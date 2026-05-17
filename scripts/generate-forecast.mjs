@@ -94,17 +94,17 @@ const races = [
 ];
 
 const CANDIDATE_STATUS = {
-  AK: { dem: "Mary Peltola", rep: "Dan Sullivan", primarySummary: "Peltola has launched her challenge and is treated as the presumptive Democratic nominee. Sullivan is the Republican incumbent and presumptive GOP nominee." },
-  AR: { dem: "Hallie Shoffner", rep: "Tom Cotton", primarySummary: "Primaries held March 3. Shoffner won the Democratic nomination; Cotton secured the Republican nomination." },
-  IL: { dem: "Juliana Stratton", rep: "Don Tracy", primarySummary: "Primaries held March 17. Stratton and Tracy are the general-election nominees." },
-  MS: { dem: "Scott Colom", rep: "Cindy Hyde-Smith", primarySummary: "Primaries held March 10. Hyde-Smith defeated a GOP challenger; Colom is the Democratic nominee." },
-  NC: { dem: "Roy Cooper", rep: "Michael Whatley", primarySummary: "Primaries held March 3. Cooper and Whatley won their nominations." },
-  OH: { dem: "Sherrod Brown", rep: "Jon Husted", primarySummary: "Primaries held May 5. Brown won the Democratic primary; Husted was unopposed for the GOP nomination." },
-  TX: { dem: "James Talarico", rep: "John Cornyn / Ken Paxton runoff", primarySummary: "Democratic primary held March 3. Talarico is nominated; Cornyn and Paxton face a May 26 Republican runoff." },
-  NE: { dem: "Dan Osborn (independent)", rep: "Pete Ricketts", primarySummary: "Ricketts won the Republican primary. The Democratic primary is over and the Democratic nominee said they will withdraw so Osborn can consolidate the anti-Ricketts vote." },
-  WV: { dem: "Rachel Fetty Anderson", rep: "Shelley Moore Capito", primarySummary: "Primaries held May 12. Capito and Anderson are the projected nominees." },
-  LA: { dem: "Jamie Davis / Gary Crockett runoff", rep: "Julia Letlow / John Fleming runoff", primarySummary: "Louisiana voted May 16. Cassidy missed the Republican runoff; Letlow and Fleming advanced. Davis advanced on the Democratic side, with Crockett treated as the second runoff candidate after Albares fell short." },
-  DEFAULT: { dem: "Democratic nominee pending", rep: "Republican nominee pending", primarySummary: "Primary not yet resolved or not entered in the manual candidate ledger." }
+  AK: { dem: "Mary Peltola", rep: "Dan Sullivan", demStatus: "presumptive", repStatus: "presumptive", primarySummary: "Peltola has launched her challenge and is treated as the presumptive Democratic nominee. Sullivan is the Republican incumbent and presumptive GOP nominee." },
+  AR: { dem: "Hallie Shoffner", rep: "Tom Cotton", demStatus: "nominee", repStatus: "nominee", primarySummary: "Primaries held March 3. Shoffner won the Democratic nomination; Cotton secured the Republican nomination." },
+  IL: { dem: "Juliana Stratton", rep: "Don Tracy", demStatus: "nominee", repStatus: "nominee", primarySummary: "Primaries held March 17. Stratton and Tracy are the general-election nominees." },
+  MS: { dem: "Scott Colom", rep: "Cindy Hyde-Smith", demStatus: "nominee", repStatus: "nominee", primarySummary: "Primaries held March 10. Hyde-Smith defeated a GOP challenger; Colom is the Democratic nominee." },
+  NC: { dem: "Roy Cooper", rep: "Michael Whatley", demStatus: "nominee", repStatus: "nominee", primarySummary: "Primaries held March 3. Cooper and Whatley won their nominations." },
+  OH: { dem: "Sherrod Brown", rep: "Jon Husted", demStatus: "nominee", repStatus: "nominee", primarySummary: "Primaries held May 5. Brown won the Democratic primary; Husted was unopposed for the GOP nomination." },
+  TX: { dem: "James Talarico", rep: "John Cornyn / Ken Paxton runoff", demStatus: "nominee", repStatus: "unresolved", primarySummary: "Democratic primary held March 3. Talarico is nominated; Cornyn and Paxton face a May 26 Republican runoff." },
+  NE: { dem: "Dan Osborn (independent)", rep: "Pete Ricketts", demStatus: "nominee", repStatus: "nominee", primarySummary: "Ricketts won the Republican primary. The Democratic primary is over and the Democratic nominee said they will withdraw so Osborn can consolidate the anti-Ricketts vote." },
+  WV: { dem: "Rachel Fetty Anderson", rep: "Shelley Moore Capito", demStatus: "nominee", repStatus: "nominee", primarySummary: "Primaries held May 12. Capito and Anderson are the projected nominees." },
+  LA: { dem: "Jamie Davis / Gary Crockett runoff", rep: "Julia Letlow / John Fleming runoff", demStatus: "unresolved", repStatus: "unresolved", primarySummary: "Louisiana voted May 16. Cassidy missed the Republican runoff; Letlow and Fleming advanced. Davis advanced on the Democratic side, with Crockett treated as the second runoff candidate after Albares fell short." },
+  DEFAULT: { dem: "Democrat", rep: "Republican", demStatus: "unresolved", repStatus: "unresolved", primarySummary: "Primary not yet resolved or not entered in the manual candidate ledger." }
 };
 
 function candidateInfo(race) {
@@ -115,11 +115,13 @@ function candidateInfo(race) {
   const incumbentName = !openSeat && race.incumbent && !["Open", "Open seat"].includes(race.incumbent) ? race.incumbent : null;
   const settledPrimary = race.primary === "resolved" ? "Primary resolved." : "Primary not yet resolved.";
   if (incumbentName && race.hold === "D") {
-    info.dem = `${incumbentName} (presumptive)`;
+    info.dem = incumbentName;
+    info.demStatus = "presumptive";
     info.primarySummary = `${settledPrimary} The incumbent is treated as the presumptive Democratic nominee until the candidate ledger is updated.`;
   }
   if (incumbentName && race.hold === "R") {
-    info.rep = `${incumbentName} (presumptive)`;
+    info.rep = incumbentName;
+    info.repStatus = "presumptive";
     info.primarySummary = `${settledPrimary} The incumbent is treated as the presumptive Republican nominee until the candidate ledger is updated.`;
   }
   return info;
@@ -130,11 +132,13 @@ function forecastSummary(race) {
   const sidePlural = race.winnerParty === "D" ? "Democrats" : "Republicans";
   const probability = Math.round(race.winnerProbability * 100);
   const margin = race.margin >= 0 ? `D+${race.margin.toFixed(1)} pts` : `R+${Math.abs(race.margin).toFixed(1)} pts`;
+  const demLabel = race.demStatus === "unresolved" ? "Democrat" : race.dem;
+  const repLabel = race.repStatus === "unresolved" ? "Republican" : race.rep;
   if (race.state === "LA") {
     return `Both parties have runoffs; the Republican incumbent was eliminated before the second round.`;
   }
   if (race.rating === "Toss-up") {
-    return `${race.dem} and ${race.rep} start close to even; the current probability margin is ${margin}.`;
+    return `${demLabel} and ${repLabel} start close to even; the current probability margin is ${margin}.`;
   }
   if (race.seat === "Open seat") {
     return `Open-seat race with a ${side} edge in the current forecast.`;

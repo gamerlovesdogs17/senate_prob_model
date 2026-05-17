@@ -532,9 +532,7 @@ dd {
 
 .candidate-row span {
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .candidate-row i {
@@ -561,6 +559,11 @@ dd {
   background: var(--ind);
 }
 
+.candidate-row i.presumptive-badge {
+  color: var(--ink);
+  background: var(--gold);
+}
+
 .dem-row strong {
   color: var(--dem);
 }
@@ -572,6 +575,31 @@ dd {
 .candidate-margin {
   border-top: 1px solid var(--line);
   padding-bottom: 8px;
+}
+
+.candidate-key {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font: 750 .72rem/1.25 "Segoe UI", Arial, sans-serif;
+}
+
+.candidate-key b {
+  display: inline-grid;
+  place-items: center;
+  width: 15px;
+  height: 15px;
+  margin-right: 3px;
+  border-radius: 4px;
+  color: var(--ink);
+  background: var(--gold);
+  font: 900 .6rem/1 "Segoe UI", Arial, sans-serif;
+}
+
+.candidate-key b + b,
+.candidate-key b:nth-of-type(2) {
+  margin-left: 8px;
+  color: white;
+  background: var(--ind);
 }
 
 .hover-card .button-link {

@@ -30,8 +30,26 @@ function oneDecimal(value) {
   return `${(value * 100).toFixed(1)}%`;
 }
 
-function partyBadge(candidate, fallbackParty) {
-  return String(candidate || "").toLowerCase().includes("independent") ? "I" : fallbackParty;
+function candidateDisplayName(race, party) {
+  const name = party === "D" ? race.dem : race.rep;
+  const status = party === "D" ? race.demStatus : race.repStatus;
+  if (status === "unresolved") return party === "D" ? "Democrat" : "Republican";
+  return name || (party === "D" ? "Democrat" : "Republican");
+}
+
+function candidateStatusBadge(race, party) {
+  const name = party === "D" ? race.dem : race.rep;
+  const status = party === "D" ? race.demStatus : race.repStatus;
+  if (status === "unresolved") return party;
+  if (String(name || "").toLowerCase().includes("independent")) return "I";
+  if (status === "presumptive") return "P";
+  return party;
+}
+
+function candidateBadgeClass(badge) {
+  if (badge === "I") return "ind-badge";
+  if (badge === "P") return "presumptive-badge";
+  return "";
 }
 
 function signedMargin(demProbability) {
@@ -186,10 +204,10 @@ function hoverMarkup(race) {
     return `<span class="panel-label">Map detail</span><h3>No Senate race</h3><p>This state is not on the regular 2026 Senate board.</p>`;
   }
   const winner = race.winnerParty === "D" ? "Democrat" : "Republican";
-  const demCandidate = race.dem || "Democratic nominee pending";
-  const repCandidate = race.rep || "Republican nominee pending";
-  const demBadge = partyBadge(demCandidate, "D");
-  const repBadge = partyBadge(repCandidate, "R");
+  const demCandidate = candidateDisplayName(race, "D");
+  const repCandidate = candidateDisplayName(race, "R");
+  const demBadge = candidateStatusBadge(race, "D");
+  const repBadge = candidateStatusBadge(race, "R");
   return `
     <span class="race-kicker">${race.displayName}</span>
     <div class="map-card-title">
@@ -200,11 +218,11 @@ function hoverMarkup(race) {
     <div class="candidate-table" aria-label="${race.state} candidate forecast">
       <div class="candidate-table-head"><span>Candidate</span><span>Chance</span></div>
       <div class="candidate-row dem-row">
-        <span>${escapeHtml(demCandidate)} <i class="${demBadge === "I" ? "ind-badge" : ""}">${demBadge}</i></span>
+        <span>${escapeHtml(demCandidate)} <i class="${candidateBadgeClass(demBadge)}">${demBadge}</i></span>
         <strong>${oneDecimal(race.demProbability)}</strong>
       </div>
       <div class="candidate-row rep-row">
-        <span>${escapeHtml(repCandidate)} <i class="${repBadge === "I" ? "ind-badge" : ""}">${repBadge}</i></span>
+        <span>${escapeHtml(repCandidate)} <i class="${candidateBadgeClass(repBadge)}">${repBadge}</i></span>
         <strong>${oneDecimal(1 - race.demProbability)}</strong>
       </div>
       <div class="candidate-margin"><span>Probability margin</span><strong>${signedMargin(race.demProbability)}</strong></div>
@@ -213,6 +231,7 @@ function hoverMarkup(race) {
       <span style="width:${race.demProbability * 100}%"></span>
       <span style="width:${(1 - race.demProbability) * 100}%"></span>
     </div>
+    <p class="candidate-key"><b>P</b> Presumptive nominee. <b>I</b> Independent.</p>
     <p>${escapeHtml(race.summary || race.note || "")}</p>
     <p class="meta">Primary: ${race.primary} / Tipping power: ${oneDecimal(race.tippingPower)}</p>
     <a class="button-link" href="race.html?state=${race.state}">Open race page</a>

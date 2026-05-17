@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-17T19:49:18.702Z",
+  "generatedAt": "2026-05-17T19:56:45.050Z",
   "modelDate": "2026-05-17",
   "runDate": "May 17, 2026",
   "updateTime": "around 6:00 AM Central",
@@ -19,11 +19,11 @@
     ]
   },
   "sourceStatus": {
-    "checkedAt": "2026-05-17T19:49:16.255Z",
+    "checkedAt": "2026-05-17T19:56:42.222Z",
     "censusPopulation": {
       "ok": true,
       "status": 200,
-      "ms": 339,
+      "ms": 598,
       "url": "https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/state/totals/NST-EST2024-POPCHG2020-2024.csv",
       "rows": 66,
       "states": 51,
@@ -32,7 +32,7 @@
     "mitSenateReturns": {
       "ok": true,
       "status": 200,
-      "ms": 692,
+      "ms": 651,
       "url": "https://raw.githubusercontent.com/MEDSL/constituency-returns/master/1976-2018-senate.csv",
       "rows": 3421,
       "states": 50
@@ -40,20 +40,20 @@
     "civicApiDocs": {
       "ok": true,
       "status": 200,
-      "ms": 872,
+      "ms": 695,
       "url": "https://www.civicapi.org/api-documentation"
     },
     "civicApiEndpoint": {
       "ok": false,
       "status": 404,
-      "ms": 58,
+      "ms": 45,
       "url": "https://www.civicapi.org/api/v1/upcomingraces",
       "error": "{\"message\":\"Route GET:/v1/upcomingraces not found\",\"error\":\"Not Found\",\"statusCode\":404}"
     },
     "openFecCandidateSummary": {
       "ok": true,
       "status": 200,
-      "ms": 1339,
+      "ms": 1773,
       "url": "https://www.fec.gov/files/bulk-downloads/2026/candidate_summary_2026.csv",
       "rows": 4032,
       "senateStates": 44
@@ -61,7 +61,7 @@
     "votehubGenericBallot": {
       "ok": true,
       "status": 200,
-      "ms": 2151,
+      "ms": 2538,
       "url": "https://api.votehub.com/polls?poll_type=generic-ballot&subject=2026",
       "rows": 451,
       "usablePolls": 351,
@@ -249,8 +249,10 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Democratic nominee pending",
-      "rep": "Republican nominee pending",
+      "dem": "Democrat",
+      "rep": "Republican",
+      "demStatus": "unresolved",
+      "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
       "margin": -17.795881146462758,
       "error": 5.734090909090909,
@@ -342,6 +344,8 @@
       },
       "dem": "Mary Peltola",
       "rep": "Dan Sullivan",
+      "demStatus": "presumptive",
+      "repStatus": "presumptive",
       "primarySummary": "Peltola has launched her challenge and is treated as the presumptive Democratic nominee. Sullivan is the Republican incumbent and presumptive GOP nominee.",
       "margin": -4.017802389530834,
       "error": 11.082727272727272,
@@ -416,6 +420,8 @@
       },
       "dem": "Hallie Shoffner",
       "rep": "Tom Cotton",
+      "demStatus": "nominee",
+      "repStatus": "nominee",
       "primarySummary": "Primaries held March 3. Shoffner won the Democratic nomination; Cotton secured the Republican nomination.",
       "margin": -19.670572002654403,
       "error": 5.2,
@@ -488,8 +494,10 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "John Hickenlooper (presumptive)",
-      "rep": "Republican nominee pending",
+      "dem": "John Hickenlooper",
+      "rep": "Republican",
+      "demStatus": "presumptive",
+      "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Democratic nominee until the candidate ledger is updated.",
       "margin": 16.726242353985292,
       "error": 5.715,
@@ -562,8 +570,10 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Chris Coons (presumptive)",
-      "rep": "Republican nominee pending",
+      "dem": "Chris Coons",
+      "rep": "Republican",
+      "demStatus": "presumptive",
+      "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Democratic nominee until the candidate ledger is updated.",
       "margin": 19.356998810349342,
       "error": 6.002000000000001,
@@ -636,8 +646,10 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Democratic nominee pending",
-      "rep": "Ashley Moody (presumptive)",
+      "dem": "Democrat",
+      "rep": "Ashley Moody",
+      "demStatus": "unresolved",
+      "repStatus": "presumptive",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Republican nominee until the candidate ledger is updated.",
       "margin": -13.245134259036192,
       "error": 6.252727272727273,
@@ -727,8 +739,10 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Jon Ossoff (presumptive)",
-      "rep": "Republican nominee pending",
+      "dem": "Jon Ossoff",
+      "rep": "Republican",
+      "demStatus": "presumptive",
+      "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Democratic nominee until the candidate ledger is updated.",
       "margin": 10.076654086655884,
       "error": 6.944090909090909,
@@ -801,8 +815,10 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Democratic nominee pending",
-      "rep": "Jim Risch (presumptive)",
+      "dem": "Democrat",
+      "rep": "Jim Risch",
+      "demStatus": "unresolved",
+      "repStatus": "presumptive",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Republican nominee until the candidate ledger is updated.",
       "margin": -20.24257761140023,
       "error": 5.55,
@@ -877,6 +893,8 @@
       },
       "dem": "Juliana Stratton",
       "rep": "Don Tracy",
+      "demStatus": "nominee",
+      "repStatus": "nominee",
       "primarySummary": "Primaries held March 17. Stratton and Tracy are the general-election nominees.",
       "margin": 17.145122579468982,
       "error": 5.2,
@@ -966,8 +984,10 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Democratic nominee pending",
-      "rep": "Republican nominee pending",
+      "dem": "Democrat",
+      "rep": "Republican",
+      "demStatus": "unresolved",
+      "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
       "margin": -5.980407670327001,
       "error": 8.427727272727273,
@@ -1040,8 +1060,10 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Democratic nominee pending",
-      "rep": "Roger Marshall (presumptive)",
+      "dem": "Democrat",
+      "rep": "Roger Marshall",
+      "demStatus": "unresolved",
+      "repStatus": "presumptive",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Republican nominee until the candidate ledger is updated.",
       "margin": -8.723877318431466,
       "error": 8.084090909090909,
@@ -1114,8 +1136,10 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Democratic nominee pending",
-      "rep": "Republican nominee pending",
+      "dem": "Democrat",
+      "rep": "Republican",
+      "demStatus": "unresolved",
+      "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
       "margin": -17.60317156597778,
       "error": 5.944090909090909,
@@ -1190,6 +1214,8 @@
       },
       "dem": "Jamie Davis / Gary Crockett runoff",
       "rep": "Julia Letlow / John Fleming runoff",
+      "demStatus": "unresolved",
+      "repStatus": "unresolved",
       "primarySummary": "Louisiana voted May 16. Cassidy missed the Republican runoff; Letlow and Fleming advanced. Davis advanced on the Democratic side, with Crockett treated as the second runoff candidate after Albares fell short.",
       "margin": -17.465113894669468,
       "error": 6.35,
@@ -1279,8 +1305,10 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Democratic nominee pending",
-      "rep": "Susan Collins (presumptive)",
+      "dem": "Democrat",
+      "rep": "Susan Collins",
+      "demStatus": "unresolved",
+      "repStatus": "presumptive",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Republican nominee until the candidate ledger is updated.",
       "margin": 5.546835445651643,
       "error": 8.774545454545455,
@@ -1353,8 +1381,10 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Ed Markey (presumptive)",
-      "rep": "Republican nominee pending",
+      "dem": "Ed Markey",
+      "rep": "Republican",
+      "demStatus": "presumptive",
+      "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Democratic nominee until the candidate ledger is updated.",
       "margin": 20.7978357438798,
       "error": 5.8963636363636365,
@@ -1444,8 +1474,10 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Democratic nominee pending",
-      "rep": "Republican nominee pending",
+      "dem": "Democrat",
+      "rep": "Republican",
+      "demStatus": "unresolved",
+      "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
       "margin": 5.532309037434997,
       "error": 8.924090909090909,
@@ -1518,8 +1550,10 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Democratic nominee pending",
-      "rep": "Republican nominee pending",
+      "dem": "Democrat",
+      "rep": "Republican",
+      "demStatus": "unresolved",
+      "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
       "margin": 4.857544045133183,
       "error": 8.53590909090909,
@@ -1594,6 +1628,8 @@
       },
       "dem": "Scott Colom",
       "rep": "Cindy Hyde-Smith",
+      "demStatus": "nominee",
+      "repStatus": "nominee",
       "primarySummary": "Primaries held March 10. Hyde-Smith defeated a GOP challenger; Colom is the Democratic nominee.",
       "margin": -16.34920206145846,
       "error": 5.2,
@@ -1679,8 +1715,10 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Democratic nominee pending",
-      "rep": "Republican nominee pending",
+      "dem": "Democrat",
+      "rep": "Republican",
+      "demStatus": "unresolved",
+      "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
       "margin": -8.070057049598805,
       "error": 8.007727272727273,
@@ -1772,6 +1810,8 @@
       },
       "dem": "Roy Cooper",
       "rep": "Michael Whatley",
+      "demStatus": "nominee",
+      "repStatus": "nominee",
       "primarySummary": "Primaries held March 3. Cooper and Whatley won their nominations.",
       "margin": 9.355262232213937,
       "error": 6.2,
@@ -1863,6 +1903,8 @@
       },
       "dem": "Dan Osborn (independent)",
       "rep": "Pete Ricketts",
+      "demStatus": "nominee",
+      "repStatus": "nominee",
       "primarySummary": "Ricketts won the Republican primary. The Democratic primary is over and the Democratic nominee said they will withdraw so Osborn can consolidate the anti-Ricketts vote.",
       "margin": -6.274862143435616,
       "error": 7.2,
@@ -1948,8 +1990,10 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Democratic nominee pending",
-      "rep": "Republican nominee pending",
+      "dem": "Democrat",
+      "rep": "Republican",
+      "demStatus": "unresolved",
+      "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
       "margin": 6.278524542118875,
       "error": 8.873181818181818,
@@ -2022,8 +2066,10 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Cory Booker (presumptive)",
-      "rep": "Republican nominee pending",
+      "dem": "Cory Booker",
+      "rep": "Republican",
+      "demStatus": "presumptive",
+      "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Democratic nominee until the candidate ledger is updated.",
       "margin": 18.057116586902353,
       "error": 5.55,
@@ -2096,8 +2142,10 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Ben Ray Lujan (presumptive)",
-      "rep": "Republican nominee pending",
+      "dem": "Ben Ray Lujan",
+      "rep": "Republican",
+      "demStatus": "presumptive",
+      "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Democratic nominee until the candidate ledger is updated.",
       "margin": 17.699474380890372,
       "error": 5.55,
@@ -2189,6 +2237,8 @@
       },
       "dem": "Sherrod Brown",
       "rep": "Jon Husted",
+      "demStatus": "nominee",
+      "repStatus": "nominee",
       "primarySummary": "Primaries held May 5. Brown won the Democratic primary; Husted was unopposed for the GOP nomination.",
       "margin": 1.4047441150531907,
       "error": 9.4,
@@ -2261,8 +2311,10 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Democratic nominee pending",
-      "rep": "Republican nominee pending",
+      "dem": "Democrat",
+      "rep": "Republican",
+      "demStatus": "unresolved",
+      "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
       "margin": -21.74758914200225,
       "error": 5.861363636363636,
@@ -2335,8 +2387,10 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Jeff Merkley (presumptive)",
-      "rep": "Republican nominee pending",
+      "dem": "Jeff Merkley",
+      "rep": "Republican",
+      "demStatus": "presumptive",
+      "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Democratic nominee until the candidate ledger is updated.",
       "margin": 18.195518965152218,
       "error": 5.55,
@@ -2409,8 +2463,10 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Jack Reed (presumptive)",
-      "rep": "Republican nominee pending",
+      "dem": "Jack Reed",
+      "rep": "Republican",
+      "demStatus": "presumptive",
+      "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Democratic nominee until the candidate ledger is updated.",
       "margin": 19.94591636055394,
       "error": 5.932727272727273,
@@ -2483,8 +2539,10 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Democratic nominee pending",
-      "rep": "Lindsey Graham (presumptive)",
+      "dem": "Democrat",
+      "rep": "Lindsey Graham",
+      "demStatus": "unresolved",
+      "repStatus": "presumptive",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Republican nominee until the candidate ledger is updated.",
       "margin": -7.330827254728437,
       "error": 8.354545454545455,
@@ -2557,8 +2615,10 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Democratic nominee pending",
-      "rep": "Mike Rounds (presumptive)",
+      "dem": "Democrat",
+      "rep": "Mike Rounds",
+      "demStatus": "unresolved",
+      "repStatus": "presumptive",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Republican nominee until the candidate ledger is updated.",
       "margin": -19.06271374099922,
       "error": 5.55,
@@ -2631,8 +2691,10 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Democratic nominee pending",
-      "rep": "Bill Hagerty (presumptive)",
+      "dem": "Democrat",
+      "rep": "Bill Hagerty",
+      "demStatus": "unresolved",
+      "repStatus": "presumptive",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Republican nominee until the candidate ledger is updated.",
       "margin": -16.85593585044126,
       "error": 5.988181818181818,
@@ -2724,6 +2786,8 @@
       },
       "dem": "James Talarico",
       "rep": "John Cornyn / Ken Paxton runoff",
+      "demStatus": "nominee",
+      "repStatus": "unresolved",
       "primarySummary": "Democratic primary held March 3. Talarico is nominated; Cornyn and Paxton face a May 26 Republican runoff.",
       "margin": -2.0354638601362485,
       "error": 9.55,
@@ -2796,8 +2860,10 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Mark Warner (presumptive)",
-      "rep": "Republican nominee pending",
+      "dem": "Mark Warner",
+      "rep": "Republican",
+      "demStatus": "presumptive",
+      "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Democratic nominee until the candidate ledger is updated.",
       "margin": 12.320763345000678,
       "error": 6.9790909090909095,
@@ -2872,6 +2938,8 @@
       },
       "dem": "Rachel Fetty Anderson",
       "rep": "Shelley Moore Capito",
+      "demStatus": "nominee",
+      "repStatus": "nominee",
       "primarySummary": "Primaries held May 12. Capito and Anderson are the projected nominees.",
       "margin": -20.508022326003644,
       "error": 5.2,
@@ -2944,8 +3012,10 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Democratic nominee pending",
-      "rep": "Republican nominee pending",
+      "dem": "Democrat",
+      "rep": "Republican",
+      "demStatus": "unresolved",
+      "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
       "margin": -23.239248742115738,
       "error": 5.9377272727272725,
