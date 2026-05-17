@@ -282,8 +282,11 @@ h3 {
 
 .big-odds {
   color: var(--rep);
-  font: 950 clamp(3rem, 5vw, 4.7rem)/.86 "Segoe UI", Arial, sans-serif;
-  letter-spacing: -.03em;
+  max-width: 100%;
+  font: 950 clamp(2.05rem, 3vw, 3.3rem)/.9 "Segoe UI", Arial, sans-serif;
+  letter-spacing: 0;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 .odds-panel dl,
