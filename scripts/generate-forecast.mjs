@@ -338,7 +338,7 @@ async function writeForecast() {
     generatedAt,
     modelDate: MODEL_DATE_KEY,
     runDate: new Date(`${MODEL_DATE_KEY}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-    updateTime: "6:00 AM Central",
+    updateTime: "around 6:00 AM Central",
     settings: SETTINGS,
     sourceStatus: await fetchNationalSignals(),
     controlHistory: appendControlHistory(),
