@@ -470,6 +470,12 @@ dd {
   border-top: 4px solid var(--ink);
 }
 
+.chart-panel,
+.detail-panel,
+.map-panel {
+  position: relative;
+}
+
 .seat-histogram,
 .leverage-chart,
 .poll-chart {
@@ -760,14 +766,46 @@ dd {
   text-anchor: end;
 }
 
-.chart-readout {
-  margin-top: 12px;
+.panel-hover-tooltip {
+  position: absolute;
+  z-index: 30;
   padding: 8px 10px;
-  border: 1px solid var(--line);
-  border-radius: 2px;
-  background: color-mix(in srgb, var(--paper-2) 78%, transparent);
+  border: 1px solid color-mix(in srgb, var(--line) 88%, var(--ink));
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--paper) 98%, white);
   color: var(--ink);
-  font: 800 .82rem/1.35 "Segoe UI", Arial, sans-serif;
+  box-shadow: 0 8px 18px rgba(49, 45, 38, .18);
+  font: 850 .78rem/1.28 "Segoe UI", Arial, sans-serif;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(3px);
+  transition: opacity .12s ease, transform .12s ease;
+}
+
+.panel-hover-tooltip.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.panel-hover-tooltip::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  width: 10px;
+  height: 10px;
+  border-right: 1px solid color-mix(in srgb, var(--line) 88%, var(--ink));
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 88%, var(--ink));
+  background: color-mix(in srgb, var(--paper) 98%, white);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.panel-hover-tooltip.below-source::after {
+  top: -6px;
+  bottom: auto;
+  border: 0;
+  border-left: 1px solid color-mix(in srgb, var(--line) 88%, var(--ink));
+  border-top: 1px solid color-mix(in srgb, var(--line) 88%, var(--ink));
 }
 
 .detail-grid {

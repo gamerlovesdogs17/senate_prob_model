@@ -44,24 +44,53 @@ function ratingColor(race) {
   return root.getPropertyValue(colors[bucket] || "--toss").trim();
 }
 
-function updateChartReadout(source, html) {
-  const panel = source.closest(".chart-panel, .detail-panel, .map-panel");
-  if (!panel) return;
-  let readout = panel.querySelector(".chart-readout");
-  if (!readout) {
-    readout = document.createElement("div");
-    readout.className = "chart-readout";
-    panel.append(readout);
+function ensurePanelTooltip(panel) {
+  let tooltip = panel.querySelector(".panel-hover-tooltip");
+  if (!tooltip) {
+    tooltip = document.createElement("div");
+    tooltip.className = "panel-hover-tooltip";
+    panel.append(tooltip);
   }
-  readout.innerHTML = html;
+  return tooltip;
 }
 
-function bindReadout(selector, getHtml) {
+function showPanelTooltip(source, html) {
+  const panel = source.closest(".chart-panel, .detail-panel, .map-panel");
+  if (!panel) return;
+  const tooltip = ensurePanelTooltip(panel);
+  tooltip.innerHTML = html;
+  tooltip.classList.add("visible");
+
+  const panelRect = panel.getBoundingClientRect();
+  const sourceRect = source.getBoundingClientRect();
+  const tooltipWidth = Math.min(240, panelRect.width - 20);
+  const sourceCenter = sourceRect.left - panelRect.left + sourceRect.width / 2;
+  const left = clamp(sourceCenter - tooltipWidth / 2, 10, panelRect.width - tooltipWidth - 10);
+  const above = sourceRect.top - panelRect.top - tooltip.offsetHeight - 10;
+  const below = sourceRect.bottom - panelRect.top + 10;
+  const isAbove = above > 8;
+  const top = isAbove ? above : below;
+
+  tooltip.style.width = `${tooltipWidth}px`;
+  tooltip.style.left = `${left}px`;
+  tooltip.style.top = `${top}px`;
+  tooltip.classList.toggle("below-source", !isAbove);
+}
+
+function hidePanelTooltip(source) {
+  const panel = source.closest(".chart-panel, .detail-panel, .map-panel");
+  const tooltip = panel?.querySelector(".panel-hover-tooltip");
+  if (tooltip) tooltip.classList.remove("visible");
+}
+
+function bindPanelTooltip(selector, getHtml) {
   document.querySelectorAll(selector).forEach((node) => {
-    const handler = () => updateChartReadout(node, getHtml(node));
+    const handler = () => showPanelTooltip(node, getHtml(node));
     node.addEventListener("mouseenter", handler);
     node.addEventListener("focus", handler);
     node.addEventListener("click", handler);
+    node.addEventListener("mouseleave", () => hidePanelTooltip(node));
+    node.addEventListener("blur", () => hidePanelTooltip(node));
   });
 }
 
@@ -196,8 +225,7 @@ function renderHistogram() {
     const height = maxCount ? clamp((value / maxCount) * 215, 4, 215) : 4;
     return `<button class="seat-bin" type="button" data-tip="${seat} Democratic seats<br>${pct(share)} of simulations"><i style="height:${height}px"></i><span>${seat}</span></button>`;
   }).join("");
-  bindReadout(".seat-bin", (node) => node.dataset.tip);
-  updateChartReadout(container, "Select a bar for exact simulation share.");
+  bindPanelTooltip(".seat-bin", (node) => node.dataset.tip);
 }
 
 function renderLeverageChart() {
@@ -209,8 +237,7 @@ function renderLeverageChart() {
     const width = max ? clamp((race.tippingPower / max) * 100, 8, 100) : 8;
     return `<a class="leverage-row" href="race.html?state=${race.state}" data-tip="${race.displayName}<br>${oneDecimal(race.tippingPower)} control tipping power<br>${pct(race.demProbability)} Democrat"><strong>${race.state}</strong><i style="width:${width}%"></i><span>${oneDecimal(race.tippingPower)}</span></a>`;
   }).join("");
-  bindReadout(".leverage-row", (node) => node.dataset.tip);
-  if (ranked[0]) updateChartReadout(chart, `${ranked[0].displayName}<br>${oneDecimal(ranked[0].tippingPower)} control tipping power`);
+  bindPanelTooltip(".leverage-row", (node) => node.dataset.tip);
 }
 
 function renderControlHistory() {
@@ -306,8 +333,6 @@ function renderLineChart(chart, points, options) {
       <rect class="history-overlay" x="${plot.left}" y="${plot.top}" width="${plotWidth}" height="${plotHeight}" tabindex="0"></rect>
     </svg>
   `;
-  const last = points[points.length - 1];
-  updateChartReadout(chart, `${options.pointHtml(last)}${points.length === 1 && options.singleNote ? `<br>${options.singleNote}` : ""}`);
   const svg = chart.querySelector("svg");
   const overlay = chart.querySelector(".history-overlay");
   const hover = chart.querySelector(".history-hover");
@@ -341,7 +366,6 @@ function renderLineChart(chart, points, options) {
     hoverTitle.textContent = coord.point.date;
     hoverDem.textContent = `Democrat ${oneDecimal(dem)}`;
     hoverRep.textContent = `Republican ${oneDecimal(rep)}`;
-    updateChartReadout(chart, options.pointHtml(coord.point));
   };
   const indexFromEvent = (event) => {
     const rect = svg.getBoundingClientRect();
