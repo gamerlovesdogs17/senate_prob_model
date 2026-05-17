@@ -317,19 +317,6 @@ function renderRacePage() {
   renderPrimaryPanel(race);
 }
 
-function renderRacesList() {
-  const container = document.getElementById("race-list");
-  if (!container || !forecast) return;
-  const ranked = [...forecast.races].sort((a, b) => b.tippingPower - a.tippingPower);
-  container.innerHTML = ranked.map((race) => `
-    <a class="source-card race-card" href="race.html?state=${race.state}">
-      <span class="source-tag">${race.rating}</span>
-      <h3>${race.displayName}</h3>
-      <p>${race.winnerParty === "D" ? "Democrat" : "Republican"} ${pct(race.winnerProbability)}. ${race.note}</p>
-    </a>
-  `).join("");
-}
-
 async function loadForecast() {
   const response = await fetch("data/forecast.json", { cache: "no-store" });
   if (!response.ok) throw new Error(`Forecast data returned ${response.status}`);
@@ -363,7 +350,6 @@ async function init() {
   renderControlHistory();
   renderRacePage();
   renderRaceSelector();
-  renderRacesList();
 }
 
 init();
