@@ -234,30 +234,131 @@ function renderRaceSelector() {
 }
 
 function renderLineChart(chart, points, options) {
-  const width = 720;
-  const height = 260;
-  const coords = points.map((point, index) => {
-    const x = points.length === 1 ? width / 2 : 36 + index * ((width - 72) / (points.length - 1));
-    const y = height - 34 - options.value(point) * (height - 68);
-    return { point, x, y };
-  });
-  const linePoints = coords.length === 1
-    ? `${coords[0].x - 28},${coords[0].y} ${coords[0].x + 28},${coords[0].y}`
-    : coords.map(({ x, y }) => `${x},${y}`).join(" ");
+  const width = 760;
+  const height = 310;
+  const plot = { left: 54, right: 150, top: 20, bottom: 48 };
+  const plotWidth = width - plot.left - plot.right;
+  const plotHeight = height - plot.top - plot.bottom;
+  const demValue = (point) => point.dem;
+  const repValue = (point) => point.rep ?? 1 - point.dem;
+  const values = points.flatMap((point) => [demValue(point), repValue(point)]);
+  const minValue = Math.min(...values);
+  const maxValue = Math.max(...values);
+  const domain = minValue >= .28 && maxValue <= .72 ? [.3, .7] : [0, 1];
+  const band = options.band ?? .055;
+  const xFor = (index) => points.length === 1 ? plot.left + plotWidth / 2 : plot.left + index * (plotWidth / (points.length - 1));
+  const yFor = (value) => plot.top + ((domain[1] - value) / (domain[1] - domain[0])) * plotHeight;
+  const coords = points.map((point, index) => ({
+    point,
+    x: xFor(index),
+    demY: yFor(demValue(point)),
+    repY: yFor(repValue(point))
+  }));
+  const linePath = (series) => {
+    if (coords.length === 1) {
+      const y = series === "dem" ? coords[0].demY : coords[0].repY;
+      return `M ${coords[0].x - 26} ${y} L ${coords[0].x + 26} ${y}`;
+    }
+    return coords.map((coord, index) => `${index ? "L" : "M"} ${coord.x} ${series === "dem" ? coord.demY : coord.repY}`).join(" ");
+  };
+  const areaPath = (series) => {
+    const upper = coords.map((coord, index) => {
+      const value = series === "dem" ? demValue(coord.point) : repValue(coord.point);
+      return `${index ? "L" : "M"} ${coord.x} ${yFor(clamp(value + band, domain[0], domain[1]))}`;
+    }).join(" ");
+    const lower = [...coords].reverse().map((coord) => {
+      const value = series === "dem" ? demValue(coord.point) : repValue(coord.point);
+      return `L ${coord.x} ${yFor(clamp(value - band, domain[0], domain[1]))}`;
+    }).join(" ");
+    return `${upper} ${lower} Z`;
+  };
+  const ticks = domain[0] === .3 ? [.7, .6, .5, .4, .3] : [1, .75, .5, .25, 0];
+  const firstDate = String(points[0].date).slice(5);
+  const lastDate = String(points[points.length - 1].date).slice(5);
+  const latest = coords[coords.length - 1];
+  const demLabelY = latest.demY <= latest.repY ? latest.demY - 4 : latest.demY + 14;
+  const repLabelY = latest.repY <= latest.demY ? latest.repY - 4 : latest.repY + 14;
   chart.innerHTML = `
     <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${options.label}">
-      <path class="history-grid" d="M36 ${height - 34}H${width - 36}M36 ${height / 2}H${width - 36}M36 34H${width - 36}"></path>
-      <text class="history-axis" x="14" y="38">100</text>
-      <text class="history-axis" x="18" y="${height / 2 + 4}">50</text>
-      <text class="history-axis" x="22" y="${height - 32}">0</text>
-      <polyline class="history-line" points="${linePoints}"></polyline>
-      ${coords.map(({ point, x, y }, index) => `<g class="history-point" tabindex="0" data-index="${index}"><circle class="history-dot" cx="${x}" cy="${y}" r="${coords.length === 1 ? 5.5 : 3.5}"></circle><circle class="history-hit" cx="${x}" cy="${y}" r="20"></circle><text x="${x}" y="${height - 10}">${String(point.date).slice(5)}</text></g>`).join("")}
+      ${ticks.map((tick) => `<path class="history-grid ${tick === .5 ? "history-midline" : ""}" d="M${plot.left} ${yFor(tick)}H${width - plot.right}"></path><text class="history-axis" x="${plot.left - 12}" y="${yFor(tick) + 4}">${(tick * 100).toFixed(domain[0] === .3 ? 1 : 0)}</text>`).join("")}
+      ${coords.length > 1 ? [1, 2, 3, 4].map((step) => {
+        const x = plot.left + (plotWidth / 5) * step;
+        return `<path class="history-vgrid" d="M${x} ${plot.top}V${height - plot.bottom}"></path>`;
+      }).join("") : ""}
+      <path class="history-band history-band-dem" d="${areaPath("dem")}"></path>
+      <path class="history-band history-band-rep" d="${areaPath("rep")}"></path>
+      <path class="history-line history-line-dem" d="${linePath("dem")}"></path>
+      <path class="history-line history-line-rep" d="${linePath("rep")}"></path>
+      ${coords.map(({ x, demY, repY }, index) => `<g class="history-point" tabindex="0" data-index="${index}"><circle class="history-dot history-dot-dem" cx="${x}" cy="${demY}" r="${coords.length === 1 ? 4.8 : 3.3}"></circle><circle class="history-dot history-dot-rep" cx="${x}" cy="${repY}" r="${coords.length === 1 ? 4.8 : 3.3}"></circle></g>`).join("")}
+      <text class="history-date history-date-start" x="${plot.left}" y="${height - 18}">${firstDate}</text>
+      <text class="history-date history-date-end" x="${width - plot.right}" y="${height - 18}">${lastDate}</text>
+      <text class="history-end-label history-end-label-dem" x="${latest.x + 11}" y="${demLabelY}">Democrat ${oneDecimal(demValue(latest.point))}</text>
+      <text class="history-end-label history-end-label-rep" x="${latest.x + 11}" y="${repLabelY}">Republican ${oneDecimal(repValue(latest.point))}</text>
+      <g class="history-hover" style="display:none">
+        <path class="history-hover-rule"></path>
+        <circle class="history-hover-dot history-hover-dot-dem" r="4.5"></circle>
+        <circle class="history-hover-dot history-hover-dot-rep" r="4.5"></circle>
+        <rect class="history-hover-box" width="132" height="56" rx="2"></rect>
+        <text class="history-hover-title"></text>
+        <text class="history-hover-dem"></text>
+        <text class="history-hover-rep"></text>
+      </g>
+      <rect class="history-overlay" x="${plot.left}" y="${plot.top}" width="${plotWidth}" height="${plotHeight}" tabindex="0"></rect>
     </svg>
   `;
   const last = points[points.length - 1];
   updateChartReadout(chart, `${options.pointHtml(last)}${points.length === 1 && options.singleNote ? `<br>${options.singleNote}` : ""}`);
+  const svg = chart.querySelector("svg");
+  const overlay = chart.querySelector(".history-overlay");
+  const hover = chart.querySelector(".history-hover");
+  const hoverRule = chart.querySelector(".history-hover-rule");
+  const hoverDemDot = chart.querySelector(".history-hover-dot-dem");
+  const hoverRepDot = chart.querySelector(".history-hover-dot-rep");
+  const hoverBox = chart.querySelector(".history-hover-box");
+  const hoverTitle = chart.querySelector(".history-hover-title");
+  const hoverDem = chart.querySelector(".history-hover-dem");
+  const hoverRep = chart.querySelector(".history-hover-rep");
+  const showIndex = (index) => {
+    const coord = coords[clamp(index, 0, coords.length - 1)];
+    const dem = demValue(coord.point);
+    const rep = repValue(coord.point);
+    const boxX = clamp(coord.x + 12, plot.left + 4, width - plot.right - 134);
+    const boxY = clamp(Math.min(coord.demY, coord.repY) - 68, plot.top + 4, height - plot.bottom - 62);
+    hover.style.display = "block";
+    hoverRule.setAttribute("d", `M${coord.x} ${plot.top}V${height - plot.bottom}`);
+    hoverDemDot.setAttribute("cx", coord.x);
+    hoverDemDot.setAttribute("cy", coord.demY);
+    hoverRepDot.setAttribute("cx", coord.x);
+    hoverRepDot.setAttribute("cy", coord.repY);
+    hoverBox.setAttribute("x", boxX);
+    hoverBox.setAttribute("y", boxY);
+    hoverTitle.setAttribute("x", boxX + 9);
+    hoverTitle.setAttribute("y", boxY + 16);
+    hoverDem.setAttribute("x", boxX + 9);
+    hoverDem.setAttribute("y", boxY + 34);
+    hoverRep.setAttribute("x", boxX + 9);
+    hoverRep.setAttribute("y", boxY + 48);
+    hoverTitle.textContent = coord.point.date;
+    hoverDem.textContent = `Democrat ${oneDecimal(dem)}`;
+    hoverRep.textContent = `Republican ${oneDecimal(rep)}`;
+    updateChartReadout(chart, options.pointHtml(coord.point));
+  };
+  const indexFromEvent = (event) => {
+    const rect = svg.getBoundingClientRect();
+    const ratio = width / rect.width;
+    const x = (event.clientX - rect.left) * ratio;
+    if (points.length === 1) return 0;
+    return Math.round(clamp((x - plot.left) / plotWidth, 0, 1) * (points.length - 1));
+  };
+  overlay.addEventListener("pointerenter", (event) => showIndex(indexFromEvent(event)));
+  overlay.addEventListener("pointermove", (event) => showIndex(indexFromEvent(event)));
+  overlay.addEventListener("click", (event) => showIndex(indexFromEvent(event)));
+  overlay.addEventListener("pointerleave", () => {
+    hover.style.display = "none";
+  });
+  overlay.addEventListener("focus", () => showIndex(points.length - 1));
   chart.querySelectorAll(".history-point").forEach((node) => {
-    const handler = () => updateChartReadout(node, options.pointHtml(points[Number(node.dataset.index)]));
+    const handler = () => showIndex(Number(node.dataset.index));
     node.addEventListener("mouseenter", handler);
     node.addEventListener("focus", handler);
     node.addEventListener("click", handler);

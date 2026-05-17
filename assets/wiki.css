@@ -598,9 +598,9 @@ dd {
 
 .history-chart {
   margin-top: 16px;
-  border: 1px solid var(--line);
+  border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
   border-radius: 2px;
-  background: color-mix(in srgb, var(--paper-2) 45%, transparent);
+  background: #fbfaf6;
   overflow: hidden;
 }
 
@@ -611,24 +611,62 @@ dd {
 
 .history-grid {
   fill: none;
-  stroke: var(--line);
+  stroke: #d8d0c1;
   stroke-width: 1;
+}
+
+.history-vgrid {
+  fill: none;
+  stroke: #d8d0c1;
+  stroke-width: 1;
+}
+
+.history-midline {
+  stroke: #282828;
+  stroke-width: 1.15;
+}
+
+.history-band {
+  stroke: none;
+  opacity: .34;
+}
+
+.history-band-dem {
+  fill: #5bb9b1;
+}
+
+.history-band-rep {
+  fill: #f2aa6a;
 }
 
 .history-line {
   fill: none;
-  stroke: var(--dem);
-  stroke-width: 3.5;
+  stroke-width: 2.6;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
+.history-line-dem {
+  stroke: #0b8f87;
+}
+
+.history-line-rep {
+  stroke: #e86d1f;
+}
+
 .history-dot {
-  fill: var(--dem);
-  stroke: var(--dem);
-  stroke-width: 2.5;
+  fill: var(--paper);
+  stroke-width: 2.2;
   pointer-events: none;
   transition: r .16s ease, fill .16s ease;
+}
+
+.history-dot-dem {
+  stroke: #0b8f87;
+}
+
+.history-dot-rep {
+  stroke: #e86d1f;
 }
 
 .history-hit {
@@ -640,18 +678,86 @@ dd {
 .history-point:hover .history-dot,
 .history-point:focus .history-dot {
   r: 5.5;
-  fill: var(--dem);
+  fill: var(--paper);
 }
 
-.history-point text {
+.history-date {
   fill: var(--muted);
-  font: 700 12px/1 "Segoe UI", Arial, sans-serif;
-  text-anchor: middle;
+  font: 800 13px/1 "Segoe UI", Arial, sans-serif;
+}
+
+.history-date-start {
+  text-anchor: start;
+}
+
+.history-date-end {
+  text-anchor: end;
+}
+
+.history-end-label {
+  font: 800 13px/1 "Segoe UI", Arial, sans-serif;
+}
+
+.history-end-label-dem {
+  fill: #0b8f87;
+}
+
+.history-end-label-rep {
+  fill: #e86d1f;
+}
+
+.history-overlay {
+  fill: transparent;
+  cursor: crosshair;
+}
+
+.history-hover-rule {
+  fill: none;
+  stroke: rgba(40, 40, 40, .35);
+  stroke-width: 1;
+}
+
+.history-hover-dot {
+  fill: var(--paper);
+  stroke-width: 2.2;
+}
+
+.history-hover-dot-dem {
+  stroke: #0b8f87;
+}
+
+.history-hover-dot-rep {
+  stroke: #e86d1f;
+}
+
+.history-hover-box {
+  fill: color-mix(in srgb, var(--paper) 96%, white);
+  stroke: var(--line);
+  filter: drop-shadow(0 5px 8px rgba(50, 45, 38, .16));
+}
+
+.history-hover-title,
+.history-hover-dem,
+.history-hover-rep {
+  font: 800 12px/1 "Segoe UI", Arial, sans-serif;
+}
+
+.history-hover-title {
+  fill: var(--ink);
+}
+
+.history-hover-dem {
+  fill: #0b8f87;
+}
+
+.history-hover-rep {
+  fill: #e86d1f;
 }
 
 .history-axis {
   fill: var(--muted);
-  font: 800 12px/1 "Segoe UI", Arial, sans-serif;
+  font: 700 13px/1 "Segoe UI", Arial, sans-serif;
+  text-anchor: end;
 }
 
 .chart-readout {
