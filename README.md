@@ -2,9 +2,7 @@
 
 A static, map-first prototype for a daily automated U.S. Senate forecast.
 
-## Run
-
-Open `index.html` in a browser. The state-shape map uses D3, TopoJSON, and `us-atlas` from public CDNs, so the map needs internet access. If those files do not load, the site shows a race-link fallback.
+The state-shape map uses D3, TopoJSON, and `us-atlas` from public CDNs, so the map needs internet access. If those files do not load, the site shows a race-link fallback.
 
 The browser model rolls to a new daily run on the first page load after 6:00 AM Central. A production deployment should add a scheduled build job before that time to refresh polling, finance, primary, and candidate data files.
 
