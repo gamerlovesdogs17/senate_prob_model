@@ -314,7 +314,9 @@ function renderLineChart(chart, points, options) {
     const index = points.findIndex((point) => point.date === annotation.date);
     if (index === -1) return null;
     const x = coords[index].x;
-    return `<g class="history-annotation"><path d="M${x} ${plot.top}V${height - plot.bottom}"></path><text x="${x - 4}" y="${plot.top + 72}" transform="rotate(-90 ${x - 4} ${plot.top + 72})">${annotation.label}</text></g>`;
+    const labelX = clamp(x - 12, plot.left + 18, width - plot.right - 18);
+    const labelY = plot.top + 96;
+    return `<g class="history-annotation"><path d="M${x} ${plot.top}V${height - plot.bottom}"></path><text x="${labelX}" y="${labelY}" transform="rotate(-90 ${labelX} ${labelY})">${annotation.label}</text></g>`;
   }).filter(Boolean).join("");
   chart.innerHTML = `
     <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${options.label}">
