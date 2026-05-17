@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Methodology | Senate Probability Desk</title>
+  <meta name="description" content="Methodology for the Senate Probability Desk model.">
+  <link rel="stylesheet" href="assets/wiki.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">51</span>
+      <span><strong>Senate Probability Desk</strong><small>2026 control forecast</small></span>
+    </a>
+    <nav class="site-nav" aria-label="Primary navigation">
+      <a href="index.html">Forecast</a>
+      <a href="races.html">Map</a>
+      <a class="active" href="methodology.html">Method</a>
+      <a href="sources.html">Sources</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="page-grid">
+      <article class="text-panel">
+        <p class="kicker">Method</p>
+        <h1>Polls, fundamentals, ratings, primaries, then uncertainty.</h1>
+        <p class="lede">
+          This prototype uses a transparent Monte Carlo model. The production
+          version should replace the hard-coded baseline with scheduled data
+          pulls and a manual ratings ledger.
+        </p>
+      </article>
+      <aside class="odds-panel">
+        <span class="panel-label">Current run</span>
+        <div id="odds-phrase" class="big-odds">--</div>
+        <dl>
+          <div><dt>Simulations</dt><dd id="sim-count">--</dd></div>
+          <div><dt>Median outcome</dt><dd id="median-seats">--</dd></div>
+          <div><dt>Run date</dt><dd id="run-date">--</dd></div>
+          <div><dt>Update time</dt><dd id="update-time">--</dd></div>
+        </dl>
+      </aside>
+    </section>
+
+    <section class="text-panel">
+      <p class="kicker">Model layers</p>
+      <ul class="method-list">
+        <li><strong>State fundamentals</strong> State lean, recent Senate performance, incumbency, candidate quality, finance, and approval/national climate.</li>
+        <li><strong>Primary layer</strong> Unresolved primaries and runoffs widen the error band. Resolved primaries shrink candidate uncertainty.</li>
+        <li><strong>Independent layer</strong> Independent candidates are colored purple and credited as Democrat or Republican for control based on the most likely organizing arrangement, with a discount when that path is uncertain.</li>
+        <li><strong>Polling layer</strong> VoteHub or another public/licensed poll feed should supply race polls, generic ballot, and approval. FiveThirtyEight is not treated as a live polling source because it shut down.</li>
+        <li><strong>Ratings layer</strong> Cook/Sabato/Inside/Split Ticket/CNalysis should be entered through a transparent manual file unless legitimate API access exists.</li>
+        <li><strong>Simulation layer</strong> Each run includes national error, turnout miss, regional error, race-level miss, primary shock, and independent-candidate shock.</li>
+        <li><strong>Tipping power</strong> Most decisive races are counted from simulations where that exact seat changes chamber control, not merely from closeness.</li>
+        <li><strong>Daily update</strong> The static site recalculates on the first load after 6:00 AM Central. A production deployment should pair this with a scheduled build job that writes refreshed polling, finance, and candidate ledgers before that time.</li>
+        <li><strong>Backtesting</strong> MIT Election Lab returns should be used to tune error and fundamentals before public launch.</li>
+      </ul>
+      <div id="poll-sync-status" class="poll-sync">Checking live polling API status...</div>
+    </section>
+
+    <section class="dashboard-grid">
+      <article class="chart-panel">
+        <span class="chart-label">Seat distribution</span>
+        <div id="seat-histogram" class="seat-histogram"></div>
+      </article>
+      <article class="chart-panel">
+        <span class="chart-label">Race leverage</span>
+        <div id="leverage-chart" class="leverage-chart"></div>
+      </article>
+    </section>
+  </main>
+
+  <script src="assets/wiki.js"></script>
+</body>
+</html>

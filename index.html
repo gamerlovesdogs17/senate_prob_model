@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Senate Probability Desk</title>
+  <meta name="description" content="A map-first U.S. Senate forecast with probabilities, charts, and race detail pages.">
+  <link rel="stylesheet" href="assets/wiki.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">51</span>
+      <span><strong>Senate Probability Desk</strong><small>2026 control forecast</small></span>
+    </a>
+    <nav class="site-nav" aria-label="Primary navigation">
+      <a class="active" href="index.html">Forecast</a>
+      <a href="races.html">Map</a>
+      <a href="methodology.html">Method</a>
+      <a href="sources.html">Sources</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero-grid" aria-labelledby="page-title">
+      <div class="hero-main">
+        <p class="kicker">Daily Senate forecast</p>
+        <h1 id="page-title">Who controls the next Senate?</h1>
+        <p class="lede">
+          A map-first probability model for the 2026 Senate. Hover over the
+          map, open a state, and inspect the path to 51 seats without scrolling
+          through a wall of race boxes.
+        </p>
+        <div class="hero-actions">
+          <a class="button-link" href="races.html">Explore the map</a>
+          <a class="button-link" href="methodology.html">How the model works</a>
+        </div>
+      </div>
+      <aside class="odds-panel" aria-label="Control forecast">
+        <span class="panel-label">Chamber control</span>
+        <div>
+          <div id="odds-phrase" class="big-odds">--</div>
+          <p id="control-headline">Calculating</p>
+        </div>
+        <div class="control-bar" aria-hidden="true">
+          <span id="dem-control-bar"></span>
+          <span id="rep-control-bar"></span>
+        </div>
+        <dl>
+          <div><dt>Democratic control</dt><dd id="dem-control">--</dd></div>
+          <div><dt>Republican control</dt><dd id="rep-control">--</dd></div>
+          <div><dt>Median outcome</dt><dd id="median-seats">--</dd></div>
+          <div><dt>Run</dt><dd id="run-date">--</dd></div>
+          <div><dt>Schedule</dt><dd id="update-time">--</dd></div>
+        </dl>
+      </aside>
+    </section>
+
+    <section class="map-panel" aria-labelledby="map-title">
+      <div class="section-head">
+        <div>
+          <p class="kicker">State-shape map</p>
+          <h2 id="map-title">The map is the interface.</h2>
+        </div>
+        <p><span id="sim-count">--</span> simulations. <span id="watch-count">--</span> races below 75 percent certainty.</p>
+      </div>
+      <div class="map-wrap">
+        <div>
+          <div id="senate-map"></div>
+          <div id="map-legend" class="map-legend" aria-label="Race rating legend"></div>
+          <p class="map-note">Click a colored state to open its race page. Muted states do not hold regular 2026 Senate contests.</p>
+        </div>
+        <aside id="map-hover-card" class="hover-card"></aside>
+      </div>
+    </section>
+
+    <section class="dashboard-grid" aria-label="Forecast charts">
+      <article class="chart-panel">
+        <span class="chart-label">Seat distribution</span>
+        <div id="seat-histogram" class="seat-histogram"></div>
+      </article>
+      <article class="chart-panel">
+        <span class="chart-label">Most decisive races by simulated control tipping power</span>
+        <div id="leverage-chart" class="leverage-chart"></div>
+      </article>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
+  <script src="assets/wiki.js"></script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Senate Map | Senate Probability Desk</title>
+  <meta name="description" content="Interactive state-shape map for 2026 Senate race probabilities.">
+  <link rel="stylesheet" href="assets/wiki.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">51</span>
+      <span><strong>Senate Probability Desk</strong><small>2026 control forecast</small></span>
+    </a>
+    <nav class="site-nav" aria-label="Primary navigation">
+      <a href="index.html">Forecast</a>
+      <a class="active" href="races.html">Map</a>
+      <a href="methodology.html">Method</a>
+      <a href="sources.html">Sources</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="map-panel" aria-labelledby="map-title">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Race map</p>
+          <h1 id="map-title">Hover for the race. Click for the page.</h1>
+          <p class="lede">This is the primary race browser. Individual race writeups live on separate URLs instead of being crammed into cards.</p>
+        </div>
+      </div>
+      <div class="map-wrap">
+        <div>
+          <div id="senate-map"></div>
+          <div id="map-legend" class="map-legend" aria-label="Race rating legend"></div>
+          <p class="map-note">Actual state geometries load from the public `us-atlas` TopoJSON package through D3.</p>
+        </div>
+        <aside id="map-hover-card" class="hover-card"></aside>
+      </div>
+    </section>
+
+    <section class="dashboard-grid" aria-label="Map charts">
+      <article class="chart-panel">
+        <span class="chart-label">Control distribution</span>
+        <div id="seat-histogram" class="seat-histogram"></div>
+      </article>
+      <article class="chart-panel">
+        <span class="chart-label">Most decisive by chamber control</span>
+        <div id="leverage-chart" class="leverage-chart"></div>
+      </article>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
+  <script src="assets/wiki.js"></script>
+</body>
+</html>

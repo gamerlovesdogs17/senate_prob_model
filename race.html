@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Race Detail | Senate Probability Desk</title>
+  <meta name="description" content="Individual 2026 Senate race detail page.">
+  <link rel="stylesheet" href="assets/wiki.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">51</span>
+      <span><strong>Senate Probability Desk</strong><small>2026 control forecast</small></span>
+    </a>
+    <nav class="site-nav" aria-label="Primary navigation">
+      <a href="index.html">Forecast</a>
+      <a class="active" href="races.html">Map</a>
+      <a href="methodology.html">Method</a>
+      <a href="sources.html">Sources</a>
+    </nav>
+  </header>
+
+  <main id="race-detail-page">
+    <section class="race-detail" aria-labelledby="race-name">
+      <article class="detail-panel">
+        <p class="kicker">Race page</p>
+        <div id="race-state" class="race-title">--</div>
+        <h1 id="race-name">Loading race</h1>
+        <p id="race-note" class="lede"></p>
+        <div class="hero-actions">
+          <a class="button-link" href="races.html">Back to map</a>
+        </div>
+      </article>
+
+      <aside class="detail-panel">
+        <span class="panel-label">Probability</span>
+        <h2 id="race-winner">--</h2>
+        <div class="prob-track" aria-label="Race probability split">
+          <span id="race-dem-track"></span>
+          <span id="race-rep-track"></span>
+        </div>
+        <dl class="race-stats">
+          <div><dt>Democratic win</dt><dd id="race-dem">--</dd></div>
+          <div><dt>Republican win</dt><dd id="race-rep">--</dd></div>
+          <div><dt>Control tipping power</dt><dd id="race-tipping">--</dd></div>
+          <div><dt>Rating input</dt><dd id="race-rating">--</dd></div>
+          <div><dt>Polling input</dt><dd id="race-polling">--</dd></div>
+          <div><dt>Baseline margin</dt><dd id="race-margin">--</dd></div>
+          <div><dt>Seat</dt><dd id="race-seat">--</dd></div>
+          <div><dt>Incumbent</dt><dd id="race-incumbent">--</dd></div>
+        </dl>
+      </aside>
+    </section>
+
+    <section class="detail-panel" aria-labelledby="history-title">
+      <p class="kicker">Probability history</p>
+      <h2 id="history-title">How the state has moved over time.</h2>
+      <p>The line is the model's stored daily-style probability path using rating movement, public poll placeholders, primary uncertainty, and model drift. Hover points for exact values.</p>
+      <div id="race-history" class="history-chart"></div>
+    </section>
+
+    <section class="detail-panel" aria-labelledby="primary-title">
+      <p class="kicker">Nomination and control treatment</p>
+      <h2 id="primary-title">Primary uncertainty changes the error band.</h2>
+      <div class="detail-grid">
+        <div class="detail-chip"><span class="meta">Democrat</span><strong id="race-dem-candidate">--</strong></div>
+        <div class="detail-chip"><span class="meta">Republican</span><strong id="race-rep-candidate">--</strong></div>
+        <div class="detail-chip"><span class="meta">Primary status</span><strong id="race-primary">--</strong></div>
+        <div class="detail-chip"><span class="meta">Independent handling</span><strong id="race-independent">--</strong></div>
+        <div class="detail-chip"><span class="meta">Control credit</span><strong id="race-caucus">--</strong></div>
+        <div class="detail-chip"><span class="meta">Primary summary</span><strong id="race-primary-summary">--</strong></div>
+      </div>
+    </section>
+
+    <section class="text-panel" aria-labelledby="nav-title">
+      <p class="kicker">Navigation</p>
+      <h2 id="nav-title">Return to the forecast.</h2>
+      <div class="hero-actions">
+        <a class="button-link" href="races.html">Return to map</a>
+        <a class="button-link" href="index.html">Main forecast</a>
+      </div>
+    </section>
+  </main>
+
+  <script src="assets/wiki.js"></script>
+</body>
+</html>
