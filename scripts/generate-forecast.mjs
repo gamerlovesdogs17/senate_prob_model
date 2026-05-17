@@ -197,11 +197,13 @@ function baselineMargin(race) {
   const pollBlend = pollMargin === null ? 0 : pollMargin * (race.polls.length >= 3 ? .48 : .34);
   const fundamentalsBlend = pollMargin === null ? 1 : .78;
   const incumbentPenalty = race.seat === "Open seat" || race.seat === "Special election" ? -.25 : (race.hold === "D" ? .45 : -.45);
-  return (rating * .48 + fundamentals * fundamentalsBlend + signals + incumbentPenalty + caucusDiscount(race)) + pollBlend;
+  const nationalPolling = race.nationalPolling || 0;
+  return (rating * .48 + fundamentals * fundamentalsBlend + signals + incumbentPenalty + caucusDiscount(race)) + pollBlend + nationalPolling;
 }
 
-function runModel() {
-  const enriched = races.map((race) => {
+function runModel(sourceData) {
+  const adjustedRaces = applySourceInputs(races, sourceData);
+  const enriched = adjustedRaces.map((race) => {
     const candidates = CANDIDATE_STATUS[race.state] || CANDIDATE_STATUS.DEFAULT;
     const margin = baselineMargin(race);
     const error = (RATING_TO_ERROR[race.rating] || 8) + primaryRisk(race);
@@ -292,8 +294,6 @@ function buildHistory(race) {
   return [...withoutToday, current].slice(-180);
 }
 
-const model = runModel();
-
 function readPreviousForecast() {
   try {
     return JSON.parse(readFileSync(FORECAST_URL, "utf8"));
@@ -302,37 +302,365 @@ function readPreviousForecast() {
   }
 }
 
-async function fetchNationalSignals() {
-  const signals = {
-    pollingApi: "not reached",
-    genericBallotPolls: 0,
-    checkedAt: new Date().toISOString()
-  };
+async function fetchText(url, label, status, options = {}) {
+  const startedAt = Date.now();
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), options.timeoutMs || 20000);
 
   try {
-    const response = await fetch("https://api.votehub.com/polls?poll_type=generic-ballot&subject=2026", {
-      headers: { accept: "application/json" }
+    const response = await fetch(url, {
+      headers: options.headers || {},
+      signal: controller.signal
     });
-    signals.pollingApi = response.ok ? "reachable" : `http ${response.status}`;
-    if (response.ok) {
-      const data = await response.json();
-      signals.genericBallotPolls = Array.isArray(data.polls) ? data.polls.length : 0;
+    const text = await response.text();
+    status[label] = {
+      ok: response.ok,
+      status: response.status,
+      ms: Date.now() - startedAt,
+      url
+    };
+    if (!response.ok) {
+      status[label].error = text.slice(0, 180);
     }
+    return response.ok ? text : null;
   } catch (error) {
-    signals.pollingApi = "unreachable";
-    signals.error = error.message;
+    status[label] = {
+      ok: false,
+      status: "fetch-error",
+      ms: Date.now() - startedAt,
+      url,
+      error: error.message
+    };
+    return null;
+  } finally {
+    clearTimeout(timeout);
   }
-
-  return signals;
 }
 
-function appendControlHistory() {
+function parseCsv(text) {
+  const rows = [];
+  let row = [];
+  let cell = "";
+  let quoted = false;
+  for (let i = 0; i < text.length; i += 1) {
+    const char = text[i];
+    const next = text[i + 1];
+    if (quoted && char === "\"" && next === "\"") {
+      cell += "\"";
+      i += 1;
+    } else if (char === "\"") {
+      quoted = !quoted;
+    } else if (!quoted && char === ",") {
+      row.push(cell);
+      cell = "";
+    } else if (!quoted && (char === "\n" || char === "\r")) {
+      if (char === "\r" && next === "\n") i += 1;
+      row.push(cell);
+      if (row.some((value) => value !== "")) rows.push(row);
+      row = [];
+      cell = "";
+    } else {
+      cell += char;
+    }
+  }
+  if (cell || row.length) {
+    row.push(cell);
+    rows.push(row);
+  }
+  const headers = rows.shift() || [];
+  return rows.map((values) => Object.fromEntries(headers.map((header, index) => [header, values[index] ?? ""])));
+}
+
+function toNumber(value) {
+  const number = Number(String(value ?? "").replace(/[$,]/g, ""));
+  return Number.isFinite(number) ? number : 0;
+}
+
+async function fetchVoteHub(status) {
+  const text = await fetchText("https://api.votehub.com/polls?poll_type=generic-ballot&subject=2026", "votehubGenericBallot", status, {
+    headers: { accept: "application/json" }
+  });
+  if (!text) return { genericBallotPolls: 0, usableGenericBallotPolls: 0, genericBallotMargin: null };
+  try {
+    const data = JSON.parse(text);
+    const polls = Array.isArray(data) ? data : Array.isArray(data.polls) ? data.polls : [];
+    const rawUsablePolls = polls.map((poll) => {
+      const demAnswer = poll.answers?.find((answer) => /^dem/i.test(answer.choice || ""));
+      const repAnswer = poll.answers?.find((answer) => /^rep/i.test(answer.choice || ""));
+      const dem = toNumber(poll.democrat ?? poll.dem ?? poll.democratic ?? poll.dem_share ?? demAnswer?.pct);
+      const rep = toNumber(poll.republican ?? poll.rep ?? poll.gop ?? poll.rep_share ?? repAnswer?.pct);
+      return {
+        id: poll.id,
+        pollster: poll.pollster,
+        endDate: poll.end_date,
+        sampleSize: toNumber(poll.sample_size),
+        population: poll.population,
+        internal: Boolean(poll.internal),
+        partisan: poll.partisan,
+        sponsors: Array.isArray(poll.sponsors) ? poll.sponsors : [],
+        dem,
+        rep,
+        margin: dem - rep
+      };
+    }).filter((poll) => Number.isFinite(poll.margin) && (poll.dem || poll.rep) && poll.endDate);
+    const usablePolls = collapseSamePollsterDay(rawUsablePolls);
+    const modelDate = new Date(`${MODEL_DATE_KEY}T12:00:00Z`);
+    let weightSum = 0;
+    let weightedMargin = 0;
+    let weightedDem = 0;
+    let weightedRep = 0;
+    const pollsterTotals = {};
+    for (const poll of usablePolls) {
+      const age = Math.max(0, (modelDate - new Date(`${poll.endDate}T12:00:00Z`)) / 86400000);
+      const populationWeight = poll.population === "lv" ? 1.1 : poll.population === "rv" ? 1 : .85;
+      const sampleWeight = clamp(Math.sqrt(poll.sampleSize || 800) / 30, .55, 2.1);
+      const recencyWeight = Math.pow(.5, age / 45);
+      const internalWeight = poll.internal ? .65 : 1;
+      const partisanWeight = poll.partisan ? .78 : 1;
+      const repeatWeight = 1 / Math.sqrt(1 + (pollsterTotals[poll.pollster] || 0));
+      const weight = populationWeight * sampleWeight * recencyWeight * internalWeight * partisanWeight * repeatWeight;
+      poll.weight = weight;
+      poll.ageDays = age;
+      pollsterTotals[poll.pollster] = (pollsterTotals[poll.pollster] || 0) + weight;
+      weightSum += weight;
+      weightedMargin += poll.margin * weight;
+      weightedDem += poll.dem * weight;
+      weightedRep += poll.rep * weight;
+    }
+    const recent = [...usablePolls]
+      .sort((a, b) => new Date(b.endDate) - new Date(a.endDate))
+      .slice(0, 8)
+      .map(({ id, pollster, endDate, sampleSize, population, dem, rep, margin, weight }) => ({
+        id, pollster, endDate, sampleSize, population, dem, rep, margin, weight: Number(weight.toFixed(4))
+      }));
+    status.votehubGenericBallot.rows = polls.length;
+    status.votehubGenericBallot.usablePolls = usablePolls.length;
+    status.votehubGenericBallot.rawUsablePolls = rawUsablePolls.length;
+    return {
+      genericBallotPolls: polls.length,
+      usableGenericBallotPolls: usablePolls.length,
+      rawUsableGenericBallotPolls: rawUsablePolls.length,
+      genericBallotMargin: weightSum ? weightedMargin / weightSum : null,
+      genericBallotDem: weightSum ? weightedDem / weightSum : null,
+      genericBallotRep: weightSum ? weightedRep / weightSum : null,
+      totalWeight: weightSum,
+      weighting: {
+        recencyHalfLifeDays: 45,
+        sample: "sqrt(sample_size), capped 0.55x to 2.10x",
+        population: { lv: 1.1, rv: 1, adultOrOther: .85 },
+        internalPoll: .65,
+        partisanPoll: .78,
+        repeatedPollster: "1 / sqrt(1 + prior weighted pollster weight)"
+      },
+      recent
+    };
+  } catch (error) {
+    status.votehubGenericBallot.parseError = error.message;
+    return { genericBallotPolls: 0, usableGenericBallotPolls: 0, genericBallotMargin: null };
+  }
+}
+
+function collapseSamePollsterDay(polls) {
+  const groups = new Map();
+  for (const poll of polls) {
+    const key = `${poll.pollster || "unknown"}|${poll.endDate}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(poll);
+  }
+  return [...groups.values()].map((group) => {
+    if (group.length === 1) return group[0];
+    const ranked = [...group].sort((a, b) => populationRank(b.population) - populationRank(a.population) || b.sampleSize - a.sampleSize);
+    const bestRank = populationRank(ranked[0].population);
+    const selected = ranked.filter((poll) => populationRank(poll.population) === bestRank);
+    const sampleTotal = selected.reduce((sum, poll) => sum + (poll.sampleSize || 800), 0);
+    return selected.reduce((merged, poll) => {
+      const weight = (poll.sampleSize || 800) / sampleTotal;
+      merged.dem += poll.dem * weight;
+      merged.rep += poll.rep * weight;
+      merged.margin += poll.margin * weight;
+      merged.sampleSize += poll.sampleSize || 0;
+      return merged;
+    }, {
+      id: selected.map((poll) => poll.id).filter(Boolean).join("+"),
+      pollster: selected[0].pollster,
+      endDate: selected[0].endDate,
+      sampleSize: 0,
+      population: selected[0].population,
+      internal: selected.some((poll) => poll.internal),
+      partisan: selected.find((poll) => poll.partisan)?.partisan || null,
+      sponsors: [...new Set(selected.flatMap((poll) => poll.sponsors))],
+      dem: 0,
+      rep: 0,
+      margin: 0
+    });
+  });
+}
+
+function populationRank(population) {
+  if (population === "lv") return 3;
+  if (population === "rv") return 2;
+  return 1;
+}
+
+async function fetchFec(status) {
+  const text = await fetchText("https://www.fec.gov/files/bulk-downloads/2026/candidate_summary_2026.csv", "openFecCandidateSummary", status);
+  const byState = {};
+  if (!text) return byState;
+  const rows = parseCsv(text);
+  for (const row of rows) {
+    if (row.Cand_Office !== "S") continue;
+    const state = row.Cand_Office_St;
+    if (!STATE_NAMES[state]) continue;
+    const party = String(row.Cand_Party_Affiliation || "").toUpperCase();
+    const side = party.startsWith("DEM") ? "dem" : party.startsWith("REP") ? "rep" : "other";
+    byState[state] ||= { demReceipts: 0, repReceipts: 0, otherReceipts: 0, candidates: 0, coverageEndDate: "" };
+    byState[state].candidates += 1;
+    byState[state].coverageEndDate = row.Coverage_End_Date || byState[state].coverageEndDate;
+    const receipts = toNumber(row.Total_Receipt);
+    if (side === "dem") byState[state].demReceipts += receipts;
+    else if (side === "rep") byState[state].repReceipts += receipts;
+    else byState[state].otherReceipts += receipts;
+  }
+  status.openFecCandidateSummary.rows = rows.length;
+  status.openFecCandidateSummary.senateStates = Object.keys(byState).length;
+  return byState;
+}
+
+async function fetchMitSenate(status) {
+  const text = await fetchText("https://raw.githubusercontent.com/MEDSL/constituency-returns/master/1976-2018-senate.csv", "mitSenateReturns", status);
+  const byStateYear = {};
+  if (!text) return {};
+  const rows = parseCsv(text);
+  for (const row of rows) {
+    if (row.stage !== "gen" || row.mode !== "total") continue;
+    const state = row.state_po;
+    const year = Number(row.year);
+    if (!STATE_NAMES[state] || !Number.isFinite(year)) continue;
+    byStateYear[state] ||= {};
+    byStateYear[state][year] ||= { dem: 0, rep: 0, total: toNumber(row.totalvotes) };
+    const party = String(row.party || "").toLowerCase();
+    if (party === "democrat") byStateYear[state][year].dem += toNumber(row.candidatevotes);
+    if (party === "republican") byStateYear[state][year].rep += toNumber(row.candidatevotes);
+  }
+
+  const latestMargins = {};
+  for (const [state, years] of Object.entries(byStateYear)) {
+    const latestYear = Math.max(...Object.keys(years).map(Number));
+    const result = years[latestYear];
+    if (!result.total) continue;
+    latestMargins[state] = {
+      year: latestYear,
+      margin: ((result.dem - result.rep) / result.total) * 100
+    };
+  }
+  status.mitSenateReturns.rows = rows.length;
+  status.mitSenateReturns.states = Object.keys(latestMargins).length;
+  return latestMargins;
+}
+
+async function fetchCensus(status) {
+  if (!process.env.CENSUS_API_KEY) {
+    status.censusPopulation = {
+      ok: false,
+      status: "missing-key",
+      url: "https://api.census.gov/data/2024/pep/population",
+      error: "Set CENSUS_API_KEY as a GitHub Actions secret to enable this adapter."
+    };
+    return {};
+  }
+  const url = `https://api.census.gov/data/2024/pep/population?get=NAME,POP_2024,POP_2020&for=state:*&key=${encodeURIComponent(process.env.CENSUS_API_KEY)}`;
+  const text = await fetchText(url, "censusPopulation", status);
+  if (!text) return {};
+  try {
+    const [headers, ...rows] = JSON.parse(text);
+    const byState = {};
+    for (const values of rows) {
+      const row = Object.fromEntries(headers.map((header, index) => [header, values[index]]));
+      const state = FIPS_TO_STATE[String(row.state).padStart(2, "0")];
+      if (!state) continue;
+      byState[state] = {
+        name: row.NAME,
+        pop2020: toNumber(row.POP_2020),
+        pop2024: toNumber(row.POP_2024)
+      };
+    }
+    status.censusPopulation.states = Object.keys(byState).length;
+    return byState;
+  } catch (error) {
+    status.censusPopulation.parseError = error.message;
+    return {};
+  }
+}
+
+async function fetchCivicApi(status) {
+  const text = await fetchText("https://civicapi.org/api-documentation", "civicApiDocs", status);
+  return {
+    documentationReachable: Boolean(text),
+    note: "No public no-key election-results endpoint is wired into the model yet."
+  };
+}
+
+async function fetchAllSources() {
+  const status = { checkedAt: new Date().toISOString() };
+  const [votehub, fec, mit, census, civic] = await Promise.all([
+    fetchVoteHub(status),
+    fetchFec(status),
+    fetchMitSenate(status),
+    fetchCensus(status),
+    fetchCivicApi(status)
+  ]);
+  return { status, votehub, fec, mit, census, civic };
+}
+
+function applySourceInputs(baseRaces, sourceData) {
+  return baseRaces.map((race) => {
+    const fec = sourceData?.fec?.[race.state];
+    const mit = sourceData?.mit?.[race.state];
+    const census = sourceData?.census?.[race.state];
+    const sourceInputs = {};
+    let money = race.money;
+    let pastSenate = race.pastSenate;
+    let pvi = race.pvi;
+
+    if (fec) {
+      const financeSignal = clamp((fec.demReceipts - fec.repReceipts) / 5000000, -1.25, 1.25);
+      money = clamp(race.money * .65 + financeSignal * .35, -1.5, 1.5);
+      sourceInputs.openFec = { ...fec, financeSignal };
+    }
+    if (mit) {
+      pastSenate = race.pastSenate * .8 + mit.margin * .2;
+      sourceInputs.mitSenate = mit;
+    }
+    if (census?.pop2020 && census?.pop2024) {
+      const growth = ((census.pop2024 - census.pop2020) / census.pop2020) * 100;
+      const growthSignal = clamp(growth / 12, -.35, .35);
+      pvi = race.pvi + growthSignal;
+      sourceInputs.census = { ...census, growth, growthSignal };
+    }
+    if (sourceData?.votehub?.genericBallotMargin !== null) {
+      const nationalPolling = clamp(sourceData.votehub.genericBallotMargin * .22, -1.5, 1.5);
+      sourceInputs.votehub = {
+        genericBallotPolls: sourceData.votehub.genericBallotPolls,
+        usableGenericBallotPolls: sourceData.votehub.usableGenericBallotPolls,
+        genericBallotMargin: sourceData.votehub.genericBallotMargin,
+        nationalPolling
+      };
+      return { ...race, money, pastSenate, pvi, nationalPolling, sourceInputs };
+    }
+
+    return { ...race, money, pastSenate, pvi, sourceInputs };
+  });
+}
+
+function appendControlHistory(model) {
   const current = { date: MODEL_DATE_KEY, dem: model.demControlProbability, rep: model.repControlProbability };
   const stored = Array.isArray(previousForecast?.controlHistory) ? previousForecast.controlHistory : [];
   return [...stored.filter((point) => point.date !== current.date), current].slice(-365);
 }
 
 async function writeForecast() {
+  const sourceData = await fetchAllSources();
+  const model = runModel(sourceData);
   const generatedAt = new Date().toISOString();
   const output = {
     generatedAt,
@@ -340,8 +668,15 @@ async function writeForecast() {
     runDate: new Date(`${MODEL_DATE_KEY}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
     updateTime: "around 6:00 AM Central",
     settings: SETTINGS,
-    sourceStatus: await fetchNationalSignals(),
-    controlHistory: appendControlHistory(),
+    sourceStatus: sourceData.status,
+    sourceSummary: {
+      votehub: sourceData.votehub,
+      fecStates: Object.keys(sourceData.fec).length,
+      mitStates: Object.keys(sourceData.mit).length,
+      censusStates: Object.keys(sourceData.census).length,
+      civicApi: sourceData.civic
+    },
+    controlHistory: appendControlHistory(model),
     ...model
   };
 

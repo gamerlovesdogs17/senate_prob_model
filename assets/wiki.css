@@ -591,8 +591,35 @@ dd {
   margin-top: 12px;
 }
 
+.source-status-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+
 .source-card h3 {
   margin: 8px 0;
+}
+
+.source-status-card {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--paper-2) 70%, transparent);
+}
+
+.source-status-card h3 {
+  margin: 7px 0;
+  font-size: 1rem;
+}
+
+.source-status-card.is-ok {
+  border-top: 4px solid var(--green);
+}
+
+.source-status-card.is-warn {
+  border-top: 4px solid var(--gold);
 }
 
 .source-card a {
@@ -865,6 +892,10 @@ dd {
   .source-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .source-status-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 720px) {
@@ -883,6 +914,7 @@ dd {
   }
 
   .source-grid,
+  .source-status-grid,
   .fallback-list,
   .race-selector,
   .detail-grid {

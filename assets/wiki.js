@@ -442,6 +442,33 @@ function renderRacePage() {
   renderPrimaryPanel(race);
 }
 
+function renderSourceStatus() {
+  const container = document.getElementById("source-status");
+  if (!container || !forecast) return;
+  const status = forecast.sourceStatus || {};
+  const summary = forecast.sourceSummary || {};
+  const rows = [
+    ["VoteHub polling", status.votehubGenericBallot, `${summary.votehub?.usableGenericBallotPolls ?? 0} usable generic-ballot polls / D ${summary.votehub?.genericBallotMargin?.toFixed?.(1) ?? "--"}`],
+    ["OpenFEC finance", status.openFecCandidateSummary, `${summary.fecStates ?? 0} Senate states`],
+    ["MIT/MEDSL history", status.mitSenateReturns, `${summary.mitStates ?? 0} states`],
+    ["Census population", status.censusPopulation, `${summary.censusStates ?? 0} states`],
+    ["civicAPI", status.civicApiDocs, summary.civicApi?.note || "Reachability check"]
+  ];
+  container.innerHTML = rows.map(([label, item, detail]) => {
+    const ok = Boolean(item?.ok);
+    const state = ok ? "Loaded" : item?.status === "missing-key" ? "Needs key" : "Not loaded";
+    const meta = item?.ms ? `${item.ms} ms` : item?.status || "";
+    return `
+      <div class="source-status-card ${ok ? "is-ok" : "is-warn"}">
+        <span class="source-tag">${state}</span>
+        <h3>${label}</h3>
+        <p>${detail}</p>
+        <p class="meta">${meta}</p>
+      </div>
+    `;
+  }).join("");
+}
+
 async function loadForecast() {
   const response = await fetch("data/forecast.json", { cache: "no-store" });
   if (!response.ok) throw new Error(`Forecast data returned ${response.status}`);
@@ -475,6 +502,7 @@ async function init() {
   renderControlHistory();
   renderRacePage();
   renderRaceSelector();
+  renderSourceStatus();
 }
 
 init();
