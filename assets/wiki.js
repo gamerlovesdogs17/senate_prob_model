@@ -559,30 +559,43 @@ function renderArticlePage() {
     <h1>${escapeHtml(article.title)}</h1>
     <p class="lede">${escapeHtml(article.dek || "")}</p>
     <p class="meta">${escapeHtml(article.date)} / ${escapeHtml(article.author || "Senate Probability Desk")}</p>
-    <div class="article-body">
-      ${(article.body || []).map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("")}
-    </div>
-    <div id="article-embeds" class="article-embeds"></div>
+    <div id="article-body" class="article-body"></div>
     <p><a class="button-link" href="articles.html">Back to articles</a></p>
   `;
-  renderArticleEmbeds(article);
+  renderArticleBody(article);
 }
 
-function renderArticleEmbeds(article) {
-  const container = document.getElementById("article-embeds");
-  if (!container || !forecast || !Array.isArray(article.embeds) || !article.embeds.length) return;
-  container.innerHTML = article.embeds.map((embed, index) => `
-    <section class="article-embed chart-panel" data-embed-index="${index}">
-      <span class="chart-label">${escapeHtml(embed.title || embedTitle(embed))}</span>
-      <div class="article-embed-target"></div>
-    </section>
-  `).join("");
+function renderArticleBody(article) {
+  const container = document.getElementById("article-body");
+  if (!container) return;
+  const blocks = Array.isArray(article.content) ? article.content : legacyArticleBlocks(article);
+  container.innerHTML = blocks.map((block, index) => {
+    if (typeof block === "string") return `<p>${escapeHtml(block)}</p>`;
+    if (block.type === "paragraph") return `<p>${escapeHtml(block.text || "")}</p>`;
+    if (block.type === "embed") {
+      const embed = block.embed || block;
+      return `
+        <section class="article-embed chart-panel article-embed-${escapeHtml(embed.size || "small")}" data-block-index="${index}">
+          <span class="chart-label">${escapeHtml(embed.title || embedTitle(embed))}</span>
+          <div class="article-embed-target"></div>
+        </section>
+      `;
+    }
+    return "";
+  }).join("");
 
   container.querySelectorAll(".article-embed").forEach((node) => {
-    const embed = article.embeds[Number(node.dataset.embedIndex)];
+    const block = blocks[Number(node.dataset.blockIndex)];
+    const embed = block.embed || block;
     const target = node.querySelector(".article-embed-target");
     renderEmbed(target, embed);
   });
+}
+
+function legacyArticleBlocks(article) {
+  const body = (article.body || []).map((text) => ({ type: "paragraph", text }));
+  const embeds = (article.embeds || []).map((embed) => ({ type: "embed", embed }));
+  return [...body, ...embeds];
 }
 
 function embedTitle(embed) {

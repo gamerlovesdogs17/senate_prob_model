@@ -724,11 +724,39 @@ dd {
 }
 
 .article-embed {
+  max-width: 760px;
   box-shadow: none;
+  padding: 14px;
+  margin: 18px 0;
 }
 
 .article-embed .history-chart {
-  margin-top: 10px;
+  margin-top: 8px;
+}
+
+.article-embed-small {
+  max-width: 620px;
+}
+
+.article-embed-medium {
+  max-width: 760px;
+}
+
+.article-embed-large {
+  max-width: 100%;
+}
+
+.article-embed-small .history-chart svg {
+  max-height: 250px;
+}
+
+.article-embed-small .history-end-label {
+  font-size: 11px;
+}
+
+.article-embed-small .history-axis,
+.article-embed-small .history-date {
+  font-size: 11px;
 }
 
 .source-card a {
