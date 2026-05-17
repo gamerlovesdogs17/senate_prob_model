@@ -532,6 +532,8 @@ dd {
   grid-template-columns: repeat(16, minmax(22px, 1fr));
   align-items: end;
   min-height: 190px;
+  overflow-x: auto;
+  padding-bottom: 4px;
 }
 
 .seat-bin {
@@ -601,6 +603,62 @@ dd {
 .leverage-row:focus i,
 .poll-row:hover i {
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--gold) 20%, transparent);
+}
+
+.compact-page-head h1 {
+  font-size: clamp(2.1rem, 5vw, 4rem);
+}
+
+.race-board-panel {
+  border-top-color: var(--ink);
+}
+
+.battleground-list {
+  display: grid;
+  gap: 0;
+  margin-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.race-board-row {
+  display: grid;
+  grid-template-columns: 48px minmax(130px, 1.2fr) minmax(82px, .7fr) minmax(126px, .75fr) 92px;
+  gap: 12px;
+  align-items: center;
+  padding: 11px 4px;
+  border-bottom: 1px solid var(--line);
+  border-left: 6px solid var(--toss);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.race-board-row.leads-dem {
+  border-left-color: var(--dem);
+}
+
+.race-board-row.leads-rep {
+  border-left-color: var(--rep);
+}
+
+.race-board-row strong {
+  padding-left: 8px;
+  color: var(--ink);
+  font: 950 1.05rem/1 "Segoe UI", Arial, sans-serif;
+}
+
+.race-board-row span {
+  color: color-mix(in srgb, var(--ink) 76%, var(--muted));
+  font: 750 .9rem/1.25 "Segoe UI", Arial, sans-serif;
+}
+
+.race-board-row span:last-child {
+  text-align: right;
+  font-weight: 900;
+}
+
+.race-board-row:hover,
+.race-board-row:focus {
+  background: color-mix(in srgb, var(--paper-2) 72%, transparent);
 }
 
 .page-grid {
@@ -1076,7 +1134,7 @@ dd {
   }
 
   .big-odds strong {
-    font-size: clamp(3rem, 18vw, 4.8rem);
+    font-size: clamp(2.7rem, 16vw, 4.2rem);
   }
 
   .map-panel {
@@ -1121,7 +1179,32 @@ dd {
   }
 
   .seat-histogram {
-    grid-template-columns: repeat(8, minmax(22px, 1fr));
+    grid-template-columns: repeat(16, 34px);
+    width: 100%;
+    max-width: 100%;
+    min-height: 168px;
+  }
+
+  .seat-bin {
+    min-width: 34px;
+  }
+
+  .seat-bin i {
+    max-height: 150px;
+  }
+
+  .race-board-row {
+    grid-template-columns: 42px minmax(0, 1fr) 116px 74px;
+    gap: 8px;
+    padding: 10px 6px;
+  }
+
+  .race-board-row span:nth-of-type(2) {
+    display: none;
+  }
+
+  .race-board-row span:last-child {
+    text-align: left;
   }
 }
 
@@ -1161,6 +1244,15 @@ dd {
   .poll-row {
     grid-template-columns: 38px 1fr 48px;
     gap: 8px;
+  }
+
+  .race-board-row {
+    grid-template-columns: 38px 1fr;
+  }
+
+  .race-board-row span:nth-of-type(3),
+  .race-board-row span:nth-of-type(4) {
+    display: none;
   }
 
   .history-end-label {

@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Senate Map | Senate Probability Desk</title>
-  <meta name="description" content="Interactive map for 2026 Senate race probabilities.">
+  <title>Races | Senate Probability Desk</title>
+  <meta name="description" content="2026 Senate races by probability and control leverage.">
   <link rel="stylesheet" href="assets/wiki.css">
 </head>
 <body>
@@ -15,45 +15,39 @@
     </a>
     <nav class="site-nav" aria-label="Primary navigation">
       <a href="index.html">Forecast</a>
-      <a class="active" href="races.html">Map</a>
+      <a class="active" href="races.html">Races</a>
       <a href="methodology.html">Method</a>
       <a href="articles.html">Articles</a>
     </nav>
   </header>
 
   <main>
-    <section class="map-panel" aria-labelledby="map-title">
+    <section class="text-panel image-panel compact-page-head" aria-labelledby="races-title">
       <div class="section-head">
         <div>
-          <p class="kicker">Map</p>
-          <h1 id="map-title">Senate battleground.</h1>
-          <p class="lede">Ratings, probabilities, and control leverage by state.</p>
+          <p class="kicker">Races</p>
+          <h1 id="races-title">Race board.</h1>
         </div>
-      </div>
-      <div class="map-wrap">
-        <div>
-          <div id="senate-map"></div>
-          <div id="map-legend" class="map-legend" aria-label="Race rating legend"></div>
-          <p class="map-note">Muted states do not hold regular 2026 Senate contests.</p>
-        </div>
-        <aside id="map-hover-card" class="hover-card"></aside>
       </div>
     </section>
 
-    <section class="dashboard-grid" aria-label="Map charts">
+    <section class="dashboard-grid" aria-label="Race charts">
       <article class="chart-panel">
         <span class="chart-label">Control distribution</span>
         <div id="seat-histogram" class="seat-histogram"></div>
       </article>
       <article class="chart-panel">
-        <span class="chart-label">Most decisive by chamber control</span>
+        <span class="chart-label">Highest tipping power</span>
         <div id="leverage-chart" class="leverage-chart"></div>
       </article>
     </section>
+
+    <section class="text-panel race-board-panel">
+      <p class="kicker">All contested seats</p>
+      <div id="battleground-list" class="battleground-list" aria-label="Senate race board"></div>
+    </section>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
   <script src="assets/wiki.js"></script>
 </body>
 </html>

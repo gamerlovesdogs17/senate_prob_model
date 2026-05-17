@@ -92,6 +92,35 @@ function showPanelTooltip(source, html) {
   tooltip.classList.toggle("below-source", !isAbove);
 }
 
+function hideAllPanelTooltips() {
+  document.querySelectorAll(".panel-hover-tooltip.visible").forEach((tooltip) => {
+    tooltip.classList.remove("visible");
+  });
+}
+
+function hideAllChartHovers() {
+  document.querySelectorAll(".history-hover").forEach((hover) => {
+    hover.style.display = "none";
+  });
+}
+
+function installInteractionDismiss() {
+  document.addEventListener("pointerdown", (event) => {
+    if (!event.target.closest(".seat-bin, .leverage-row, .poll-row, .panel-hover-tooltip")) {
+      hideAllPanelTooltips();
+    }
+    if (!event.target.closest(".history-chart")) {
+      hideAllChartHovers();
+    }
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      hideAllPanelTooltips();
+      hideAllChartHovers();
+    }
+  });
+}
+
 function hidePanelTooltip(source) {
   const panel = source.closest(".chart-panel, .detail-panel, .map-panel");
   const tooltip = panel?.querySelector(".panel-hover-tooltip");
@@ -104,7 +133,10 @@ function bindPanelTooltip(selector, getHtml) {
 
 function bindPanelTooltipFor(root, selector, getHtml) {
   root.querySelectorAll(selector).forEach((node) => {
-    const handler = () => showPanelTooltip(node, getHtml(node));
+    const handler = (event) => {
+      event.stopPropagation();
+      showPanelTooltip(node, getHtml(node));
+    };
     node.addEventListener("mouseenter", handler);
     node.addEventListener("focus", handler);
     node.addEventListener("click", handler);
@@ -510,6 +542,26 @@ function renderSourceStatus() {
   }).join("");
 }
 
+function renderBattlegroundList() {
+  const container = document.getElementById("battleground-list");
+  if (!container || !forecast) return;
+  const races = [...forecast.races]
+    .sort((a, b) => b.tippingPower - a.tippingPower);
+  container.innerHTML = races.map((race) => {
+    const leader = race.winnerParty === "D" ? "Democrat" : "Republican";
+    const leaderClass = race.rating === "Toss-up" ? "leads-tossup" : race.winnerParty === "D" ? "leads-dem" : "leads-rep";
+    return `
+      <a class="race-board-row ${leaderClass}" href="race.html?state=${race.state}">
+        <strong>${escapeHtml(race.state)}</strong>
+        <span>${escapeHtml(race.displayName.replace(" Senate", ""))}</span>
+        <span>${escapeHtml(race.rating)}</span>
+        <span>${leader} ${pct(race.winnerProbability)}</span>
+        <span>${oneDecimal(race.tippingPower)}</span>
+      </a>
+    `;
+  }).join("");
+}
+
 function sortedArticles() {
   return [...articles].sort((a, b) => new Date(b.date) - new Date(a.date));
 }
@@ -682,6 +734,7 @@ function renderLoadError(error) {
 }
 
 async function init() {
+  installInteractionDismiss();
   articles = await loadArticles();
   try {
     forecast = await loadForecast();
@@ -701,6 +754,7 @@ async function init() {
   renderRacePage();
   renderRaceSelector();
   renderSourceStatus();
+  renderBattlegroundList();
   renderTopArticle();
   renderArticlesList();
   renderArticlePage();
