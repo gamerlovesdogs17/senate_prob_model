@@ -37,7 +37,7 @@ function partyBadge(candidate, fallbackParty) {
 function signedMargin(demProbability) {
   const margin = (demProbability - .5) * 100;
   if (Math.abs(margin) < .05) return "Even";
-  return `${margin > 0 ? "D" : "R"}+${Math.abs(margin).toFixed(1)}`;
+  return `${margin > 0 ? "D" : "R"}+${Math.abs(margin).toFixed(1)} pts`;
 }
 
 function setText(id, value) {
@@ -207,7 +207,7 @@ function hoverMarkup(race) {
         <span>${escapeHtml(repCandidate)} <i class="${repBadge === "I" ? "ind-badge" : ""}">${repBadge}</i></span>
         <strong>${oneDecimal(1 - race.demProbability)}</strong>
       </div>
-      <div class="candidate-margin"><span>Margin</span><strong>${signedMargin(race.demProbability)}</strong></div>
+      <div class="candidate-margin"><span>Probability margin</span><strong>${signedMargin(race.demProbability)}</strong></div>
     </div>
     <div class="prob-track" aria-label="${race.state} probability split">
       <span style="width:${race.demProbability * 100}%"></span>
