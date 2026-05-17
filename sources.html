@@ -27,8 +27,7 @@
       <h1>Use public feeds where they exist. Curate what is not public.</h1>
       <p class="lede">
         There is no single free source that cleanly powers a serious Senate forecast.
-        The site should combine official data, public polling APIs, historical results,
-        and a transparent manual ratings file.
+        The daily generator combines public feeds where reachable with a transparent manual ratings file.
       </p>
     </section>
 
@@ -36,7 +35,7 @@
       <article class="source-card">
         <span class="source-tag">Polling</span>
         <h3>VoteHub Polling API</h3>
-        <p>Free beta REST API for approval, generic ballot, favorability, and available poll subjects. This replaces the old FiveThirtyEight live-polls assumption and is the first daily polling adapter to wire.</p>
+        <p>Free beta REST API for approval, generic ballot, favorability, and available poll subjects. The generator checks it server-side during the daily run.</p>
         <a href="https://votehub.com/polls/api/" target="_blank" rel="noreferrer">Open API docs</a>
       </article>
       <article class="source-card">

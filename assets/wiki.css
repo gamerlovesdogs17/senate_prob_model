@@ -192,8 +192,9 @@ main {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, color-mix(in srgb, var(--dem) 12%, transparent), transparent 56%),
-    linear-gradient(180deg, transparent 0, color-mix(in srgb, var(--paper-2) 52%, transparent) 100%);
+    linear-gradient(90deg, rgba(255, 253, 248, .93), rgba(255, 253, 248, .68) 46%, rgba(255, 253, 248, .30)),
+    linear-gradient(180deg, transparent 0, color-mix(in srgb, var(--paper-2) 48%, transparent) 100%),
+    url("img/hero-senate.jpg") center / cover;
   pointer-events: none;
 }
 
@@ -457,6 +458,10 @@ dd {
   margin-top: 12px;
 }
 
+.chart-wide {
+  grid-column: 1 / -1;
+}
+
 .chart-panel,
 .source-panel,
 .text-panel,
@@ -577,6 +582,7 @@ dd {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
+  margin-top: 12px;
 }
 
 .source-card h3 {
@@ -648,32 +654,6 @@ dd {
   font: 800 12px/1 "Segoe UI", Arial, sans-serif;
 }
 
-.chart-tooltip {
-  position: fixed;
-  z-index: 100;
-  max-width: 220px;
-  padding: 8px 10px;
-  border: 1px solid var(--line);
-  border-radius: 3px;
-  background: color-mix(in srgb, var(--paper) 96%, black);
-  color: var(--ink);
-  box-shadow: var(--shadow);
-  font: 800 .8rem/1.32 "Segoe UI", Arial, sans-serif;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(3px);
-  transition: opacity .12s ease, transform .12s ease;
-}
-
-.history-chart .chart-tooltip {
-  display: none;
-}
-
-.chart-tooltip.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
 .chart-readout {
   margin-top: 12px;
   padding: 8px 10px;
@@ -712,14 +692,6 @@ dd {
 .detail-chip.independent-candidate strong::before {
   content: "Independent ";
   color: var(--ind);
-}
-
-.poll-sync {
-  margin-top: 14px;
-  padding: 12px;
-  border: 1px solid var(--line);
-  background: color-mix(in srgb, var(--paper-2) 70%, transparent);
-  color: var(--muted);
 }
 
 .method-list {

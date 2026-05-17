@@ -26,15 +26,15 @@
       <div class="section-head">
         <div>
           <p class="kicker">Race map</p>
-          <h1 id="map-title">Hover for the race. Click for the page.</h1>
-          <p class="lede">This is the primary race browser. Individual race writeups live on separate URLs instead of being crammed into cards.</p>
+          <h1 id="map-title">The Senate battlefield.</h1>
+          <p class="lede">Ratings, probabilities, and control leverage by state.</p>
         </div>
       </div>
       <div class="map-wrap">
         <div>
           <div id="senate-map"></div>
           <div id="map-legend" class="map-legend" aria-label="Race rating legend"></div>
-          <p class="map-note">Actual state geometries load from the public `us-atlas` TopoJSON package through D3.</p>
+          <p class="map-note">Muted states do not hold regular 2026 Senate contests.</p>
         </div>
         <aside id="map-hover-card" class="hover-card"></aside>
       </div>
@@ -50,6 +50,8 @@
         <div id="leverage-chart" class="leverage-chart"></div>
       </article>
     </section>
+
+    <section class="source-grid" id="race-list" aria-label="Race pages"></section>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>

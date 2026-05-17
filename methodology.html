@@ -26,11 +26,7 @@
       <article class="text-panel">
         <p class="kicker">Method</p>
         <h1>Polls, fundamentals, ratings, primaries, then uncertainty.</h1>
-        <p class="lede">
-          This prototype uses a transparent Monte Carlo model. The production
-          version should replace the hard-coded baseline with scheduled data
-          pulls and a manual ratings ledger.
-        </p>
+        <p class="lede">The forecast is generated once, saved to JSON, and rendered the same way for every visitor.</p>
       </article>
       <aside class="odds-panel">
         <span class="panel-label">Current run</span>
@@ -54,10 +50,9 @@
         <li><strong>Ratings layer</strong> Cook/Sabato/Inside/Split Ticket/CNalysis should be entered through a transparent manual file unless legitimate API access exists.</li>
         <li><strong>Simulation layer</strong> Each run includes national error, turnout miss, regional error, race-level miss, primary shock, and independent-candidate shock.</li>
         <li><strong>Tipping power</strong> Most decisive races are counted from simulations where that exact seat changes chamber control, not merely from closeness.</li>
-        <li><strong>Daily update</strong> The static site recalculates on the first load after 6:00 AM Central. A production deployment should pair this with a scheduled build job that writes refreshed polling, finance, and candidate ledgers before that time.</li>
+        <li><strong>Daily update</strong> GitHub Actions runs the generator each morning, commits `data/forecast.json`, and keeps the public site on one shared forecast until the next run.</li>
         <li><strong>Backtesting</strong> MIT Election Lab returns should be used to tune error and fundamentals before public launch.</li>
       </ul>
-      <div id="poll-sync-status" class="poll-sync">Checking live polling API status...</div>
     </section>
 
     <section class="dashboard-grid">
@@ -68,6 +63,10 @@
       <article class="chart-panel">
         <span class="chart-label">Race leverage</span>
         <div id="leverage-chart" class="leverage-chart"></div>
+      </article>
+      <article class="chart-panel chart-wide">
+        <span class="chart-label">National chamber control probability over time</span>
+        <div id="control-history-chart" class="history-chart"></div>
       </article>
     </section>
   </main>
