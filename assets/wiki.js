@@ -11,6 +11,10 @@ const RATING_BUCKET = {
   "Tilt R": "tilt-r", "Lean R": "lean-r", "Likely R": "likely-r", "Safe R": "safe-r"
 };
 
+const CHART_ANNOTATIONS = [
+  { date: "2026-05-17", label: "Model reworked" }
+];
+
 let forecast = null;
 
 function clamp(value, min, max) {
@@ -235,7 +239,8 @@ function renderLeverageChart() {
   const max = Math.max(...ranked.map((race) => race.tippingPower));
   chart.innerHTML = ranked.map((race) => {
     const width = max ? clamp((race.tippingPower / max) * 100, 8, 100) : 8;
-    return `<a class="leverage-row" href="race.html?state=${race.state}" data-tip="${race.displayName}<br>${oneDecimal(race.tippingPower)} control tipping power<br>${pct(race.demProbability)} Democrat"><strong>${race.state}</strong><i style="width:${width}%"></i><span>${oneDecimal(race.tippingPower)}</span></a>`;
+    const leaderClass = race.rating === "Toss-up" ? "leads-tossup" : race.winnerParty === "D" ? "leads-dem" : "leads-rep";
+    return `<a class="leverage-row ${leaderClass}" href="race.html?state=${race.state}" data-tip="${race.displayName}<br>${oneDecimal(race.tippingPower)} control tipping power<br>${pct(race.demProbability)} Democrat"><strong>${race.state}</strong><i style="width:${width}%"></i><span>${oneDecimal(race.tippingPower)}</span></a>`;
   }).join("");
   bindPanelTooltip(".leverage-row", (node) => node.dataset.tip);
 }
@@ -305,6 +310,12 @@ function renderLineChart(chart, points, options) {
   const latest = coords[coords.length - 1];
   const demLabelY = latest.demY <= latest.repY ? latest.demY - 4 : latest.demY + 14;
   const repLabelY = latest.repY <= latest.demY ? latest.repY - 4 : latest.repY + 14;
+  const annotations = CHART_ANNOTATIONS.map((annotation) => {
+    const index = points.findIndex((point) => point.date === annotation.date);
+    if (index === -1) return null;
+    const x = coords[index].x;
+    return `<g class="history-annotation"><path d="M${x} ${plot.top}V${height - plot.bottom}"></path><text x="${x - 4}" y="${plot.top + 72}" transform="rotate(-90 ${x - 4} ${plot.top + 72})">${annotation.label}</text></g>`;
+  }).filter(Boolean).join("");
   chart.innerHTML = `
     <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${options.label}">
       ${ticks.map((tick) => `<path class="history-grid ${tick === .5 ? "history-midline" : ""}" d="M${plot.left} ${yFor(tick)}H${width - plot.right}"></path><text class="history-axis" x="${plot.left - 12}" y="${yFor(tick) + 4}">${(tick * 100).toFixed(domain[0] === .3 ? 1 : 0)}</text>`).join("")}
@@ -316,6 +327,7 @@ function renderLineChart(chart, points, options) {
       <path class="history-band history-band-rep" d="${areaPath("rep")}"></path>
       <path class="history-line history-line-dem" d="${linePath("dem")}"></path>
       <path class="history-line history-line-rep" d="${linePath("rep")}"></path>
+      ${annotations}
       ${coords.map(({ x, demY, repY }, index) => `<g class="history-point" tabindex="0" data-index="${index}"><circle class="history-dot history-dot-dem" cx="${x}" cy="${demY}" r="${coords.length === 1 ? 4.8 : 3.3}"></circle><circle class="history-dot history-dot-rep" cx="${x}" cy="${repY}" r="${coords.length === 1 ? 4.8 : 3.3}"></circle></g>`).join("")}
       <text class="history-date history-date-start" x="${plot.left}" y="${height - 18}">${firstDate}</text>
       <text class="history-date history-date-end" x="${width - plot.right}" y="${height - 18}">${lastDate}</text>

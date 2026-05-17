@@ -541,6 +541,18 @@ dd {
   background: var(--rep);
 }
 
+.leverage-row.leads-dem i {
+  background: var(--dem);
+}
+
+.leverage-row.leads-rep i {
+  background: var(--rep);
+}
+
+.leverage-row.leads-tossup i {
+  background: var(--toss);
+}
+
 .leverage-row:hover i,
 .leverage-row:focus i,
 .poll-row:hover i {
@@ -737,6 +749,18 @@ dd {
 
 .history-end-label-rep {
   fill: var(--rep);
+}
+
+.history-annotation path {
+  fill: none;
+  stroke: rgba(80, 75, 66, .32);
+  stroke-width: 1;
+}
+
+.history-annotation text {
+  fill: color-mix(in srgb, var(--muted) 82%, var(--ink));
+  font: 800 11px/1 "Segoe UI", Arial, sans-serif;
+  letter-spacing: .04em;
 }
 
 .history-overlay {
