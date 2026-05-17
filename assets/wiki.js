@@ -42,20 +42,30 @@ function candidateStatusBadge(race, party) {
   const status = party === "D" ? race.demStatus : race.repStatus;
   if (status === "unresolved") return party;
   if (String(name || "").toLowerCase().includes("independent")) return "I";
-  if (status === "presumptive") return "P";
   return party;
 }
 
-function candidateBadgeClass(badge) {
+function candidateBadgeClass(badge, party) {
   if (badge === "I") return "ind-badge";
-  if (badge === "P") return "presumptive-badge";
+  if (party === "D") return "party-badge dem-badge";
+  if (party === "R") return "party-badge rep-badge";
   return "";
+}
+
+function presumptiveBadge(race, party) {
+  const status = party === "D" ? race.demStatus : race.repStatus;
+  return status === "presumptive" ? `<i class="presumptive-badge">P</i>` : "";
 }
 
 function signedMargin(demProbability) {
   const margin = (demProbability - .5) * 100;
   if (Math.abs(margin) < .05) return "Even";
   return `${margin > 0 ? "D" : "R"}+${Math.abs(margin).toFixed(1)} pts`;
+}
+
+function signedPointMargin(value) {
+  if (!Number.isFinite(value) || Math.abs(value) < .05) return "Even";
+  return `${value > 0 ? "D" : "R"}+${Math.abs(value).toFixed(1)} pts`;
 }
 
 function setText(id, value) {
@@ -218,14 +228,14 @@ function hoverMarkup(race) {
     <div class="candidate-table" aria-label="${race.state} candidate forecast">
       <div class="candidate-table-head"><span>Candidate</span><span>Chance</span></div>
       <div class="candidate-row dem-row">
-        <span>${escapeHtml(demCandidate)} <i class="${candidateBadgeClass(demBadge)}">${demBadge}</i></span>
+        <span>${escapeHtml(demCandidate)} <i class="${candidateBadgeClass(demBadge, "D")}">${demBadge}</i>${presumptiveBadge(race, "D")}</span>
         <strong>${oneDecimal(race.demProbability)}</strong>
       </div>
       <div class="candidate-row rep-row">
-        <span>${escapeHtml(repCandidate)} <i class="${candidateBadgeClass(repBadge)}">${repBadge}</i></span>
+        <span>${escapeHtml(repCandidate)} <i class="${candidateBadgeClass(repBadge, "R")}">${repBadge}</i>${presumptiveBadge(race, "R")}</span>
         <strong>${oneDecimal(1 - race.demProbability)}</strong>
       </div>
-      <div class="candidate-margin"><span>Probability margin</span><strong>${signedMargin(race.demProbability)}</strong></div>
+      <div class="candidate-margin"><span>Projected margin</span><strong>${signedPointMargin(race.margin)}</strong></div>
     </div>
     <div class="prob-track" aria-label="${race.state} probability split">
       <span style="width:${race.demProbability * 100}%"></span>
@@ -330,8 +340,8 @@ function renderSeatHistogramInto(container) {
     const seat = minSeat + i;
     const value = counts[seat] || 0;
     const share = sims ? value / sims : 0;
-    const height = maxCount ? clamp((value / maxCount) * 215, 4, 215) : 4;
-    return `<button class="seat-bin" type="button" data-tip="${seat} Democratic seats<br>${pct(share)} of simulations"><i style="height:${height}px"></i><span>${seat}</span></button>`;
+    const height = maxCount ? clamp((value / maxCount), .02, 1) : .02;
+    return `<button class="seat-bin" type="button" data-tip="${seat} Democratic seats<br>${pct(share)} of simulations"><i style="--bar-scale:${height}"></i><span>${seat}</span></button>`;
   }).join("");
   bindPanelTooltipFor(container, ".seat-bin", (node) => node.dataset.tip);
 }
@@ -551,7 +561,8 @@ function renderRacePage() {
   setText("race-note", race.summary || race.note);
   setText("race-dem", pct(race.demProbability));
   setText("race-rep", pct(1 - race.demProbability));
-  setText("race-margin", `${race.margin.toFixed(1)} pts D baseline`);
+  setText("race-margin", signedPointMargin(race.margin));
+  setText("race-prob-margin", signedMargin(race.demProbability));
   setText("race-tipping", oneDecimal(race.tippingPower));
   setText("race-polling", race.pollMargin === null ? "No recent public race-poll input" : `${race.pollMargin.toFixed(1)} pts D weighted poll margin`);
   const demTrack = document.getElementById("race-dem-track");

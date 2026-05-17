@@ -545,13 +545,14 @@ dd {
   color: white;
   font: 900 .62rem/1 "Segoe UI", Arial, sans-serif;
   font-style: normal;
+  vertical-align: middle;
 }
 
-.dem-row i {
+.dem-row i.party-badge {
   background: var(--dem);
 }
 
-.rep-row i {
+.rep-row i.party-badge {
   background: var(--rep);
 }
 
@@ -560,8 +561,12 @@ dd {
 }
 
 .candidate-row i.presumptive-badge {
-  color: var(--ink);
-  background: var(--gold);
+  width: 13px;
+  height: 13px;
+  color: var(--muted);
+  border: 1px solid color-mix(in srgb, var(--muted) 55%, transparent);
+  background: color-mix(in srgb, var(--paper) 85%, white);
+  font-size: .5rem;
 }
 
 .dem-row strong {
@@ -590,8 +595,9 @@ dd {
   height: 15px;
   margin-right: 3px;
   border-radius: 4px;
-  color: var(--ink);
-  background: var(--gold);
+  color: var(--muted);
+  border: 1px solid color-mix(in srgb, var(--muted) 55%, transparent);
+  background: color-mix(in srgb, var(--paper) 85%, white);
   font: 900 .6rem/1 "Segoe UI", Arial, sans-serif;
 }
 
@@ -599,6 +605,7 @@ dd {
 .candidate-key b:nth-of-type(2) {
   margin-left: 8px;
   color: white;
+  border-color: transparent;
   background: var(--ind);
 }
 
@@ -677,6 +684,7 @@ dd {
 
 .seat-bin i {
   display: block;
+  height: calc(var(--bar-scale, .02) * 215px);
   min-height: 4px;
   border-radius: 2px 2px 0 0;
   background: var(--dem);
@@ -1328,7 +1336,7 @@ dd {
   }
 
   .seat-bin i {
-    max-height: 150px;
+    height: calc(var(--bar-scale, .02) * 145px);
   }
 
   .seat-bin span {
