@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-17T11:49:33.349Z",
+  "generatedAt": "2026-05-17T19:01:31.473Z",
   "modelDate": "2026-05-17",
   "runDate": "May 17, 2026",
   "updateTime": "around 6:00 AM Central",
@@ -19,53 +19,53 @@
     ]
   },
   "sourceStatus": {
-    "checkedAt": "2026-05-17T11:49:31.239Z",
+    "checkedAt": "2026-05-17T19:01:29.294Z",
     "censusPopulation": {
       "ok": true,
       "status": 200,
-      "ms": 304,
+      "ms": 271,
       "url": "https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/state/totals/NST-EST2024-POPCHG2020-2024.csv",
       "rows": 66,
       "states": 51,
       "source": "Census Bureau no-key CSV"
     },
-    "civicApiDocs": {
-      "ok": true,
-      "status": 200,
-      "ms": 417,
-      "url": "https://www.civicapi.org/api-documentation"
-    },
     "mitSenateReturns": {
       "ok": true,
       "status": 200,
-      "ms": 444,
+      "ms": 284,
       "url": "https://raw.githubusercontent.com/MEDSL/constituency-returns/master/1976-2018-senate.csv",
       "rows": 3421,
       "states": 50
     },
+    "civicApiDocs": {
+      "ok": true,
+      "status": 200,
+      "ms": 347,
+      "url": "https://www.civicapi.org/api-documentation"
+    },
     "civicApiEndpoint": {
       "ok": false,
       "status": 404,
-      "ms": 50,
+      "ms": 45,
       "url": "https://www.civicapi.org/api/v1/upcomingraces",
       "error": "{\"message\":\"Route GET:/v1/upcomingraces not found\",\"error\":\"Not Found\",\"statusCode\":404}"
-    },
-    "votehubGenericBallot": {
-      "ok": true,
-      "status": 200,
-      "ms": 919,
-      "url": "https://api.votehub.com/polls?poll_type=generic-ballot&subject=2026",
-      "rows": 451,
-      "usablePolls": 351,
-      "rawUsablePolls": 451
     },
     "openFecCandidateSummary": {
       "ok": true,
       "status": 200,
-      "ms": 1730,
+      "ms": 1377,
       "url": "https://www.fec.gov/files/bulk-downloads/2026/candidate_summary_2026.csv",
       "rows": 4032,
       "senateStates": 44
+    },
+    "votehubGenericBallot": {
+      "ok": true,
+      "status": 200,
+      "ms": 1895,
+      "url": "https://api.votehub.com/polls?poll_type=generic-ballot&subject=2026",
+      "rows": 451,
+      "usablePolls": 351,
+      "rawUsablePolls": 451
     }
   },
   "sourceSummary": {
@@ -197,8 +197,8 @@
     },
     {
       "date": "2026-05-17",
-      "dem": 0.4286,
-      "rep": 0.5714
+      "dem": 0.428575,
+      "rep": 0.5714250000000001
     }
   ],
   "races": [
@@ -253,17 +253,17 @@
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
       "margin": -17.795881146462758,
-      "error": 5.738636363636364,
-      "demProbability": 0.0099,
+      "error": 5.734090909090909,
+      "demProbability": 0.009875,
       "pollMargin": null,
-      "primaryRisk": 0.5386363636363637,
+      "primaryRisk": 0.5340909090909091,
       "winnerParty": "R",
-      "winnerProbability": 0.9901,
+      "winnerProbability": 0.990125,
       "competitive": false,
       "displayName": "Alabama Senate",
-      "tippingPower": 0.008096034859675522,
-      "demTippingPower": 0.00045,
-      "repTippingPower": 0.145575,
+      "tippingPower": 0.008088676886943405,
+      "demTippingPower": 0.000475,
+      "repTippingPower": 0.1456,
       "history": [
         {
           "date": "2026-05-16",
@@ -271,7 +271,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.0099
+          "dem": 0.009875
         }
       ]
     },
@@ -340,20 +340,20 @@
         }
       },
       "dem": "Democratic nominee pending",
-      "rep": "Republican nominee pending",
-      "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
+      "rep": "Dan Sullivan (presumptive)",
+      "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Republican nominee until the candidate ledger is updated.",
       "margin": -4.017802389530834,
-      "error": 11.087272727272728,
-      "demProbability": 0.3726,
+      "error": 11.082727272727272,
+      "demProbability": 0.372525,
       "pollMargin": -3.895987359817345,
-      "primaryRisk": 1.6872727272727273,
+      "primaryRisk": 1.6827272727272726,
       "winnerParty": "R",
-      "winnerProbability": 0.6274,
+      "winnerProbability": 0.627475,
       "competitive": true,
       "displayName": "Alaska Senate",
-      "tippingPower": 0.23459268970351485,
-      "demTippingPower": 0.056475,
-      "repTippingPower": 0.09515,
+      "tippingPower": 0.23427367267162183,
+      "demTippingPower": 0.0563,
+      "repTippingPower": 0.095125,
       "history": [
         {
           "date": "2026-05-16",
@@ -361,7 +361,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.3726
+          "dem": 0.372525
         }
       ]
     },
@@ -424,9 +424,9 @@
       "winnerProbability": 0.99715,
       "competitive": false,
       "displayName": "Arkansas Senate",
-      "tippingPower": 0.004357072666955368,
+      "tippingPower": 0.004357818996634531,
       "demTippingPower": 0.000125,
-      "repTippingPower": 0.145825,
+      "repTippingPower": 0.14585,
       "history": [
         {
           "date": "2026-05-16",
@@ -485,21 +485,21 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Democratic nominee pending",
+      "dem": "John Hickenlooper (presumptive)",
       "rep": "Republican nominee pending",
-      "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
+      "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Democratic nominee until the candidate ledger is updated.",
       "margin": 16.726242353985292,
-      "error": 5.719545454545455,
-      "demProbability": 0.9864,
+      "error": 5.715,
+      "demProbability": 0.986425,
       "pollMargin": null,
-      "primaryRisk": 0.5195454545454545,
+      "primaryRisk": 0.515,
       "winnerParty": "D",
-      "winnerProbability": 0.9864,
+      "winnerProbability": 0.986425,
       "competitive": false,
       "displayName": "Colorado Senate",
-      "tippingPower": 0.013652962662478913,
-      "demTippingPower": 0.13065,
-      "repTippingPower": 0.000325,
+      "tippingPower": 0.01363537374383177,
+      "demTippingPower": 0.130625,
+      "repTippingPower": 0.0003,
       "history": [
         {
           "date": "2026-05-16",
@@ -507,7 +507,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.9864
+          "dem": 0.986425
         }
       ]
     },
@@ -558,20 +558,20 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Democratic nominee pending",
+      "dem": "Chris Coons (presumptive)",
       "rep": "Republican nominee pending",
-      "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
+      "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Democratic nominee until the candidate ledger is updated.",
       "margin": 19.356998810349342,
-      "error": 6.006545454545455,
-      "demProbability": 0.994575,
+      "error": 6.002000000000001,
+      "demProbability": 0.9946,
       "pollMargin": null,
-      "primaryRisk": 0.8065454545454546,
+      "primaryRisk": 0.802,
       "winnerParty": "D",
-      "winnerProbability": 0.994575,
+      "winnerProbability": 0.9946,
       "competitive": false,
       "displayName": "Delaware Senate",
-      "tippingPower": 0.008665248389946137,
-      "demTippingPower": 0.130875,
+      "tippingPower": 0.008643719043536205,
+      "demTippingPower": 0.13085,
       "repTippingPower": 0.0002,
       "history": [
         {
@@ -580,7 +580,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.994575
+          "dem": 0.9946
         }
       ]
     },
@@ -632,20 +632,20 @@
         }
       },
       "dem": "Democratic nominee pending",
-      "rep": "Republican nominee pending",
-      "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
+      "rep": "Ashley Moody (presumptive)",
+      "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Republican nominee until the candidate ledger is updated.",
       "margin": -13.245134259036192,
-      "error": 6.257272727272728,
-      "demProbability": 0.049225,
+      "error": 6.252727272727273,
+      "demProbability": 0.049175,
       "pollMargin": null,
-      "primaryRisk": 1.0572727272727271,
+      "primaryRisk": 1.0527272727272727,
       "winnerParty": "R",
-      "winnerProbability": 0.950775,
+      "winnerProbability": 0.950825,
       "competitive": false,
       "displayName": "Florida Senate",
-      "tippingPower": 0.015930550183158174,
+      "tippingPower": 0.015925579027597343,
       "demTippingPower": 0.004175,
-      "repTippingPower": 0.1431,
+      "repTippingPower": 0.143125,
       "history": [
         {
           "date": "2026-05-16",
@@ -653,7 +653,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.049225
+          "dem": 0.049175
         }
       ]
     },
@@ -721,20 +721,20 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Democratic nominee pending",
+      "dem": "Jon Ossoff (presumptive)",
       "rep": "Republican nominee pending",
-      "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
+      "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Democratic nominee until the candidate ledger is updated.",
       "margin": 10.076654086655884,
-      "error": 6.948636363636364,
-      "demProbability": 0.883475,
+      "error": 6.944090909090909,
+      "demProbability": 0.883525,
       "pollMargin": 2.5333153981851684,
-      "primaryRisk": 0.7486363636363637,
+      "primaryRisk": 0.744090909090909,
       "winnerParty": "D",
-      "winnerProbability": 0.883475,
+      "winnerProbability": 0.883525,
       "competitive": false,
       "displayName": "Georgia Senate",
-      "tippingPower": 0.10872920653073989,
-      "demTippingPower": 0.125425,
+      "tippingPower": 0.10866885342258245,
+      "demTippingPower": 0.125375,
       "repTippingPower": 0.010125,
       "history": [
         {
@@ -743,7 +743,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.883475
+          "dem": 0.883525
         }
       ]
     },
@@ -795,8 +795,8 @@
         }
       },
       "dem": "Democratic nominee pending",
-      "rep": "Republican nominee pending",
-      "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
+      "rep": "Jim Risch (presumptive)",
+      "primarySummary": "Primary resolved. The incumbent is treated as the presumptive Republican nominee until the candidate ledger is updated.",
       "margin": -20.24257761140023,
       "error": 5.2,
       "demProbability": 0.00255,
@@ -806,9 +806,9 @@
       "winnerProbability": 0.99745,
       "competitive": false,
       "displayName": "Idaho Senate",
-      "tippingPower": 0.004119879877764612,
+      "tippingPower": 0.004120585941154118,
       "demTippingPower": 0.00005,
-      "repTippingPower": 0.145825,
+      "repTippingPower": 0.14585,
       "history": [
         {
           "date": "2026-05-16",
@@ -879,8 +879,8 @@
       "winnerProbability": 0.992275,
       "competitive": false,
       "displayName": "Illinois Senate",
-      "tippingPower": 0.01031645197658638,
-      "demTippingPower": 0.130875,
+      "tippingPower": 0.010314482060226518,
+      "demTippingPower": 0.13085,
       "repTippingPower": 0.00005,
       "history": [
         {
@@ -961,17 +961,17 @@
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
       "margin": -5.980407670327001,
-      "error": 8.432272727272728,
-      "demProbability": 0.272625,
+      "error": 8.427727272727273,
+      "demProbability": 0.2725,
       "pollMargin": -3.726210825671242,
-      "primaryRisk": 1.2322727272727274,
+      "primaryRisk": 1.227727272727273,
       "winnerParty": "R",
-      "winnerProbability": 0.727375,
+      "winnerProbability": 0.7275,
       "competitive": true,
       "displayName": "Iowa Senate",
-      "tippingPower": 0.10184786406341403,
-      "demTippingPower": 0.039375,
-      "repTippingPower": 0.1131,
+      "tippingPower": 0.10193344171956475,
+      "demTippingPower": 0.0394,
+      "repTippingPower": 0.113225,
       "history": [
         {
           "date": "2026-05-16",
@@ -979,7 +979,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.272625
+          "dem": 0.2725
         }
       ]
     },
@@ -1031,19 +1031,19 @@
         }
       },
       "dem": "Democratic nominee pending",
-      "rep": "Republican nominee pending",
-      "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
+      "rep": "Roger Marshall (presumptive)",
+      "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Republican nominee until the candidate ledger is updated.",
       "margin": -8.723877318431466,
-      "error": 8.088636363636365,
-      "demProbability": 0.1755,
+      "error": 8.084090909090909,
+      "demProbability": 0.175325,
       "pollMargin": null,
-      "primaryRisk": 0.8886363636363637,
+      "primaryRisk": 0.884090909090909,
       "winnerParty": "R",
-      "winnerProbability": 0.8245,
+      "winnerProbability": 0.824675,
       "competitive": false,
       "displayName": "Kansas Senate",
-      "tippingPower": 0.05166133676726702,
-      "demTippingPower": 0.023725,
+      "tippingPower": 0.051615386269725914,
+      "demTippingPower": 0.02365,
       "repTippingPower": 0.127175,
       "history": [
         {
@@ -1052,7 +1052,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.1755
+          "dem": 0.175325
         }
       ]
     },
@@ -1107,17 +1107,17 @@
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
       "margin": -17.60317156597778,
-      "error": 5.948636363636364,
-      "demProbability": 0.011725,
+      "error": 5.944090909090909,
+      "demProbability": 0.0117,
       "pollMargin": null,
-      "primaryRisk": 0.7486363636363637,
+      "primaryRisk": 0.744090909090909,
       "winnerParty": "R",
-      "winnerProbability": 0.988275,
+      "winnerProbability": 0.9883,
       "competitive": false,
       "displayName": "Kentucky Senate",
-      "tippingPower": 0.008802591989775512,
+      "tippingPower": 0.008794819220651204,
       "demTippingPower": 0.000525,
-      "repTippingPower": 0.1455,
+      "repTippingPower": 0.145525,
       "history": [
         {
           "date": "2026-05-16",
@@ -1125,7 +1125,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.011725
+          "dem": 0.0117
         }
       ]
     },
@@ -1188,9 +1188,9 @@
       "winnerProbability": 0.989025,
       "competitive": false,
       "displayName": "Louisiana Senate",
-      "tippingPower": 0.008537141092810233,
+      "tippingPower": 0.008538599685171896,
       "demTippingPower": 0.000575,
-      "repTippingPower": 0.14575,
+      "repTippingPower": 0.145775,
       "history": [
         {
           "date": "2026-05-16",
@@ -1267,20 +1267,20 @@
         }
       },
       "dem": "Democratic nominee pending",
-      "rep": "Republican nominee pending",
-      "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
+      "rep": "Susan Collins (presumptive)",
+      "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Republican nominee until the candidate ledger is updated.",
       "margin": 5.546835445651643,
-      "error": 8.77909090909091,
-      "demProbability": 0.71145,
+      "error": 8.774545454545455,
+      "demProbability": 0.7115,
       "pollMargin": 0.7483495138595477,
-      "primaryRisk": 1.579090909090909,
+      "primaryRisk": 1.5745454545454545,
       "winnerParty": "D",
-      "winnerProbability": 0.71145,
+      "winnerProbability": 0.7115,
       "competitive": true,
       "displayName": "Maine Senate",
-      "tippingPower": 0.14049811327228054,
-      "demTippingPower": 0.106575,
-      "repTippingPower": 0.034375,
+      "tippingPower": 0.14061546932546576,
+      "demTippingPower": 0.10665,
+      "repTippingPower": 0.034425,
       "history": [
         {
           "date": "2026-05-16",
@@ -1288,7 +1288,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.71145
+          "dem": 0.7115
         }
       ]
     },
@@ -1339,20 +1339,20 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Democratic nominee pending",
+      "dem": "Ed Markey (presumptive)",
       "rep": "Republican nominee pending",
-      "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
+      "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Democratic nominee until the candidate ledger is updated.",
       "margin": 20.7978357438798,
-      "error": 5.900909090909091,
-      "demProbability": 0.997,
+      "error": 5.8963636363636365,
+      "demProbability": 0.997025,
       "pollMargin": null,
-      "primaryRisk": 0.7009090909090909,
+      "primaryRisk": 0.6963636363636364,
       "winnerParty": "D",
-      "winnerProbability": 0.997,
+      "winnerProbability": 0.997025,
       "competitive": false,
       "displayName": "Massachusetts Senate",
-      "tippingPower": 0.006447955203783602,
-      "demTippingPower": 0.130875,
+      "tippingPower": 0.006419887618163353,
+      "demTippingPower": 0.13085,
       "repTippingPower": 0.000125,
       "history": [
         {
@@ -1361,7 +1361,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.997
+          "dem": 0.997025
         }
       ]
     },
@@ -1433,15 +1433,15 @@
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
       "margin": 5.532309037434997,
-      "error": 8.928636363636365,
-      "demProbability": 0.703675,
+      "error": 8.924090909090909,
+      "demProbability": 0.70365,
       "pollMargin": 1.10890571098529,
-      "primaryRisk": 1.728636363636364,
+      "primaryRisk": 1.7240909090909093,
       "winnerParty": "D",
-      "winnerProbability": 0.703675,
+      "winnerProbability": 0.70365,
       "competitive": true,
       "displayName": "Michigan Senate",
-      "tippingPower": 0.1783414977315869,
+      "tippingPower": 0.17834585242687756,
       "demTippingPower": 0.107475,
       "repTippingPower": 0.037175,
       "history": [
@@ -1451,7 +1451,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.703675
+          "dem": 0.70365
         }
       ]
     },
@@ -1506,17 +1506,17 @@
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
       "margin": 4.857544045133183,
-      "error": 8.540454545454546,
-      "demProbability": 0.691425,
+      "error": 8.53590909090909,
+      "demProbability": 0.691475,
       "pollMargin": null,
-      "primaryRisk": 1.3404545454545456,
+      "primaryRisk": 1.335909090909091,
       "winnerParty": "D",
-      "winnerProbability": 0.691425,
+      "winnerProbability": 0.691475,
       "competitive": true,
       "displayName": "Minnesota Senate",
-      "tippingPower": 0.060164314900615044,
-      "demTippingPower": 0.106525,
-      "repTippingPower": 0.0382,
+      "tippingPower": 0.06010965348391478,
+      "demTippingPower": 0.10645,
+      "repTippingPower": 0.03815,
       "history": [
         {
           "date": "2026-05-16",
@@ -1524,7 +1524,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.691425
+          "dem": 0.691475
         }
       ]
     },
@@ -1587,9 +1587,9 @@
       "winnerProbability": 0.9891,
       "competitive": false,
       "displayName": "Mississippi Senate",
-      "tippingPower": 0.008492253275537853,
+      "tippingPower": 0.008493706930668893,
       "demTippingPower": 0.000475,
-      "repTippingPower": 0.145575,
+      "repTippingPower": 0.1456,
       "history": [
         {
           "date": "2026-05-16",
@@ -1673,8 +1673,8 @@
       "winnerProbability": 0.81955,
       "competitive": false,
       "displayName": "Montana Senate",
-      "tippingPower": 0.07965352175664485,
-      "demTippingPower": 0.023675,
+      "tippingPower": 0.07962737155252252,
+      "demTippingPower": 0.023625,
       "repTippingPower": 0.128625,
       "history": [
         {
@@ -1763,8 +1763,8 @@
       "winnerProbability": 0.881275,
       "competitive": false,
       "displayName": "North Carolina Senate",
-      "tippingPower": 0.09837724224216304,
-      "demTippingPower": 0.126125,
+      "tippingPower": 0.0983410142023022,
+      "demTippingPower": 0.126075,
       "repTippingPower": 0.00965,
       "history": [
         {
@@ -1853,9 +1853,9 @@
       "winnerProbability": 0.762025,
       "competitive": false,
       "displayName": "Nebraska Senate",
-      "tippingPower": 0.09372991273990497,
-      "demTippingPower": 0.033025,
-      "repTippingPower": 0.119825,
+      "tippingPower": 0.09380656461489671,
+      "demTippingPower": 0.033075,
+      "repTippingPower": 0.1199,
       "history": [
         {
           "date": "2026-05-16",
@@ -1931,17 +1931,17 @@
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
       "margin": 6.278524542118875,
-      "error": 8.877727272727274,
-      "demProbability": 0.72935,
+      "error": 8.873181818181818,
+      "demProbability": 0.729575,
       "pollMargin": 1.2969574033441138,
-      "primaryRisk": 1.677727272727273,
+      "primaryRisk": 1.6731818181818183,
       "winnerParty": "D",
-      "winnerProbability": 0.72935,
+      "winnerProbability": 0.729575,
       "competitive": true,
       "displayName": "New Hampshire Senate",
-      "tippingPower": 0.12702411117792864,
-      "demTippingPower": 0.10925,
-      "repTippingPower": 0.0337,
+      "tippingPower": 0.12701309298927285,
+      "demTippingPower": 0.1093,
+      "repTippingPower": 0.033675,
       "history": [
         {
           "date": "2026-05-16",
@@ -1949,7 +1949,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.72935
+          "dem": 0.729575
         }
       ]
     },
@@ -2000,9 +2000,9 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Democratic nominee pending",
+      "dem": "Cory Booker (presumptive)",
       "rep": "Republican nominee pending",
-      "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
+      "primarySummary": "Primary resolved. The incumbent is treated as the presumptive Democratic nominee until the candidate ledger is updated.",
       "margin": 18.057116586902353,
       "error": 5.2,
       "demProbability": 0.99485,
@@ -2012,8 +2012,8 @@
       "winnerProbability": 0.99485,
       "competitive": false,
       "displayName": "New Jersey Senate",
-      "tippingPower": 0.008437491206493734,
-      "demTippingPower": 0.130875,
+      "tippingPower": 0.008435880690897915,
+      "demTippingPower": 0.13085,
       "repTippingPower": 0.0001,
       "history": [
         {
@@ -2073,9 +2073,9 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Democratic nominee pending",
+      "dem": "Ben Ray Lujan (presumptive)",
       "rep": "Republican nominee pending",
-      "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
+      "primarySummary": "Primary resolved. The incumbent is treated as the presumptive Democratic nominee until the candidate ledger is updated.",
       "margin": 17.699474380890372,
       "error": 5.2,
       "demProbability": 0.9937,
@@ -2085,8 +2085,8 @@
       "winnerProbability": 0.9937,
       "competitive": false,
       "displayName": "New Mexico Senate",
-      "tippingPower": 0.009326717794684074,
-      "demTippingPower": 0.130825,
+      "tippingPower": 0.00932493754696606,
+      "demTippingPower": 0.1308,
       "repTippingPower": 0.00015,
       "history": [
         {
@@ -2175,9 +2175,9 @@
       "winnerProbability": 0.551775,
       "competitive": true,
       "displayName": "Ohio Senate",
-      "tippingPower": 0.275410211379312,
+      "tippingPower": 0.27545621275084686,
       "demTippingPower": 0.086225,
-      "repTippingPower": 0.06345,
+      "repTippingPower": 0.063475,
       "history": [
         {
           "date": "2026-05-16",
@@ -2240,17 +2240,17 @@
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
       "margin": -21.74758914200225,
-      "error": 5.865909090909091,
+      "error": 5.861363636363636,
       "demProbability": 0.001875,
       "pollMargin": null,
-      "primaryRisk": 0.6659090909090909,
+      "primaryRisk": 0.6613636363636364,
       "winnerParty": "R",
       "winnerProbability": 0.998125,
       "competitive": false,
       "displayName": "Oklahoma Senate",
-      "tippingPower": 0.003533963005115283,
+      "tippingPower": 0.0035345686543021065,
       "demTippingPower": 0.00005,
-      "repTippingPower": 0.145825,
+      "repTippingPower": 0.14585,
       "history": [
         {
           "date": "2026-05-16",
@@ -2309,9 +2309,9 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Democratic nominee pending",
+      "dem": "Jeff Merkley (presumptive)",
       "rep": "Republican nominee pending",
-      "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
+      "primarySummary": "Primary resolved. The incumbent is treated as the presumptive Democratic nominee until the candidate ledger is updated.",
       "margin": 18.195518965152218,
       "error": 5.2,
       "demProbability": 0.99535,
@@ -2321,8 +2321,8 @@
       "winnerProbability": 0.99535,
       "competitive": false,
       "displayName": "Oregon Senate",
-      "tippingPower": 0.008014871112334144,
-      "demTippingPower": 0.13085,
+      "tippingPower": 0.008013340388286714,
+      "demTippingPower": 0.130825,
       "repTippingPower": 0.00005,
       "history": [
         {
@@ -2382,20 +2382,20 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Democratic nominee pending",
+      "dem": "Jack Reed (presumptive)",
       "rep": "Republican nominee pending",
-      "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
+      "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Democratic nominee until the candidate ledger is updated.",
       "margin": 19.94591636055394,
-      "error": 5.9372727272727275,
+      "error": 5.932727272727273,
       "demProbability": 0.996125,
       "pollMargin": null,
-      "primaryRisk": 0.7372727272727273,
+      "primaryRisk": 0.7327272727272727,
       "winnerParty": "D",
       "winnerProbability": 0.996125,
       "competitive": false,
       "displayName": "Rhode Island Senate",
-      "tippingPower": 0.007316594895967596,
-      "demTippingPower": 0.130825,
+      "tippingPower": 0.007315196998585869,
+      "demTippingPower": 0.1308,
       "repTippingPower": 0.000025,
       "history": [
         {
@@ -2456,20 +2456,20 @@
         }
       },
       "dem": "Democratic nominee pending",
-      "rep": "Republican nominee pending",
-      "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
+      "rep": "Lindsey Graham (presumptive)",
+      "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Republican nominee until the candidate ledger is updated.",
       "margin": -7.330827254728437,
-      "error": 8.35909090909091,
-      "demProbability": 0.2242,
+      "error": 8.354545454545455,
+      "demProbability": 0.22405,
       "pollMargin": null,
-      "primaryRisk": 1.1590909090909092,
+      "primaryRisk": 1.1545454545454545,
       "winnerParty": "R",
-      "winnerProbability": 0.7758,
+      "winnerProbability": 0.77595,
       "competitive": false,
       "displayName": "South Carolina Senate",
-      "tippingPower": 0.07035081892407274,
+      "tippingPower": 0.07035701208960762,
       "demTippingPower": 0.032,
-      "repTippingPower": 0.12135,
+      "repTippingPower": 0.1214,
       "history": [
         {
           "date": "2026-05-16",
@@ -2477,7 +2477,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.2242
+          "dem": 0.22405
         }
       ]
     },
@@ -2529,8 +2529,8 @@
         }
       },
       "dem": "Democratic nominee pending",
-      "rep": "Republican nominee pending",
-      "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
+      "rep": "Mike Rounds (presumptive)",
+      "primarySummary": "Primary resolved. The incumbent is treated as the presumptive Republican nominee until the candidate ledger is updated.",
       "margin": -19.06271374099922,
       "error": 5.2,
       "demProbability": 0.003975,
@@ -2540,9 +2540,9 @@
       "winnerProbability": 0.996025,
       "competitive": false,
       "displayName": "South Dakota Senate",
-      "tippingPower": 0.005147159283706627,
+      "tippingPower": 0.005148040194075223,
       "demTippingPower": 0.00025,
-      "repTippingPower": 0.145825,
+      "repTippingPower": 0.14585,
       "history": [
         {
           "date": "2026-05-16",
@@ -2602,20 +2602,20 @@
         }
       },
       "dem": "Democratic nominee pending",
-      "rep": "Republican nominee pending",
-      "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
+      "rep": "Bill Hagerty (presumptive)",
+      "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Republican nominee until the candidate ledger is updated.",
       "margin": -16.85593585044126,
-      "error": 5.992727272727273,
-      "demProbability": 0.01445,
+      "error": 5.988181818181818,
+      "demProbability": 0.0144,
       "pollMargin": null,
-      "primaryRisk": 0.7927272727272727,
+      "primaryRisk": 0.7881818181818182,
       "winnerParty": "R",
-      "winnerProbability": 0.98555,
+      "winnerProbability": 0.9856,
       "competitive": false,
       "displayName": "Tennessee Senate",
-      "tippingPower": 0.009788694809993287,
-      "demTippingPower": 0.001025,
-      "repTippingPower": 0.14545,
+      "tippingPower": 0.009775328268942084,
+      "demTippingPower": 0.00105,
+      "repTippingPower": 0.145475,
       "history": [
         {
           "date": "2026-05-16",
@@ -2623,7 +2623,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.01445
+          "dem": 0.0144
         }
       ]
     },
@@ -2703,8 +2703,8 @@
       "winnerProbability": 0.577175,
       "competitive": true,
       "displayName": "Texas Senate",
-      "tippingPower": 0.24995452183186556,
-      "demTippingPower": 0.066625,
+      "tippingPower": 0.2499952775014941,
+      "demTippingPower": 0.06665,
       "repTippingPower": 0.0867,
       "history": [
         {
@@ -2764,21 +2764,21 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Democratic nominee pending",
+      "dem": "Mark Warner (presumptive)",
       "rep": "Republican nominee pending",
-      "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
+      "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Democratic nominee until the candidate ledger is updated.",
       "margin": 12.320763345000678,
-      "error": 6.983636363636364,
-      "demProbability": 0.92625,
+      "error": 6.9790909090909095,
+      "demProbability": 0.92635,
       "pollMargin": null,
-      "primaryRisk": 0.7836363636363637,
+      "primaryRisk": 0.7790909090909091,
       "winnerParty": "D",
-      "winnerProbability": 0.92625,
+      "winnerProbability": 0.92635,
       "competitive": false,
       "displayName": "Virginia Senate",
-      "tippingPower": 0.031526332247467745,
-      "demTippingPower": 0.12835,
-      "repTippingPower": 0.005675,
+      "tippingPower": 0.03149489781839841,
+      "demTippingPower": 0.128325,
+      "repTippingPower": 0.00565,
       "history": [
         {
           "date": "2026-05-16",
@@ -2786,7 +2786,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.92625
+          "dem": 0.92635
         }
       ]
     },
@@ -2849,9 +2849,9 @@
       "winnerProbability": 0.997975,
       "competitive": false,
       "displayName": "West Virginia Senate",
-      "tippingPower": 0.0036735848368054463,
+      "tippingPower": 0.003674214198607195,
       "demTippingPower": 0.0001,
-      "repTippingPower": 0.145825,
+      "repTippingPower": 0.14585,
       "history": [
         {
           "date": "2026-05-16",
@@ -2914,17 +2914,17 @@
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
       "margin": -23.239248742115738,
-      "error": 5.942272727272727,
-      "demProbability": 0.001525,
+      "error": 5.9377272727272725,
+      "demProbability": 0.001475,
       "pollMargin": null,
-      "primaryRisk": 0.7422727272727272,
+      "primaryRisk": 0.7377272727272728,
       "winnerParty": "R",
-      "winnerProbability": 0.998475,
+      "winnerProbability": 0.998525,
       "competitive": false,
       "displayName": "Wyoming Senate",
-      "tippingPower": 0.0031854779016944348,
+      "tippingPower": 0.0031334374703847795,
       "demTippingPower": 0,
-      "repTippingPower": 0.145775,
+      "repTippingPower": 0.1458,
       "history": [
         {
           "date": "2026-05-16",
@@ -2932,13 +2932,13 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.001525
+          "dem": 0.001475
         }
       ]
     }
   ],
-  "demControlProbability": 0.4286,
-  "repControlProbability": 0.5714,
+  "demControlProbability": 0.428575,
+  "repControlProbability": 0.5714250000000001,
   "medianSeats": 50,
   "seatCounts": {
     "36": 1,
@@ -2949,19 +2949,19 @@
     "41": 33,
     "42": 82,
     "43": 237,
-    "44": 536,
-    "45": 1074,
-    "46": 2050,
+    "44": 535,
+    "45": 1075,
+    "46": 2051,
     "47": 3134,
-    "48": 4357,
-    "49": 5493,
-    "50": 5834,
-    "51": 5236,
-    "52": 4535,
-    "53": 3157,
-    "54": 2065,
-    "55": 1068,
-    "56": 590,
+    "48": 4355,
+    "49": 5494,
+    "50": 5835,
+    "51": 5235,
+    "52": 4539,
+    "53": 3154,
+    "54": 2063,
+    "55": 1072,
+    "56": 587,
     "57": 275,
     "58": 122,
     "59": 50,

@@ -278,6 +278,8 @@ h3 {
   justify-content: space-between;
   padding: 16px;
   border-top: 6px solid var(--rep);
+  min-width: 0;
+  overflow: hidden;
 }
 
 .big-odds {
@@ -292,17 +294,17 @@ h3 {
 .big-odds strong {
   display: block;
   max-width: 100%;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
 }
 
 .big-odds span {
-  font-size: clamp(1.75rem, 2.5vw, 3rem);
-  line-height: .95;
-  font-weight: 950;
+  color: var(--muted);
+  font: 900 .74rem/1.1 "Segoe UI", Arial, sans-serif;
+  text-transform: uppercase;
 }
 
 .big-odds strong {
-  font-size: clamp(2.15rem, 3.3vw, 3.75rem);
+  font-size: clamp(3.4rem, 5vw, 5.1rem);
   line-height: .85;
   font-weight: 950;
 }
@@ -388,6 +390,7 @@ dd {
 #senate-map {
   min-height: 430px;
   width: 100%;
+  overflow: hidden;
 }
 
 #senate-map svg {
@@ -1063,6 +1066,52 @@ dd {
     min-height: 360px;
   }
 
+  main {
+    width: min(100% - 18px, 1180px);
+    padding-top: 10px;
+  }
+
+  .hero-grid {
+    min-height: 0;
+  }
+
+  .big-odds strong {
+    font-size: clamp(3rem, 18vw, 4.8rem);
+  }
+
+  .map-panel {
+    padding: 10px;
+  }
+
+  .map-wrap {
+    gap: 10px;
+  }
+
+  #senate-map {
+    min-height: 230px;
+  }
+
+  #senate-map svg {
+    width: 100%;
+    max-height: 330px;
+  }
+
+  .hover-card {
+    min-height: 0;
+  }
+
+  .hover-card .state-code {
+    font-size: 2.3rem;
+  }
+
+  .map-legend {
+    gap: 6px;
+  }
+
+  .map-legend span {
+    font-size: .62rem;
+  }
+
   .source-grid,
   .source-status-grid,
   .fallback-list,
@@ -1073,5 +1122,48 @@ dd {
 
   .seat-histogram {
     grid-template-columns: repeat(8, minmax(22px, 1fr));
+  }
+}
+
+@media (max-width: 430px) {
+  .site-header {
+    padding-inline: 9px;
+  }
+
+  .brand small {
+    display: none;
+  }
+
+  .site-nav a,
+  .button-link {
+    min-height: 32px;
+    padding: 6px 8px;
+    font-size: .82rem;
+  }
+
+  h1 {
+    font-size: clamp(2.15rem, 14vw, 3.35rem);
+  }
+
+  h2 {
+    font-size: clamp(1.45rem, 9vw, 2.15rem);
+  }
+
+  .source-grid,
+  .source-status-grid,
+  .fallback-list,
+  .race-selector,
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .leverage-row,
+  .poll-row {
+    grid-template-columns: 38px 1fr 48px;
+    gap: 8px;
+  }
+
+  .history-end-label {
+    display: none;
   }
 }

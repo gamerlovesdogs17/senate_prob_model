@@ -127,7 +127,7 @@ function updateSummary() {
   const favoredProbability = Math.max(forecast.demControlProbability, forecast.repControlProbability);
   const oddsNode = document.getElementById("odds-phrase");
   if (oddsNode) {
-    oddsNode.innerHTML = `<span>${favoredSide}</span><strong>${pct(favoredProbability)}</strong>`;
+    oddsNode.innerHTML = `<span>${favoredSide} favored</span><strong>${pct(favoredProbability)}</strong>`;
   }
   setText("update-time", `Updates daily at ${forecast.updateTime || "6:00 AM Central"}`);
 
@@ -492,9 +492,8 @@ function renderSourceStatus() {
   const rows = [
     ["VoteHub polling", status.votehubGenericBallot, `${summary.votehub?.usableGenericBallotPolls ?? 0} usable generic-ballot polls / D ${summary.votehub?.genericBallotMargin?.toFixed?.(1) ?? "--"}`],
     ["OpenFEC finance", status.openFecCandidateSummary, `${summary.fecStates ?? 0} Senate states`],
-    ["MIT/MEDSL history", status.mitSenateReturns, `${summary.mitStates ?? 0} states`],
     ["Census population", status.censusPopulation, `${summary.censusStates ?? 0} states from no-key CSV`],
-    ["civicAPI", status.civicApiEndpoint, summary.civicApi?.note || "Endpoint check"]
+    ["Historical results", status.mitSenateReturns, `${summary.mitStates ?? 0} states from MIT/MEDSL; used instead of broken civicAPI endpoints`]
   ];
   container.innerHTML = rows.map(([label, item, detail]) => {
     const ok = Boolean(item?.ok);

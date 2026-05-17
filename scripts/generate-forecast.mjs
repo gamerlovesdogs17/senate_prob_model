@@ -106,6 +106,24 @@ const CANDIDATE_STATUS = {
   DEFAULT: { dem: "Democratic nominee pending", rep: "Republican nominee pending", primarySummary: "Primary not yet resolved or not entered in the manual candidate ledger." }
 };
 
+function candidateInfo(race) {
+  const entered = CANDIDATE_STATUS[race.state];
+  if (entered) return entered;
+  const info = { ...CANDIDATE_STATUS.DEFAULT };
+  const openSeat = race.seat === "Open seat";
+  const incumbentName = !openSeat && race.incumbent && !["Open", "Open seat"].includes(race.incumbent) ? race.incumbent : null;
+  const settledPrimary = race.primary === "resolved" ? "Primary resolved." : "Primary not yet resolved.";
+  if (incumbentName && race.hold === "D") {
+    info.dem = `${incumbentName} (presumptive)`;
+    info.primarySummary = `${settledPrimary} The incumbent is treated as the presumptive Democratic nominee until the candidate ledger is updated.`;
+  }
+  if (incumbentName && race.hold === "R") {
+    info.rep = `${incumbentName} (presumptive)`;
+    info.primarySummary = `${settledPrimary} The incumbent is treated as the presumptive Republican nominee until the candidate ledger is updated.`;
+  }
+  return info;
+}
+
 const regionScale = { South: 1, West: .9, Northeast: .78, Midwest: 1, Plains: .9 };
 
 function hashString(value) {
@@ -204,7 +222,7 @@ function baselineMargin(race) {
 function runModel(sourceData) {
   const adjustedRaces = applySourceInputs(races, sourceData);
   const enriched = adjustedRaces.map((race) => {
-    const candidates = CANDIDATE_STATUS[race.state] || CANDIDATE_STATUS.DEFAULT;
+    const candidates = candidateInfo(race);
     const margin = baselineMargin(race);
     const error = (RATING_TO_ERROR[race.rating] || 8) + primaryRisk(race);
     return { ...race, ...candidates, margin, error, demProbability: logistic(margin, error), pollMargin: latestPollMargin(race), primaryRisk: primaryRisk(race) };
