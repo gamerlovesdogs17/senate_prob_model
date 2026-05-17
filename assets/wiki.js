@@ -99,7 +99,11 @@ function hidePanelTooltip(source) {
 }
 
 function bindPanelTooltip(selector, getHtml) {
-  document.querySelectorAll(selector).forEach((node) => {
+  bindPanelTooltipFor(document, selector, getHtml);
+}
+
+function bindPanelTooltipFor(root, selector, getHtml) {
+  root.querySelectorAll(selector).forEach((node) => {
     const handler = () => showPanelTooltip(node, getHtml(node));
     node.addEventListener("mouseenter", handler);
     node.addEventListener("focus", handler);
@@ -121,7 +125,10 @@ function updateSummary() {
   setText("control-headline", forecast.demControlProbability >= .5 ? "Democrats narrowly favored" : "Republicans narrowly favored");
   const favoredSide = forecast.demControlProbability >= forecast.repControlProbability ? "Democrats" : "Republicans";
   const favoredProbability = Math.max(forecast.demControlProbability, forecast.repControlProbability);
-  setText("odds-phrase", `${favoredSide} ${pct(favoredProbability)}`);
+  const oddsNode = document.getElementById("odds-phrase");
+  if (oddsNode) {
+    oddsNode.innerHTML = `<span>${favoredSide}</span><strong>${pct(favoredProbability)}</strong>`;
+  }
   setText("update-time", `Updates daily at ${forecast.updateTime || "6:00 AM Central"}`);
 
   const demBar = document.getElementById("dem-control-bar");
@@ -228,6 +235,10 @@ function renderLegend() {
 function renderHistogram() {
   const container = document.getElementById("seat-histogram");
   if (!container || !forecast) return;
+  renderSeatHistogramInto(container);
+}
+
+function renderSeatHistogramInto(container) {
   const counts = forecast.seatCounts || {};
   const seats = Object.keys(counts).map(Number).sort((a, b) => a - b);
   if (!seats.length) return;
@@ -242,12 +253,16 @@ function renderHistogram() {
     const height = maxCount ? clamp((value / maxCount) * 215, 4, 215) : 4;
     return `<button class="seat-bin" type="button" data-tip="${seat} Democratic seats<br>${pct(share)} of simulations"><i style="height:${height}px"></i><span>${seat}</span></button>`;
   }).join("");
-  bindPanelTooltip(".seat-bin", (node) => node.dataset.tip);
+  bindPanelTooltipFor(container, ".seat-bin", (node) => node.dataset.tip);
 }
 
 function renderLeverageChart() {
   const chart = document.getElementById("leverage-chart");
   if (!chart || !forecast) return;
+  renderLeverageInto(chart);
+}
+
+function renderLeverageInto(chart) {
   const ranked = [...forecast.races].sort((a, b) => b.tippingPower - a.tippingPower).slice(0, 9);
   const max = Math.max(...ranked.map((race) => race.tippingPower));
   chart.innerHTML = ranked.map((race) => {
@@ -255,7 +270,7 @@ function renderLeverageChart() {
     const leaderClass = race.rating === "Toss-up" ? "leads-tossup" : race.winnerParty === "D" ? "leads-dem" : "leads-rep";
     return `<a class="leverage-row ${leaderClass}" href="race.html?state=${race.state}" data-tip="${race.displayName}<br>${oneDecimal(race.tippingPower)} control tipping power<br>${pct(race.demProbability)} Democrat"><strong>${race.state}</strong><i style="width:${width}%"></i><span>${oneDecimal(race.tippingPower)}</span></a>`;
   }).join("");
-  bindPanelTooltip(".leverage-row", (node) => node.dataset.tip);
+  bindPanelTooltipFor(chart, ".leverage-row", (node) => node.dataset.tip);
 }
 
 function renderControlHistory() {
@@ -547,8 +562,82 @@ function renderArticlePage() {
     <div class="article-body">
       ${(article.body || []).map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("")}
     </div>
+    <div id="article-embeds" class="article-embeds"></div>
     <p><a class="button-link" href="articles.html">Back to articles</a></p>
   `;
+  renderArticleEmbeds(article);
+}
+
+function renderArticleEmbeds(article) {
+  const container = document.getElementById("article-embeds");
+  if (!container || !forecast || !Array.isArray(article.embeds) || !article.embeds.length) return;
+  container.innerHTML = article.embeds.map((embed, index) => `
+    <section class="article-embed chart-panel" data-embed-index="${index}">
+      <span class="chart-label">${escapeHtml(embed.title || embedTitle(embed))}</span>
+      <div class="article-embed-target"></div>
+    </section>
+  `).join("");
+
+  container.querySelectorAll(".article-embed").forEach((node) => {
+    const embed = article.embeds[Number(node.dataset.embedIndex)];
+    const target = node.querySelector(".article-embed-target");
+    renderEmbed(target, embed);
+  });
+}
+
+function embedTitle(embed) {
+  if (embed.type === "control-history") return "National chamber control probability";
+  if (embed.type === "state-history") return `${embed.state} probability history`;
+  if (embed.type === "state-card") return `${embed.state} forecast card`;
+  if (embed.type === "seat-distribution") return "Seat distribution";
+  if (embed.type === "leverage") return "Most decisive races";
+  return "Forecast chart";
+}
+
+function renderEmbed(target, embed) {
+  if (!target) return;
+  if (embed.type === "control-history") {
+    target.className = "article-embed-target history-chart";
+    const points = forecast.controlHistory?.length ? forecast.controlHistory : [{ date: forecast.modelDate, dem: forecast.demControlProbability, rep: forecast.repControlProbability }];
+    renderLineChart(target, points, {
+      label: embed.title || "National chamber control probability",
+      pointHtml: (point) => `${point.date}<br>D ${pct(point.dem)} / R ${pct(point.rep ?? 1 - point.dem)}`,
+      value: (point) => point.dem
+    });
+    return;
+  }
+  if (embed.type === "state-history") {
+    const race = getRace(String(embed.state || "").toUpperCase());
+    target.className = "article-embed-target history-chart";
+    if (!race) {
+      target.innerHTML = `<p>State not found.</p>`;
+      return;
+    }
+    const points = race.history?.length ? race.history : [{ date: forecast.modelDate, dem: race.demProbability }];
+    renderLineChart(target, points, {
+      label: embed.title || `${race.displayName} probability history`,
+      pointHtml: (point) => `${point.date}<br>D ${pct(point.dem)} / R ${pct(1 - point.dem)}`,
+      value: (point) => point.dem
+    });
+    return;
+  }
+  if (embed.type === "state-card") {
+    const race = getRace(String(embed.state || "").toUpperCase());
+    target.className = "article-embed-target";
+    target.innerHTML = race ? hoverMarkup(race) : `<p>State not found.</p>`;
+    return;
+  }
+  if (embed.type === "seat-distribution") {
+    target.className = "article-embed-target seat-histogram";
+    renderSeatHistogramInto(target);
+    return;
+  }
+  if (embed.type === "leverage") {
+    target.className = "article-embed-target leverage-chart";
+    renderLeverageInto(target);
+    return;
+  }
+  target.innerHTML = `<p>Unknown embed type.</p>`;
 }
 
 async function loadArticles() {

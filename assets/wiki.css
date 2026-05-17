@@ -281,12 +281,30 @@ h3 {
 }
 
 .big-odds {
+  display: grid;
+  gap: 2px;
   color: var(--rep);
-  max-width: 100%;
-  font: 950 clamp(2.05rem, 3vw, 3.3rem)/.9 "Segoe UI", Arial, sans-serif;
+  font-family: "Segoe UI", Arial, sans-serif;
   letter-spacing: 0;
-  overflow-wrap: normal;
-  word-break: normal;
+}
+
+.big-odds span,
+.big-odds strong {
+  display: block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.big-odds span {
+  font-size: clamp(1.75rem, 2.5vw, 3rem);
+  line-height: .95;
+  font-weight: 950;
+}
+
+.big-odds strong {
+  font-size: clamp(2.15rem, 3.3vw, 3.75rem);
+  line-height: .85;
+  font-weight: 950;
 }
 
 .odds-panel dl,
@@ -697,6 +715,20 @@ dd {
 .article-body p {
   color: color-mix(in srgb, var(--ink) 88%, var(--muted));
   font-size: 1.05rem;
+}
+
+.article-embeds {
+  display: grid;
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.article-embed {
+  box-shadow: none;
+}
+
+.article-embed .history-chart {
+  margin-top: 10px;
 }
 
 .source-card a {

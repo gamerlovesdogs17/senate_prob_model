@@ -11,6 +11,13 @@ Copy this object, paste it at the top of the array after the opening [, then add
   "dek": "One or two sentence summary that appears on the homepage and article list.",
   "author": "Senate Probability Desk",
   "featured": true,
+  "embeds": [
+    { "type": "control-history", "title": "National chamber control probability" },
+    { "type": "state-history", "state": "OH", "title": "Ohio probability history" },
+    { "type": "state-card", "state": "TX", "title": "Texas forecast card" },
+    { "type": "seat-distribution", "title": "Seat distribution" },
+    { "type": "leverage", "title": "Most decisive races" }
+  ],
   "body": [
     "First paragraph.",
     "Second paragraph.",
@@ -23,4 +30,12 @@ Rules:
 - Only one article needs featured: true. The newest featured article appears on the homepage.
 - Use straight quotes, not curly quotes, inside JSON.
 - Each paragraph in body must be in quotes and separated by commas.
+- Delete the embeds you do not want. You can also omit the entire "embeds" block.
+- Embed types:
+  - "control-history": national chamber-control probability over time.
+  - "state-history": a state's probability history. Requires "state": "OH" or another two-letter state code.
+  - "state-card": a compact state forecast card. Requires "state": "OH" or another two-letter state code.
+  - "seat-distribution": national simulated seat distribution.
+  - "leverage": most decisive races by control tipping power.
+- The optional "title" field overrides the chart heading shown in the article.
 - Run `node -e "JSON.parse(require('fs').readFileSync('data/articles.json','utf8')); console.log('articles ok')"` if you want to check the file before pushing.
