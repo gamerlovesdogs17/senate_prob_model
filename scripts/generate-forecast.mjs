@@ -697,6 +697,16 @@ function appendControlHistory(model) {
   return [...stored.filter((point) => point.date !== current.date), current].slice(-365);
 }
 
+function appendSeatHistory(model) {
+  const current = {
+    date: MODEL_DATE_KEY,
+    dem: model.medianSeats,
+    rep: 100 - model.medianSeats
+  };
+  const stored = Array.isArray(previousForecast?.seatHistory) ? previousForecast.seatHistory : [];
+  return [...stored.filter((point) => point.date !== current.date), current].slice(-365);
+}
+
 async function writeForecast() {
   const sourceData = await fetchAllSources();
   const model = runModel(sourceData);
@@ -716,6 +726,7 @@ async function writeForecast() {
       civicApi: sourceData.civic
     },
     controlHistory: appendControlHistory(model),
+    seatHistory: appendSeatHistory(model),
     ...model
   };
 

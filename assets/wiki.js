@@ -68,6 +68,11 @@ function signedPointMargin(value) {
   return `${value > 0 ? "D" : "R"}+${Math.abs(value).toFixed(1)} pts`;
 }
 
+function pollingInputText(race) {
+  if (race.pollMargin === null) return "No recent public race-poll margin";
+  return `${signedPointMargin(race.pollMargin)} weighted race-poll margin`;
+}
+
 function setText(id, value) {
   const node = document.getElementById(id);
   if (node) node.textContent = value;
@@ -375,6 +380,22 @@ function renderControlHistory() {
   });
 }
 
+function renderSeatHistory() {
+  const chart = document.getElementById("seat-history-chart");
+  if (!chart || !forecast) return;
+  const points = forecast.seatHistory?.length ? forecast.seatHistory : [{ date: forecast.modelDate, dem: forecast.medianSeats, rep: 100 - forecast.medianSeats }];
+  renderLineChart(chart, points, {
+    label: "Projected Senate seats history",
+    domain: [30, 70],
+    ticks: [70, 60, 50, 40, 30],
+    band: 3.2,
+    valueFormat: (value) => value.toFixed(0),
+    endLabel: (party, value) => `${party === "dem" ? "Democrat" : "Republican"} ${value.toFixed(0)}`,
+    hoverLabel: (party, value) => `${party === "dem" ? "Democratic seats" : "Republican seats"} ${value.toFixed(0)}`,
+    singleNote: "Seat-count history starts with the first generated forecast and grows each daily run."
+  });
+}
+
 function renderRaceSelector() {
   const container = document.getElementById("race-selector");
   if (!container || !forecast) return;
@@ -394,8 +415,12 @@ function renderLineChart(chart, points, options) {
   const values = points.flatMap((point) => [demValue(point), repValue(point)]);
   const minValue = Math.min(...values);
   const maxValue = Math.max(...values);
-  const domain = minValue >= .28 && maxValue <= .72 ? [.3, .7] : [0, 1];
+  const domain = options.domain || (minValue >= .28 && maxValue <= .72 ? [.3, .7] : [0, 1]);
   const band = options.band ?? .055;
+  const ticks = options.ticks || (domain[0] === .3 ? [.7, .6, .5, .4, .3] : [1, .75, .5, .25, 0]);
+  const valueFormat = options.valueFormat || ((value) => (value * 100).toFixed(domain[0] === .3 ? 1 : 0));
+  const endLabel = options.endLabel || ((party, value) => `${party === "dem" ? "Democrat" : "Republican"} ${oneDecimal(value)}`);
+  const hoverLabel = options.hoverLabel || ((party, value) => `${party === "dem" ? "Democrat" : "Republican"} ${oneDecimal(value)}`);
   const xFor = (index) => points.length === 1 ? plot.left + plotWidth / 2 : plot.left + index * (plotWidth / (points.length - 1));
   const yFor = (value) => plot.top + ((domain[1] - value) / (domain[1] - domain[0])) * plotHeight;
   const coords = points.map((point, index) => ({
@@ -422,7 +447,6 @@ function renderLineChart(chart, points, options) {
     }).join(" ");
     return `${upper} ${lower} Z`;
   };
-  const ticks = domain[0] === .3 ? [.7, .6, .5, .4, .3] : [1, .75, .5, .25, 0];
   const firstDate = String(points[0].date).slice(5);
   const lastDate = String(points[points.length - 1].date).slice(5);
   const latest = coords[coords.length - 1];
@@ -438,7 +462,7 @@ function renderLineChart(chart, points, options) {
   }).filter(Boolean).join("");
   chart.innerHTML = `
     <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${options.label}">
-      ${ticks.map((tick) => `<path class="history-grid ${tick === .5 ? "history-midline" : ""}" d="M${plot.left} ${yFor(tick)}H${width - plot.right}"></path><text class="history-axis" x="${plot.left - 12}" y="${yFor(tick) + 4}">${(tick * 100).toFixed(domain[0] === .3 ? 1 : 0)}</text>`).join("")}
+      ${ticks.map((tick) => `<path class="history-grid ${tick === (options.midline ?? .5) ? "history-midline" : ""}" d="M${plot.left} ${yFor(tick)}H${width - plot.right}"></path><text class="history-axis" x="${plot.left - 12}" y="${yFor(tick) + 4}">${valueFormat(tick)}</text>`).join("")}
       ${coords.length > 1 ? [1, 2, 3, 4].map((step) => {
         const x = plot.left + (plotWidth / 5) * step;
         return `<path class="history-vgrid" d="M${x} ${plot.top}V${height - plot.bottom}"></path>`;
@@ -451,8 +475,8 @@ function renderLineChart(chart, points, options) {
       ${coords.map(({ x, demY, repY }, index) => `<g class="history-point" tabindex="0" data-index="${index}"><circle class="history-dot history-dot-dem" cx="${x}" cy="${demY}" r="${coords.length === 1 ? 4.8 : 3.3}"></circle><circle class="history-dot history-dot-rep" cx="${x}" cy="${repY}" r="${coords.length === 1 ? 4.8 : 3.3}"></circle></g>`).join("")}
       <text class="history-date history-date-start" x="${plot.left}" y="${height - 18}">${firstDate}</text>
       <text class="history-date history-date-end" x="${width - plot.right}" y="${height - 18}">${lastDate}</text>
-      <text class="history-end-label history-end-label-dem" x="${latest.x + 11}" y="${demLabelY}">Democrat ${oneDecimal(demValue(latest.point))}</text>
-      <text class="history-end-label history-end-label-rep" x="${latest.x + 11}" y="${repLabelY}">Republican ${oneDecimal(repValue(latest.point))}</text>
+      <text class="history-end-label history-end-label-dem" x="${latest.x + 11}" y="${demLabelY}">${endLabel("dem", demValue(latest.point))}</text>
+      <text class="history-end-label history-end-label-rep" x="${latest.x + 11}" y="${repLabelY}">${endLabel("rep", repValue(latest.point))}</text>
       <g class="history-hover" style="display:none">
         <path class="history-hover-rule"></path>
         <circle class="history-hover-dot history-hover-dot-dem" r="4.5"></circle>
@@ -496,8 +520,8 @@ function renderLineChart(chart, points, options) {
     hoverRep.setAttribute("x", boxX + 9);
     hoverRep.setAttribute("y", boxY + 48);
     hoverTitle.textContent = coord.point.date;
-    hoverDem.textContent = `Democrat ${oneDecimal(dem)}`;
-    hoverRep.textContent = `Republican ${oneDecimal(rep)}`;
+    hoverDem.textContent = hoverLabel("dem", dem);
+    hoverRep.textContent = hoverLabel("rep", rep);
   };
   const indexFromEvent = (event) => {
     const rect = svg.getBoundingClientRect();
@@ -564,7 +588,7 @@ function renderRacePage() {
   setText("race-margin", signedPointMargin(race.margin));
   setText("race-prob-margin", signedMargin(race.demProbability));
   setText("race-tipping", oneDecimal(race.tippingPower));
-  setText("race-polling", race.pollMargin === null ? "No recent public race-poll input" : `${race.pollMargin.toFixed(1)} pts D weighted poll margin`);
+  setText("race-polling", pollingInputText(race));
   const demTrack = document.getElementById("race-dem-track");
   const repTrack = document.getElementById("race-rep-track");
   if (demTrack && repTrack) {
@@ -810,6 +834,7 @@ async function init() {
   renderHistogram();
   renderLeverageChart();
   renderControlHistory();
+  renderSeatHistory();
   renderRacePage();
   renderRaceSelector();
   renderSourceStatus();

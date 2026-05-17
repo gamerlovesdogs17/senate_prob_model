@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-17T19:56:45.050Z",
+  "generatedAt": "2026-05-17T20:07:39.543Z",
   "modelDate": "2026-05-17",
   "runDate": "May 17, 2026",
   "updateTime": "around 6:00 AM Central",
@@ -19,20 +19,11 @@
     ]
   },
   "sourceStatus": {
-    "checkedAt": "2026-05-17T19:56:42.222Z",
-    "censusPopulation": {
-      "ok": true,
-      "status": 200,
-      "ms": 598,
-      "url": "https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/state/totals/NST-EST2024-POPCHG2020-2024.csv",
-      "rows": 66,
-      "states": 51,
-      "source": "Census Bureau no-key CSV"
-    },
+    "checkedAt": "2026-05-17T20:07:37.569Z",
     "mitSenateReturns": {
       "ok": true,
       "status": 200,
-      "ms": 651,
+      "ms": 486,
       "url": "https://raw.githubusercontent.com/MEDSL/constituency-returns/master/1976-2018-senate.csv",
       "rows": 3421,
       "states": 50
@@ -40,32 +31,41 @@
     "civicApiDocs": {
       "ok": true,
       "status": 200,
-      "ms": 695,
+      "ms": 585,
       "url": "https://www.civicapi.org/api-documentation"
+    },
+    "censusPopulation": {
+      "ok": true,
+      "status": 200,
+      "ms": 662,
+      "url": "https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/state/totals/NST-EST2024-POPCHG2020-2024.csv",
+      "rows": 66,
+      "states": 51,
+      "source": "Census Bureau no-key CSV"
     },
     "civicApiEndpoint": {
       "ok": false,
       "status": 404,
-      "ms": 45,
+      "ms": 109,
       "url": "https://www.civicapi.org/api/v1/upcomingraces",
       "error": "{\"message\":\"Route GET:/v1/upcomingraces not found\",\"error\":\"Not Found\",\"statusCode\":404}"
-    },
-    "openFecCandidateSummary": {
-      "ok": true,
-      "status": 200,
-      "ms": 1773,
-      "url": "https://www.fec.gov/files/bulk-downloads/2026/candidate_summary_2026.csv",
-      "rows": 4032,
-      "senateStates": 44
     },
     "votehubGenericBallot": {
       "ok": true,
       "status": 200,
-      "ms": 2538,
+      "ms": 835,
       "url": "https://api.votehub.com/polls?poll_type=generic-ballot&subject=2026",
       "rows": 451,
       "usablePolls": 351,
       "rawUsablePolls": 451
+    },
+    "openFecCandidateSummary": {
+      "ok": true,
+      "status": 200,
+      "ms": 1545,
+      "url": "https://www.fec.gov/files/bulk-downloads/2026/candidate_summary_2026.csv",
+      "rows": 4032,
+      "senateStates": 44
     }
   },
   "sourceSummary": {
@@ -199,6 +199,13 @@
       "date": "2026-05-17",
       "dem": 0.436,
       "rep": 0.5640000000000001
+    }
+  ],
+  "seatHistory": [
+    {
+      "date": "2026-05-17",
+      "dem": 50,
+      "rep": 50
     }
   ],
   "races": [
