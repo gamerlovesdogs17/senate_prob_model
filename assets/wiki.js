@@ -216,7 +216,7 @@ function updateSummary() {
 
 function hoverMarkup(race) {
   if (!race) {
-    return `<span class="panel-label">Map detail</span><h3>No Senate race</h3><p>This state is not on the regular 2026 Senate board.</p>`;
+    return `<span class="panel-label">State detail</span><h3>No Senate race</h3><p>This state is not on the regular 2026 Senate board.</p>`;
   }
   const winner = race.winnerParty === "D" ? "Democrat" : "Republican";
   const demCandidate = candidateDisplayName(race, "D");
