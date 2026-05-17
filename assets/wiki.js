@@ -241,20 +241,23 @@ function renderLineChart(chart, points, options) {
     const y = height - 34 - options.value(point) * (height - 68);
     return { point, x, y };
   });
+  const linePoints = coords.length === 1
+    ? `${coords[0].x - 28},${coords[0].y} ${coords[0].x + 28},${coords[0].y}`
+    : coords.map(({ x, y }) => `${x},${y}`).join(" ");
   chart.innerHTML = `
     <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${options.label}">
       <path class="history-grid" d="M36 ${height - 34}H${width - 36}M36 ${height / 2}H${width - 36}M36 34H${width - 36}"></path>
       <text class="history-axis" x="14" y="38">100</text>
       <text class="history-axis" x="18" y="${height / 2 + 4}">50</text>
       <text class="history-axis" x="22" y="${height - 32}">0</text>
-      <polyline class="history-line" points="${coords.map(({ x, y }) => `${x},${y}`).join(" ")}"></polyline>
-      ${coords.map(({ point, x, y }) => `<g class="history-point" tabindex="0" data-tip="${options.pointHtml(point)}"><circle class="history-dot" cx="${x}" cy="${y}" r="3.5"></circle><circle class="history-hit" cx="${x}" cy="${y}" r="18"></circle><text x="${x}" y="${height - 10}">${String(point.date).slice(5)}</text></g>`).join("")}
+      <polyline class="history-line" points="${linePoints}"></polyline>
+      ${coords.map(({ point, x, y }, index) => `<g class="history-point" tabindex="0" data-index="${index}"><circle class="history-dot" cx="${x}" cy="${y}" r="${coords.length === 1 ? 5.5 : 3.5}"></circle><circle class="history-hit" cx="${x}" cy="${y}" r="20"></circle><text x="${x}" y="${height - 10}">${String(point.date).slice(5)}</text></g>`).join("")}
     </svg>
   `;
   const last = points[points.length - 1];
   updateChartReadout(chart, `${options.pointHtml(last)}${points.length === 1 && options.singleNote ? `<br>${options.singleNote}` : ""}`);
   chart.querySelectorAll(".history-point").forEach((node) => {
-    const handler = () => updateChartReadout(node, node.dataset.tip);
+    const handler = () => updateChartReadout(node, options.pointHtml(points[Number(node.dataset.index)]));
     node.addEventListener("mouseenter", handler);
     node.addEventListener("focus", handler);
     node.addEventListener("click", handler);
