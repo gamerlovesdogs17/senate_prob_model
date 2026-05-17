@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Page Not Found | Senate Probability Desk</title>
+  <title>Articles | Senate Probability Desk</title>
+  <meta name="description" content="Forecast notes and Senate analysis from the Senate Probability Desk.">
   <link rel="stylesheet" href="assets/wiki.css">
 </head>
 <body>
@@ -16,19 +17,20 @@
       <a href="index.html">Forecast</a>
       <a href="races.html">Map</a>
       <a href="methodology.html">Method</a>
-      <a href="articles.html">Articles</a>
+      <a class="active" href="articles.html">Articles</a>
     </nav>
   </header>
+
   <main>
-    <section class="text-panel">
-      <p class="kicker">404</p>
-      <h1>This forecast page does not exist.</h1>
-      <p class="lede">Use the map to pick a Senate race or return to the main forecast.</p>
-      <div class="hero-actions">
-        <a class="button-link" href="index.html">Forecast</a>
-        <a class="button-link" href="races.html">Map</a>
-      </div>
+    <section class="text-panel image-panel">
+      <p class="kicker">Articles</p>
+      <h1>Forecast notes and race analysis.</h1>
+      <p class="lede">Short writeups on model changes, Senate paths, and races that matter.</p>
     </section>
+
+    <section id="articles-list" class="article-list" aria-label="Articles"></section>
   </main>
+
+  <script src="assets/wiki.js"></script>
 </body>
 </html>

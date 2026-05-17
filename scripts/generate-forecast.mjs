@@ -559,44 +559,37 @@ async function fetchMitSenate(status) {
 }
 
 async function fetchCensus(status) {
-  if (!process.env.CENSUS_API_KEY) {
-    status.censusPopulation = {
-      ok: false,
-      status: "missing-key",
-      url: "https://api.census.gov/data/2024/pep/population",
-      error: "Set CENSUS_API_KEY as a GitHub Actions secret to enable this adapter."
-    };
-    return {};
-  }
-  const url = `https://api.census.gov/data/2024/pep/population?get=NAME,POP_2024,POP_2020&for=state:*&key=${encodeURIComponent(process.env.CENSUS_API_KEY)}`;
+  const url = "https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/state/totals/NST-EST2024-POPCHG2020-2024.csv";
   const text = await fetchText(url, "censusPopulation", status);
   if (!text) return {};
-  try {
-    const [headers, ...rows] = JSON.parse(text);
-    const byState = {};
-    for (const values of rows) {
-      const row = Object.fromEntries(headers.map((header, index) => [header, values[index]]));
-      const state = FIPS_TO_STATE[String(row.state).padStart(2, "0")];
-      if (!state) continue;
-      byState[state] = {
-        name: row.NAME,
-        pop2020: toNumber(row.POP_2020),
-        pop2024: toNumber(row.POP_2024)
-      };
-    }
-    status.censusPopulation.states = Object.keys(byState).length;
-    return byState;
-  } catch (error) {
-    status.censusPopulation.parseError = error.message;
-    return {};
+  const rows = parseCsv(text);
+  const byState = {};
+  for (const row of rows) {
+    if (row.SUMLEV !== "040") continue;
+    const state = FIPS_TO_STATE[String(row.STATE).padStart(2, "0")];
+    if (!state) continue;
+    byState[state] = {
+      name: row.NAME,
+      pop2020: toNumber(row.POPESTIMATE2020),
+      pop2024: toNumber(row.POPESTIMATE2024),
+      pctChange2024: toNumber(row.PPOPCHG_2024)
+    };
   }
+  status.censusPopulation.rows = rows.length;
+  status.censusPopulation.states = Object.keys(byState).length;
+  status.censusPopulation.source = "Census Bureau no-key CSV";
+  return byState;
 }
 
 async function fetchCivicApi(status) {
-  const text = await fetchText("https://civicapi.org/api-documentation", "civicApiDocs", status);
+  const docsText = await fetchText("https://www.civicapi.org/api-documentation", "civicApiDocs", status);
+  const endpointText = await fetchText("https://www.civicapi.org/api/v1/upcomingraces", "civicApiEndpoint", status);
   return {
-    documentationReachable: Boolean(text),
-    note: "No public no-key election-results endpoint is wired into the model yet."
+    documentationReachable: Boolean(docsText),
+    endpointReachable: Boolean(endpointText),
+    note: endpointText
+      ? "Endpoint reachable, but no Senate forecast result feed is wired yet."
+      : "Docs are reachable, but tested no-key API endpoints currently return 404; using MIT/MEDSL historical results instead."
   };
 }
 

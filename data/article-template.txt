@@ -1,0 +1,26 @@
+How to publish an article
+
+Open data/articles.json.
+
+Copy this object, paste it at the top of the array after the opening [, then add a comma after it if another article follows.
+
+{
+  "slug": "short-url-name-with-dashes",
+  "title": "Article headline",
+  "date": "2026-05-17",
+  "dek": "One or two sentence summary that appears on the homepage and article list.",
+  "author": "Senate Probability Desk",
+  "featured": true,
+  "body": [
+    "First paragraph.",
+    "Second paragraph.",
+    "Third paragraph."
+  ]
+}
+
+Rules:
+- Keep slug lowercase with dashes only.
+- Only one article needs featured: true. The newest featured article appears on the homepage.
+- Use straight quotes, not curly quotes, inside JSON.
+- Each paragraph in body must be in quotes and separated by commas.
+- Run `node -e "JSON.parse(require('fs').readFileSync('data/articles.json','utf8')); console.log('articles ok')"` if you want to check the file before pushing.

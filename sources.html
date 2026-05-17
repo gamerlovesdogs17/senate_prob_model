@@ -3,96 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sources | Senate Probability Desk</title>
-  <meta name="description" content="Public data sources and API plan for the Senate Probability Desk.">
+  <meta http-equiv="refresh" content="0; url=methodology.html">
+  <title>Sources moved | Senate Probability Desk</title>
   <link rel="stylesheet" href="assets/wiki.css">
 </head>
 <body>
-  <header class="site-header">
-    <a class="brand" href="index.html">
-      <span class="brand-mark">51</span>
-      <span><strong>Senate Probability Desk</strong><small>2026 control forecast</small></span>
-    </a>
-    <nav class="site-nav" aria-label="Primary navigation">
-      <a href="index.html">Forecast</a>
-      <a href="races.html">Map</a>
-      <a href="methodology.html">Method</a>
-      <a class="active" href="sources.html">Sources</a>
-    </nav>
-  </header>
-
   <main>
-    <section class="text-panel image-panel">
-      <p class="kicker">Sources</p>
-      <h1>Use public feeds where they exist. Curate what is not public.</h1>
-      <p class="lede">
-        There is no single free source that cleanly powers a serious Senate forecast.
-        The daily generator combines public feeds where reachable with a transparent manual ratings file.
-      </p>
-    </section>
-
-    <section class="text-panel" aria-labelledby="source-status-title">
-      <p class="kicker">Latest generated run</p>
-      <h2 id="source-status-title">What actually loaded.</h2>
-      <div id="source-status" class="source-status-grid"></div>
-    </section>
-
-    <section class="source-grid" aria-label="Recommended data sources">
-      <article class="source-card">
-        <span class="source-tag">Polling</span>
-        <h3>VoteHub Polling API</h3>
-        <p>Free beta REST API for approval, generic ballot, favorability, and available poll subjects. The generator checks it server-side during the daily run.</p>
-        <a href="https://votehub.com/polls/api/" target="_blank" rel="noreferrer">Open API docs</a>
-      </article>
-      <article class="source-card">
-        <span class="source-tag">Finance</span>
-        <h3>OpenFEC</h3>
-        <p>Official public campaign-finance API for candidates, committees, receipts, spending, cash on hand, and filings.</p>
-        <a href="https://api.open.fec.gov/developers/" target="_blank" rel="noreferrer">Open API docs</a>
-      </article>
-      <article class="source-card">
-        <span class="source-tag">History</span>
-        <h3>MIT Election Lab</h3>
-        <p>Statewide, county, precinct, and 2024 election returns for fundamentals, validation, and backtesting.</p>
-        <a href="https://electionlab.mit.edu/data" target="_blank" rel="noreferrer">Open datasets</a>
-      </article>
-      <article class="source-card">
-        <span class="source-tag">Demographics</span>
-        <h3>Census API</h3>
-        <p>Population and demographic variables for turnout context, electorate modeling, and state baselines.</p>
-        <a href="https://www.census.gov/data/developers/guidance/api-user-guide.Core_Concepts.html" target="_blank" rel="noreferrer">Open guide</a>
-      </article>
-      <article class="source-card">
-        <span class="source-tag">Live results</span>
-        <h3>civicAPI</h3>
-        <p>No-auth public election results API. Useful for live results and any available race/polling data, with attribution requirements.</p>
-        <a href="https://civicapi.org/api-documentation" target="_blank" rel="noreferrer">Open docs</a>
-      </article>
-      <article class="source-card">
-        <span class="source-tag">Map geometry</span>
-        <h3>us-atlas</h3>
-        <p>Public TopoJSON state geometry used by the site to render actual U.S. state shapes through D3.</p>
-        <a href="https://www.npmjs.com/package/us-atlas" target="_blank" rel="noreferrer">Open package</a>
-      </article>
-      <article class="source-card">
-        <span class="source-tag">Historical only</span>
-        <h3>FiveThirtyEight archives</h3>
-        <p>538 was shut down, so it should not be a live polling dependency. Archived data can still be useful for historical backtesting where available.</p>
-        <a href="https://data.fivethirtyeight.com/" target="_blank" rel="noreferrer">Open archive</a>
-      </article>
-      <article class="source-card">
-        <span class="source-tag">Manual ledger</span>
-        <h3>Ratings and news</h3>
-        <p>Cook, Sabato, Inside Elections, Split Ticket, CNalysis, retirements, scandals, endorsements, ballot access, primary results, and party-withdrawal/independent-control arrangements should be curated rather than scraped.</p>
-      </article>
-      <article class="source-card">
-        <span class="source-tag">Not free core</span>
-        <h3>AP, DDHQ, Cook API</h3>
-        <p>These are useful professional feeds, but they are gated, commercial, or credentialed. Do not design the public prototype around hidden access.</p>
-      </article>
+    <section class="text-panel">
+      <p class="kicker">Moved</p>
+      <h1>Sources are now part of Method.</h1>
+      <p><a class="button-link" href="methodology.html">Open Method & Sources</a></p>
     </section>
   </main>
-
-  <script src="assets/wiki.js"></script>
 </body>
 </html>

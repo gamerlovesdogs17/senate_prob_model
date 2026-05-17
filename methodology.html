@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Methodology | Senate Probability Desk</title>
-  <meta name="description" content="Methodology for the Senate Probability Desk model.">
+  <title>Method & Sources | Senate Probability Desk</title>
+  <meta name="description" content="Brief method and source notes for the Senate Probability Desk model.">
   <link rel="stylesheet" href="assets/wiki.css">
 </head>
 <body>
@@ -17,7 +17,7 @@
       <a href="index.html">Forecast</a>
       <a href="races.html">Map</a>
       <a class="active" href="methodology.html">Method</a>
-      <a href="sources.html">Sources</a>
+      <a href="articles.html">Articles</a>
     </nav>
   </header>
 
@@ -25,8 +25,8 @@
     <section class="page-grid">
       <article class="text-panel image-panel">
         <p class="kicker">Method</p>
-        <h1>Polls, fundamentals, ratings, primaries, then uncertainty.</h1>
-        <p class="lede">The forecast is generated once, saved to JSON, and rendered the same way for every visitor.</p>
+        <h1>Method and sources.</h1>
+        <p class="lede">A daily Senate forecast built from polling, fundamentals, candidate finance, primary status, and simulated error.</p>
       </article>
       <aside class="odds-panel">
         <span class="panel-label">Current run</span>
@@ -41,32 +41,57 @@
     </section>
 
     <section class="text-panel">
-      <p class="kicker">Model layers</p>
+      <p class="kicker">Short version</p>
       <ul class="method-list">
-        <li><strong>State fundamentals</strong> State lean, recent Senate performance, incumbency, candidate quality, finance, and approval/national climate.</li>
-        <li><strong>Primary layer</strong> Unresolved primaries and runoffs widen the error band. Resolved primaries shrink candidate uncertainty.</li>
-        <li><strong>Independent layer</strong> Independent candidates are colored purple and credited as Democrat or Republican for control based on the most likely organizing arrangement, with a discount when that path is uncertain.</li>
-        <li><strong>Polling layer</strong> VoteHub or another public/licensed poll feed should supply race polls, generic ballot, and approval. FiveThirtyEight is not treated as a live polling source because it shut down.</li>
-        <li><strong>Ratings layer</strong> Cook/Sabato/Inside/Split Ticket/CNalysis should be entered through a transparent manual file unless legitimate API access exists.</li>
-        <li><strong>Simulation layer</strong> Each run includes national error, turnout miss, regional error, race-level miss, primary shock, and independent-candidate shock.</li>
-        <li><strong>Tipping power</strong> Most decisive races are counted from simulations where that exact seat changes chamber control, not merely from closeness.</li>
-        <li><strong>Daily update</strong> GitHub Actions runs the generator each morning, commits `data/forecast.json`, and keeps the public site on one shared forecast until the next run.</li>
-        <li><strong>Backtesting</strong> MIT Election Lab returns should be used to tune error and fundamentals before public launch.</li>
+        <li><strong>Polling</strong> VoteHub generic-ballot polls are averaged with recency, sample-size, population, internal/partisan, and repeated-pollster weights.</li>
+        <li><strong>Fundamentals</strong> The baseline blends race ratings, state lean, recent Senate results, incumbency, candidate quality, finance, and population growth.</li>
+        <li><strong>Uncertainty</strong> Simulations include national error, regional error, turnout miss, race error, primary uncertainty, and independent-candidate uncertainty.</li>
+        <li><strong>Control math</strong> Independent candidates are counted by likely caucus for chamber control. Tipping power comes from simulations where that exact race changes control.</li>
+        <li><strong>Publishing</strong> GitHub Actions runs the generator daily and writes one shared `data/forecast.json` file for everyone.</li>
       </ul>
     </section>
 
-    <section class="dashboard-grid">
-      <article class="chart-panel">
-        <span class="chart-label">Seat distribution</span>
-        <div id="seat-histogram" class="seat-histogram"></div>
+    <section class="text-panel" aria-labelledby="source-status-title">
+      <p class="kicker">Latest generated run</p>
+      <h2 id="source-status-title">Source status.</h2>
+      <div id="source-status" class="source-status-grid"></div>
+    </section>
+
+    <section class="source-grid" aria-label="Model sources">
+      <article class="source-card">
+        <span class="source-tag">Polling</span>
+        <h3>VoteHub</h3>
+        <p>Generic-ballot polling feed. Race-level Senate polling is used when a usable no-key feed is available.</p>
+        <a href="https://votehub.com/polls/api/" target="_blank" rel="noreferrer">Open docs</a>
       </article>
-      <article class="chart-panel">
-        <span class="chart-label">Race leverage</span>
-        <div id="leverage-chart" class="leverage-chart"></div>
+      <article class="source-card">
+        <span class="source-tag">Finance</span>
+        <h3>OpenFEC</h3>
+        <p>Candidate finance and filing data from the 2026 candidate summary bulk file.</p>
+        <a href="https://www.fec.gov/data/browse-data/?tab=bulk-data" target="_blank" rel="noreferrer">Open bulk data</a>
       </article>
-      <article class="chart-panel chart-wide">
-        <span class="chart-label">National chamber control probability over time</span>
-        <div id="control-history-chart" class="history-chart"></div>
+      <article class="source-card">
+        <span class="source-tag">History</span>
+        <h3>MIT/MEDSL</h3>
+        <p>Historical Senate returns used for state-level fundamentals and validation.</p>
+        <a href="https://github.com/MEDSL/constituency-returns" target="_blank" rel="noreferrer">Open dataset</a>
+      </article>
+      <article class="source-card">
+        <span class="source-tag">Demographics</span>
+        <h3>Census</h3>
+        <p>No-key Census population-estimate CSVs provide state growth signals.</p>
+        <a href="https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/state/totals/" target="_blank" rel="noreferrer">Open files</a>
+      </article>
+      <article class="source-card">
+        <span class="source-tag">Map</span>
+        <h3>us-atlas</h3>
+        <p>Public TopoJSON geometry for state-shape map rendering.</p>
+        <a href="https://www.npmjs.com/package/us-atlas" target="_blank" rel="noreferrer">Open package</a>
+      </article>
+      <article class="source-card">
+        <span class="source-tag">Manual</span>
+        <h3>Ratings and ballot context</h3>
+        <p>Ratings, primary outcomes, retirements, withdrawals, and caucus assumptions remain curated inputs.</p>
       </article>
     </section>
   </main>

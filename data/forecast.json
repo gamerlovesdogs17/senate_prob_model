@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-17T11:28:22.631Z",
+  "generatedAt": "2026-05-17T11:49:33.349Z",
   "modelDate": "2026-05-17",
   "runDate": "May 17, 2026",
   "updateTime": "around 6:00 AM Central",
@@ -19,43 +19,53 @@
     ]
   },
   "sourceStatus": {
-    "checkedAt": "2026-05-17T11:28:20.739Z",
+    "checkedAt": "2026-05-17T11:49:31.239Z",
     "censusPopulation": {
-      "ok": false,
-      "status": "missing-key",
-      "url": "https://api.census.gov/data/2024/pep/population",
-      "error": "Set CENSUS_API_KEY as a GitHub Actions secret to enable this adapter."
-    },
-    "mitSenateReturns": {
       "ok": true,
       "status": 200,
-      "ms": 230,
-      "url": "https://raw.githubusercontent.com/MEDSL/constituency-returns/master/1976-2018-senate.csv",
-      "rows": 3421,
-      "states": 50
+      "ms": 304,
+      "url": "https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/state/totals/NST-EST2024-POPCHG2020-2024.csv",
+      "rows": 66,
+      "states": 51,
+      "source": "Census Bureau no-key CSV"
     },
     "civicApiDocs": {
       "ok": true,
       "status": 200,
-      "ms": 273,
-      "url": "https://civicapi.org/api-documentation"
+      "ms": 417,
+      "url": "https://www.civicapi.org/api-documentation"
     },
-    "openFecCandidateSummary": {
+    "mitSenateReturns": {
       "ok": true,
       "status": 200,
-      "ms": 1031,
-      "url": "https://www.fec.gov/files/bulk-downloads/2026/candidate_summary_2026.csv",
-      "rows": 4032,
-      "senateStates": 44
+      "ms": 444,
+      "url": "https://raw.githubusercontent.com/MEDSL/constituency-returns/master/1976-2018-senate.csv",
+      "rows": 3421,
+      "states": 50
+    },
+    "civicApiEndpoint": {
+      "ok": false,
+      "status": 404,
+      "ms": 50,
+      "url": "https://www.civicapi.org/api/v1/upcomingraces",
+      "error": "{\"message\":\"Route GET:/v1/upcomingraces not found\",\"error\":\"Not Found\",\"statusCode\":404}"
     },
     "votehubGenericBallot": {
       "ok": true,
       "status": 200,
-      "ms": 1616,
+      "ms": 919,
       "url": "https://api.votehub.com/polls?poll_type=generic-ballot&subject=2026",
       "rows": 451,
       "usablePolls": 351,
       "rawUsablePolls": 451
+    },
+    "openFecCandidateSummary": {
+      "ok": true,
+      "status": 200,
+      "ms": 1730,
+      "url": "https://www.fec.gov/files/bulk-downloads/2026/candidate_summary_2026.csv",
+      "rows": 4032,
+      "senateStates": 44
     }
   },
   "sourceSummary": {
@@ -172,10 +182,11 @@
     },
     "fecStates": 44,
     "mitStates": 50,
-    "censusStates": 0,
+    "censusStates": 51,
     "civicApi": {
       "documentationReachable": true,
-      "note": "No public no-key election-results endpoint is wired into the model yet."
+      "endpointReachable": false,
+      "note": "Docs are reachable, but tested no-key API endpoints currently return 404; using MIT/MEDSL historical results instead."
     }
   },
   "controlHistory": [
@@ -186,8 +197,8 @@
     },
     {
       "date": "2026-05-17",
-      "dem": 0.426025,
-      "rep": 0.573975
+      "dem": 0.4286,
+      "rep": 0.5714
     }
   ],
   "races": [
@@ -198,7 +209,7 @@
       "hold": "R",
       "caucusTarget": "D",
       "rating": "Safe R",
-      "pvi": -15,
+      "pvi": -14.793690521178425,
       "pastSenate": -18.418306407261706,
       "money": -1.0875,
       "candidate": -1,
@@ -223,6 +234,14 @@
           "year": 2016,
           "margin": -28.09153203630852
         },
+        "census": {
+          "name": "Alabama",
+          "pop2020": 5033094,
+          "pop2024": 5157699,
+          "pctChange2024": 0.7821132769,
+          "growth": 2.4757137458589087,
+          "growthSignal": 0.20630947882157571
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -233,18 +252,18 @@
       "dem": "Democratic nominee pending",
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": -17.845395421379937,
+      "margin": -17.795881146462758,
       "error": 5.738636363636364,
-      "demProbability": 0.00975,
+      "demProbability": 0.0099,
       "pollMargin": null,
       "primaryRisk": 0.5386363636363637,
       "winnerParty": "R",
-      "winnerProbability": 0.99025,
+      "winnerProbability": 0.9901,
       "competitive": false,
       "displayName": "Alabama Senate",
-      "tippingPower": 0.007992431107352444,
-      "demTippingPower": 0.000475,
-      "repTippingPower": 0.144775,
+      "tippingPower": 0.008096034859675522,
+      "demTippingPower": 0.00045,
+      "repTippingPower": 0.145575,
       "history": [
         {
           "date": "2026-05-16",
@@ -252,7 +271,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.00975
+          "dem": 0.0099
         }
       ]
     },
@@ -263,7 +282,7 @@
       "hold": "R",
       "caucusTarget": "D",
       "rating": "Toss-up",
-      "pvi": -8,
+      "pvi": -7.919101466950971,
       "pastSenate": -16.1469222099852,
       "money": 0.34625704720000006,
       "candidate": 1.2,
@@ -305,6 +324,14 @@
           "year": 2016,
           "margin": -32.73461104992599
         },
+        "census": {
+          "name": "Alaska",
+          "pop2020": 733017,
+          "pop2024": 740133,
+          "pctChange2024": 0.4919145701,
+          "growth": 0.9707823965883464,
+          "growthSignal": 0.08089853304902887
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -315,18 +342,18 @@
       "dem": "Democratic nominee pending",
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": -4.032946594917613,
+      "margin": -4.017802389530834,
       "error": 11.087272727272728,
-      "demProbability": 0.3722,
+      "demProbability": 0.3726,
       "pollMargin": -3.895987359817345,
       "primaryRisk": 1.6872727272727273,
       "winnerParty": "R",
-      "winnerProbability": 0.6278,
+      "winnerProbability": 0.6274,
       "competitive": true,
       "displayName": "Alaska Senate",
-      "tippingPower": 0.23365202430979606,
-      "demTippingPower": 0.056575,
-      "repTippingPower": 0.094475,
+      "tippingPower": 0.23459268970351485,
+      "demTippingPower": 0.056475,
+      "repTippingPower": 0.09515,
       "history": [
         {
           "date": "2026-05-16",
@@ -334,7 +361,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.3722
+          "dem": 0.3726
         }
       ]
     },
@@ -345,7 +372,7 @@
       "hold": "R",
       "caucusTarget": "D",
       "rating": "Safe R",
-      "pvi": -18,
+      "pvi": -17.795967065466353,
       "pastSenate": -23.920122941124422,
       "money": -0.9250346431,
       "candidate": -1,
@@ -370,6 +397,14 @@
           "year": 2016,
           "margin": -23.6006147056221
         },
+        "census": {
+          "name": "Arkansas",
+          "pop2020": 3014546,
+          "pop2024": 3088354,
+          "pctChange2024": 0.6154496731,
+          "growth": 2.4483952144037606,
+          "growthSignal": 0.2040329345336467
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -380,18 +415,18 @@
       "dem": "Hallie Shoffner",
       "rep": "Tom Cotton",
       "primarySummary": "Primaries held March 3. Shoffner won the Democratic nomination; Cotton secured the Republican nomination.",
-      "margin": -19.71953990694248,
+      "margin": -19.670572002654403,
       "error": 5.2,
-      "demProbability": 0.002725,
+      "demProbability": 0.00285,
       "pollMargin": null,
       "primaryRisk": 0,
       "winnerParty": "R",
-      "winnerProbability": 0.997275,
+      "winnerProbability": 0.99715,
       "competitive": false,
       "displayName": "Arkansas Senate",
-      "tippingPower": 0.0042373641364530845,
+      "tippingPower": 0.004357072666955368,
       "demTippingPower": 0.000125,
-      "repTippingPower": 0.145025,
+      "repTippingPower": 0.145825,
       "history": [
         {
           "date": "2026-05-16",
@@ -399,7 +434,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.002725
+          "dem": 0.00285
         }
       ]
     },
@@ -410,7 +445,7 @@
       "hold": "D",
       "caucusTarget": "D",
       "rating": "Safe D",
-      "pvi": 8,
+      "pvi": 8.24532026156666,
       "pastSenate": 10.732998155684442,
       "money": 1.0875,
       "candidate": 1,
@@ -435,6 +470,14 @@
           "year": 2016,
           "margin": 5.664990778422201
         },
+        "census": {
+          "name": "Colorado",
+          "pop2020": 5787129,
+          "pop2024": 5957493,
+          "pctChange2024": 0.9515467591,
+          "growth": 2.9438431387999127,
+          "growthSignal": 0.2453202615666594
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -445,17 +488,17 @@
       "dem": "Democratic nominee pending",
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": 16.667365491209292,
+      "margin": 16.726242353985292,
       "error": 5.719545454545455,
-      "demProbability": 0.986125,
+      "demProbability": 0.9864,
       "pollMargin": null,
       "primaryRisk": 0.5195454545454545,
       "winnerParty": "D",
-      "winnerProbability": 0.986125,
+      "winnerProbability": 0.9864,
       "competitive": false,
       "displayName": "Colorado Senate",
-      "tippingPower": 0.013809439850630524,
-      "demTippingPower": 0.13085,
+      "tippingPower": 0.013652962662478913,
+      "demTippingPower": 0.13065,
       "repTippingPower": 0.000325,
       "history": [
         {
@@ -464,7 +507,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.986125
+          "dem": 0.9864
         }
       ]
     },
@@ -475,7 +518,7 @@
       "hold": "D",
       "caucusTarget": "D",
       "rating": "Safe D",
-      "pvi": 14,
+      "pvi": 14.35,
       "pastSenate": 17.22690406848469,
       "money": 0.8562245962,
       "candidate": 1,
@@ -500,6 +543,14 @@
           "year": 2018,
           "margin": 22.13452034242344
         },
+        "census": {
+          "name": "Delaware",
+          "pop2020": 991928,
+          "pop2024": 1051917,
+          "pctChange2024": 1.494949456,
+          "growth": 6.047717173020622,
+          "growthSignal": 0.35
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -510,18 +561,18 @@
       "dem": "Democratic nominee pending",
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": 19.272998810349343,
+      "margin": 19.356998810349342,
       "error": 6.006545454545455,
-      "demProbability": 0.9944,
+      "demProbability": 0.994575,
       "pollMargin": null,
       "primaryRisk": 0.8065454545454546,
       "winnerParty": "D",
-      "winnerProbability": 0.9944,
+      "winnerProbability": 0.994575,
       "competitive": false,
       "displayName": "Delaware Senate",
-      "tippingPower": 0.008813200739068905,
-      "demTippingPower": 0.13105,
-      "repTippingPower": 0.000175,
+      "tippingPower": 0.008665248389946137,
+      "demTippingPower": 0.130875,
+      "repTippingPower": 0.0002,
       "history": [
         {
           "date": "2026-05-16",
@@ -529,7 +580,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.9944
+          "dem": 0.994575
         }
       ]
     },
@@ -540,7 +591,7 @@
       "hold": "R",
       "caucusTarget": "D",
       "rating": "Safe R",
-      "pvi": -8,
+      "pvi": -7.65,
       "pastSenate": -10.424500595542982,
       "money": -0.21250000000000002,
       "candidate": -1,
@@ -565,6 +616,14 @@
           "year": 2018,
           "margin": -0.12250297771490982
         },
+        "census": {
+          "name": "Florida",
+          "pop2020": 21592035,
+          "pop2024": 23372215,
+          "pctChange2024": 2.0403828566,
+          "growth": 8.244614275588196,
+          "growthSignal": 0.35
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -575,18 +634,18 @@
       "dem": "Democratic nominee pending",
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": -13.329134259036191,
+      "margin": -13.245134259036192,
       "error": 6.257272727272728,
-      "demProbability": 0.047975,
+      "demProbability": 0.049225,
       "pollMargin": null,
       "primaryRisk": 1.0572727272727271,
       "winnerParty": "R",
-      "winnerProbability": 0.952025,
+      "winnerProbability": 0.950775,
       "competitive": false,
       "displayName": "Florida Senate",
-      "tippingPower": 0.015649160637385223,
-      "demTippingPower": 0.00415,
-      "repTippingPower": 0.1423,
+      "tippingPower": 0.015930550183158174,
+      "demTippingPower": 0.004175,
+      "repTippingPower": 0.1431,
       "history": [
         {
           "date": "2026-05-16",
@@ -594,7 +653,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.047975
+          "dem": 0.049225
         }
       ]
     },
@@ -605,7 +664,7 @@
       "hold": "D",
       "caucusTarget": "D",
       "rating": "Likely D",
-      "pvi": 0,
+      "pvi": 0.34783275480001286,
       "pastSenate": -1.9501118989997706,
       "money": 1.3475,
       "candidate": 1.1,
@@ -647,6 +706,14 @@
           "year": 2016,
           "margin": -13.750559494998852
         },
+        "census": {
+          "name": "Georgia",
+          "pop2020": 10732888,
+          "pop2024": 11180878,
+          "pctChange2024": 1.0524354074,
+          "growth": 4.173993057600154,
+          "growthSignal": 0.34783275480001286
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -657,18 +724,18 @@
       "dem": "Democratic nominee pending",
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": 10.011539794957322,
+      "margin": 10.076654086655884,
       "error": 6.948636363636364,
-      "demProbability": 0.881875,
+      "demProbability": 0.883475,
       "pollMargin": 2.5333153981851684,
       "primaryRisk": 0.7486363636363637,
       "winnerParty": "D",
-      "winnerProbability": 0.881875,
+      "winnerProbability": 0.883475,
       "competitive": false,
       "displayName": "Georgia Senate",
-      "tippingPower": 0.10937396513904961,
-      "demTippingPower": 0.1255,
-      "repTippingPower": 0.01005,
+      "tippingPower": 0.10872920653073989,
+      "demTippingPower": 0.125425,
+      "repTippingPower": 0.010125,
       "history": [
         {
           "date": "2026-05-16",
@@ -676,7 +743,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.881875
+          "dem": 0.883475
         }
       ]
     },
@@ -687,7 +754,7 @@
       "hold": "R",
       "caucusTarget": "D",
       "rating": "Safe R",
-      "pvi": -19,
+      "pvi": -18.65,
       "pastSenate": -27.681587408663173,
       "money": -0.6636399886000001,
       "candidate": -1,
@@ -712,6 +779,14 @@
           "year": 2016,
           "margin": -38.40793704331586
         },
+        "census": {
+          "name": "Idaho",
+          "pop2020": 1849415,
+          "pop2024": 2001619,
+          "pctChange2024": 1.5471898746,
+          "growth": 8.229845653895962,
+          "growthSignal": 0.35
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -722,18 +797,18 @@
       "dem": "Democratic nominee pending",
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": -20.32657761140023,
+      "margin": -20.24257761140023,
       "error": 5.2,
-      "demProbability": 0.0025,
+      "demProbability": 0.00255,
       "pollMargin": null,
       "primaryRisk": 0,
       "winnerParty": "R",
-      "winnerProbability": 0.9975,
+      "winnerProbability": 0.99745,
       "competitive": false,
       "displayName": "Idaho Senate",
-      "tippingPower": 0.004057019197511272,
+      "tippingPower": 0.004119879877764612,
       "demTippingPower": 0.00005,
-      "repTippingPower": 0.145025,
+      "repTippingPower": 0.145825,
       "history": [
         {
           "date": "2026-05-16",
@@ -741,7 +816,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.0025
+          "dem": 0.00255
         }
       ]
     },
@@ -752,7 +827,7 @@
       "hold": "D",
       "caucusTarget": "D",
       "rating": "Safe D",
-      "pvi": 13,
+      "pvi": 12.942098739118496,
       "pastSenate": 14.216265110040684,
       "money": 1.0875,
       "candidate": 0.4,
@@ -777,6 +852,14 @@
           "year": 2016,
           "margin": 15.08132555020341
         },
+        "census": {
+          "name": "Illinois",
+          "pop2020": 12799088,
+          "pop2024": 12710158,
+          "pctChange2024": 0.5370796469,
+          "growth": -0.6948151305780537,
+          "growthSignal": -0.05790126088150447
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -787,7 +870,7 @@
       "dem": "Juliana Stratton",
       "rep": "Don Tracy",
       "primarySummary": "Primaries held March 17. Stratton and Tracy are the general-election nominees.",
-      "margin": 17.15901888208054,
+      "margin": 17.145122579468982,
       "error": 5.2,
       "demProbability": 0.992275,
       "pollMargin": null,
@@ -796,8 +879,8 @@
       "winnerProbability": 0.992275,
       "competitive": false,
       "displayName": "Illinois Senate",
-      "tippingPower": 0.010330241391105398,
-      "demTippingPower": 0.13105,
+      "tippingPower": 0.01031645197658638,
+      "demTippingPower": 0.130875,
       "repTippingPower": 0.00005,
       "history": [
         {
@@ -817,7 +900,7 @@
       "hold": "R",
       "caucusTarget": "D",
       "rating": "Lean R",
-      "pvi": -6,
+      "pvi": -5.868524037849367,
       "pastSenate": -9.686933205973126,
       "money": -0.11010339340000001,
       "candidate": 0.2,
@@ -859,6 +942,14 @@
           "year": 2016,
           "margin": -24.434666029865625
         },
+        "census": {
+          "name": "Iowa",
+          "pop2020": 3191141,
+          "pop2024": 3241488,
+          "pctChange2024": 0.7169369758,
+          "growth": 1.5777115458075968,
+          "growthSignal": 0.13147596215063306
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -869,18 +960,18 @@
       "dem": "Democratic nominee pending",
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": -6.0050199704416,
+      "margin": -5.980407670327001,
       "error": 8.432272727272728,
-      "demProbability": 0.271875,
+      "demProbability": 0.272625,
       "pollMargin": -3.726210825671242,
       "primaryRisk": 1.2322727272727274,
       "winnerParty": "R",
-      "winnerProbability": 0.728125,
+      "winnerProbability": 0.727375,
       "competitive": true,
       "displayName": "Iowa Senate",
-      "tippingPower": 0.10139303256767676,
-      "demTippingPower": 0.039575,
-      "repTippingPower": 0.11235,
+      "tippingPower": 0.10184786406341403,
+      "demTippingPower": 0.039375,
+      "repTippingPower": 0.1131,
       "history": [
         {
           "date": "2026-05-16",
@@ -888,7 +979,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.271875
+          "dem": 0.272625
         }
       ]
     },
@@ -899,7 +990,7 @@
       "hold": "R",
       "caucusTarget": "D",
       "rating": "Lean R",
-      "pvi": -10,
+      "pvi": -9.908009696732073,
       "pastSenate": -14.78742531339087,
       "money": -0.8283175429,
       "candidate": -0.5,
@@ -924,6 +1015,14 @@
           "year": 2016,
           "margin": -29.937126566954348
         },
+        "census": {
+          "name": "Kansas",
+          "pop2020": 2938172,
+          "pop2024": 2970606,
+          "pctChange2024": 0.6473318652,
+          "growth": 1.1038836392151312,
+          "growthSignal": 0.0919903032679276
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -934,18 +1033,18 @@
       "dem": "Democratic nominee pending",
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": -8.745954991215768,
+      "margin": -8.723877318431466,
       "error": 8.088636363636365,
-      "demProbability": 0.17485,
+      "demProbability": 0.1755,
       "pollMargin": null,
       "primaryRisk": 0.8886363636363637,
       "winnerParty": "R",
-      "winnerProbability": 0.82515,
+      "winnerProbability": 0.8245,
       "competitive": false,
       "displayName": "Kansas Senate",
-      "tippingPower": 0.05129532426012157,
+      "tippingPower": 0.05166133676726702,
       "demTippingPower": 0.023725,
-      "repTippingPower": 0.126325,
+      "repTippingPower": 0.127175,
       "history": [
         {
           "date": "2026-05-16",
@@ -953,7 +1052,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.17485
+          "dem": 0.1755
         }
       ]
     },
@@ -964,7 +1063,7 @@
       "hold": "R",
       "caucusTarget": "D",
       "rating": "Safe R",
-      "pvi": -16,
+      "pvi": -15.852025374725859,
       "pastSenate": -17.30975668057989,
       "money": -1.0875,
       "candidate": -1,
@@ -989,6 +1088,14 @@
           "year": 2016,
           "margin": -14.54878340289945
         },
+        "census": {
+          "name": "Kentucky",
+          "pop2020": 4508318,
+          "pop2024": 4588372,
+          "pctChange2024": 0.8301551775,
+          "growth": 1.775695503289697,
+          "growthSignal": 0.14797462527414143
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -999,18 +1106,18 @@
       "dem": "Democratic nominee pending",
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": -17.638685476043573,
+      "margin": -17.60317156597778,
       "error": 5.948636363636364,
-      "demProbability": 0.011525,
+      "demProbability": 0.011725,
       "pollMargin": null,
       "primaryRisk": 0.7486363636363637,
       "winnerParty": "R",
-      "winnerProbability": 0.988475,
+      "winnerProbability": 0.988275,
       "competitive": false,
       "displayName": "Kentucky Senate",
-      "tippingPower": 0.008681754083957214,
+      "tippingPower": 0.008802591989775512,
       "demTippingPower": 0.000525,
-      "repTippingPower": 0.144725,
+      "repTippingPower": 0.1455,
       "history": [
         {
           "date": "2026-05-16",
@@ -1018,7 +1125,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.011525
+          "dem": 0.011725
         }
       ]
     },
@@ -1029,7 +1136,7 @@
       "hold": "R",
       "caucusTarget": "D",
       "rating": "Safe R",
-      "pvi": -12,
+      "pvi": -12.09773120870726,
       "pastSenate": -19.749621323260655,
       "money": -1.0875,
       "candidate": -1,
@@ -1054,6 +1161,14 @@
           "year": 2016,
           "margin": -26.74810661630328
         },
+        "census": {
+          "name": "Louisiana",
+          "pop2020": 4652301,
+          "pop2024": 4597740,
+          "pctChange2024": 0.2107421616,
+          "growth": -1.1727745044871345,
+          "growthSignal": -0.09773120870726121
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -1064,18 +1179,18 @@
       "dem": "Democratic nominee pending",
       "rep": "Bill Cassidy / Julia Letlow / John Fleming",
       "primarySummary": "Louisiana voted May 16. Final result/runoff handling should be refreshed once certified.",
-      "margin": -17.441658404579726,
+      "margin": -17.465113894669468,
       "error": 5.7250000000000005,
-      "demProbability": 0.0111,
+      "demProbability": 0.010975,
       "pollMargin": null,
       "primaryRisk": 0.525,
       "winnerParty": "R",
-      "winnerProbability": 0.9889,
+      "winnerProbability": 0.989025,
       "competitive": false,
       "displayName": "Louisiana Senate",
-      "tippingPower": 0.00853960759134602,
-      "demTippingPower": 0.0006,
-      "repTippingPower": 0.14495,
+      "tippingPower": 0.008537141092810233,
+      "demTippingPower": 0.000575,
+      "repTippingPower": 0.14575,
       "history": [
         {
           "date": "2026-05-16",
@@ -1083,7 +1198,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.0111
+          "dem": 0.010975
         }
       ]
     },
@@ -1094,7 +1209,7 @@
       "hold": "R",
       "caucusTarget": "D",
       "rating": "Lean D",
-      "pvi": 5,
+      "pvi": 5.24697017108918,
       "pastSenate": 1.443134633966416,
       "money": 0.8925,
       "candidate": 0.4,
@@ -1136,6 +1251,14 @@
           "year": 2018,
           "margin": -24.78432683016792
         },
+        "census": {
+          "name": "Maine",
+          "pop2020": 1364571,
+          "pop2024": 1405012,
+          "pctChange2024": 0.3833826553,
+          "growth": 2.963642053070159,
+          "growthSignal": 0.24697017108917993
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -1146,18 +1269,18 @@
       "dem": "Democratic nominee pending",
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": 5.500602629623748,
+      "margin": 5.546835445651643,
       "error": 8.77909090909091,
-      "demProbability": 0.70975,
+      "demProbability": 0.71145,
       "pollMargin": 0.7483495138595477,
       "primaryRisk": 1.579090909090909,
       "winnerParty": "D",
-      "winnerProbability": 0.70975,
+      "winnerProbability": 0.71145,
       "competitive": true,
       "displayName": "Maine Senate",
-      "tippingPower": 0.14081781588222358,
-      "demTippingPower": 0.10675,
-      "repTippingPower": 0.034275,
+      "tippingPower": 0.14049811327228054,
+      "demTippingPower": 0.106575,
+      "repTippingPower": 0.034375,
       "history": [
         {
           "date": "2026-05-16",
@@ -1165,7 +1288,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.70975
+          "dem": 0.71145
         }
       ]
     },
@@ -1176,7 +1299,7 @@
       "hold": "D",
       "caucusTarget": "D",
       "rating": "Safe D",
-      "pvi": 16,
+      "pvi": 16.168669450338676,
       "pastSenate": 20.83294607863056,
       "money": 1.0875,
       "candidate": 1,
@@ -1201,6 +1324,14 @@
           "year": 2018,
           "margin": 24.164730393152794
         },
+        "census": {
+          "name": "Massachusetts",
+          "pop2020": 6994598,
+          "pop2024": 7136171,
+          "pctChange2024": 0.9849618655,
+          "growth": 2.0240334040641077,
+          "growthSignal": 0.16866945033867564
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -1211,17 +1342,17 @@
       "dem": "Democratic nominee pending",
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": 20.757355075798518,
+      "margin": 20.7978357438798,
       "error": 5.900909090909091,
-      "demProbability": 0.99695,
+      "demProbability": 0.997,
       "pollMargin": null,
       "primaryRisk": 0.7009090909090909,
       "winnerParty": "D",
-      "winnerProbability": 0.99695,
+      "winnerProbability": 0.997,
       "competitive": false,
       "displayName": "Massachusetts Senate",
-      "tippingPower": 0.00650998804210738,
-      "demTippingPower": 0.13105,
+      "tippingPower": 0.006447955203783602,
+      "demTippingPower": 0.130875,
       "repTippingPower": 0.000125,
       "history": [
         {
@@ -1230,7 +1361,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.99695
+          "dem": 0.997
         }
       ]
     },
@@ -1241,7 +1372,7 @@
       "hold": "D",
       "caucusTarget": "D",
       "rating": "Lean D",
-      "pvi": 1,
+      "pvi": 1.0560557909166322,
       "pastSenate": 2.9011204617311472,
       "money": 0.6975,
       "candidate": 0.3,
@@ -1283,6 +1414,14 @@
           "year": 2018,
           "margin": 6.505602308655736
         },
+        "census": {
+          "name": "Michigan",
+          "pop2020": 10072703,
+          "pop2024": 10140459,
+          "pctChange2024": 0.5663094708,
+          "growth": 0.6726694909995857,
+          "growthSignal": 0.056055790916632146
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -1293,18 +1432,18 @@
       "dem": "Democratic nominee pending",
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": 5.5218153933754035,
+      "margin": 5.532309037434997,
       "error": 8.928636363636365,
-      "demProbability": 0.70315,
+      "demProbability": 0.703675,
       "pollMargin": 1.10890571098529,
       "primaryRisk": 1.728636363636364,
       "winnerParty": "D",
-      "winnerProbability": 0.70315,
+      "winnerProbability": 0.703675,
       "competitive": true,
       "displayName": "Michigan Senate",
-      "tippingPower": 0.17843281181548945,
-      "demTippingPower": 0.10795,
-      "repTippingPower": 0.0367,
+      "tippingPower": 0.1783414977315869,
+      "demTippingPower": 0.107475,
+      "repTippingPower": 0.037175,
       "history": [
         {
           "date": "2026-05-16",
@@ -1312,7 +1451,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.70315
+          "dem": 0.703675
         }
       ]
     },
@@ -1323,7 +1462,7 @@
       "hold": "D",
       "caucusTarget": "D",
       "rating": "Lean D",
-      "pvi": 4,
+      "pvi": 4.120264729496291,
       "pastSenate": -2.255407789191655,
       "money": 0.7808291197999999,
       "candidate": 0.2,
@@ -1348,6 +1487,14 @@
           "year": 2018,
           "margin": -39.277038945958274
         },
+        "census": {
+          "name": "Minnesota",
+          "pop2020": 5710735,
+          "pop2024": 5793151,
+          "pctChange2024": 0.6970739684,
+          "growth": 1.443176753955489,
+          "growthSignal": 0.12026472949629075
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -1358,18 +1505,18 @@
       "dem": "Democratic nominee pending",
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": 4.828680510054074,
+      "margin": 4.857544045133183,
       "error": 8.540454545454546,
-      "demProbability": 0.69045,
+      "demProbability": 0.691425,
       "pollMargin": null,
       "primaryRisk": 1.3404545454545456,
       "winnerParty": "D",
-      "winnerProbability": 0.69045,
+      "winnerProbability": 0.691425,
       "competitive": true,
       "displayName": "Minnesota Senate",
-      "tippingPower": 0.06013357289397384,
-      "demTippingPower": 0.106625,
-      "repTippingPower": 0.0379,
+      "tippingPower": 0.060164314900615044,
+      "demTippingPower": 0.106525,
+      "repTippingPower": 0.0382,
       "history": [
         {
           "date": "2026-05-16",
@@ -1377,7 +1524,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.69045
+          "dem": 0.691425
         }
       ]
     },
@@ -1388,7 +1535,7 @@
       "hold": "R",
       "caucusTarget": "D",
       "rating": "Safe R",
-      "pvi": -11,
+      "pvi": -11.04363363050734,
       "pastSenate": -17.04672527379552,
       "money": -0.8126675505000001,
       "candidate": -1,
@@ -1413,6 +1560,14 @@
           "year": 2018,
           "margin": -13.233626368977596
         },
+        "census": {
+          "name": "Mississippi",
+          "pop2020": 2958536,
+          "pop2024": 2943045,
+          "pctChange2024": -0.004315072,
+          "growth": -0.5236035660880922,
+          "growthSignal": -0.043633630507341016
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -1423,18 +1578,18 @@
       "dem": "Scott Colom",
       "rep": "Cindy Hyde-Smith",
       "primarySummary": "Primaries held March 10. Hyde-Smith defeated a GOP challenger; Colom is the Democratic nominee.",
-      "margin": -16.3387299901367,
+      "margin": -16.34920206145846,
       "error": 5.2,
-      "demProbability": 0.011,
+      "demProbability": 0.0109,
       "pollMargin": null,
       "primaryRisk": 0,
       "winnerParty": "R",
-      "winnerProbability": 0.989,
+      "winnerProbability": 0.9891,
       "competitive": false,
       "displayName": "Mississippi Senate",
-      "tippingPower": 0.008483960863441085,
+      "tippingPower": 0.008492253275537853,
       "demTippingPower": 0.000475,
-      "repTippingPower": 0.144775,
+      "repTippingPower": 0.145575,
       "history": [
         {
           "date": "2026-05-16",
@@ -1442,7 +1597,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.011
+          "dem": 0.0109
         }
       ]
     },
@@ -1453,7 +1608,7 @@
       "hold": "R",
       "caucusTarget": "D",
       "rating": "Lean R",
-      "pvi": -11,
+      "pvi": -10.65,
       "pastSenate": -7.289707841644462,
       "money": 0.15318948370000002,
       "candidate": 0.8,
@@ -1491,6 +1646,14 @@
           "year": 2018,
           "margin": 3.5514607917776932
         },
+        "census": {
+          "name": "Montana",
+          "pop2020": 1087230,
+          "pop2024": 1137233,
+          "pctChange2024": 0.5242631941,
+          "growth": 4.599118861694397,
+          "growthSignal": 0.35
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -1501,18 +1664,18 @@
       "dem": "Democratic nominee pending",
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": -8.135577049598805,
+      "margin": -8.070057049598805,
       "error": 7.2,
-      "demProbability": 0.1785,
+      "demProbability": 0.18045,
       "pollMargin": -6.508477128551405,
       "primaryRisk": 0,
       "winnerParty": "R",
-      "winnerProbability": 0.8215,
+      "winnerProbability": 0.81955,
       "competitive": false,
       "displayName": "Montana Senate",
-      "tippingPower": 0.0787563165074322,
-      "demTippingPower": 0.023325,
-      "repTippingPower": 0.1279,
+      "tippingPower": 0.07965352175664485,
+      "demTippingPower": 0.023675,
+      "repTippingPower": 0.128625,
       "history": [
         {
           "date": "2026-05-16",
@@ -1520,7 +1683,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.1785
+          "dem": 0.18045
         }
       ]
     },
@@ -1531,7 +1694,7 @@
       "hold": "R",
       "caucusTarget": "D",
       "rating": "Likely D",
-      "pvi": -2,
+      "pvi": -1.65,
       "pastSenate": -1.93921732766903,
       "money": 1.2175,
       "candidate": 1.4,
@@ -1573,6 +1736,14 @@
           "year": 2016,
           "margin": -5.69608663834515
         },
+        "census": {
+          "name": "North Carolina",
+          "pop2020": 10449652,
+          "pop2024": 11046024,
+          "pctChange2024": 1.5148620247,
+          "growth": 5.707099145502644,
+          "growthSignal": 0.35
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -1583,18 +1754,18 @@
       "dem": "Roy Cooper",
       "rep": "Michael Whatley",
       "primarySummary": "Primaries held March 3. Cooper and Whatley won their nominations.",
-      "margin": 9.289742232213936,
+      "margin": 9.355262232213937,
       "error": 6.2,
-      "demProbability": 0.879375,
+      "demProbability": 0.881275,
       "pollMargin": 3.1643630734539587,
       "primaryRisk": 0,
       "winnerParty": "D",
-      "winnerProbability": 0.879375,
+      "winnerProbability": 0.881275,
       "competitive": false,
       "displayName": "North Carolina Senate",
-      "tippingPower": 0.09925497516102606,
-      "demTippingPower": 0.126225,
-      "repTippingPower": 0.009825,
+      "tippingPower": 0.09837724224216304,
+      "demTippingPower": 0.126125,
+      "repTippingPower": 0.00965,
       "history": [
         {
           "date": "2026-05-16",
@@ -1602,7 +1773,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.879375
+          "dem": 0.881275
         }
       ]
     },
@@ -1613,7 +1784,7 @@
       "hold": "R",
       "caucusTarget": "D",
       "rating": "Lean R",
-      "pvi": -13,
+      "pvi": -12.821405560900628,
       "pastSenate": -9.412769805532543,
       "money": -0.0805954412,
       "candidate": 1.25,
@@ -1655,6 +1826,14 @@
           "year": 2018,
           "margin": -19.063849027662712
         },
+        "census": {
+          "name": "Nebraska",
+          "pop2020": 1963387,
+          "pop2024": 2005465,
+          "pctChange2024": 0.8854227452,
+          "growth": 2.143133269192472,
+          "growthSignal": 0.17859443909937267
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -1665,18 +1844,18 @@
       "dem": "Dan Osborn (independent)",
       "rep": "Pete Ricketts",
       "primarySummary": "Ricketts won the Republican primary. The Democratic primary is over and the Democratic nominee said they will withdraw so Osborn can consolidate the anti-Ricketts vote.",
-      "margin": -6.3082950224350185,
+      "margin": -6.274862143435616,
       "error": 7.2,
-      "demProbability": 0.236775,
+      "demProbability": 0.237975,
       "pollMargin": -4.22558936617572,
       "primaryRisk": 0,
       "winnerParty": "R",
-      "winnerProbability": 0.763225,
+      "winnerProbability": 0.762025,
       "competitive": false,
       "displayName": "Nebraska Senate",
-      "tippingPower": 0.09330671768395857,
-      "demTippingPower": 0.033175,
-      "repTippingPower": 0.11925,
+      "tippingPower": 0.09372991273990497,
+      "demTippingPower": 0.033025,
+      "repTippingPower": 0.119825,
       "history": [
         {
           "date": "2026-05-16",
@@ -1684,7 +1863,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.236775
+          "dem": 0.237975
         }
       ]
     },
@@ -1695,7 +1874,7 @@
       "hold": "D",
       "caucusTarget": "D",
       "rating": "Lean D",
-      "pvi": 3,
+      "pvi": 3.182991044100624,
       "pastSenate": 4.027518467408068,
       "money": 0.6720225822999999,
       "candidate": 0.4,
@@ -1733,6 +1912,14 @@
           "year": 2016,
           "margin": 0.13759233704034418
         },
+        "census": {
+          "name": "New Hampshire",
+          "pop2020": 1378756,
+          "pop2024": 1409032,
+          "pctChange2024": 0.4873060101,
+          "growth": 2.1958925292074887,
+          "growthSignal": 0.18299104410062406
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -1743,18 +1930,18 @@
       "dem": "Democratic nominee pending",
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": 6.244268618663238,
+      "margin": 6.278524542118875,
       "error": 8.877727272727274,
-      "demProbability": 0.7281,
+      "demProbability": 0.72935,
       "pollMargin": 1.2969574033441138,
       "primaryRisk": 1.677727272727273,
       "winnerParty": "D",
-      "winnerProbability": 0.7281,
+      "winnerProbability": 0.72935,
       "competitive": true,
       "displayName": "New Hampshire Senate",
-      "tippingPower": 0.1273636846175525,
-      "demTippingPower": 0.109525,
-      "repTippingPower": 0.0336,
+      "tippingPower": 0.12702411117792864,
+      "demTippingPower": 0.10925,
+      "repTippingPower": 0.0337,
       "history": [
         {
           "date": "2026-05-16",
@@ -1762,7 +1949,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.7281
+          "dem": 0.72935
         }
       ]
     },
@@ -1773,7 +1960,7 @@
       "hold": "D",
       "caucusTarget": "D",
       "rating": "Safe D",
-      "pvi": 12,
+      "pvi": 12.20495171142592,
       "pastSenate": 12.635811580438645,
       "money": 1.0875,
       "candidate": 1,
@@ -1798,6 +1985,14 @@
           "year": 2018,
           "margin": 11.179057902193222
         },
+        "census": {
+          "name": "New Jersey",
+          "pop2020": 9272794,
+          "pop2024": 9500851,
+          "pctChange2024": 1.2922561437,
+          "growth": 2.4594205371110367,
+          "growthSignal": 0.20495171142591972
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -1808,17 +2003,17 @@
       "dem": "Democratic nominee pending",
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": 18.00792817616013,
+      "margin": 18.057116586902353,
       "error": 5.2,
-      "demProbability": 0.994675,
+      "demProbability": 0.99485,
       "pollMargin": null,
       "primaryRisk": 0,
       "winnerParty": "D",
-      "winnerProbability": 0.994675,
+      "winnerProbability": 0.99485,
       "competitive": false,
       "displayName": "New Jersey Senate",
-      "tippingPower": 0.008590356980267303,
-      "demTippingPower": 0.13105,
+      "tippingPower": 0.008437491206493734,
+      "demTippingPower": 0.130875,
       "repTippingPower": 0.0001,
       "history": [
         {
@@ -1827,7 +2022,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.994675
+          "dem": 0.99485
         }
       ]
     },
@@ -1838,7 +2033,7 @@
       "hold": "D",
       "caucusTarget": "D",
       "rating": "Safe D",
-      "pvi": 10,
+      "pvi": 10.04582415670178,
       "pastSenate": 14.311109708297707,
       "money": 0.9769319795,
       "candidate": 1,
@@ -1863,6 +2058,14 @@
           "year": 2018,
           "margin": 23.555548541488523
         },
+        "census": {
+          "name": "New Mexico",
+          "pop2020": 2118606,
+          "pop2024": 2130256,
+          "pctChange2024": 0.428632581,
+          "growth": 0.5498898804213714,
+          "growthSignal": 0.04582415670178095
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -1873,17 +2076,17 @@
       "dem": "Democratic nominee pending",
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": 17.688476583281947,
+      "margin": 17.699474380890372,
       "error": 5.2,
-      "demProbability": 0.993675,
+      "demProbability": 0.9937,
       "pollMargin": null,
       "primaryRisk": 0,
       "winnerParty": "D",
-      "winnerProbability": 0.993675,
+      "winnerProbability": 0.9937,
       "competitive": false,
       "displayName": "New Mexico Senate",
-      "tippingPower": 0.009357573586681323,
-      "demTippingPower": 0.131,
+      "tippingPower": 0.009326717794684074,
+      "demTippingPower": 0.130825,
       "repTippingPower": 0.00015,
       "history": [
         {
@@ -1892,7 +2095,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.993675
+          "dem": 0.9937
         }
       ]
     },
@@ -1903,7 +2106,7 @@
       "hold": "R",
       "caucusTarget": "D",
       "rating": "Toss-up",
-      "pvi": -7,
+      "pvi": -6.940390654895518,
       "pastSenate": 0.5691543082610389,
       "money": 0.8925,
       "candidate": 1.2,
@@ -1945,6 +2148,14 @@
           "year": 2018,
           "margin": 6.8457715413051945
         },
+        "census": {
+          "name": "Ohio",
+          "pop2020": 11798905,
+          "pop2024": 11883304,
+          "pctChange2024": 0.5012671648,
+          "growth": 0.7153121412537858,
+          "growthSignal": 0.05960934510448215
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -1955,18 +2166,18 @@
       "dem": "Sherrod Brown",
       "rep": "Jon Husted",
       "primarySummary": "Primaries held May 5. Brown won the Democratic primary; Husted was unopposed for the GOP nomination.",
-      "margin": 1.3935852456496316,
+      "margin": 1.4047441150531907,
       "error": 9.4,
-      "demProbability": 0.551325,
+      "demProbability": 0.551775,
       "pollMargin": -0.7918097635656146,
       "primaryRisk": 0,
       "winnerParty": "D",
-      "winnerProbability": 0.551325,
+      "winnerProbability": 0.551775,
       "competitive": true,
       "displayName": "Ohio Senate",
-      "tippingPower": 0.2759421050176913,
-      "demTippingPower": 0.08655,
-      "repTippingPower": 0.0634,
+      "tippingPower": 0.275410211379312,
+      "demTippingPower": 0.086225,
+      "repTippingPower": 0.06345,
       "history": [
         {
           "date": "2026-05-16",
@@ -1974,7 +2185,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.551325
+          "dem": 0.551775
         }
       ]
     },
@@ -1985,7 +2196,7 @@
       "hold": "R",
       "caucusTarget": "D",
       "rating": "Safe R",
-      "pvi": -20,
+      "pvi": -19.726850783587594,
       "pastSenate": -32.632054070068165,
       "money": -1.0875,
       "candidate": -1,
@@ -2010,6 +2221,14 @@
           "year": 2016,
           "margin": -43.16027035034084
         },
+        "census": {
+          "name": "Oklahoma",
+          "pop2020": 3965415,
+          "pop2024": 4095393,
+          "pctChange2024": 0.7753916083,
+          "growth": 3.2777905969488694,
+          "growthSignal": 0.2731492164124058
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -2020,18 +2239,18 @@
       "dem": "Democratic nominee pending",
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": -21.81314495394123,
+      "margin": -21.74758914200225,
       "error": 5.865909090909091,
-      "demProbability": 0.001825,
+      "demProbability": 0.001875,
       "pollMargin": null,
       "primaryRisk": 0.6659090909090909,
       "winnerParty": "R",
-      "winnerProbability": 0.998175,
+      "winnerProbability": 0.998125,
       "competitive": false,
       "displayName": "Oklahoma Senate",
-      "tippingPower": 0.0034674913380998928,
+      "tippingPower": 0.003533963005115283,
       "demTippingPower": 0.00005,
-      "repTippingPower": 0.145025,
+      "repTippingPower": 0.145825,
       "history": [
         {
           "date": "2026-05-16",
@@ -2039,7 +2258,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.001825
+          "dem": 0.001875
         }
       ]
     },
@@ -2050,7 +2269,7 @@
       "hold": "D",
       "caucusTarget": "D",
       "rating": "Safe D",
-      "pvi": 10,
+      "pvi": 10.056144928062151,
       "pastSenate": 16.65063370752449,
       "money": 0.9221128675999999,
       "candidate": 1,
@@ -2075,6 +2294,14 @@
           "year": 2016,
           "margin": 23.253168537622447
         },
+        "census": {
+          "name": "Oregon",
+          "pop2020": 4243779,
+          "pop2024": 4272371,
+          "pctChange2024": 0.4400452975,
+          "growth": 0.6737391367458108,
+          "growthSignal": 0.0561449280621509
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -2085,7 +2312,7 @@
       "dem": "Democratic nominee pending",
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": 18.182044182417304,
+      "margin": 18.195518965152218,
       "error": 5.2,
       "demProbability": 0.99535,
       "pollMargin": null,
@@ -2094,8 +2321,8 @@
       "winnerProbability": 0.99535,
       "competitive": false,
       "displayName": "Oregon Senate",
-      "tippingPower": 0.008025586180666141,
-      "demTippingPower": 0.131025,
+      "tippingPower": 0.008014871112334144,
+      "demTippingPower": 0.13085,
       "repTippingPower": 0.00005,
       "history": [
         {
@@ -2115,7 +2342,7 @@
       "hold": "D",
       "caucusTarget": "D",
       "rating": "Safe D",
-      "pvi": 15,
+      "pvi": 15.119908560033318,
       "pastSenate": 19.021567243017692,
       "money": 0.8231211083000001,
       "candidate": 1,
@@ -2140,6 +2367,14 @@
           "year": 2018,
           "margin": 23.10783621508847
         },
+        "census": {
+          "name": "Rhode Island",
+          "pop2020": 1096530,
+          "pop2024": 1112308,
+          "pctChange2024": 0.8046734316,
+          "growth": 1.4389027203998066,
+          "growthSignal": 0.11990856003331722
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -2150,18 +2385,18 @@
       "dem": "Democratic nominee pending",
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": 19.917138306145944,
+      "margin": 19.94591636055394,
       "error": 5.9372727272727275,
-      "demProbability": 0.9961,
+      "demProbability": 0.996125,
       "pollMargin": null,
       "primaryRisk": 0.7372727272727273,
       "winnerParty": "D",
-      "winnerProbability": 0.9961,
+      "winnerProbability": 0.996125,
       "competitive": false,
       "displayName": "Rhode Island Senate",
-      "tippingPower": 0.007351285815235996,
-      "demTippingPower": 0.131,
-      "repTippingPower": 0.00005,
+      "tippingPower": 0.007316594895967596,
+      "demTippingPower": 0.130825,
+      "repTippingPower": 0.000025,
       "history": [
         {
           "date": "2026-05-16",
@@ -2169,7 +2404,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.9961
+          "dem": 0.996125
         }
       ]
     },
@@ -2180,7 +2415,7 @@
       "hold": "R",
       "caucusTarget": "D",
       "rating": "Lean R",
-      "pvi": -8,
+      "pvi": -7.65,
       "pastSenate": -13.239971061904207,
       "money": -0.6598321137999998,
       "candidate": -0.2,
@@ -2205,6 +2440,14 @@
           "year": 2016,
           "margin": -26.199855309521038
         },
+        "census": {
+          "name": "South Carolina",
+          "pop2020": 5132249,
+          "pop2024": 5478831,
+          "pctChange2024": 1.6890102323,
+          "growth": 6.7530238692627735,
+          "growthSignal": 0.35
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -2215,18 +2458,18 @@
       "dem": "Democratic nominee pending",
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": -7.414827254728435,
+      "margin": -7.330827254728437,
       "error": 8.35909090909091,
-      "demProbability": 0.2217,
+      "demProbability": 0.2242,
       "pollMargin": null,
       "primaryRisk": 1.1590909090909092,
       "winnerParty": "R",
-      "winnerProbability": 0.7783,
+      "winnerProbability": 0.7758,
       "competitive": false,
       "displayName": "South Carolina Senate",
-      "tippingPower": 0.06968172457480781,
-      "demTippingPower": 0.031725,
-      "repTippingPower": 0.120775,
+      "tippingPower": 0.07035081892407274,
+      "demTippingPower": 0.032,
+      "repTippingPower": 0.12135,
       "history": [
         {
           "date": "2026-05-16",
@@ -2234,7 +2477,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.2217
+          "dem": 0.2242
         }
       ]
     },
@@ -2245,7 +2488,7 @@
       "hold": "R",
       "caucusTarget": "D",
       "rating": "Safe R",
-      "pvi": -16,
+      "pvi": -15.655375840326986,
       "pastSenate": -24.73114463176575,
       "money": -0.8069005256,
       "candidate": -1,
@@ -2270,6 +2513,14 @@
           "year": 2016,
           "margin": -43.65572315882875
         },
+        "census": {
+          "name": "South Dakota",
+          "pop2020": 887948,
+          "pop2024": 924669,
+          "pctChange2024": 0.693015937,
+          "growth": 4.135489916076167,
+          "growthSignal": 0.3446241596730139
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -2280,18 +2531,18 @@
       "dem": "Democratic nominee pending",
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": -19.145423539320745,
+      "margin": -19.06271374099922,
       "error": 5.2,
-      "demProbability": 0.00385,
+      "demProbability": 0.003975,
       "pollMargin": null,
       "primaryRisk": 0,
       "winnerParty": "R",
-      "winnerProbability": 0.99615,
+      "winnerProbability": 0.996025,
       "competitive": false,
       "displayName": "South Dakota Senate",
-      "tippingPower": 0.005039023406813841,
-      "demTippingPower": 0.000275,
-      "repTippingPower": 0.145025,
+      "tippingPower": 0.005147159283706627,
+      "demTippingPower": 0.00025,
+      "repTippingPower": 0.145825,
       "history": [
         {
           "date": "2026-05-16",
@@ -2299,7 +2550,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.00385
+          "dem": 0.003975
         }
       ]
     },
@@ -2310,7 +2561,7 @@
       "hold": "R",
       "caucusTarget": "D",
       "rating": "Safe R",
-      "pvi": -14,
+      "pvi": -13.65,
       "pastSenate": -14.957406829668322,
       "money": -1.0616337162,
       "candidate": -1,
@@ -2335,6 +2586,14 @@
           "year": 2018,
           "margin": -10.787034148341608
         },
+        "census": {
+          "name": "Tennessee",
+          "pop2020": 6927904,
+          "pop2024": 7227750,
+          "pctChange2024": 1.1113964935,
+          "growth": 4.3280911513785405,
+          "growthSignal": 0.35
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -2345,18 +2604,18 @@
       "dem": "Democratic nominee pending",
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": -16.93993585044126,
+      "margin": -16.85593585044126,
       "error": 5.992727272727273,
-      "demProbability": 0.013825,
+      "demProbability": 0.01445,
       "pollMargin": null,
       "primaryRisk": 0.7927272727272727,
       "winnerParty": "R",
-      "winnerProbability": 0.986175,
+      "winnerProbability": 0.98555,
       "competitive": false,
       "displayName": "Tennessee Senate",
-      "tippingPower": 0.009523752056082871,
-      "demTippingPower": 0.000975,
-      "repTippingPower": 0.144675,
+      "tippingPower": 0.009788694809993287,
+      "demTippingPower": 0.001025,
+      "repTippingPower": 0.14545,
       "history": [
         {
           "date": "2026-05-16",
@@ -2364,7 +2623,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.013825
+          "dem": 0.01445
         }
       ]
     },
@@ -2375,7 +2634,7 @@
       "hold": "R",
       "caucusTarget": "D",
       "rating": "Tilt R",
-      "pvi": -5,
+      "pvi": -4.65,
       "pastSenate": -4.513449252268518,
       "money": 0.8275,
       "candidate": 0.6,
@@ -2417,6 +2676,14 @@
           "year": 2018,
           "margin": -2.56724626134259
         },
+        "census": {
+          "name": "Texas",
+          "pop2020": 29239570,
+          "pop2024": 31290831,
+          "pctChange2024": 1.8320197059,
+          "growth": 7.015359665001913,
+          "growthSignal": 0.35
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -2427,18 +2694,18 @@
       "dem": "James Talarico",
       "rep": "John Cornyn / Ken Paxton runoff",
       "primarySummary": "Democratic primary held March 3. Talarico is nominated; Cornyn and Paxton face a May 26 Republican runoff.",
-      "margin": -2.1009838601362487,
+      "margin": -2.0354638601362485,
       "error": 9.55,
-      "demProbability": 0.420525,
+      "demProbability": 0.422825,
       "pollMargin": -3.080524243447426,
       "primaryRisk": 1.15,
       "winnerParty": "R",
-      "winnerProbability": 0.579475,
+      "winnerProbability": 0.577175,
       "competitive": true,
       "displayName": "Texas Senate",
-      "tippingPower": 0.24928123630456855,
-      "demTippingPower": 0.06675,
-      "repTippingPower": 0.086275,
+      "tippingPower": 0.24995452183186556,
+      "demTippingPower": 0.066625,
+      "repTippingPower": 0.0867,
       "history": [
         {
           "date": "2026-05-16",
@@ -2446,7 +2713,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.420525
+          "dem": 0.422825
         }
       ]
     },
@@ -2457,7 +2724,7 @@
       "hold": "D",
       "caucusTarget": "D",
       "rating": "Likely D",
-      "pvi": 6,
+      "pvi": 6.167465208856843,
       "pastSenate": 10.399029174013158,
       "money": 1.0875,
       "candidate": 1,
@@ -2482,6 +2749,14 @@
           "year": 2018,
           "margin": 15.995145870065791
         },
+        "census": {
+          "name": "Virginia",
+          "pop2020": 8637615,
+          "pop2024": 8811195,
+          "pctChange2024": 0.8759331332,
+          "growth": 2.0095825062821158,
+          "growthSignal": 0.167465208856843
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -2492,18 +2767,18 @@
       "dem": "Democratic nominee pending",
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": 12.280571694875036,
+      "margin": 12.320763345000678,
       "error": 6.983636363636364,
-      "demProbability": 0.925575,
+      "demProbability": 0.92625,
       "pollMargin": null,
       "primaryRisk": 0.7836363636363637,
       "winnerParty": "D",
-      "winnerProbability": 0.925575,
+      "winnerProbability": 0.92625,
       "competitive": false,
       "displayName": "Virginia Senate",
-      "tippingPower": 0.031641018663217294,
-      "demTippingPower": 0.128425,
-      "repTippingPower": 0.005525,
+      "tippingPower": 0.031526332247467745,
+      "demTippingPower": 0.12835,
+      "repTippingPower": 0.005675,
       "history": [
         {
           "date": "2026-05-16",
@@ -2511,7 +2786,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.925575
+          "dem": 0.92625
         }
       ]
     },
@@ -2522,7 +2797,7 @@
       "hold": "R",
       "caucusTarget": "D",
       "rating": "Safe R",
-      "pvi": -23,
+      "pvi": -23.10077790664748,
       "pastSenate": -21.750295328103263,
       "money": -1.0064360254,
       "candidate": -1,
@@ -2547,6 +2822,14 @@
           "year": 2018,
           "margin": 3.2485233594836944
         },
+        "census": {
+          "name": "West Virginia",
+          "pop2020": 1791646,
+          "pop2024": 1769979,
+          "pctChange2024": -0.029144392,
+          "growth": -1.2093348797697758,
+          "growthSignal": -0.10077790664748132
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -2557,7 +2840,7 @@
       "dem": "Rachel Fetty Anderson",
       "rep": "Shelley Moore Capito",
       "primarySummary": "Primaries held May 12. Capito and Anderson are the projected nominees.",
-      "margin": -20.483835628408247,
+      "margin": -20.508022326003644,
       "error": 5.2,
       "demProbability": 0.002025,
       "pollMargin": null,
@@ -2566,9 +2849,9 @@
       "winnerProbability": 0.997975,
       "competitive": false,
       "displayName": "West Virginia Senate",
-      "tippingPower": 0.0036534452591494974,
+      "tippingPower": 0.0036735848368054463,
       "demTippingPower": 0.0001,
-      "repTippingPower": 0.145025,
+      "repTippingPower": 0.145825,
       "history": [
         {
           "date": "2026-05-16",
@@ -2587,7 +2870,7 @@
       "hold": "R",
       "caucusTarget": "D",
       "rating": "Safe R",
-      "pvi": -26,
+      "pvi": -25.856653874139305,
       "pastSenate": -32.972234785173534,
       "money": -0.9513563504,
       "candidate": -1,
@@ -2612,6 +2895,14 @@
           "year": 2018,
           "margin": -36.86117392586766
         },
+        "census": {
+          "name": "Wyoming",
+          "pop2020": 577681,
+          "pop2024": 587618,
+          "pctChange2024": 0.4360184389,
+          "growth": 1.7201535103283645,
+          "growthSignal": 0.14334612586069703
+        },
         "votehub": {
           "genericBallotPolls": 451,
           "usableGenericBallotPolls": 351,
@@ -2622,18 +2913,18 @@
       "dem": "Democratic nominee pending",
       "rep": "Republican nominee pending",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": -23.273651812322303,
+      "margin": -23.239248742115738,
       "error": 5.942272727272727,
-      "demProbability": 0.001475,
+      "demProbability": 0.001525,
       "pollMargin": null,
       "primaryRisk": 0.7422727272727272,
       "winnerParty": "R",
-      "winnerProbability": 0.998525,
+      "winnerProbability": 0.998475,
       "competitive": false,
       "displayName": "Wyoming Senate",
-      "tippingPower": 0.003115707114328075,
+      "tippingPower": 0.0031854779016944348,
       "demTippingPower": 0,
-      "repTippingPower": 0.144975,
+      "repTippingPower": 0.145775,
       "history": [
         {
           "date": "2026-05-16",
@@ -2641,44 +2932,44 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.001475
+          "dem": 0.001525
         }
       ]
     }
   ],
-  "demControlProbability": 0.426025,
-  "repControlProbability": 0.573975,
+  "demControlProbability": 0.4286,
+  "repControlProbability": 0.5714,
   "medianSeats": 50,
   "seatCounts": {
     "36": 1,
     "37": 3,
     "38": 2,
     "39": 8,
-    "40": 13,
-    "41": 32,
-    "42": 87,
-    "43": 242,
-    "44": 540,
-    "45": 1090,
-    "46": 2065,
-    "47": 3167,
-    "48": 4386,
-    "49": 5521,
-    "50": 5802,
-    "51": 5243,
-    "52": 4521,
-    "53": 3115,
-    "54": 2051,
-    "55": 1054,
-    "56": 576,
-    "57": 268,
-    "58": 121,
-    "59": 48,
-    "60": 22,
+    "40": 12,
+    "41": 33,
+    "42": 82,
+    "43": 237,
+    "44": 536,
+    "45": 1074,
+    "46": 2050,
+    "47": 3134,
+    "48": 4357,
+    "49": 5493,
+    "50": 5834,
+    "51": 5236,
+    "52": 4535,
+    "53": 3157,
+    "54": 2065,
+    "55": 1068,
+    "56": 590,
+    "57": 275,
+    "58": 122,
+    "59": 50,
+    "60": 24,
     "61": 10,
     "62": 5,
-    "63": 4,
-    "64": 1,
+    "63": 3,
+    "64": 2,
     "65": 1,
     "66": 1
   }

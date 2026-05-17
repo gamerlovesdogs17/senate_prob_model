@@ -654,6 +654,48 @@ dd {
   border-top: 4px solid var(--gold);
 }
 
+.article-teaser h2,
+.article-card h2,
+.article-page h1 {
+  margin-top: 6px;
+}
+
+.article-teaser h2 a,
+.article-card h2 a {
+  color: inherit;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.article-teaser .button-link {
+  margin-top: 10px;
+}
+
+.article-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.article-card {
+  padding: clamp(14px, 2.4vw, 22px);
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--ink);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  box-shadow: var(--shadow);
+}
+
+.article-body {
+  max-width: 760px;
+  margin-top: 22px;
+}
+
+.article-body p {
+  color: color-mix(in srgb, var(--ink) 88%, var(--muted));
+  font-size: 1.05rem;
+}
+
 .source-card a {
   display: inline-flex;
   margin-top: 8px;

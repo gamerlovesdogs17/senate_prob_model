@@ -16,6 +16,7 @@ const CHART_ANNOTATIONS = [
 ];
 
 let forecast = null;
+let articles = [];
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
@@ -32,6 +33,16 @@ function oneDecimal(value) {
 function setText(id, value) {
   const node = document.getElementById(id);
   if (node) node.textContent = value;
+}
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#39;"
+  })[char]);
 }
 
 function getRace(state) {
@@ -108,7 +119,9 @@ function updateSummary() {
   setText("rep-control", oneDecimal(forecast.repControlProbability));
   setText("median-seats", `${forecast.medianSeats} D`);
   setText("control-headline", forecast.demControlProbability >= .5 ? "Democrats narrowly favored" : "Republicans narrowly favored");
-  setText("odds-phrase", `${Math.round(forecast.demControlProbability * 100)} in 100`);
+  const favoredSide = forecast.demControlProbability >= forecast.repControlProbability ? "Democrats" : "Republicans";
+  const favoredProbability = Math.max(forecast.demControlProbability, forecast.repControlProbability);
+  setText("odds-phrase", `${favoredSide} ${pct(favoredProbability)}`);
   setText("update-time", `Updates daily at ${forecast.updateTime || "6:00 AM Central"}`);
 
   const demBar = document.getElementById("dem-control-bar");
@@ -465,8 +478,8 @@ function renderSourceStatus() {
     ["VoteHub polling", status.votehubGenericBallot, `${summary.votehub?.usableGenericBallotPolls ?? 0} usable generic-ballot polls / D ${summary.votehub?.genericBallotMargin?.toFixed?.(1) ?? "--"}`],
     ["OpenFEC finance", status.openFecCandidateSummary, `${summary.fecStates ?? 0} Senate states`],
     ["MIT/MEDSL history", status.mitSenateReturns, `${summary.mitStates ?? 0} states`],
-    ["Census population", status.censusPopulation, `${summary.censusStates ?? 0} states`],
-    ["civicAPI", status.civicApiDocs, summary.civicApi?.note || "Reachability check"]
+    ["Census population", status.censusPopulation, `${summary.censusStates ?? 0} states from no-key CSV`],
+    ["civicAPI", status.civicApiEndpoint, summary.civicApi?.note || "Endpoint check"]
   ];
   container.innerHTML = rows.map(([label, item, detail]) => {
     const ok = Boolean(item?.ok);
@@ -481,6 +494,72 @@ function renderSourceStatus() {
       </div>
     `;
   }).join("");
+}
+
+function sortedArticles() {
+  return [...articles].sort((a, b) => new Date(b.date) - new Date(a.date));
+}
+
+function articleUrl(article) {
+  return `article.html?slug=${encodeURIComponent(article.slug)}`;
+}
+
+function renderTopArticle() {
+  const container = document.getElementById("top-article");
+  if (!container || !articles.length) return;
+  const article = sortedArticles().find((item) => item.featured) || sortedArticles()[0];
+  container.innerHTML = `
+    <p class="meta">${escapeHtml(article.date)} / ${escapeHtml(article.author || "Senate Probability Desk")}</p>
+    <h2 id="top-article-title"><a href="${articleUrl(article)}">${escapeHtml(article.title)}</a></h2>
+    <p>${escapeHtml(article.dek || "")}</p>
+    <a class="button-link" href="${articleUrl(article)}">Read article</a>
+  `;
+}
+
+function renderArticlesList() {
+  const container = document.getElementById("articles-list");
+  if (!container) return;
+  const list = sortedArticles();
+  container.innerHTML = list.length ? list.map((article) => `
+    <article class="article-card">
+      <p class="meta">${escapeHtml(article.date)} / ${escapeHtml(article.author || "Senate Probability Desk")}</p>
+      <h2><a href="${articleUrl(article)}">${escapeHtml(article.title)}</a></h2>
+      <p>${escapeHtml(article.dek || "")}</p>
+    </article>
+  `).join("") : `<article class="article-card"><h2>No articles yet.</h2></article>`;
+}
+
+function renderArticlePage() {
+  const container = document.getElementById("article-page");
+  if (!container) return;
+  const slug = new URLSearchParams(window.location.search).get("slug") || sortedArticles()[0]?.slug;
+  const article = articles.find((item) => item.slug === slug);
+  if (!article) {
+    container.innerHTML = `<p class="kicker">Article</p><h1>Article not found.</h1><p><a class="button-link" href="articles.html">Back to articles</a></p>`;
+    return;
+  }
+  document.title = `${article.title} | Senate Probability Desk`;
+  container.innerHTML = `
+    <p class="kicker">Article</p>
+    <h1>${escapeHtml(article.title)}</h1>
+    <p class="lede">${escapeHtml(article.dek || "")}</p>
+    <p class="meta">${escapeHtml(article.date)} / ${escapeHtml(article.author || "Senate Probability Desk")}</p>
+    <div class="article-body">
+      ${(article.body || []).map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("")}
+    </div>
+    <p><a class="button-link" href="articles.html">Back to articles</a></p>
+  `;
+}
+
+async function loadArticles() {
+  try {
+    const response = await fetch("data/articles.json", { cache: "no-store" });
+    if (!response.ok) return [];
+    const data = await response.json();
+    return Array.isArray(data) ? data : [];
+  } catch (error) {
+    return [];
+  }
 }
 
 async function loadForecast() {
@@ -502,10 +581,14 @@ function renderLoadError(error) {
 }
 
 async function init() {
+  articles = await loadArticles();
   try {
     forecast = await loadForecast();
   } catch (error) {
     renderLoadError(error);
+    renderTopArticle();
+    renderArticlesList();
+    renderArticlePage();
     return;
   }
   updateSummary();
@@ -517,6 +600,9 @@ async function init() {
   renderRacePage();
   renderRaceSelector();
   renderSourceStatus();
+  renderTopArticle();
+  renderArticlesList();
+  renderArticlePage();
 }
 
 init();
