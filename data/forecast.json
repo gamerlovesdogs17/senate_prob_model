@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-17T20:07:39.543Z",
+  "generatedAt": "2026-05-17T22:12:56.698Z",
   "modelDate": "2026-05-17",
   "runDate": "May 17, 2026",
   "updateTime": "around 6:00 AM Central",
@@ -15,57 +15,60 @@
     "dataSources": [
       "Manual ratings and candidate ledger",
       "Public polling adapter when reachable from GitHub Actions",
+      "OpenFEC candidate finance bulk files",
+      "MIT/MEDSL historical Senate returns",
+      "Census state population estimates",
       "Historical and fundamentals inputs stored in this generator"
     ]
   },
   "sourceStatus": {
-    "checkedAt": "2026-05-17T20:07:37.569Z",
-    "mitSenateReturns": {
-      "ok": true,
-      "status": 200,
-      "ms": 486,
-      "url": "https://raw.githubusercontent.com/MEDSL/constituency-returns/master/1976-2018-senate.csv",
-      "rows": 3421,
-      "states": 50
-    },
-    "civicApiDocs": {
-      "ok": true,
-      "status": 200,
-      "ms": 585,
-      "url": "https://www.civicapi.org/api-documentation"
-    },
+    "checkedAt": "2026-05-17T22:12:54.232Z",
     "censusPopulation": {
       "ok": true,
       "status": 200,
-      "ms": 662,
+      "ms": 335,
       "url": "https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/state/totals/NST-EST2024-POPCHG2020-2024.csv",
       "rows": 66,
       "states": 51,
       "source": "Census Bureau no-key CSV"
     },
+    "civicApiDocs": {
+      "ok": true,
+      "status": 200,
+      "ms": 427,
+      "url": "https://www.civicapi.org/api-documentation"
+    },
+    "mitSenateReturns": {
+      "ok": true,
+      "status": 200,
+      "ms": 495,
+      "url": "https://raw.githubusercontent.com/MEDSL/constituency-returns/master/1976-2018-senate.csv",
+      "rows": 3421,
+      "states": 50
+    },
     "civicApiEndpoint": {
       "ok": false,
       "status": 404,
-      "ms": 109,
+      "ms": 116,
       "url": "https://www.civicapi.org/api/v1/upcomingraces",
       "error": "{\"message\":\"Route GET:/v1/upcomingraces not found\",\"error\":\"Not Found\",\"statusCode\":404}"
-    },
-    "votehubGenericBallot": {
-      "ok": true,
-      "status": 200,
-      "ms": 835,
-      "url": "https://api.votehub.com/polls?poll_type=generic-ballot&subject=2026",
-      "rows": 451,
-      "usablePolls": 351,
-      "rawUsablePolls": 451
     },
     "openFecCandidateSummary": {
       "ok": true,
       "status": 200,
-      "ms": 1545,
+      "ms": 1666,
       "url": "https://www.fec.gov/files/bulk-downloads/2026/candidate_summary_2026.csv",
       "rows": 4032,
       "senateStates": 44
+    },
+    "votehubGenericBallot": {
+      "ok": true,
+      "status": 200,
+      "ms": 2102,
+      "url": "https://api.votehub.com/polls?poll_type=generic-ballot&subject=2026",
+      "rows": 451,
+      "usablePolls": 351,
+      "rawUsablePolls": 451
     }
   },
   "sourceSummary": {
@@ -189,6 +192,54 @@
       "note": "Docs are reachable, but tested no-key API endpoints currently return 404; using MIT/MEDSL historical results instead."
     }
   },
+  "calibration": {
+    "sample": 35,
+    "meanBrier": 0.14111714285714286,
+    "meanAbsoluteMarginError": 12.37542857142857,
+    "note": "Diagnostic only: compares current-cycle model structure against each state's latest available MIT/MEDSL Senate result, not a true historical forecast archive.",
+    "worstStates": [
+      {
+        "state": "MN",
+        "latestHistoricalYear": 2018,
+        "predicted": 0.6341,
+        "actual": 0,
+        "brier": 0.4021,
+        "absoluteMarginError": 43.97
+      },
+      {
+        "state": "AK",
+        "latestHistoricalYear": 2016,
+        "predicted": 0.468,
+        "actual": 0,
+        "brier": 0.219,
+        "absoluteMarginError": 31.31
+      },
+      {
+        "state": "ME",
+        "latestHistoricalYear": 2018,
+        "predicted": 0.6137,
+        "actual": 0,
+        "brier": 0.3766,
+        "absoluteMarginError": 28.84
+      },
+      {
+        "state": "GA",
+        "latestHistoricalYear": 2016,
+        "predicted": 0.8331,
+        "actual": 0,
+        "brier": 0.694,
+        "absoluteMarginError": 24.91
+      },
+      {
+        "state": "SD",
+        "latestHistoricalYear": 2016,
+        "predicted": 0.0281,
+        "actual": 0,
+        "brier": 0.0008,
+        "absoluteMarginError": 24
+      }
+    ]
+  },
   "controlHistory": [
     {
       "date": "2026-05-16",
@@ -197,8 +248,8 @@
     },
     {
       "date": "2026-05-17",
-      "dem": 0.436,
-      "rep": 0.5640000000000001
+      "dem": 0.468075,
+      "rep": 0.531925
     }
   ],
   "seatHistory": [
@@ -218,7 +269,7 @@
       "rating": "Safe R",
       "pvi": -14.793690521178425,
       "pastSenate": -18.418306407261706,
-      "money": -1.0875,
+      "money": -0.8905491230536702,
       "candidate": -1,
       "approval": -1,
       "primary": "unresolved",
@@ -233,9 +284,21 @@
           "demReceipts": 355940.77,
           "repReceipts": 8560420.79,
           "otherReceipts": 0,
+          "demDisbursements": 338840.29,
+          "repDisbursements": 7050191.5,
+          "demCash": 17100.48,
+          "repCash": 1635360.95,
+          "demDebts": 150268.4,
+          "repDebts": 906949.6,
+          "demIndividual": 297614.56,
+          "repIndividual": 5274351.350000001,
           "candidates": 14,
           "coverageEndDate": "04/29/2026",
-          "financeSignal": -1.25
+          "demEfficiency": 78.74779672882566,
+          "repEfficiency": 1270.6873692492154,
+          "efficiencySignal": -0.6621886514002164,
+          "rawReceiptSignal": -1,
+          "financeSignal": -0.7567758290081559
         },
         "mitSenate": {
           "year": 2016,
@@ -261,19 +324,23 @@
       "demStatus": "unresolved",
       "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": -17.795881146462758,
+      "margin": -17.618625357211062,
       "error": 5.734090909090909,
-      "demProbability": 0.0096,
+      "demProbability": 0.01465,
       "pollMargin": null,
       "primaryRisk": 0.5340909090909091,
+      "stateElasticity": 1.1557230581176676,
+      "candidateHistoryAdjustment": 0,
+      "primaryScenarioAdjustment": 0,
+      "rcvAdjustment": 0,
       "winnerParty": "R",
-      "winnerProbability": 0.9904,
+      "winnerProbability": 0.98535,
       "competitive": false,
       "displayName": "Alabama Senate",
       "summary": "Open-seat race with a Republican edge in the current forecast.",
-      "tippingPower": 0.007939503891010058,
-      "demTippingPower": 0.00045,
-      "repTippingPower": 0.14495,
+      "tippingPower": 0.009123506574502276,
+      "demTippingPower": 0.00065,
+      "repTippingPower": 0.13495,
       "history": [
         {
           "date": "2026-05-16",
@@ -281,7 +348,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.0096
+          "dem": 0.01465
         }
       ]
     },
@@ -294,7 +361,7 @@
       "rating": "Toss-up",
       "pvi": -7.919101466950971,
       "pastSenate": -16.1469222099852,
-      "money": 0.34625704720000006,
+      "money": -0.048117477651372836,
       "candidate": 1.2,
       "approval": 0.1,
       "primary": "unresolved",
@@ -319,16 +386,28 @@
           47
         ]
       ],
-      "note": "Mary Peltola and Dan Sullivan start close to even; the current probability margin is R+4.0 pts.",
+      "note": "Mary Peltola and Dan Sullivan start close to even; the current probability margin is R+1.4 pts.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
           "demReceipts": 8661662.38,
           "repReceipts": 6500847.42,
           "otherReceipts": 0,
+          "demDisbursements": 2934553.61,
+          "repDisbursements": 1505699.66,
+          "demCash": 5727108.77,
+          "repCash": 7086052.55,
+          "demDebts": 0,
+          "repDebts": 0,
+          "demIndividual": 7563867.88,
+          "repIndividual": 2531692.06,
           "candidates": 6,
           "coverageEndDate": "03/31/2026",
-          "financeSignal": 0.4321629920000002
+          "demEfficiency": 5330.157938835438,
+          "repEfficiency": 6703.215234787509,
+          "efficiencySignal": -0.7628096088622619,
+          "rawReceiptSignal": 0.27010187000000013,
+          "financeSignal": -0.47359439478082854
         },
         "mitSenate": {
           "year": 2016,
@@ -354,19 +433,23 @@
       "demStatus": "presumptive",
       "repStatus": "presumptive",
       "primarySummary": "Peltola has launched her challenge and is treated as the presumptive Democratic nominee. Sullivan is the Republican incumbent and presumptive GOP nominee.",
-      "margin": -4.017802389530834,
+      "margin": -1.422739461897069,
       "error": 11.082727272727272,
-      "demProbability": 0.3734,
+      "demProbability": 0.454625,
       "pollMargin": -3.895987359817345,
       "primaryRisk": 1.6827272727272726,
+      "stateElasticity": 1.18,
+      "candidateHistoryAdjustment": 1.6,
+      "primaryScenarioAdjustment": 0,
+      "rcvAdjustment": 1.35,
       "winnerParty": "R",
-      "winnerProbability": 0.6266,
+      "winnerProbability": 0.5453749999999999,
       "competitive": true,
       "displayName": "Alaska Senate",
-      "summary": "Mary Peltola and Dan Sullivan start close to even; the current probability margin is R+4.0 pts.",
-      "tippingPower": 0.23751947418988428,
-      "demTippingPower": 0.057375,
-      "repTippingPower": 0.096075,
+      "summary": "Mary Peltola and Dan Sullivan start close to even; the current probability margin is R+1.4 pts.",
+      "tippingPower": 0.23267593257574168,
+      "demTippingPower": 0.067175,
+      "repTippingPower": 0.07885,
       "history": [
         {
           "date": "2026-05-16",
@@ -374,7 +457,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.3734
+          "dem": 0.454625
         }
       ]
     },
@@ -387,7 +470,7 @@
       "rating": "Safe R",
       "pvi": -17.795967065466353,
       "pastSenate": -23.920122941124422,
-      "money": -0.9250346431,
+      "money": -1.0492827946975,
       "candidate": -1,
       "approval": -1,
       "primary": "resolved",
@@ -395,16 +478,28 @@
       "nomination": 0.05,
       "independent": "none",
       "polls": [],
-      "note": "Tom Cotton is the Republican incumbent; the current forecast gives Republicans a 100% chance.",
+      "note": "Tom Cotton is the Republican incumbent; the current forecast gives Republicans a 99% chance.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
           "demReceipts": 1610666.26,
           "repReceipts": 5539732.59,
           "otherReceipts": 0,
+          "demDisbursements": 1036510.8400000001,
+          "repDisbursements": 3162354.1599999997,
+          "demCash": 582034.75,
+          "repCash": 9787967.39,
+          "demDebts": 5837.84,
+          "repDebts": 74693.4,
+          "demIndividual": 1603611.8699999999,
+          "repIndividual": 2755530.02,
           "candidates": 9,
           "coverageEndDate": "03/31/2026",
-          "financeSignal": -0.785813266
+          "demEfficiency": 1276.4792158312603,
+          "repEfficiency": 6171.997474552086,
+          "efficiencySignal": -1.35,
+          "rawReceiptSignal": -0.49113329125,
+          "financeSignal": -1.10951732155
         },
         "mitSenate": {
           "year": 2016,
@@ -430,19 +525,23 @@
       "demStatus": "nominee",
       "repStatus": "nominee",
       "primarySummary": "Primaries held March 3. Shoffner won the Democratic nomination; Cotton secured the Republican nomination.",
-      "margin": -19.670572002654403,
+      "margin": -19.782395339092155,
       "error": 5.2,
-      "demProbability": 0.002375,
+      "demProbability": 0.00565,
       "pollMargin": null,
       "primaryRisk": 0,
+      "stateElasticity": 1.187325969110172,
+      "candidateHistoryAdjustment": 0,
+      "primaryScenarioAdjustment": 0,
+      "rcvAdjustment": 0,
       "winnerParty": "R",
-      "winnerProbability": 0.997625,
+      "winnerProbability": 0.99435,
       "competitive": false,
       "displayName": "Arkansas Senate",
-      "summary": "Tom Cotton is the Republican incumbent; the current forecast gives Republicans a 100% chance.",
-      "tippingPower": 0.003960674116359361,
-      "demTippingPower": 0.000075,
-      "repTippingPower": 0.145225,
+      "summary": "Tom Cotton is the Republican incumbent; the current forecast gives Republicans a 99% chance.",
+      "tippingPower": 0.005675954169218281,
+      "demTippingPower": 0.00015,
+      "repTippingPower": 0.135075,
       "history": [
         {
           "date": "2026-05-16",
@@ -450,7 +549,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.002375
+          "dem": 0.00565
         }
       ]
     },
@@ -463,7 +562,7 @@
       "rating": "Safe D",
       "pvi": 8.24532026156666,
       "pastSenate": 10.732998155684442,
-      "money": 1.0875,
+      "money": 1.092495706345,
       "candidate": 1,
       "approval": 0.5,
       "primary": "unresolved",
@@ -478,9 +577,21 @@
           "demReceipts": 7451022.370000001,
           "repReceipts": 778279.11,
           "otherReceipts": 334082.18,
+          "demDisbursements": 4726331.65,
+          "repDisbursements": 423499.01999999996,
+          "demCash": 4160323.7,
+          "repCash": 355855.08999999997,
+          "demDebts": 140.68,
+          "repDebts": 400100,
+          "demIndividual": 5521942.1899999995,
+          "repIndividual": 316392.67,
           "candidates": 20,
           "coverageEndDate": "03/31/2026",
-          "financeSignal": 1.25
+          "demEfficiency": 3056.605052979197,
+          "repEfficiency": 335.2370217303509,
+          "efficiencySignal": 1.35,
+          "rawReceiptSignal": 0.8340929075000001,
+          "financeSignal": 1.2055460141
         },
         "mitSenate": {
           "year": 2016,
@@ -506,19 +617,23 @@
       "demStatus": "presumptive",
       "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Democratic nominee until the candidate ledger is updated.",
-      "margin": 16.726242353985292,
+      "margin": 17.13073848969579,
       "error": 5.715,
-      "demProbability": 0.987325,
+      "demProbability": 0.98735,
       "pollMargin": null,
       "primaryRisk": 0.515,
+      "stateElasticity": 1.0867928448585964,
+      "candidateHistoryAdjustment": 0,
+      "primaryScenarioAdjustment": 0.4,
+      "rcvAdjustment": 0,
       "winnerParty": "D",
-      "winnerProbability": 0.987325,
+      "winnerProbability": 0.98735,
       "competitive": false,
       "displayName": "Colorado Senate",
       "summary": "John Hickenlooper is the Democratic incumbent; the current forecast gives Democrats a 99% chance.",
-      "tippingPower": 0.013664898516579442,
-      "demTippingPower": 0.13525,
-      "repTippingPower": 0.000475,
+      "tippingPower": 0.013337267493688491,
+      "demTippingPower": 0.13225,
+      "repTippingPower": 0.00035,
       "history": [
         {
           "date": "2026-05-16",
@@ -526,7 +641,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.987325
+          "dem": 0.98735
         }
       ]
     },
@@ -539,7 +654,7 @@
       "rating": "Safe D",
       "pvi": 14.35,
       "pastSenate": 17.22690406848469,
-      "money": 0.8562245962,
+      "money": 1.033800534145,
       "candidate": 1,
       "approval": 0.6,
       "primary": "unresolved",
@@ -554,9 +669,21 @@
           "demReceipts": 3067005.37,
           "repReceipts": 120939.71,
           "otherReceipts": 0,
+          "demDisbursements": 1113343.1,
+          "repDisbursements": 15138.27,
+          "demCash": 4138862.12,
+          "repCash": 105801.44,
+          "demDebts": 12850,
+          "repDebts": 119250,
+          "demIndividual": 1541751.3,
+          "repIndividual": 1679.71,
           "candidates": 6,
           "coverageEndDate": "03/31/2026",
-          "financeSignal": 0.589213132
+          "demEfficiency": 4571.529755372245,
+          "repEfficiency": 187.5973903976412,
+          "efficiencySignal": 1.35,
+          "rawReceiptSignal": 0.36825820750000005,
+          "financeSignal": 1.0751122981
         },
         "mitSenate": {
           "year": 2018,
@@ -582,18 +709,22 @@
       "demStatus": "presumptive",
       "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Democratic nominee until the candidate ledger is updated.",
-      "margin": 19.356998810349342,
+      "margin": 19.916817154499842,
       "error": 6.002000000000001,
-      "demProbability": 0.993825,
+      "demProbability": 0.99215,
       "pollMargin": null,
       "primaryRisk": 0.802,
+      "stateElasticity": 1.1510526315789473,
+      "candidateHistoryAdjustment": 0,
+      "primaryScenarioAdjustment": 0.4,
+      "rcvAdjustment": 0,
       "winnerParty": "D",
-      "winnerProbability": 0.993825,
+      "winnerProbability": 0.99215,
       "competitive": false,
       "displayName": "Delaware Senate",
       "summary": "Chris Coons is the Democratic incumbent; the current forecast gives Democrats a 99% chance.",
-      "tippingPower": 0.009551577608708233,
-      "demTippingPower": 0.135325,
+      "tippingPower": 0.010520053993316278,
+      "demTippingPower": 0.1323,
       "repTippingPower": 0.00015,
       "history": [
         {
@@ -602,7 +733,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.993825
+          "dem": 0.99215
         }
       ]
     },
@@ -615,7 +746,7 @@
       "rating": "Safe R",
       "pvi": -7.65,
       "pastSenate": -10.424500595542982,
-      "money": -0.21250000000000002,
+      "money": -0.8614,
       "candidate": -1,
       "approval": -0.4,
       "primary": "unresolved",
@@ -623,16 +754,28 @@
       "nomination": 0.3,
       "independent": "none",
       "polls": [],
-      "note": "Special election with Republicans at 95% in the current forecast.",
+      "note": "Special election with Republicans at 96% in the current forecast.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
           "demReceipts": 25908532.120000005,
           "repReceipts": 8443265.260000002,
           "otherReceipts": 0,
+          "demDisbursements": 18842431.349999998,
+          "repDisbursements": 1305164.0399999998,
+          "demCash": 7098087.3100000005,
+          "repCash": 7138101.220000001,
+          "demDebts": 4300719.28,
+          "repDebts": 26937.73,
+          "demIndividual": 25020159.39,
+          "repIndividual": 2757925.21,
           "candidates": 36,
           "coverageEndDate": "03/31/2026",
-          "financeSignal": 1.25
+          "demEfficiency": 3535.4545862577875,
+          "repEfficiency": 7317.954840904169,
+          "efficiencySignal": -1.35,
+          "rawReceiptSignal": 1,
+          "financeSignal": -0.692
         },
         "mitSenate": {
           "year": 2018,
@@ -658,19 +801,23 @@
       "demStatus": "unresolved",
       "repStatus": "presumptive",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Republican nominee until the candidate ledger is updated.",
-      "margin": -13.245134259036192,
+      "margin": -14.229144259036191,
       "error": 6.252727272727273,
-      "demProbability": 0.050275,
+      "demProbability": 0.043975,
       "pollMargin": null,
       "primaryRisk": 1.0527272727272727,
+      "stateElasticity": 1.0805263157894738,
+      "candidateHistoryAdjustment": 0,
+      "primaryScenarioAdjustment": -0.4,
+      "rcvAdjustment": 0,
       "winnerParty": "R",
-      "winnerProbability": 0.949725,
+      "winnerProbability": 0.956025,
       "competitive": false,
       "displayName": "Florida Senate",
-      "summary": "Special election with Republicans at 95% in the current forecast.",
-      "tippingPower": 0.016036037683997313,
-      "demTippingPower": 0.004075,
-      "repTippingPower": 0.1427,
+      "summary": "Special election with Republicans at 96% in the current forecast.",
+      "tippingPower": 0.013999072331134222,
+      "demTippingPower": 0.00295,
+      "repTippingPower": 0.1336,
       "history": [
         {
           "date": "2026-05-16",
@@ -678,7 +825,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.050275
+          "dem": 0.043975
         }
       ]
     },
@@ -691,7 +838,7 @@
       "rating": "Likely D",
       "pvi": 0.34783275480001286,
       "pastSenate": -1.9501118989997706,
-      "money": 1.3475,
+      "money": 1.3334000000000001,
       "candidate": 1.1,
       "approval": 0.5,
       "primary": "unresolved",
@@ -716,16 +863,28 @@
           57
         ]
       ],
-      "note": "Jon Ossoff is the Democratic incumbent; the current forecast gives Democrats a 88% chance.",
+      "note": "Jon Ossoff is the Democratic incumbent; the current forecast gives Democrats a 90% chance.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
           "demReceipts": 60439612.91,
           "repReceipts": 15932236.769999998,
           "otherReceipts": 0,
+          "demDisbursements": 32925743.34,
+          "repDisbursements": 14486336.089999998,
+          "demCash": 32504436.28,
+          "repCash": 5069770.899999999,
+          "demDebts": 0,
+          "repDebts": 3316941.43,
+          "demIndividual": 53243293.44,
+          "repIndividual": 9445835.979999999,
           "candidates": 22,
           "coverageEndDate": "05/04/2026",
-          "financeSignal": 1.25
+          "demEfficiency": 9840.183834253612,
+          "repEfficiency": 1838.7726576712053,
+          "efficiencySignal": 1.35,
+          "rawReceiptSignal": 1,
+          "financeSignal": 1.252
         },
         "mitSenate": {
           "year": 2016,
@@ -751,19 +910,23 @@
       "demStatus": "presumptive",
       "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Democratic nominee until the candidate ledger is updated.",
-      "margin": 10.076654086655884,
+      "margin": 11.163964086655882,
       "error": 6.944090909090909,
-      "demProbability": 0.88165,
+      "demProbability": 0.89515,
       "pollMargin": 2.5333153981851684,
       "primaryRisk": 0.744090909090909,
+      "stateElasticity": 1.12,
+      "candidateHistoryAdjustment": 0.7,
+      "primaryScenarioAdjustment": 0.4,
+      "rcvAdjustment": 0,
       "winnerParty": "D",
-      "winnerProbability": 0.88165,
+      "winnerProbability": 0.89515,
       "competitive": false,
       "displayName": "Georgia Senate",
-      "summary": "Jon Ossoff is the Democratic incumbent; the current forecast gives Democrats a 88% chance.",
-      "tippingPower": 0.11340094620490931,
-      "demTippingPower": 0.13,
-      "repTippingPower": 0.010425,
+      "summary": "Jon Ossoff is the Democratic incumbent; the current forecast gives Democrats a 90% chance.",
+      "tippingPower": 0.10347310537933199,
+      "demTippingPower": 0.1274,
+      "repTippingPower": 0.0077,
       "history": [
         {
           "date": "2026-05-16",
@@ -771,7 +934,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.88165
+          "dem": 0.89515
         }
       ]
     },
@@ -784,7 +947,7 @@
       "rating": "Safe R",
       "pvi": -18.65,
       "pastSenate": -27.681587408663173,
-      "money": -0.6636399886000001,
+      "money": -0.5316230727460559,
       "candidate": -1,
       "approval": -0.8,
       "primary": "unresolved",
@@ -799,9 +962,21 @@
           "demReceipts": 8641.66,
           "repReceipts": 203498.64,
           "otherReceipts": 3313244.12,
+          "demDisbursements": 8185.61,
+          "repDisbursements": 141070.63,
+          "demCash": 1050.82,
+          "repCash": 62428.01,
+          "demDebts": 10846.47,
+          "repDebts": 195965.8,
+          "demIndividual": 4085.63,
+          "repIndividual": 23276.86,
           "candidates": 8,
           "coverageEndDate": "04/29/2026",
-          "financeSignal": -0.038971396000000005
+          "demEfficiency": -51.980342173480835,
+          "repEfficiency": -171.12436822317025,
+          "efficiencySignal": 0.06619112558316079,
+          "rawReceiptSignal": -0.0243571225,
+          "financeSignal": 0.04083761611987576
         },
         "mitSenate": {
           "year": 2016,
@@ -827,19 +1002,23 @@
       "demStatus": "unresolved",
       "repStatus": "presumptive",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Republican nominee until the candidate ledger is updated.",
-      "margin": -20.24257761140023,
+      "margin": -20.523762387131676,
       "error": 5.55,
-      "demProbability": 0.00325,
+      "demProbability": 0.004825,
       "pollMargin": null,
       "primaryRisk": 0.35,
+      "stateElasticity": 1.1963157894736842,
+      "candidateHistoryAdjustment": 0,
+      "primaryScenarioAdjustment": -0.4,
+      "rcvAdjustment": 0,
       "winnerParty": "R",
-      "winnerProbability": 0.99675,
+      "winnerProbability": 0.995175,
       "competitive": false,
       "displayName": "Idaho Senate",
       "summary": "Jim Risch is the Republican incumbent; the current forecast gives Republicans a 100% chance.",
-      "tippingPower": 0.004630348869426553,
-      "demTippingPower": 0.000075,
-      "repTippingPower": 0.1452,
+      "tippingPower": 0.005247390741630911,
+      "demTippingPower": 0.000125,
+      "repTippingPower": 0.1351,
       "history": [
         {
           "date": "2026-05-16",
@@ -847,7 +1026,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.00325
+          "dem": 0.004825
         }
       ]
     },
@@ -860,7 +1039,7 @@
       "rating": "Safe D",
       "pvi": 12.942098739118496,
       "pastSenate": 14.216265110040684,
-      "money": 1.0875,
+      "money": 1.0347011113832147,
       "candidate": 0.4,
       "approval": 0.4,
       "primary": "resolved",
@@ -875,9 +1054,21 @@
           "demReceipts": 40429712.45000001,
           "repReceipts": 3877445.8399999994,
           "otherReceipts": 36862.4,
+          "demDisbursements": 36385656.10999999,
+          "repDisbursements": 2182022.06,
+          "demCash": 4047800.86,
+          "repCash": 1696877.55,
+          "demDebts": 370261.17000000004,
+          "repDebts": 3068348.4000000004,
+          "demIndividual": 16833883.61,
+          "repIndividual": 644770.23,
           "candidates": 31,
           "coverageEndDate": "02/25/2026",
-          "financeSignal": 1.25
+          "demEfficiency": 1883.9135940826213,
+          "repEfficiency": -108.87035804634864,
+          "efficiencySignal": 1.1071021956272056,
+          "rawReceiptSignal": 1,
+          "financeSignal": 1.077113580851588
         },
         "mitSenate": {
           "year": 2016,
@@ -903,19 +1094,23 @@
       "demStatus": "nominee",
       "repStatus": "nominee",
       "primarySummary": "Primaries held March 17. Stratton and Tracy are the general-election nominees.",
-      "margin": 17.145122579468982,
+      "margin": 17.097603579713876,
       "error": 5.2,
-      "demProbability": 0.9919,
+      "demProbability": 0.9873,
       "pollMargin": null,
       "primaryRisk": 0,
+      "stateElasticity": 1.1362326183065106,
+      "candidateHistoryAdjustment": 0,
+      "primaryScenarioAdjustment": 0,
+      "rcvAdjustment": 0,
       "winnerParty": "D",
-      "winnerProbability": 0.9919,
+      "winnerProbability": 0.9873,
       "competitive": false,
       "displayName": "Illinois Senate",
       "summary": "Open-seat race with a Democratic edge in the current forecast.",
-      "tippingPower": 0.01091684137124857,
-      "demTippingPower": 0.1352,
-      "repTippingPower": 0.000125,
+      "tippingPower": 0.013353183486508961,
+      "demTippingPower": 0.132275,
+      "repTippingPower": 0.000225,
       "history": [
         {
           "date": "2026-05-16",
@@ -923,7 +1118,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.9919
+          "dem": 0.9873
         }
       ]
     },
@@ -936,7 +1131,7 @@
       "rating": "Lean R",
       "pvi": -5.868524037849367,
       "pastSenate": -9.686933205973126,
-      "money": -0.11010339340000001,
+      "money": -0.46217326351500004,
       "candidate": 0.2,
       "approval": -0.2,
       "primary": "unresolved",
@@ -968,9 +1163,21 @@
           "demReceipts": 7985912.600000001,
           "repReceipts": 9558818.22,
           "otherReceipts": 20422.91,
+          "demDisbursements": 6164780.27,
+          "repDisbursements": 5198849.5,
+          "demCash": 1821132.3299999998,
+          "repCash": 8527886.86,
+          "demDebts": 16921.92,
+          "repDebts": 193506.46,
+          "demIndividual": 7775996.5200000005,
+          "repIndividual": 5069989.01,
           "candidates": 12,
           "coverageEndDate": "03/31/2026",
-          "financeSignal": -0.31458112400000005
+          "demEfficiency": 2138.0201443142487,
+          "repEfficiency": 4681.344260724411,
+          "efficiencySignal": -1.35,
+          "rawReceiptSignal": -0.1966132025,
+          "financeSignal": -1.0270516967
         },
         "mitSenate": {
           "year": 2016,
@@ -996,19 +1203,23 @@
       "demStatus": "unresolved",
       "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": -5.980407670327001,
+      "margin": -6.297270553430501,
       "error": 8.427727272727273,
-      "demProbability": 0.269875,
+      "demProbability": 0.270725,
       "pollMargin": -3.726210825671242,
       "primaryRisk": 1.227727272727273,
+      "stateElasticity": 1.1,
+      "candidateHistoryAdjustment": 0,
+      "primaryScenarioAdjustment": 0,
+      "rcvAdjustment": 0,
       "winnerParty": "R",
-      "winnerProbability": 0.730125,
+      "winnerProbability": 0.729275,
       "competitive": true,
       "displayName": "Iowa Senate",
       "summary": "Open-seat race with a Republican edge in the current forecast.",
-      "tippingPower": 0.10388800049634836,
-      "demTippingPower": 0.041125,
-      "repTippingPower": 0.1149,
+      "tippingPower": 0.09780908883243342,
+      "demTippingPower": 0.0383,
+      "repTippingPower": 0.10845,
       "history": [
         {
           "date": "2026-05-16",
@@ -1016,7 +1227,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.269875
+          "dem": 0.270725
         }
       ]
     },
@@ -1029,7 +1240,7 @@
       "rating": "Lean R",
       "pvi": -9.908009696732073,
       "pastSenate": -14.78742531339087,
-      "money": -0.8283175429,
+      "money": -1.0275214471525,
       "candidate": -0.5,
       "approval": -0.5,
       "primary": "unresolved",
@@ -1037,16 +1248,28 @@
       "nomination": 0.25,
       "independent": "none",
       "polls": [],
-      "note": "Roger Marshall is the Republican incumbent; the current forecast gives Republicans a 82% chance.",
+      "note": "Roger Marshall is the Republican incumbent; the current forecast gives Republicans a 83% chance.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
           "demReceipts": 784569.9099999999,
           "repReceipts": 3331963.38,
           "otherReceipts": 0,
+          "demDisbursements": 437826.14,
+          "repDisbursements": 255723.24,
+          "demCash": 346743.77,
+          "repCash": 4781258.78,
+          "demDebts": 109611.53,
+          "repDebts": 0,
+          "demIndividual": 645941.12,
+          "repIndividual": 1461071.57,
           "candidates": 11,
           "coverageEndDate": "03/31/2026",
-          "financeSignal": -0.5094786939999999
+          "demEfficiency": 847.3656475103256,
+          "repEfficiency": 10755.049864065175,
+          "efficiencySignal": -1.35,
+          "rawReceiptSignal": -0.31842418375,
+          "financeSignal": -1.06115877145
         },
         "mitSenate": {
           "year": 2016,
@@ -1072,19 +1295,23 @@
       "demStatus": "unresolved",
       "repStatus": "presumptive",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Republican nominee until the candidate ledger is updated.",
-      "margin": -8.723877318431466,
+      "margin": -9.303160832258717,
       "error": 8.084090909090909,
-      "demProbability": 0.178,
+      "demProbability": 0.17255,
       "pollMargin": null,
       "primaryRisk": 0.884090909090909,
+      "stateElasticity": 1.1042948389129692,
+      "candidateHistoryAdjustment": 0,
+      "primaryScenarioAdjustment": -0.4,
+      "rcvAdjustment": 0,
       "winnerParty": "R",
-      "winnerProbability": 0.8220000000000001,
+      "winnerProbability": 0.82745,
       "competitive": false,
       "displayName": "Kansas Senate",
-      "summary": "Roger Marshall is the Republican incumbent; the current forecast gives Republicans a 82% chance.",
-      "tippingPower": 0.05206954739756722,
-      "demTippingPower": 0.02435,
-      "repTippingPower": 0.1269,
+      "summary": "Roger Marshall is the Republican incumbent; the current forecast gives Republicans a 83% chance.",
+      "tippingPower": 0.04833273253840051,
+      "demTippingPower": 0.020975,
+      "repTippingPower": 0.12115,
       "history": [
         {
           "date": "2026-05-16",
@@ -1092,7 +1319,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.178
+          "dem": 0.17255
         }
       ]
     },
@@ -1105,7 +1332,7 @@
       "rating": "Safe R",
       "pvi": -15.852025374725859,
       "pastSenate": -17.30975668057989,
-      "money": -1.0875,
+      "money": -0.6168358138528582,
       "candidate": -1,
       "approval": -0.7,
       "primary": "unresolved",
@@ -1120,9 +1347,21 @@
           "demReceipts": 4203283.12,
           "repReceipts": 19248282.79,
           "otherReceipts": 0,
+          "demDisbursements": 3692996.4400000004,
+          "repDisbursements": 19337017.689999998,
+          "demCash": 472133.92,
+          "repCash": 3604342.7399999998,
+          "demDebts": 436311.69,
+          "repDebts": 6991783.94,
+          "demIndividual": 3708219.15,
+          "repIndividual": 8987629.200000001,
           "candidates": 21,
           "coverageEndDate": "12/31/2025",
-          "financeSignal": -1.25
+          "demEfficiency": 955.090709683566,
+          "repEfficiency": 626.4007866438892,
+          "efficiencySignal": 0.18260551279982046,
+          "rawReceiptSignal": -1,
+          "financeSignal": -0.1485240307841293
         },
         "mitSenate": {
           "year": 2016,
@@ -1148,19 +1387,23 @@
       "demStatus": "unresolved",
       "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": -17.60317156597778,
+      "margin": -17.179573798445354,
       "error": 5.944090909090909,
-      "demProbability": 0.01135,
+      "demProbability": 0.019475,
       "pollMargin": null,
       "primaryRisk": 0.744090909090909,
+      "stateElasticity": 1.1668634249971144,
+      "candidateHistoryAdjustment": 0,
+      "primaryScenarioAdjustment": 0,
+      "rcvAdjustment": 0,
       "winnerParty": "R",
-      "winnerProbability": 0.98865,
+      "winnerProbability": 0.980525,
       "competitive": false,
       "displayName": "Kentucky Senate",
       "summary": "Open-seat race with a Republican edge in the current forecast.",
-      "tippingPower": 0.008634147287543246,
-      "demTippingPower": 0.000675,
-      "repTippingPower": 0.144875,
+      "tippingPower": 0.0104933892999053,
+      "demTippingPower": 0.00085,
+      "repTippingPower": 0.13475,
       "history": [
         {
           "date": "2026-05-16",
@@ -1168,7 +1411,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.01135
+          "dem": 0.019475
         }
       ]
     },
@@ -1181,7 +1424,7 @@
       "rating": "Safe R",
       "pvi": -12.09773120870726,
       "pastSenate": -19.749621323260655,
-      "money": -1.0875,
+      "money": -0.8285511034672602,
       "candidate": -1,
       "approval": -0.8,
       "primary": "runoff",
@@ -1196,9 +1439,21 @@
           "demReceipts": 997329.36,
           "repReceipts": 30806023.69,
           "otherReceipts": 0,
+          "demDisbursements": 443031.98,
+          "repDisbursements": 24803552.32,
+          "demCash": 892158.4400000001,
+          "repCash": 12601786.030000001,
+          "demDebts": 365275,
+          "repDebts": 6903496.01,
+          "demIndividual": 630808.24,
+          "repIndividual": 7417228.619999999,
           "candidates": 24,
           "coverageEndDate": "03/31/2026",
-          "financeSignal": -1.25
+          "demEfficiency": 1382.6917907836514,
+          "repEfficiency": 2230.1979211573193,
+          "efficiencySignal": -0.47083673909648216,
+          "rawReceiptSignal": -1,
+          "financeSignal": -0.6190024521494671
         },
         "mitSenate": {
           "year": 2016,
@@ -1224,19 +1479,23 @@
       "demStatus": "unresolved",
       "repStatus": "unresolved",
       "primarySummary": "Louisiana voted May 16. Cassidy missed the Republican runoff; Letlow and Fleming advanced. Davis advanced on the Democratic side, with Crockett treated as the second runoff candidate after Albares fell short.",
-      "margin": -17.465113894669468,
+      "margin": -17.05205988779,
       "error": 6.35,
-      "demProbability": 0.0144,
+      "demProbability": 0.022325,
       "pollMargin": null,
       "primaryRisk": 1.15,
+      "stateElasticity": 1.1273445390390238,
+      "candidateHistoryAdjustment": 0,
+      "primaryScenarioAdjustment": 0.18,
+      "rcvAdjustment": 0,
       "winnerParty": "R",
-      "winnerProbability": 0.9856,
+      "winnerProbability": 0.977675,
       "competitive": false,
       "displayName": "Louisiana Senate",
       "summary": "Both parties have runoffs; the Republican incumbent was eliminated before the second round.",
-      "tippingPower": 0.009708613863421237,
-      "demTippingPower": 0.000875,
-      "repTippingPower": 0.14465,
+      "tippingPower": 0.011212447737449859,
+      "demTippingPower": 0.0013,
+      "repTippingPower": 0.134225,
       "history": [
         {
           "date": "2026-05-16",
@@ -1244,7 +1503,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.0144
+          "dem": 0.022325
         }
       ]
     },
@@ -1257,7 +1516,7 @@
       "rating": "Lean D",
       "pvi": 5.24697017108918,
       "pastSenate": 1.443134633966416,
-      "money": 0.8925,
+      "money": 0.0736,
       "candidate": 0.4,
       "approval": 0.2,
       "primary": "unresolved",
@@ -1282,16 +1541,28 @@
           54
         ]
       ],
-      "note": "Susan Collins is the Republican incumbent; the current forecast gives Democrats a 71% chance.",
+      "note": "Susan Collins is the Republican incumbent; the current forecast gives Democrats a 66% chance.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
           "demReceipts": 23316828.459999997,
           "repReceipts": 10498823.07,
           "otherReceipts": 61936.520000000004,
+          "demDisbursements": 18753236.43,
+          "repDisbursements": 3081284.4299999997,
+          "demCash": 4563592.029999999,
+          "repCash": 9993847.54,
+          "demDebts": 288204.1,
+          "repDebts": 0,
+          "demIndividual": 22019924.32,
+          "repIndividual": 5994565.11,
           "candidates": 17,
           "coverageEndDate": "03/31/2026",
-          "financeSignal": 1.25
+          "demEfficiency": 3295.4190906560534,
+          "repEfficiency": 7230.088776549159,
+          "efficiencySignal": -1.35,
+          "rawReceiptSignal": 1,
+          "financeSignal": -0.692
         },
         "mitSenate": {
           "year": 2018,
@@ -1317,19 +1588,23 @@
       "demStatus": "unresolved",
       "repStatus": "presumptive",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Republican nominee until the candidate ledger is updated.",
-      "margin": 5.546835445651643,
+      "margin": 4.059825445651642,
       "error": 8.774545454545455,
-      "demProbability": 0.710275,
+      "demProbability": 0.657075,
       "pollMargin": 0.7483495138595477,
       "primaryRisk": 1.5745454545454545,
+      "stateElasticity": 0.86,
+      "candidateHistoryAdjustment": -1.25,
+      "primaryScenarioAdjustment": -0.4,
+      "rcvAdjustment": 0.9,
       "winnerParty": "D",
-      "winnerProbability": 0.710275,
+      "winnerProbability": 0.657075,
       "competitive": true,
       "displayName": "Maine Senate",
-      "summary": "Susan Collins is the Republican incumbent; the current forecast gives Democrats a 71% chance.",
-      "tippingPower": 0.1462064578884426,
-      "demTippingPower": 0.111125,
-      "repTippingPower": 0.035375,
+      "summary": "Susan Collins is the Republican incumbent; the current forecast gives Democrats a 66% chance.",
+      "tippingPower": 0.1477438557839971,
+      "demTippingPower": 0.0973,
+      "repTippingPower": 0.044175,
       "history": [
         {
           "date": "2026-05-16",
@@ -1337,7 +1612,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.710275
+          "dem": 0.657075
         }
       ]
     },
@@ -1350,7 +1625,7 @@
       "rating": "Safe D",
       "pvi": 16.168669450338676,
       "pastSenate": 20.83294607863056,
-      "money": 1.0875,
+      "money": 1.09285676974,
       "candidate": 1,
       "approval": 0.7,
       "primary": "unresolved",
@@ -1365,9 +1640,21 @@
           "demReceipts": 8135808.93,
           "repReceipts": 1440141.01,
           "otherReceipts": 122458.98,
+          "demDisbursements": 5921271.4399999995,
+          "repDisbursements": 615551.15,
+          "demCash": 5875562.5200000005,
+          "repCash": 829363.6,
+          "demDebts": 37789.41,
+          "repDebts": 1137087.21,
+          "demIndividual": 5708559.67,
+          "repIndividual": 320775.19,
           "candidates": 10,
           "coverageEndDate": "03/31/2026",
-          "financeSignal": 1.25
+          "demEfficiency": 3459.389222185574,
+          "repEfficiency": 226.55861214803048,
+          "efficiencySignal": 1.35,
+          "rawReceiptSignal": 0.83695849,
+          "financeSignal": 1.2063483771999999
         },
         "mitSenate": {
           "year": 2018,
@@ -1393,18 +1680,22 @@
       "demStatus": "presumptive",
       "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Democratic nominee until the candidate ledger is updated.",
-      "margin": 20.7978357438798,
+      "margin": 21.2026568366458,
       "error": 5.8963636363636365,
-      "demProbability": 0.9974,
+      "demProbability": 0.9955,
       "pollMargin": null,
       "primaryRisk": 0.6963636363636364,
+      "stateElasticity": 1.1701965205298808,
+      "candidateHistoryAdjustment": 0,
+      "primaryScenarioAdjustment": 0.4,
+      "rcvAdjustment": 0,
       "winnerParty": "D",
-      "winnerProbability": 0.9974,
+      "winnerProbability": 0.9955,
       "competitive": false,
       "displayName": "Massachusetts Senate",
       "summary": "Ed Markey is the Democratic incumbent; the current forecast gives Democrats a 100% chance.",
-      "tippingPower": 0.006206727944103917,
-      "demTippingPower": 0.135325,
+      "tippingPower": 0.007978502053267458,
+      "demTippingPower": 0.13235,
       "repTippingPower": 0.0001,
       "history": [
         {
@@ -1413,7 +1704,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.9974
+          "dem": 0.9955
         }
       ]
     },
@@ -1426,7 +1717,7 @@
       "rating": "Lean D",
       "pvi": 1.0560557909166322,
       "pastSenate": 2.9011204617311472,
-      "money": 0.6975,
+      "money": 0.6680641591666994,
       "candidate": 0.3,
       "approval": 0.2,
       "primary": "unresolved",
@@ -1458,9 +1749,21 @@
           "demReceipts": 25395838.04,
           "repReceipts": 7763286.260000001,
           "otherReceipts": 1000,
+          "demDisbursements": 15780280.48,
+          "repDisbursements": 3802130.1,
+          "demCash": 9615557.56,
+          "repCash": 4215887.600000001,
+          "demDebts": 59842.46,
+          "repDebts": 48669.16,
+          "demIndividual": 22756419.2,
+          "repIndividual": 4567147.7,
           "candidates": 17,
           "coverageEndDate": "03/31/2026",
-          "financeSignal": 1.25
+          "demEfficiency": 4987.88031249952,
+          "repEfficiency": 3198.634983795635,
+          "efficiencySignal": 0.9940251826132696,
+          "rawReceiptSignal": 1,
+          "financeSignal": 0.9956981314815541
         },
         "mitSenate": {
           "year": 2018,
@@ -1486,19 +1789,23 @@
       "demStatus": "unresolved",
       "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": 5.532309037434997,
+      "margin": 5.755816780685025,
       "error": 8.924090909090909,
-      "demProbability": 0.71035,
+      "demProbability": 0.7131,
       "pollMargin": 1.10890571098529,
       "primaryRisk": 1.7240909090909093,
+      "stateElasticity": 1.12,
+      "candidateHistoryAdjustment": 0.25,
+      "primaryScenarioAdjustment": 0,
+      "rcvAdjustment": 0,
       "winnerParty": "D",
-      "winnerProbability": 0.71035,
+      "winnerProbability": 0.7131,
       "competitive": true,
       "displayName": "Michigan Senate",
       "summary": "Open-seat race with a Democratic edge in the current forecast.",
-      "tippingPower": 0.18033998384486244,
-      "demTippingPower": 0.1117,
-      "repTippingPower": 0.03555,
+      "tippingPower": 0.17372268440797733,
+      "demTippingPower": 0.1078,
+      "repTippingPower": 0.03445,
       "history": [
         {
           "date": "2026-05-16",
@@ -1506,7 +1813,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.71035
+          "dem": 0.7131
         }
       ]
     },
@@ -1519,7 +1826,7 @@
       "rating": "Lean D",
       "pvi": 4.120264729496291,
       "pastSenate": -2.255407789191655,
-      "money": 0.7808291197999999,
+      "money": 0.5990878571954591,
       "candidate": 0.2,
       "approval": 0.2,
       "primary": "unresolved",
@@ -1534,9 +1841,21 @@
           "demReceipts": 9589987.969999999,
           "repReceipts": 4006714.83,
           "otherReceipts": 4646309.17,
+          "demDisbursements": 4694674.91,
+          "repDisbursements": 1925488.4000000001,
+          "demCash": 4895313.06,
+          "repCash": 2222509.44,
+          "demDebts": 389289.67,
+          "repDebts": 152645,
+          "demIndividual": 7433630.92,
+          "repIndividual": 3534913.6999999997,
           "candidates": 16,
           "coverageEndDate": "03/31/2026",
-          "financeSignal": 1.1166546279999998
+          "demEfficiency": 3677.4220511311946,
+          "repEfficiency": 2671.025910906422,
+          "efficiencySignal": 0.5591089667915404,
+          "rawReceiptSignal": 0.6979091424999998,
+          "financeSignal": 0.597973015989909
         },
         "mitSenate": {
           "year": 2018,
@@ -1562,19 +1881,23 @@
       "demStatus": "unresolved",
       "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": 4.857544045133183,
+      "margin": 4.693976908789097,
       "error": 8.53590909090909,
-      "demProbability": 0.687975,
+      "demProbability": 0.679575,
       "pollMargin": null,
       "primaryRisk": 1.335909090909091,
+      "stateElasticity": 0.9,
+      "candidateHistoryAdjustment": 0,
+      "primaryScenarioAdjustment": 0,
+      "rcvAdjustment": 0,
       "winnerParty": "D",
-      "winnerProbability": 0.687975,
+      "winnerProbability": 0.679575,
       "competitive": true,
       "displayName": "Minnesota Senate",
       "summary": "Open-seat race with a Democratic edge in the current forecast.",
-      "tippingPower": 0.062079085170700314,
-      "demTippingPower": 0.109375,
-      "repTippingPower": 0.0395,
+      "tippingPower": 0.060413537858357236,
+      "demTippingPower": 0.101725,
+      "repTippingPower": 0.042125,
       "history": [
         {
           "date": "2026-05-16",
@@ -1582,7 +1905,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.687975
+          "dem": 0.679575
         }
       ]
     },
@@ -1595,7 +1918,7 @@
       "rating": "Safe R",
       "pvi": -11.04363363050734,
       "pastSenate": -17.04672527379552,
-      "money": -0.8126675505000001,
+      "money": -0.757269281532971,
       "candidate": -1,
       "approval": -0.7,
       "primary": "resolved",
@@ -1603,16 +1926,28 @@
       "nomination": 0.1,
       "independent": "none",
       "polls": [],
-      "note": "Cindy Hyde-Smith is the Republican incumbent; the current forecast gives Republicans a 99% chance.",
+      "note": "Cindy Hyde-Smith is the Republican incumbent; the current forecast gives Republicans a 98% chance.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
           "demReceipts": 1636536.54,
           "repReceipts": 3960358.69,
           "otherReceipts": 90225.35,
+          "demDisbursements": 1065800.5,
+          "repDisbursements": 1961768.6,
+          "demCash": 559626.9,
+          "repCash": 2468353.94,
+          "demDebts": 86514.64,
+          "repDebts": 607000,
+          "demIndividual": 1370124.07,
+          "repIndividual": 1773651.9900000002,
           "candidates": 8,
           "coverageEndDate": "03/31/2026",
-          "financeSignal": -0.46476443
+          "demEfficiency": 1080.6351619266034,
+          "repEfficiency": 2028.796732318109,
+          "efficiencySignal": -0.5267564279952809,
+          "rawReceiptSignal": -0.29047776875,
+          "financeSignal": -0.46059840340660224
         },
         "mitSenate": {
           "year": 2018,
@@ -1638,19 +1973,23 @@
       "demStatus": "nominee",
       "repStatus": "nominee",
       "primarySummary": "Primaries held March 10. Hyde-Smith defeated a GOP challenger; Colom is the Democratic nominee.",
-      "margin": -16.34920206145846,
+      "margin": -16.299343619388136,
       "error": 5.2,
-      "demProbability": 0.011,
+      "demProbability": 0.0163,
       "pollMargin": null,
       "primaryRisk": 0,
+      "stateElasticity": 1.116248775057972,
+      "candidateHistoryAdjustment": 0,
+      "primaryScenarioAdjustment": 0,
+      "rcvAdjustment": 0,
       "winnerParty": "R",
-      "winnerProbability": 0.989,
+      "winnerProbability": 0.9837,
       "competitive": false,
       "displayName": "Mississippi Senate",
-      "summary": "Cindy Hyde-Smith is the Republican incumbent; the current forecast gives Republicans a 99% chance.",
-      "tippingPower": 0.00850002343994674,
-      "demTippingPower": 0.000475,
-      "repTippingPower": 0.14505,
+      "summary": "Cindy Hyde-Smith is the Republican incumbent; the current forecast gives Republicans a 98% chance.",
+      "tippingPower": 0.009606657881177531,
+      "demTippingPower": 0.00055,
+      "repTippingPower": 0.134925,
       "history": [
         {
           "date": "2026-05-16",
@@ -1658,7 +1997,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.011
+          "dem": 0.0163
         }
       ]
     },
@@ -1671,7 +2010,7 @@
       "rating": "Lean R",
       "pvi": -10.65,
       "pastSenate": -7.289707841644462,
-      "money": 0.15318948370000002,
+      "money": -0.2818073661675,
       "candidate": 0.8,
       "approval": -0.2,
       "primary": "unresolved",
@@ -1699,9 +2038,21 @@
           "demReceipts": 327350.42000000004,
           "repReceipts": 924643.51,
           "otherReceipts": 1620669.92,
+          "demDisbursements": 203640.74,
+          "repDisbursements": 15686.66,
+          "demCash": 125793.98999999999,
+          "repCash": 908956.85,
+          "demDebts": 102850,
+          "repDebts": 0,
+          "demIndividual": 179275.64,
+          "repIndividual": 355576.11,
           "candidates": 12,
           "coverageEndDate": "05/13/2026",
-          "financeSignal": -0.11945861799999999
+          "demEfficiency": 297.990064803223,
+          "repEfficiency": 8534.632955225828,
+          "efficiencySignal": -1.35,
+          "rawReceiptSignal": -0.07466163625,
+          "financeSignal": -0.99290525815
         },
         "mitSenate": {
           "year": 2018,
@@ -1727,19 +2078,23 @@
       "demStatus": "unresolved",
       "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": -8.070057049598805,
+      "margin": -7.661554214479556,
       "error": 8.007727272727273,
-      "demProbability": 0.194575,
+      "demProbability": 0.214275,
       "pollMargin": -6.508477128551405,
       "primaryRisk": 0.8077272727272727,
+      "stateElasticity": 1.04,
+      "candidateHistoryAdjustment": 0.8,
+      "primaryScenarioAdjustment": 0,
+      "rcvAdjustment": 0,
       "winnerParty": "R",
-      "winnerProbability": 0.8054250000000001,
+      "winnerProbability": 0.785725,
       "competitive": false,
       "displayName": "Montana Senate",
       "summary": "Open-seat race with a Republican edge in the current forecast.",
-      "tippingPower": 0.08133689394200751,
-      "demTippingPower": 0.026675,
-      "repTippingPower": 0.1244,
+      "tippingPower": 0.07932440260599194,
+      "demTippingPower": 0.0268,
+      "repTippingPower": 0.11535,
       "history": [
         {
           "date": "2026-05-16",
@@ -1747,7 +2102,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.194575
+          "dem": 0.214275
         }
       ]
     },
@@ -1760,7 +2115,7 @@
       "rating": "Likely D",
       "pvi": -1.65,
       "pastSenate": -1.93921732766903,
-      "money": 1.2175,
+      "money": 1.2234,
       "candidate": 1.4,
       "approval": 0.3,
       "primary": "resolved",
@@ -1792,9 +2147,21 @@
           "demReceipts": 27417023.970000003,
           "repReceipts": 8656785.14,
           "otherReceipts": 64450.36,
+          "demDisbursements": 9650552.08,
+          "repDisbursements": 6125933.68,
+          "demCash": 18455463.05,
+          "repCash": 2531563.6,
+          "demDebts": 0,
+          "repDebts": 668774.48,
+          "demIndividual": 11230498.6,
+          "repIndividual": 3985161.19,
           "candidates": 25,
           "coverageEndDate": "03/31/2026",
-          "financeSignal": 1.25
+          "demEfficiency": 7567.65833666505,
+          "repEfficiency": 1558.2410160225193,
+          "efficiencySignal": 1.35,
+          "rawReceiptSignal": 1,
+          "financeSignal": 1.252
         },
         "mitSenate": {
           "year": 2016,
@@ -1820,19 +2187,23 @@
       "demStatus": "nominee",
       "repStatus": "nominee",
       "primarySummary": "Primaries held March 3. Cooper and Whatley won their nominations.",
-      "margin": 9.355262232213937,
+      "margin": 10.610572232213936,
       "error": 6.2,
-      "demProbability": 0.881975,
+      "demProbability": 0.89775,
       "pollMargin": 3.1643630734539587,
       "primaryRisk": 0,
+      "stateElasticity": 1.18,
+      "candidateHistoryAdjustment": 1.25,
+      "primaryScenarioAdjustment": 0,
+      "rcvAdjustment": 0,
       "winnerParty": "D",
-      "winnerProbability": 0.881975,
+      "winnerProbability": 0.89775,
       "competitive": false,
       "displayName": "North Carolina Senate",
       "summary": "Open-seat race with a Democratic edge in the current forecast.",
-      "tippingPower": 0.10036614242364263,
-      "demTippingPower": 0.130025,
-      "repTippingPower": 0.00885,
+      "tippingPower": 0.09209525001700149,
+      "demTippingPower": 0.1287,
+      "repTippingPower": 0.007,
       "history": [
         {
           "date": "2026-05-16",
@@ -1840,7 +2211,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.881975
+          "dem": 0.89775
         }
       ]
     },
@@ -1853,7 +2224,7 @@
       "rating": "Lean R",
       "pvi": -12.821405560900628,
       "pastSenate": -9.412769805532543,
-      "money": -0.0805954412,
+      "money": -0.01858331265665006,
       "candidate": 1.25,
       "approval": -0.1,
       "primary": "resolved",
@@ -1878,16 +2249,28 @@
           44
         ]
       ],
-      "note": "Special election with Republicans at 76% in the current forecast.",
+      "note": "Special election with Republicans at 70% in the current forecast.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
           "demReceipts": 1000,
           "repReceipts": 4866649.16,
           "otherReceipts": 3870000.95,
+          "demDisbursements": 1000,
+          "repDisbursements": 4281083.75,
+          "demCash": 0,
+          "repCash": 1072534.52,
+          "demDebts": 0,
+          "repDebts": 0,
+          "demIndividual": 0,
+          "repIndividual": 1753452.32,
           "candidates": 8,
           "coverageEndDate": "04/22/2026",
-          "financeSignal": -0.973129832
+          "demEfficiency": 0,
+          "repEfficiency": 899.7185465925003,
+          "efficiencySignal": -0.4998436369958335,
+          "rawReceiptSignal": -0.608206145,
+          "financeSignal": -0.5301851392370002
         },
         "mitSenate": {
           "year": 2018,
@@ -1913,19 +2296,23 @@
       "demStatus": "nominee",
       "repStatus": "nominee",
       "primarySummary": "Ricketts won the Republican primary. The Democratic primary is over and the Democratic nominee said they will withdraw so Osborn can consolidate the anti-Ricketts vote.",
-      "margin": -6.274862143435616,
+      "margin": -4.7690512277466,
       "error": 7.2,
-      "demProbability": 0.236225,
+      "demProbability": 0.302925,
       "pollMargin": -4.22558936617572,
       "primaryRisk": 0,
+      "stateElasticity": 1.134962163798954,
+      "candidateHistoryAdjustment": 1.45,
+      "primaryScenarioAdjustment": 0,
+      "rcvAdjustment": 0,
       "winnerParty": "R",
-      "winnerProbability": 0.763775,
-      "competitive": false,
+      "winnerProbability": 0.697075,
+      "competitive": true,
       "displayName": "Nebraska Senate",
-      "summary": "Special election with Republicans at 76% in the current forecast.",
-      "tippingPower": 0.09421051065418999,
-      "demTippingPower": 0.034125,
-      "repTippingPower": 0.1199,
+      "summary": "Special election with Republicans at 70% in the current forecast.",
+      "tippingPower": 0.09768541248876716,
+      "demTippingPower": 0.041575,
+      "repTippingPower": 0.10605,
       "history": [
         {
           "date": "2026-05-16",
@@ -1933,7 +2320,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.236225
+          "dem": 0.302925
         }
       ]
     },
@@ -1946,7 +2333,7 @@
       "rating": "Lean D",
       "pvi": 3.182991044100624,
       "pastSenate": 4.027518467408068,
-      "money": 0.6720225822999999,
+      "money": 0.35563275825697793,
       "candidate": 0.4,
       "approval": 0.2,
       "primary": "unresolved",
@@ -1974,9 +2361,21 @@
           "demReceipts": 10074818.93,
           "repReceipts": 4188782.04,
           "otherReceipts": 4463.13,
+          "demDisbursements": 6204661.87,
+          "repDisbursements": 1512491.83,
+          "demCash": 4277841.29,
+          "repCash": 2676290.21,
+          "demDebts": 8416.27,
+          "repDebts": 0,
+          "demIndividual": 8856262.79,
+          "repIndividual": 2460561.8899999997,
           "candidates": 11,
           "coverageEndDate": "06/30/2025",
-          "financeSignal": 1.1772073779999999
+          "demEfficiency": 3314.95238016013,
+          "repEfficiency": 3076.4652843852527,
+          "efficiencySignal": 0.13249283098604286,
+          "rawReceiptSignal": 0.73575461125,
+          "financeSignal": 0.3014061294599508
         },
         "mitSenate": {
           "year": 2016,
@@ -2002,19 +2401,23 @@
       "demStatus": "unresolved",
       "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": 6.278524542118875,
+      "margin": 6.343773700480154,
       "error": 8.873181818181818,
-      "demProbability": 0.7312,
+      "demProbability": 0.730625,
       "pollMargin": 1.2969574033441138,
       "primaryRisk": 1.6731818181818183,
+      "stateElasticity": 0.94,
+      "candidateHistoryAdjustment": 0.35,
+      "primaryScenarioAdjustment": 0,
+      "rcvAdjustment": 0,
       "winnerParty": "D",
-      "winnerProbability": 0.7312,
+      "winnerProbability": 0.730625,
       "competitive": true,
       "displayName": "New Hampshire Senate",
       "summary": "Open-seat race with a Democratic edge in the current forecast.",
-      "tippingPower": 0.1283235239490188,
-      "demTippingPower": 0.112025,
-      "repTippingPower": 0.0327,
+      "tippingPower": 0.12526037284716793,
+      "demTippingPower": 0.1087,
+      "repTippingPower": 0.032475,
       "history": [
         {
           "date": "2026-05-16",
@@ -2022,7 +2425,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.7312
+          "dem": 0.730625
         }
       ]
     },
@@ -2035,7 +2438,7 @@
       "rating": "Safe D",
       "pvi": 12.20495171142592,
       "pastSenate": 12.635811580438645,
-      "money": 1.0875,
+      "money": 1.1134,
       "candidate": 1,
       "approval": 0.5,
       "primary": "unresolved",
@@ -2050,9 +2453,21 @@
           "demReceipts": 16808282.46,
           "repReceipts": 118348.06,
           "otherReceipts": 0,
+          "demDisbursements": 5829198.17,
+          "repDisbursements": 87754.31000000001,
+          "demCash": 22171570.28,
+          "repCash": 29697.690000000002,
+          "demDebts": 0,
+          "repDebts": 107966.96,
+          "demIndividual": 12629918.79,
+          "repIndividual": 12610.59,
           "candidates": 13,
           "coverageEndDate": "03/31/2026",
-          "financeSignal": 1.25
+          "demEfficiency": 11537.168660550555,
+          "repEfficiency": -135.7178781269136,
+          "efficiencySignal": 1.35,
+          "rawReceiptSignal": 1,
+          "financeSignal": 1.252
         },
         "mitSenate": {
           "year": 2018,
@@ -2078,19 +2493,23 @@
       "demStatus": "presumptive",
       "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Democratic nominee until the candidate ledger is updated.",
-      "margin": 18.057116586902353,
+      "margin": 18.480426586902354,
       "error": 5.55,
-      "demProbability": 0.99345,
+      "demProbability": 0.99225,
       "pollMargin": null,
       "primaryRisk": 0.35,
+      "stateElasticity": 1.1284731759097466,
+      "candidateHistoryAdjustment": 0,
+      "primaryScenarioAdjustment": 0.4,
+      "rcvAdjustment": 0,
       "winnerParty": "D",
-      "winnerProbability": 0.99345,
+      "winnerProbability": 0.99225,
       "competitive": false,
       "displayName": "New Jersey Senate",
       "summary": "Cory Booker is the Democratic incumbent; the current forecast gives Democrats a 99% chance.",
-      "tippingPower": 0.00984273470581844,
-      "demTippingPower": 0.135325,
-      "repTippingPower": 0.00025,
+      "tippingPower": 0.010459278505708915,
+      "demTippingPower": 0.13235,
+      "repTippingPower": 0.000175,
       "history": [
         {
           "date": "2026-05-16",
@@ -2098,7 +2517,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.99345
+          "dem": 0.99225
         }
       ]
     },
@@ -2111,7 +2530,7 @@
       "rating": "Safe D",
       "pvi": 10.04582415670178,
       "pastSenate": 14.311109708297707,
-      "money": 0.9769319795,
+      "money": 1.0609596953875,
       "candidate": 1,
       "approval": 0.4,
       "primary": "unresolved",
@@ -2126,9 +2545,21 @@
           "demReceipts": 4670456.850000001,
           "repReceipts": 0,
           "otherReceipts": 0,
+          "demDisbursements": 1704554.38,
+          "repDisbursements": 0,
+          "demCash": 4179695.36,
+          "repCash": 0,
+          "demDebts": 0,
+          "repDebts": 0,
+          "demIndividual": 2412982.17,
+          "repIndividual": 0,
           "candidates": 8,
           "coverageEndDate": "03/31/2026",
-          "financeSignal": 0.9340913700000001
+          "demEfficiency": 4033.0828041255113,
+          "repEfficiency": 0,
+          "efficiencySignal": 1.35,
+          "rawReceiptSignal": 0.5838071062500001,
+          "financeSignal": 1.1354659897500001
         },
         "mitSenate": {
           "year": 2018,
@@ -2154,19 +2585,23 @@
       "demStatus": "presumptive",
       "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Democratic nominee until the candidate ledger is updated.",
-      "margin": 17.699474380890372,
+      "margin": 18.175099325189123,
       "error": 5.55,
-      "demProbability": 0.99225,
+      "demProbability": 0.99035,
       "pollMargin": null,
       "primaryRisk": 0.35,
+      "stateElasticity": 1.105745517438966,
+      "candidateHistoryAdjustment": 0,
+      "primaryScenarioAdjustment": 0.4,
+      "rcvAdjustment": 0,
       "winnerParty": "D",
-      "winnerProbability": 0.99225,
+      "winnerProbability": 0.99035,
       "competitive": false,
       "displayName": "New Mexico Senate",
       "summary": "Ben Ray Lujan is the Democratic incumbent; the current forecast gives Democrats a 99% chance.",
-      "tippingPower": 0.010684209226261794,
-      "demTippingPower": 0.135225,
-      "repTippingPower": 0.00015,
+      "tippingPower": 0.01166879247039929,
+      "demTippingPower": 0.132375,
+      "repTippingPower": 0.00025,
       "history": [
         {
           "date": "2026-05-16",
@@ -2174,7 +2609,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.99225
+          "dem": 0.99035
         }
       ]
     },
@@ -2187,7 +2622,7 @@
       "rating": "Toss-up",
       "pvi": -6.940390654895518,
       "pastSenate": 0.5691543082610389,
-      "money": 0.8925,
+      "money": 0.7144314929574249,
       "candidate": 1.2,
       "approval": 0.1,
       "primary": "resolved",
@@ -2212,16 +2647,28 @@
           51
         ]
       ],
-      "note": "Sherrod Brown and Jon Husted start close to even; the current probability margin is D+1.4 pts.",
+      "note": "Sherrod Brown and Jon Husted start close to even; the current probability margin is D+2.4 pts.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
           "demReceipts": 31033381.599999998,
           "repReceipts": 10527814.39,
           "otherReceipts": 77455.27,
+          "demDisbursements": 13975130.690000003,
+          "repDisbursements": 2360331.93,
+          "demCash": 17079813.73,
+          "repCash": 8167482.46,
+          "demDebts": 25995.57,
+          "repDebts": 0,
+          "demIndividual": 26092474.860000003,
+          "repIndividual": 4296470.44,
           "candidates": 15,
           "coverageEndDate": "03/31/2026",
-          "financeSignal": 1.25
+          "demEfficiency": 7704.833278831355,
+          "repEfficiency": 6574.6583179567715,
+          "efficiencySignal": 0.6278749782636572,
+          "rawReceiptSignal": 1,
+          "financeSignal": 0.7320699843498333
         },
         "mitSenate": {
           "year": 2018,
@@ -2247,19 +2694,23 @@
       "demStatus": "nominee",
       "repStatus": "nominee",
       "primarySummary": "Primaries held May 5. Brown won the Democratic primary; Husted was unopposed for the GOP nomination.",
-      "margin": 1.4047441150531907,
+      "margin": 2.3944824587148728,
       "error": 9.4,
-      "demProbability": 0.554,
+      "demProbability": 0.586575,
       "pollMargin": -0.7918097635656146,
       "primaryRisk": 0,
+      "stateElasticity": 1.22,
+      "candidateHistoryAdjustment": 1.15,
+      "primaryScenarioAdjustment": 0,
+      "rcvAdjustment": 0,
       "winnerParty": "D",
-      "winnerProbability": 0.554,
+      "winnerProbability": 0.586575,
       "competitive": true,
       "displayName": "Ohio Senate",
-      "summary": "Sherrod Brown and Jon Husted start close to even; the current probability margin is D+1.4 pts.",
-      "tippingPower": 0.2816243079350962,
-      "demTippingPower": 0.089425,
-      "repTippingPower": 0.0637,
+      "summary": "Sherrod Brown and Jon Husted start close to even; the current probability margin is D+2.4 pts.",
+      "tippingPower": 0.26820673310102555,
+      "demTippingPower": 0.091575,
+      "repTippingPower": 0.055625,
       "history": [
         {
           "date": "2026-05-16",
@@ -2267,7 +2718,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.554
+          "dem": 0.586575
         }
       ]
     },
@@ -2280,7 +2731,7 @@
       "rating": "Safe R",
       "pvi": -19.726850783587594,
       "pastSenate": -32.632054070068165,
-      "money": -1.0875,
+      "money": -1.1134,
       "candidate": -1,
       "approval": -0.9,
       "primary": "unresolved",
@@ -2295,9 +2746,21 @@
           "demReceipts": 264882.01,
           "repReceipts": 11465231.45,
           "otherReceipts": 6187.6,
+          "demDisbursements": 120081.95000000001,
+          "repDisbursements": 1070878.57,
+          "demCash": 145736.40000000002,
+          "repCash": 10577369.67,
+          "demDebts": 50000,
+          "repDebts": 5075400.39,
+          "demIndividual": 211405.22,
+          "repIndividual": 1460624.71,
           "candidates": 18,
           "coverageEndDate": "03/31/2026",
-          "financeSignal": -1.25
+          "demEfficiency": 594.0865925573904,
+          "repEfficiency": 7423.294081252664,
+          "efficiencySignal": -1.35,
+          "rawReceiptSignal": -1,
+          "financeSignal": -1.252
         },
         "mitSenate": {
           "year": 2016,
@@ -2323,19 +2786,23 @@
       "demStatus": "unresolved",
       "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": -21.74758914200225,
+      "margin": -21.770899142002254,
       "error": 5.861363636363636,
-      "demProbability": 0.00225,
+      "demProbability": 0.003575,
       "pollMargin": null,
       "primaryRisk": 0.6613636363636364,
+      "stateElasticity": 1.2076510608798694,
+      "candidateHistoryAdjustment": 0,
+      "primaryScenarioAdjustment": 0,
+      "rcvAdjustment": 0,
       "winnerParty": "R",
-      "winnerProbability": 0.99775,
+      "winnerProbability": 0.996425,
       "competitive": false,
       "displayName": "Oklahoma Senate",
       "summary": "Special election with Republicans at 100% in the current forecast.",
-      "tippingPower": 0.0038572686009978293,
-      "demTippingPower": 0.000125,
-      "repTippingPower": 0.14525,
+      "tippingPower": 0.004517148912528556,
+      "demTippingPower": 0.00005,
+      "repTippingPower": 0.1351,
       "history": [
         {
           "date": "2026-05-16",
@@ -2343,7 +2810,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.00225
+          "dem": 0.003575
         }
       ]
     },
@@ -2356,7 +2823,7 @@
       "rating": "Safe D",
       "pvi": 10.056144928062151,
       "pastSenate": 16.65063370752449,
-      "money": 0.9221128675999999,
+      "money": 1.0486253952100002,
       "candidate": 1,
       "approval": 0.5,
       "primary": "unresolved",
@@ -2371,9 +2838,21 @@
           "demReceipts": 3944598.07,
           "repReceipts": 57271.39,
           "otherReceipts": 0,
+          "demDisbursements": 1725947.65,
+          "repDisbursements": 24002.96,
+          "demCash": 6485649.07,
+          "repCash": 33648.96,
+          "demDebts": 0,
+          "repDebts": 37274.47,
+          "demIndividual": 3072756.16,
+          "repIndividual": 51802.5,
           "candidates": 6,
           "coverageEndDate": "04/29/2026",
-          "financeSignal": 0.7774653359999999
+          "demEfficiency": 5989.242616820707,
+          "repEfficiency": 199.23536295962825,
+          "efficiencySignal": 1.35,
+          "rawReceiptSignal": 0.48591583499999996,
+          "financeSignal": 1.1080564338
         },
         "mitSenate": {
           "year": 2016,
@@ -2399,18 +2878,22 @@
       "demStatus": "presumptive",
       "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Democratic nominee until the candidate ledger is updated.",
-      "margin": 18.195518965152218,
+      "margin": 18.709380240001217,
       "error": 5.55,
-      "demProbability": 0.99275,
+      "demProbability": 0.992575,
       "pollMargin": null,
       "primaryRisk": 0.35,
+      "stateElasticity": 1.1058541571374962,
+      "candidateHistoryAdjustment": 0,
+      "primaryScenarioAdjustment": 0.4,
+      "rcvAdjustment": 0,
       "winnerParty": "D",
-      "winnerProbability": 0.99275,
+      "winnerProbability": 0.992575,
       "competitive": false,
       "displayName": "Oregon Senate",
       "summary": "Jeff Merkley is the Democratic incumbent; the current forecast gives Democrats a 99% chance.",
-      "tippingPower": 0.010345959066519327,
-      "demTippingPower": 0.135275,
+      "tippingPower": 0.01023736724280338,
+      "demTippingPower": 0.132275,
       "repTippingPower": 0.000225,
       "history": [
         {
@@ -2419,7 +2902,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.99275
+          "dem": 0.992575
         }
       ]
     },
@@ -2432,7 +2915,7 @@
       "rating": "Safe D",
       "pvi": 15.119908560033318,
       "pastSenate": 19.021567243017692,
-      "money": 0.8231211083000001,
+      "money": 1.0263522493675001,
       "candidate": 1,
       "approval": 0.7,
       "primary": "unresolved",
@@ -2440,16 +2923,28 @@
       "nomination": 0.1,
       "independent": "none",
       "polls": [],
-      "note": "Jack Reed is the Democratic incumbent; the current forecast gives Democrats a 100% chance.",
+      "note": "Jack Reed is the Democratic incumbent; the current forecast gives Democrats a 99% chance.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
           "demReceipts": 2613033.32,
           "repReceipts": 139874.63,
           "otherReceipts": 0,
+          "demDisbursements": 770877.82,
+          "repDisbursements": 128139.73,
+          "demCash": 3430347.54,
+          "repCash": 13962.400000000001,
+          "demDebts": 0,
+          "repDebts": 689.51,
+          "demIndividual": 1646934.06,
+          "repIndividual": 137896.07,
           "candidates": 6,
           "coverageEndDate": "03/31/2026",
-          "financeSignal": 0.494631738
+          "demEfficiency": 4751.11831694926,
+          "repEfficiency": 211.00511865268498,
+          "efficiencySignal": 1.35,
+          "rawReceiptSignal": 0.30914483625,
+          "financeSignal": 1.05856055415
         },
         "mitSenate": {
           "year": 2018,
@@ -2475,19 +2970,23 @@
       "demStatus": "presumptive",
       "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Democratic nominee until the candidate ledger is updated.",
-      "margin": 19.94591636055394,
+      "margin": 20.52882438751469,
       "error": 5.932727272727273,
-      "demProbability": 0.9953,
+      "demProbability": 0.994925,
       "pollMargin": null,
       "primaryRisk": 0.7327272727272727,
+      "stateElasticity": 1.159156932210877,
+      "candidateHistoryAdjustment": 0,
+      "primaryScenarioAdjustment": 0.4,
+      "rcvAdjustment": 0,
       "winnerParty": "D",
-      "winnerProbability": 0.9953,
+      "winnerProbability": 0.994925,
       "competitive": false,
       "displayName": "Rhode Island Senate",
-      "summary": "Jack Reed is the Democratic incumbent; the current forecast gives Democrats a 100% chance.",
-      "tippingPower": 0.00833464496672993,
-      "demTippingPower": 0.1353,
-      "repTippingPower": 0.0001,
+      "summary": "Jack Reed is the Democratic incumbent; the current forecast gives Democrats a 99% chance.",
+      "tippingPower": 0.008473670704745475,
+      "demTippingPower": 0.132375,
+      "repTippingPower": 0.000125,
       "history": [
         {
           "date": "2026-05-16",
@@ -2495,7 +2994,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.9953
+          "dem": 0.994925
         }
       ]
     },
@@ -2508,7 +3007,7 @@
       "rating": "Lean R",
       "pvi": -7.65,
       "pastSenate": -13.239971061904207,
-      "money": -0.6598321137999998,
+      "money": -0.46268948888603123,
       "candidate": -0.2,
       "approval": -0.4,
       "primary": "unresolved",
@@ -2523,9 +3022,21 @@
           "demReceipts": 7201021.9,
           "repReceipts": 12912909.239999998,
           "otherReceipts": 17082.52,
+          "demDisbursements": 4512202.35,
+          "repDisbursements": 13135505.1,
+          "demCash": 2645553.5500000003,
+          "repCash": 15401021.43,
+          "demDebts": 276202.96,
+          "repDebts": 5744665.96,
+          "demIndividual": 6608449.409999999,
+          "repIndividual": 2118331.48,
           "candidates": 22,
           "coverageEndDate": "12/01/2025",
-          "financeSignal": -1.1423774679999996
+          "demEfficiency": 2554.386175767927,
+          "repEfficiency": 3402.870971773656,
+          "efficiencySignal": -0.47138044222540504,
+          "rawReceiptSignal": -0.7139859174999997,
+          "financeSignal": -0.5393099753022915
         },
         "mitSenate": {
           "year": 2016,
@@ -2551,19 +3062,23 @@
       "demStatus": "unresolved",
       "repStatus": "presumptive",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Republican nominee until the candidate ledger is updated.",
-      "margin": -7.330827254728437,
+      "margin": -7.553398892305864,
       "error": 8.354545454545455,
-      "demProbability": 0.22605,
+      "demProbability": 0.226,
       "pollMargin": null,
       "primaryRisk": 1.1545454545454545,
+      "stateElasticity": 1.0805263157894738,
+      "candidateHistoryAdjustment": 0,
+      "primaryScenarioAdjustment": -0.4,
+      "rcvAdjustment": 0,
       "winnerParty": "R",
-      "winnerProbability": 0.77395,
+      "winnerProbability": 0.774,
       "competitive": false,
       "displayName": "South Carolina Senate",
       "summary": "Lindsey Graham is the Republican incumbent; the current forecast gives Republicans a 77% chance.",
-      "tippingPower": 0.0712233422199602,
-      "demTippingPower": 0.034175,
-      "repTippingPower": 0.120625,
+      "tippingPower": 0.0647998851885858,
+      "demTippingPower": 0.028,
+      "repTippingPower": 0.11285,
       "history": [
         {
           "date": "2026-05-16",
@@ -2571,7 +3086,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.22605
+          "dem": 0.226
         }
       ]
     },
@@ -2584,7 +3099,7 @@
       "rating": "Safe R",
       "pvi": -15.655375840326986,
       "pastSenate": -24.73114463176575,
-      "money": -0.8069005256,
+      "money": -1.02270261826,
       "candidate": -1,
       "approval": -0.8,
       "primary": "unresolved",
@@ -2599,9 +3114,21 @@
           "demReceipts": 192473.04,
           "repReceipts": 2433909.12,
           "otherReceipts": 564715.66,
+          "demDisbursements": 185994.34,
+          "repDisbursements": 1365519.57,
+          "demCash": 6478.7,
+          "repCash": 2938418.62,
+          "demDebts": 14458.22,
+          "repDebts": 9602.39,
+          "demIndividual": 183243.08,
+          "repIndividual": 1034288.51,
           "candidates": 5,
           "coverageEndDate": "03/31/2026",
-          "financeSignal": -0.448287216
+          "demEfficiency": 182.75560191436122,
+          "repEfficiency": 2907.117805922755,
+          "efficiencySignal": -1.35,
+          "rawReceiptSignal": -0.28017951,
+          "financeSignal": -1.0504502628
         },
         "mitSenate": {
           "year": 2016,
@@ -2627,19 +3154,23 @@
       "demStatus": "unresolved",
       "repStatus": "presumptive",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Republican nominee until the candidate ledger is updated.",
-      "margin": -19.06271374099922,
+      "margin": -19.65693562439322,
       "error": 5.55,
-      "demProbability": 0.0053,
+      "demProbability": 0.006725,
       "pollMargin": null,
       "primaryRisk": 0.35,
+      "stateElasticity": 1.1647934298981788,
+      "candidateHistoryAdjustment": 0,
+      "primaryScenarioAdjustment": -0.4,
+      "rcvAdjustment": 0,
       "winnerParty": "R",
-      "winnerProbability": 0.9947,
+      "winnerProbability": 0.993275,
       "competitive": false,
       "displayName": "South Dakota Senate",
       "summary": "Mike Rounds is the Republican incumbent; the current forecast gives Republicans a 99% chance.",
-      "tippingPower": 0.005919142828008499,
-      "demTippingPower": 0.00035,
-      "repTippingPower": 0.145225,
+      "tippingPower": 0.006185644742690125,
+      "demTippingPower": 0.0001,
+      "repTippingPower": 0.13505,
       "history": [
         {
           "date": "2026-05-16",
@@ -2647,7 +3178,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.0053
+          "dem": 0.006725
         }
       ]
     },
@@ -2660,7 +3191,7 @@
       "rating": "Safe R",
       "pvi": -13.65,
       "pastSenate": -14.957406829668322,
-      "money": -1.0616337162,
+      "money": -1.0800175861449999,
       "candidate": -1,
       "approval": -0.8,
       "primary": "unresolved",
@@ -2675,9 +3206,21 @@
           "demReceipts": 0,
           "repReceipts": 5880481.66,
           "otherReceipts": 0,
+          "demDisbursements": 0,
+          "repDisbursements": 2133071.28,
+          "demCash": 0,
+          "repCash": 5674879.45,
+          "demDebts": 0,
+          "repDebts": 0,
+          "demIndividual": 0,
+          "repIndividual": 3021763.57,
           "candidates": 10,
           "coverageEndDate": "03/31/2026",
-          "financeSignal": -1.176096332
+          "demEfficiency": 0,
+          "repEfficiency": 4816.606107198971,
+          "efficiencySignal": -1.35,
+          "rawReceiptSignal": -0.7350602075,
+          "financeSignal": -1.1778168581
         },
         "mitSenate": {
           "year": 2018,
@@ -2703,19 +3246,23 @@
       "demStatus": "unresolved",
       "repStatus": "presumptive",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Republican nominee until the candidate ledger is updated.",
-      "margin": -16.85593585044126,
+      "margin": -17.272481333391756,
       "error": 5.988181818181818,
-      "demProbability": 0.015275,
+      "demProbability": 0.018575,
       "pollMargin": null,
       "primaryRisk": 0.7881818181818182,
+      "stateElasticity": 1.1436842105263159,
+      "candidateHistoryAdjustment": 0,
+      "primaryScenarioAdjustment": -0.4,
+      "rcvAdjustment": 0,
       "winnerParty": "R",
-      "winnerProbability": 0.984725,
+      "winnerProbability": 0.981425,
       "competitive": false,
       "displayName": "Tennessee Senate",
       "summary": "Bill Hagerty is the Republican incumbent; the current forecast gives Republicans a 98% chance.",
-      "tippingPower": 0.010005093351833074,
-      "demTippingPower": 0.0009,
-      "repTippingPower": 0.144775,
+      "tippingPower": 0.010281111378659278,
+      "demTippingPower": 0.0011,
+      "repTippingPower": 0.134875,
       "history": [
         {
           "date": "2026-05-16",
@@ -2723,7 +3270,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.015275
+          "dem": 0.018575
         }
       ]
     },
@@ -2736,7 +3283,7 @@
       "rating": "Tilt R",
       "pvi": -4.65,
       "pastSenate": -4.513449252268518,
-      "money": 0.8275,
+      "money": 0.831311078827693,
       "candidate": 0.6,
       "approval": -0.2,
       "primary": "runoff",
@@ -2761,16 +3308,28 @@
           46
         ]
       ],
-      "note": "John Cornyn is the Republican incumbent; the current forecast gives Republicans a 57% chance.",
+      "note": "John Cornyn is the Republican incumbent; the current forecast gives Republicans a 54% chance.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
           "demReceipts": 59677739.79,
           "repReceipts": 17769980.669999998,
           "otherReceipts": 17815.57,
+          "demDisbursements": 49074259.05,
+          "repDisbursements": 17934422.61,
+          "demCash": 10539344.08,
+          "repCash": 6452911.210000001,
+          "demDebts": 321479.29,
+          "repDebts": 106018.34999999999,
+          "demIndividual": 53473943.42999999,
+          "repIndividual": 12385543.3,
           "candidates": 35,
           "coverageEndDate": "05/06/2026",
-          "financeSignal": 1.25
+          "demEfficiency": 4907.366126527304,
+          "repEfficiency": 2822.304577484566,
+          "efficiencySignal": 1.1583675272459657,
+          "rawReceiptSignal": 1,
+          "financeSignal": 1.1140246196170953
         },
         "mitSenate": {
           "year": 2018,
@@ -2796,19 +3355,23 @@
       "demStatus": "nominee",
       "repStatus": "unresolved",
       "primarySummary": "Democratic primary held March 3. Talarico is nominated; Cornyn and Paxton face a May 26 Republican runoff.",
-      "margin": -2.0354638601362485,
+      "margin": -1.3220338891913248,
       "error": 9.55,
-      "demProbability": 0.430125,
+      "demProbability": 0.458125,
       "pollMargin": -3.080524243447426,
       "primaryRisk": 1.15,
+      "stateElasticity": 1.16,
+      "candidateHistoryAdjustment": 0.25,
+      "primaryScenarioAdjustment": 0.46,
+      "rcvAdjustment": 0,
       "winnerParty": "R",
-      "winnerProbability": 0.569875,
+      "winnerProbability": 0.541875,
       "competitive": true,
       "displayName": "Texas Senate",
-      "summary": "John Cornyn is the Republican incumbent; the current forecast gives Republicans a 57% chance.",
-      "tippingPower": 0.24793040226609897,
-      "demTippingPower": 0.06615,
-      "repTippingPower": 0.0856,
+      "summary": "John Cornyn is the Republican incumbent; the current forecast gives Republicans a 54% chance.",
+      "tippingPower": 0.23951930346151828,
+      "demTippingPower": 0.068475,
+      "repTippingPower": 0.0772,
       "history": [
         {
           "date": "2026-05-16",
@@ -2816,7 +3379,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.430125
+          "dem": 0.458125
         }
       ]
     },
@@ -2829,7 +3392,7 @@
       "rating": "Likely D",
       "pvi": 6.167465208856843,
       "pastSenate": 10.399029174013158,
-      "money": 1.0875,
+      "money": 1.1134,
       "candidate": 1,
       "approval": 0.5,
       "primary": "unresolved",
@@ -2837,16 +3400,28 @@
       "nomination": 0.2,
       "independent": "none",
       "polls": [],
-      "note": "Mark Warner is the Democratic incumbent; the current forecast gives Democrats a 92% chance.",
+      "note": "Mark Warner is the Democratic incumbent; the current forecast gives Democrats a 94% chance.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
           "demReceipts": 14780359.6,
           "repReceipts": 517052.12000000005,
           "otherReceipts": 0,
+          "demDisbursements": 5719995.63,
+          "repDisbursements": 420529.88,
+          "demCash": 14613597.79,
+          "repCash": 96740.82,
+          "demDebts": 45375.17,
+          "repDebts": 116500,
+          "demIndividual": 7712432.72,
+          "repIndividual": 212453.31,
           "candidates": 13,
           "coverageEndDate": "03/31/2026",
-          "financeSignal": 1.25
+          "demEfficiency": 7548.102353976933,
+          "repEfficiency": 170.85215817832795,
+          "efficiencySignal": 1.35,
+          "rawReceiptSignal": 1,
+          "financeSignal": 1.252
         },
         "mitSenate": {
           "year": 2018,
@@ -2872,19 +3447,23 @@
       "demStatus": "presumptive",
       "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved. The incumbent is treated as the presumptive Democratic nominee until the candidate ledger is updated.",
-      "margin": 12.320763345000678,
+      "margin": 13.294073345000678,
       "error": 6.9790909090909095,
-      "demProbability": 0.924575,
+      "demProbability": 0.944575,
       "pollMargin": null,
       "primaryRisk": 0.7790909090909091,
+      "stateElasticity": 0.86,
+      "candidateHistoryAdjustment": 0.55,
+      "primaryScenarioAdjustment": 0.4,
+      "rcvAdjustment": 0,
       "winnerParty": "D",
-      "winnerProbability": 0.924575,
+      "winnerProbability": 0.944575,
       "competitive": false,
       "displayName": "Virginia Senate",
-      "summary": "Mark Warner is the Democratic incumbent; the current forecast gives Democrats a 92% chance.",
-      "tippingPower": 0.032851699420792545,
-      "demTippingPower": 0.1329,
-      "repTippingPower": 0.005325,
+      "summary": "Mark Warner is the Democratic incumbent; the current forecast gives Democrats a 94% chance.",
+      "tippingPower": 0.027553051073781958,
+      "demTippingPower": 0.1298,
+      "repTippingPower": 0.004,
       "history": [
         {
           "date": "2026-05-16",
@@ -2892,7 +3471,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.924575
+          "dem": 0.944575
         }
       ]
     },
@@ -2905,7 +3484,7 @@
       "rating": "Safe R",
       "pvi": -23.10077790664748,
       "pastSenate": -21.750295328103263,
-      "money": -1.0064360254,
+      "money": -1.0675981057150001,
       "candidate": -1,
       "approval": -0.9,
       "primary": "resolved",
@@ -2920,9 +3499,21 @@
           "demReceipts": 534761.76,
           "repReceipts": 5626704.98,
           "otherReceipts": 0,
+          "demDisbursements": 520931.41,
+          "repDisbursements": 3771027.95,
+          "demCash": 20826.98,
+          "repCash": 4227973.02,
+          "demDebts": 25970.56,
+          "repDebts": 175984,
+          "demIndividual": 521642.26999999996,
+          "repIndividual": 3473322.63,
           "candidates": 10,
           "coverageEndDate": "04/22/2026",
-          "financeSignal": -1.018388644
+          "demEfficiency": 328.90125345772634,
+          "repEfficiency": 2918.656634684376,
+          "efficiencySignal": -1.35,
+          "rawReceiptSignal": -0.6364929025000001,
+          "financeSignal": -1.1502180127
         },
         "mitSenate": {
           "year": 2018,
@@ -2948,19 +3539,23 @@
       "demStatus": "nominee",
       "repStatus": "nominee",
       "primarySummary": "Primaries held May 12. Capito and Anderson are the projected nominees.",
-      "margin": -20.508022326003644,
+      "margin": -20.563068198287144,
       "error": 5.2,
-      "demProbability": 0.002175,
+      "demProbability": 0.0044,
       "pollMargin": null,
       "primaryRisk": 0,
+      "stateElasticity": 1.24,
+      "candidateHistoryAdjustment": 0,
+      "primaryScenarioAdjustment": 0,
+      "rcvAdjustment": 0,
       "winnerParty": "R",
-      "winnerProbability": 0.997825,
+      "winnerProbability": 0.9956,
       "competitive": false,
       "displayName": "West Virginia Senate",
       "summary": "Shelley Moore Capito is the Republican incumbent; the current forecast gives Republicans a 100% chance.",
-      "tippingPower": 0.003790621855974932,
-      "demTippingPower": 0.00005,
-      "repTippingPower": 0.14525,
+      "tippingPower": 0.0050101783674167295,
+      "demTippingPower": 0.000075,
+      "repTippingPower": 0.1351,
       "history": [
         {
           "date": "2026-05-16",
@@ -2968,7 +3563,7 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.002175
+          "dem": 0.0044
         }
       ]
     },
@@ -2981,7 +3576,7 @@
       "rating": "Safe R",
       "pvi": -25.856653874139305,
       "pastSenate": -32.972234785173534,
-      "money": -0.9513563504,
+      "money": -0.8887330162438395,
       "candidate": -1,
       "approval": -1,
       "primary": "unresolved",
@@ -2996,9 +3591,21 @@
           "demReceipts": 9653,
           "repReceipts": 4314743.72,
           "otherReceipts": 0,
+          "demDisbursements": 8319.97,
+          "repDisbursements": 2959491.75,
+          "demCash": 1822.79,
+          "repCash": 2928886.91,
+          "demDebts": 0,
+          "repDebts": 1249322.57,
+          "demIndividual": 9653,
+          "repIndividual": 1447289.87,
           "candidates": 6,
           "coverageEndDate": "03/31/2026",
-          "financeSignal": -0.861018144
+          "demEfficiency": 67.6023226567017,
+          "repEfficiency": 1572.7569749002541,
+          "efficiencySignal": -0.8361970290241958,
+          "rawReceiptSignal": -0.53813634,
+          "financeSignal": -0.752740036097421
         },
         "mitSenate": {
           "year": 2018,
@@ -3024,19 +3631,23 @@
       "demStatus": "unresolved",
       "repStatus": "unresolved",
       "primarySummary": "Primary not yet resolved or not entered in the manual candidate ledger.",
-      "margin": -23.239248742115738,
+      "margin": -23.182887741375193,
       "error": 5.9377272727272725,
-      "demProbability": 0.00145,
+      "demProbability": 0.0037,
       "pollMargin": null,
       "primaryRisk": 0.7377272727272728,
+      "stateElasticity": 1.24,
+      "candidateHistoryAdjustment": 0,
+      "primaryScenarioAdjustment": 0,
+      "rcvAdjustment": 0,
       "winnerParty": "R",
-      "winnerProbability": 0.99855,
+      "winnerProbability": 0.9963,
       "competitive": false,
       "displayName": "Wyoming Senate",
       "summary": "Open-seat race with a Republican edge in the current forecast.",
-      "tippingPower": 0.003095088539727257,
+      "tippingPower": 0.004595153296490919,
       "demTippingPower": 0.00005,
-      "repTippingPower": 0.1452,
+      "repTippingPower": 0.1351,
       "history": [
         {
           "date": "2026-05-16",
@@ -3044,42 +3655,47 @@
         },
         {
           "date": "2026-05-17",
-          "dem": 0.00145
+          "dem": 0.0037
         }
       ]
     }
   ],
-  "demControlProbability": 0.436,
-  "repControlProbability": 0.5640000000000001,
+  "demControlProbability": 0.468075,
+  "repControlProbability": 0.531925,
   "medianSeats": 50,
   "seatCounts": {
-    "38": 3,
-    "39": 6,
-    "40": 20,
-    "41": 44,
-    "42": 109,
-    "43": 248,
-    "44": 590,
-    "45": 1087,
-    "46": 1954,
-    "47": 3078,
-    "48": 4346,
-    "49": 5265,
-    "50": 5810,
-    "51": 5414,
-    "52": 4511,
-    "53": 3141,
-    "54": 2024,
-    "55": 1206,
-    "56": 607,
-    "57": 295,
-    "58": 136,
-    "59": 62,
-    "60": 25,
-    "61": 13,
-    "62": 2,
-    "63": 2,
-    "66": 1,
-    "67": 1
+    "35": 1,
+    "36": 1,
+    "37": 2,
+    "38": 8,
+    "39": 12,
+    "40": 24,
+    "41": 50,
+    "42": 136,
+    "43": 296,
+    "44": 501,
+    "45": 997,
+    "46": 1789,
+    "47": 2908,
+    "48": 4082,
+    "49": 5066,
+    "50": 5404,
+    "51": 5296,
+    "52": 4507,
+    "53": 3464,
+    "54": 2345,
+    "55": 1435,
+    "56": 805,
+    "57": 402,
+    "58": 213,
+    "59": 104,
+    "60": 69,
+    "61": 38,
+    "62": 19,
+    "63": 13,
+    "64": 4,
+    "65": 5,
+    "66": 2,
+    "67": 2
   }
 }

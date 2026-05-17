@@ -45,8 +45,10 @@
       <p class="kicker">Short version</p>
       <ul class="method-list">
         <li><strong>Polling</strong> VoteHub generic-ballot polls are averaged with recency, sample-size, population, internal/partisan, and repeated-pollster weights.</li>
-        <li><strong>Fundamentals</strong> The baseline blends race ratings, state lean, recent Senate results, incumbency, candidate quality, finance, and population growth.</li>
-        <li><strong>Uncertainty</strong> Simulations include national error, regional error, turnout miss, race error, primary uncertainty, and independent-candidate uncertainty.</li>
+        <li><strong>Fundamentals</strong> The baseline blends race ratings, state lean, recent Senate results, incumbency, candidate overperformance history, finance efficiency, and population growth.</li>
+        <li><strong>Uncertainty</strong> Simulations include national error, correlated regional polling error, turnout miss, race error, primary scenarios, ranked-choice effects, and independent-candidate uncertainty.</li>
+        <li><strong>State response</strong> Competitive and elastic states move more with the national environment; less elastic states move less.</li>
+        <li><strong>Calibration</strong> Each run writes a diagnostic check against MIT/MEDSL historical Senate results so model error can be tracked over time.</li>
         <li><strong>Control math</strong> Independent candidates are counted by likely caucus for chamber control. Tipping power comes from simulations where that exact race changes control.</li>
         <li><strong>Publishing</strong> GitHub Actions runs the generator daily and writes one shared `data/forecast.json` file for everyone.</li>
       </ul>
@@ -68,7 +70,7 @@
       <article class="source-card">
         <span class="source-tag">Finance</span>
         <h3>OpenFEC</h3>
-        <p>Candidate finance and filing data from the 2026 candidate summary bulk file.</p>
+        <p>Candidate finance and filing data from the 2026 candidate summary bulk file. The model favors usable cash, individual support, and debt-adjusted efficiency over raw receipts.</p>
         <a href="https://www.fec.gov/data/browse-data/?tab=bulk-data" target="_blank" rel="noreferrer">Open bulk data</a>
       </article>
       <article class="source-card">

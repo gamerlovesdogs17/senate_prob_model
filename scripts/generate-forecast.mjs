@@ -15,6 +15,9 @@ const SETTINGS = {
   dataSources: [
     "Manual ratings and candidate ledger",
     "Public polling adapter when reachable from GitHub Actions",
+    "OpenFEC candidate finance bulk files",
+    "MIT/MEDSL historical Senate returns",
+    "Census state population estimates",
     "Historical and fundamentals inputs stored in this generator"
   ]
 };
@@ -53,6 +56,30 @@ const RATING_BUCKET = {
 const PATH_CENTRALITY = {
   OH: 1.85, TX: 1.65, AK: 1.6, MI: 1.35, GA: 1.25, NC: 1.12, ME: 1.1, NH: 1,
   IA: .75, NE: .72, MT: .68, SC: .55, KS: .45, FL: .25
+};
+
+const STATE_ELASTICITY = {
+  AK: 1.18, AZ: 1.08, GA: 1.12, IA: 1.1, ME: .86, MI: 1.12, MN: .9, MT: 1.04,
+  NC: 1.18, NH: .94, OH: 1.22, PA: 1.12, TX: 1.16, VA: .86, WI: 1.12
+};
+
+const CANDIDATE_HISTORY = {
+  AK: 1.6, // Peltola has a demonstrated crossover vote profile in Alaska.
+  GA: .7,
+  ME: -1.25, // Collins' historical overperformance is Republican-favorable.
+  MI: .25,
+  MT: .8,
+  NC: 1.25,
+  NE: 1.45,
+  NH: .35,
+  OH: 1.15,
+  TX: .25,
+  VA: .55
+};
+
+const RCV_STATES = {
+  AK: { transferMean: 1.0, transferSd: 1.55, exhaustedSd: .75 },
+  ME: { transferMean: .55, transferSd: .9, exhaustedSd: .45 }
 };
 
 const races = [
@@ -233,6 +260,33 @@ function caucusDiscount(race) {
   return 0;
 }
 
+function candidateHistoryAdjustment(race) {
+  return CANDIDATE_HISTORY[race.state] || 0;
+}
+
+function stateElasticity(race) {
+  return STATE_ELASTICITY[race.state] || clamp(1 + Math.abs(race.pvi) / 95, .82, 1.24);
+}
+
+function primaryScenarioAdjustment(race) {
+  const demStatus = race.demStatus || "unresolved";
+  const repStatus = race.repStatus || "unresolved";
+  let adjustment = 0;
+  if (demStatus === "unresolved" && repStatus !== "unresolved") adjustment -= .28;
+  if (repStatus === "unresolved" && demStatus !== "unresolved") adjustment += .28;
+  if (race.primary === "runoff") adjustment += race.hold === "D" ? -.18 : .18;
+  if (demStatus === "presumptive") adjustment += .12;
+  if (repStatus === "presumptive") adjustment -= .12;
+  return adjustment;
+}
+
+function rcvBaselineAdjustment(race) {
+  const rcv = RCV_STATES[race.state];
+  if (!rcv) return 0;
+  const independentContext = race.independent !== "none" ? .35 : 0;
+  return rcv.transferMean + independentContext;
+}
+
 function baselineMargin(race) {
   const rating = RATING_TO_MARGIN[race.rating] || 0;
   const fundamentals = race.pvi * .24 + race.pastSenate * .20;
@@ -242,16 +296,29 @@ function baselineMargin(race) {
   const fundamentalsBlend = pollMargin === null ? 1 : .78;
   const incumbentPenalty = race.seat === "Open seat" || race.seat === "Special election" ? -.25 : (race.hold === "D" ? .45 : -.45);
   const nationalPolling = race.nationalPolling || 0;
-  return (rating * .48 + fundamentals * fundamentalsBlend + signals + incumbentPenalty + caucusDiscount(race)) + pollBlend + nationalPolling;
+  return (rating * .48 + fundamentals * fundamentalsBlend + signals + incumbentPenalty + caucusDiscount(race)) +
+    pollBlend + nationalPolling + candidateHistoryAdjustment(race) + primaryScenarioAdjustment(race) + rcvBaselineAdjustment(race);
 }
 
 function runModel(sourceData) {
   const adjustedRaces = applySourceInputs(races, sourceData);
   const enriched = adjustedRaces.map((race) => {
     const candidates = candidateInfo(race);
-    const margin = baselineMargin(race);
+    const withCandidates = { ...race, ...candidates };
+    const margin = baselineMargin(withCandidates);
     const error = (RATING_TO_ERROR[race.rating] || 8) + primaryRisk(race);
-    return { ...race, ...candidates, margin, error, demProbability: logistic(margin, error), pollMargin: latestPollMargin(race), primaryRisk: primaryRisk(race) };
+    return {
+      ...withCandidates,
+      margin,
+      error,
+      demProbability: logistic(margin, error),
+      pollMargin: latestPollMargin(race),
+      primaryRisk: primaryRisk(race),
+      stateElasticity: stateElasticity(race),
+      candidateHistoryAdjustment: candidateHistoryAdjustment(race),
+      primaryScenarioAdjustment: primaryScenarioAdjustment(withCandidates),
+      rcvAdjustment: rcvBaselineAdjustment(race)
+    };
   });
 
   const wins = Object.fromEntries(enriched.map((race) => [race.state, 0]));
@@ -262,8 +329,10 @@ function runModel(sourceData) {
 
   for (let sim = 0; sim < SETTINGS.simulations; sim += 1) {
     const nationalSwing = normalRandom() * 4.2;
+    const nationalPollingError = normalRandom() * 1.7;
     const turnoutMiss = normalRandom() * 1.4;
     const regionSwings = {};
+    const regionalPollingErrors = {};
     let demSeats = SETTINGS.safeDemSeats;
     const results = [];
 
@@ -272,10 +341,16 @@ function runModel(sourceData) {
       if (!regionSwings[region]) {
         regionSwings[region] = normalRandom() * 2.1 * (regionScale[region] || 1);
       }
+      if (!regionalPollingErrors[region]) {
+        regionalPollingErrors[region] = nationalPollingError * .45 + normalRandom() * 1.35 * (regionScale[region] || 1);
+      }
 
       const primaryShock = race.primaryRisk > 0 ? normalRandom() * race.primaryRisk : 0;
       const independentShock = race.independent !== "none" ? normalRandom() * 1.1 : 0;
-      const simulatedMargin = race.margin + nationalSwing + turnoutMiss + regionSwings[region] + primaryShock + independentShock + normalRandom() * race.error;
+      const rcv = RCV_STATES[race.state];
+      const rcvShock = rcv ? normalRandom() * rcv.transferSd + normalRandom() * rcv.exhaustedSd : 0;
+      const elasticNationalSwing = nationalSwing * race.stateElasticity;
+      const simulatedMargin = race.margin + elasticNationalSwing + turnoutMiss + regionSwings[region] + regionalPollingErrors[region] + primaryShock + independentShock + rcvShock + normalRandom() * race.error;
       const demWin = simulatedMargin > 0;
       results.push([race.state, demWin]);
       if (demWin) {
@@ -422,6 +497,13 @@ function toNumber(value) {
   return Number.isFinite(number) ? number : 0;
 }
 
+function rowNumber(row, names) {
+  for (const name of names) {
+    if (row[name] !== undefined && row[name] !== "") return toNumber(row[name]);
+  }
+  return 0;
+}
+
 async function fetchVoteHub(status) {
   const text = await fetchText("https://api.votehub.com/polls?poll_type=generic-ballot&subject=2026", "votehubGenericBallot", status, {
     headers: { accept: "application/json" }
@@ -559,12 +641,34 @@ async function fetchFec(status) {
     if (!STATE_NAMES[state]) continue;
     const party = String(row.Cand_Party_Affiliation || "").toUpperCase();
     const side = party.startsWith("DEM") ? "dem" : party.startsWith("REP") ? "rep" : "other";
-    byState[state] ||= { demReceipts: 0, repReceipts: 0, otherReceipts: 0, candidates: 0, coverageEndDate: "" };
+    byState[state] ||= {
+      demReceipts: 0, repReceipts: 0, otherReceipts: 0,
+      demDisbursements: 0, repDisbursements: 0,
+      demCash: 0, repCash: 0,
+      demDebts: 0, repDebts: 0,
+      demIndividual: 0, repIndividual: 0,
+      candidates: 0, coverageEndDate: ""
+    };
     byState[state].candidates += 1;
     byState[state].coverageEndDate = row.Coverage_End_Date || byState[state].coverageEndDate;
     const receipts = toNumber(row.Total_Receipt);
-    if (side === "dem") byState[state].demReceipts += receipts;
-    else if (side === "rep") byState[state].repReceipts += receipts;
+    const disbursements = rowNumber(row, ["Total_Disbursement", "Total_Disbursements", "Total_Disb"]);
+    const cash = rowNumber(row, ["Cash_On_Hand_COP", "Cash_On_Hand", "COH_COP"]);
+    const debts = rowNumber(row, ["Debts_Owed_By_Committee", "Debts_Owed", "Debt_Owed_By_Committee"]);
+    const individual = rowNumber(row, ["Individual_Contribution", "Individual_Contributions", "Contrib_Indiv"]);
+    if (side === "dem") {
+      byState[state].demReceipts += receipts;
+      byState[state].demDisbursements += disbursements;
+      byState[state].demCash += cash;
+      byState[state].demDebts += debts;
+      byState[state].demIndividual += individual;
+    } else if (side === "rep") {
+      byState[state].repReceipts += receipts;
+      byState[state].repDisbursements += disbursements;
+      byState[state].repCash += cash;
+      byState[state].repDebts += debts;
+      byState[state].repIndividual += individual;
+    }
     else byState[state].otherReceipts += receipts;
   }
   status.openFecCandidateSummary.rows = rows.length;
@@ -662,9 +766,13 @@ function applySourceInputs(baseRaces, sourceData) {
     let pvi = race.pvi;
 
     if (fec) {
-      const financeSignal = clamp((fec.demReceipts - fec.repReceipts) / 5000000, -1.25, 1.25);
-      money = clamp(race.money * .65 + financeSignal * .35, -1.5, 1.5);
-      sourceInputs.openFec = { ...fec, financeSignal };
+      const demEfficiency = (fec.demCash + fec.demIndividual * .45 - fec.demDebts * .7) / Math.sqrt(1 + Math.max(fec.demDisbursements, 1));
+      const repEfficiency = (fec.repCash + fec.repIndividual * .45 - fec.repDebts * .7) / Math.sqrt(1 + Math.max(fec.repDisbursements, 1));
+      const efficiencySignal = clamp((demEfficiency - repEfficiency) / 1800, -1.35, 1.35);
+      const rawReceiptSignal = clamp((fec.demReceipts - fec.repReceipts) / 8000000, -1, 1);
+      const financeSignal = efficiencySignal * .72 + rawReceiptSignal * .28;
+      money = clamp(race.money * .55 + financeSignal * .45, -1.5, 1.5);
+      sourceInputs.openFec = { ...fec, demEfficiency, repEfficiency, efficiencySignal, rawReceiptSignal, financeSignal };
     }
     if (mit) {
       pastSenate = race.pastSenate * .8 + mit.margin * .2;
@@ -707,6 +815,35 @@ function appendSeatHistory(model) {
   return [...stored.filter((point) => point.date !== current.date), current].slice(-365);
 }
 
+function buildCalibrationReport(sourceData, model) {
+  const rows = model.races
+    .map((race) => {
+      const historical = sourceData?.mit?.[race.state];
+      if (!historical) return null;
+      const predicted = logistic(race.margin, race.error);
+      const actual = historical.margin > 0 ? 1 : 0;
+      const brier = (predicted - actual) ** 2;
+      const absoluteMarginError = Math.abs(race.margin - historical.margin);
+      return {
+        state: race.state,
+        latestHistoricalYear: historical.year,
+        predicted: Number(predicted.toFixed(4)),
+        actual,
+        brier: Number(brier.toFixed(4)),
+        absoluteMarginError: Number(absoluteMarginError.toFixed(2))
+      };
+    })
+    .filter(Boolean);
+  const mean = (field) => rows.length ? rows.reduce((sum, row) => sum + row[field], 0) / rows.length : null;
+  return {
+    sample: rows.length,
+    meanBrier: mean("brier"),
+    meanAbsoluteMarginError: mean("absoluteMarginError"),
+    note: "Diagnostic only: compares current-cycle model structure against each state's latest available MIT/MEDSL Senate result, not a true historical forecast archive.",
+    worstStates: [...rows].sort((a, b) => b.absoluteMarginError - a.absoluteMarginError).slice(0, 5)
+  };
+}
+
 async function writeForecast() {
   const sourceData = await fetchAllSources();
   const model = runModel(sourceData);
@@ -725,6 +862,7 @@ async function writeForecast() {
       censusStates: Object.keys(sourceData.census).length,
       civicApi: sourceData.civic
     },
+    calibration: buildCalibrationReport(sourceData, model),
     controlHistory: appendControlHistory(model),
     seatHistory: appendSeatHistory(model),
     ...model
