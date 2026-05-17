@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-17T19:01:31.473Z",
+  "generatedAt": "2026-05-17T19:40:18.872Z",
   "modelDate": "2026-05-17",
   "runDate": "May 17, 2026",
   "updateTime": "around 6:00 AM Central",
@@ -19,41 +19,41 @@
     ]
   },
   "sourceStatus": {
-    "checkedAt": "2026-05-17T19:01:29.294Z",
+    "checkedAt": "2026-05-17T19:40:16.499Z",
     "censusPopulation": {
       "ok": true,
       "status": 200,
-      "ms": 271,
+      "ms": 243,
       "url": "https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/state/totals/NST-EST2024-POPCHG2020-2024.csv",
       "rows": 66,
       "states": 51,
       "source": "Census Bureau no-key CSV"
     },
+    "civicApiDocs": {
+      "ok": true,
+      "status": 200,
+      "ms": 249,
+      "url": "https://www.civicapi.org/api-documentation"
+    },
     "mitSenateReturns": {
       "ok": true,
       "status": 200,
-      "ms": 284,
+      "ms": 266,
       "url": "https://raw.githubusercontent.com/MEDSL/constituency-returns/master/1976-2018-senate.csv",
       "rows": 3421,
       "states": 50
     },
-    "civicApiDocs": {
-      "ok": true,
-      "status": 200,
-      "ms": 347,
-      "url": "https://www.civicapi.org/api-documentation"
-    },
     "civicApiEndpoint": {
       "ok": false,
       "status": 404,
-      "ms": 45,
+      "ms": 133,
       "url": "https://www.civicapi.org/api/v1/upcomingraces",
       "error": "{\"message\":\"Route GET:/v1/upcomingraces not found\",\"error\":\"Not Found\",\"statusCode\":404}"
     },
     "openFecCandidateSummary": {
       "ok": true,
       "status": 200,
-      "ms": 1377,
+      "ms": 1036,
       "url": "https://www.fec.gov/files/bulk-downloads/2026/candidate_summary_2026.csv",
       "rows": 4032,
       "senateStates": 44
@@ -61,7 +61,7 @@
     "votehubGenericBallot": {
       "ok": true,
       "status": 200,
-      "ms": 1895,
+      "ms": 2095,
       "url": "https://api.votehub.com/polls?poll_type=generic-ballot&subject=2026",
       "rows": 451,
       "usablePolls": 351,
@@ -219,7 +219,7 @@
       "nomination": 0.25,
       "independent": "none",
       "polls": [],
-      "note": "The Republican primary matters more than the general-election baseline.",
+      "note": "Open-seat race with a Republican edge in the current forecast.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -261,6 +261,7 @@
       "winnerProbability": 0.990125,
       "competitive": false,
       "displayName": "Alabama Senate",
+      "summary": "Open-seat race with a Republican edge in the current forecast.",
       "tippingPower": 0.008088676886943405,
       "demTippingPower": 0.000475,
       "repTippingPower": 0.1456,
@@ -309,7 +310,7 @@
           47
         ]
       ],
-      "note": "Alaska is modeled as a coalition/independent route, not a normal Democratic-label race.",
+      "note": "Democratic nominee pending and Dan Sullivan (presumptive) start close to even; the model baseline is R+4.0.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -351,6 +352,7 @@
       "winnerProbability": 0.627475,
       "competitive": true,
       "displayName": "Alaska Senate",
+      "summary": "Democratic nominee pending and Dan Sullivan (presumptive) start close to even; the model baseline is R+4.0.",
       "tippingPower": 0.23427367267162183,
       "demTippingPower": 0.0563,
       "repTippingPower": 0.095125,
@@ -382,7 +384,7 @@
       "nomination": 0.05,
       "independent": "none",
       "polls": [],
-      "note": "A deeply Republican state with no normal Democratic path.",
+      "note": "Tom Cotton is the Republican incumbent; the current forecast gives Republicans a 100% chance.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -424,6 +426,7 @@
       "winnerProbability": 0.99715,
       "competitive": false,
       "displayName": "Arkansas Senate",
+      "summary": "Tom Cotton is the Republican incumbent; the current forecast gives Republicans a 100% chance.",
       "tippingPower": 0.004357818996634531,
       "demTippingPower": 0.000125,
       "repTippingPower": 0.14585,
@@ -455,7 +458,7 @@
       "nomination": 0.15,
       "independent": "none",
       "polls": [],
-      "note": "Colorado starts outside the serious battleground set.",
+      "note": "John Hickenlooper is the Democratic incumbent; the current forecast gives Democrats a 99% chance.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -497,6 +500,7 @@
       "winnerProbability": 0.986425,
       "competitive": false,
       "displayName": "Colorado Senate",
+      "summary": "John Hickenlooper is the Democratic incumbent; the current forecast gives Democrats a 99% chance.",
       "tippingPower": 0.01363537374383177,
       "demTippingPower": 0.130625,
       "repTippingPower": 0.0003,
@@ -528,7 +532,7 @@
       "nomination": 0.12,
       "independent": "none",
       "polls": [],
-      "note": "Safe Democratic hold under ordinary conditions.",
+      "note": "Chris Coons is the Democratic incumbent; the current forecast gives Democrats a 99% chance.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -570,6 +574,7 @@
       "winnerProbability": 0.9946,
       "competitive": false,
       "displayName": "Delaware Senate",
+      "summary": "Chris Coons is the Democratic incumbent; the current forecast gives Democrats a 99% chance.",
       "tippingPower": 0.008643719043536205,
       "demTippingPower": 0.13085,
       "repTippingPower": 0.0002,
@@ -601,7 +606,7 @@
       "nomination": 0.3,
       "independent": "none",
       "polls": [],
-      "note": "Special election for the remainder of Marco Rubio's term.",
+      "note": "Special election with Republicans at 95% in the current forecast.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -643,6 +648,7 @@
       "winnerProbability": 0.950825,
       "competitive": false,
       "displayName": "Florida Senate",
+      "summary": "Special election with Republicans at 95% in the current forecast.",
       "tippingPower": 0.015925579027597343,
       "demTippingPower": 0.004175,
       "repTippingPower": 0.143125,
@@ -691,7 +697,7 @@
           57
         ]
       ],
-      "note": "A Democratic hold is central to the majority path; a miss here changes the whole map.",
+      "note": "Jon Ossoff is the Democratic incumbent; the current forecast gives Democrats a 88% chance.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -733,6 +739,7 @@
       "winnerProbability": 0.883525,
       "competitive": false,
       "displayName": "Georgia Senate",
+      "summary": "Jon Ossoff is the Democratic incumbent; the current forecast gives Democrats a 88% chance.",
       "tippingPower": 0.10866885342258245,
       "demTippingPower": 0.125375,
       "repTippingPower": 0.010125,
@@ -764,7 +771,7 @@
       "nomination": 0.1,
       "independent": "independent longshot, no assumed caucus",
       "polls": [],
-      "note": "Independent upside is tracked, but no caucus assumption is credited.",
+      "note": "Jim Risch is the Republican incumbent; the current forecast gives Republicans a 100% chance.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -806,6 +813,7 @@
       "winnerProbability": 0.99745,
       "competitive": false,
       "displayName": "Idaho Senate",
+      "summary": "Jim Risch is the Republican incumbent; the current forecast gives Republicans a 100% chance.",
       "tippingPower": 0.004120585941154118,
       "demTippingPower": 0.00005,
       "repTippingPower": 0.14585,
@@ -837,7 +845,7 @@
       "nomination": 0.2,
       "independent": "none",
       "polls": [],
-      "note": "Open seat, but the state floor remains strongly Democratic.",
+      "note": "Open-seat race with a Democratic edge in the current forecast.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -879,6 +887,7 @@
       "winnerProbability": 0.992275,
       "competitive": false,
       "displayName": "Illinois Senate",
+      "summary": "Open-seat race with a Democratic edge in the current forecast.",
       "tippingPower": 0.010314482060226518,
       "demTippingPower": 0.13085,
       "repTippingPower": 0.00005,
@@ -927,7 +936,7 @@
           44
         ]
       ],
-      "note": "Open-seat uncertainty keeps Iowa on the long Democratic path.",
+      "note": "Open-seat race with a Republican edge in the current forecast.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -969,6 +978,7 @@
       "winnerProbability": 0.7275,
       "competitive": true,
       "displayName": "Iowa Senate",
+      "summary": "Open-seat race with a Republican edge in the current forecast.",
       "tippingPower": 0.10193344171956475,
       "demTippingPower": 0.0394,
       "repTippingPower": 0.113225,
@@ -1000,7 +1010,7 @@
       "nomination": 0.25,
       "independent": "none",
       "polls": [],
-      "note": "Kansas becomes live only in a large wave.",
+      "note": "Roger Marshall is the Republican incumbent; the current forecast gives Republicans a 82% chance.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -1042,6 +1052,7 @@
       "winnerProbability": 0.824675,
       "competitive": false,
       "displayName": "Kansas Senate",
+      "summary": "Roger Marshall is the Republican incumbent; the current forecast gives Republicans a 82% chance.",
       "tippingPower": 0.051615386269725914,
       "demTippingPower": 0.02365,
       "repTippingPower": 0.127175,
@@ -1073,7 +1084,7 @@
       "nomination": 0.35,
       "independent": "none",
       "polls": [],
-      "note": "Open seat, but fundamentals remain heavily Republican.",
+      "note": "Open-seat race with a Republican edge in the current forecast.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -1115,6 +1126,7 @@
       "winnerProbability": 0.9883,
       "competitive": false,
       "displayName": "Kentucky Senate",
+      "summary": "Open-seat race with a Republican edge in the current forecast.",
       "tippingPower": 0.008794819220651204,
       "demTippingPower": 0.000525,
       "repTippingPower": 0.145525,
@@ -1146,7 +1158,7 @@
       "nomination": 0.25,
       "independent": "none",
       "polls": [],
-      "note": "Not enough evidence for a serious control path.",
+      "note": "Bill Cassidy is the Republican incumbent; the current forecast gives Republicans a 99% chance.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -1188,6 +1200,7 @@
       "winnerProbability": 0.989025,
       "competitive": false,
       "displayName": "Louisiana Senate",
+      "summary": "Bill Cassidy is the Republican incumbent; the current forecast gives Republicans a 99% chance.",
       "tippingPower": 0.008538599685171896,
       "demTippingPower": 0.000575,
       "repTippingPower": 0.145775,
@@ -1236,7 +1249,7 @@
           54
         ]
       ],
-      "note": "Collins' personal brand keeps the race contested, but the state lean has moved against Republicans.",
+      "note": "Susan Collins is the Republican incumbent; the current forecast gives Democrats a 71% chance.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -1278,6 +1291,7 @@
       "winnerProbability": 0.7115,
       "competitive": true,
       "displayName": "Maine Senate",
+      "summary": "Susan Collins is the Republican incumbent; the current forecast gives Democrats a 71% chance.",
       "tippingPower": 0.14061546932546576,
       "demTippingPower": 0.10665,
       "repTippingPower": 0.034425,
@@ -1309,7 +1323,7 @@
       "nomination": 0.1,
       "independent": "none",
       "polls": [],
-      "note": "A safe Democratic anchor.",
+      "note": "Ed Markey is the Democratic incumbent; the current forecast gives Democrats a 100% chance.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -1351,6 +1365,7 @@
       "winnerProbability": 0.997025,
       "competitive": false,
       "displayName": "Massachusetts Senate",
+      "summary": "Ed Markey is the Democratic incumbent; the current forecast gives Democrats a 100% chance.",
       "tippingPower": 0.006419887618163353,
       "demTippingPower": 0.13085,
       "repTippingPower": 0.000125,
@@ -1399,7 +1414,7 @@
           54
         ]
       ],
-      "note": "Democrats probably need to hold Michigan before the pickup path matters.",
+      "note": "Open-seat race with a Democratic edge in the current forecast.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -1441,6 +1456,7 @@
       "winnerProbability": 0.70365,
       "competitive": true,
       "displayName": "Michigan Senate",
+      "summary": "Open-seat race with a Democratic edge in the current forecast.",
       "tippingPower": 0.17834585242687756,
       "demTippingPower": 0.107475,
       "repTippingPower": 0.037175,
@@ -1472,7 +1488,7 @@
       "nomination": 0.45,
       "independent": "none",
       "polls": [],
-      "note": "Competitive mainly under a poor Democratic national climate.",
+      "note": "Open-seat race with a Democratic edge in the current forecast.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -1514,6 +1530,7 @@
       "winnerProbability": 0.691475,
       "competitive": true,
       "displayName": "Minnesota Senate",
+      "summary": "Open-seat race with a Democratic edge in the current forecast.",
       "tippingPower": 0.06010965348391478,
       "demTippingPower": 0.10645,
       "repTippingPower": 0.03815,
@@ -1545,7 +1562,7 @@
       "nomination": 0.1,
       "independent": "none",
       "polls": [],
-      "note": "A high Republican floor unless candidate quality breaks badly.",
+      "note": "Cindy Hyde-Smith is the Republican incumbent; the current forecast gives Republicans a 99% chance.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -1587,6 +1604,7 @@
       "winnerProbability": 0.9891,
       "competitive": false,
       "displayName": "Mississippi Senate",
+      "summary": "Cindy Hyde-Smith is the Republican incumbent; the current forecast gives Republicans a 99% chance.",
       "tippingPower": 0.008493706930668893,
       "demTippingPower": 0.000475,
       "repTippingPower": 0.1456,
@@ -1631,7 +1649,7 @@
           39
         ]
       ],
-      "note": "An independent path is modeled, but caucus uncertainty keeps the seat discounted.",
+      "note": "Open-seat race with a Republican edge in the current forecast.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -1673,6 +1691,7 @@
       "winnerProbability": 0.81955,
       "competitive": false,
       "displayName": "Montana Senate",
+      "summary": "Open-seat race with a Republican edge in the current forecast.",
       "tippingPower": 0.07962737155252252,
       "demTippingPower": 0.023625,
       "repTippingPower": 0.128625,
@@ -1721,7 +1740,7 @@
           59
         ]
       ],
-      "note": "A core Democratic pickup in most plausible majority paths.",
+      "note": "Open-seat race with a Democratic edge in the current forecast.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -1763,6 +1782,7 @@
       "winnerProbability": 0.881275,
       "competitive": false,
       "displayName": "North Carolina Senate",
+      "summary": "Open-seat race with a Democratic edge in the current forecast.",
       "tippingPower": 0.0983410142023022,
       "demTippingPower": 0.126075,
       "repTippingPower": 0.00965,
@@ -1811,7 +1831,7 @@
           44
         ]
       ],
-      "note": "Modeled as a purple independent who counts as Democrat for control if elected.",
+      "note": "Special election with Republicans at 76% in the current forecast.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -1853,6 +1873,7 @@
       "winnerProbability": 0.762025,
       "competitive": false,
       "displayName": "Nebraska Senate",
+      "summary": "Special election with Republicans at 76% in the current forecast.",
       "tippingPower": 0.09380656461489671,
       "demTippingPower": 0.033075,
       "repTippingPower": 0.1199,
@@ -1897,7 +1918,7 @@
           54
         ]
       ],
-      "note": "A necessary Democratic hold in almost every route to a majority.",
+      "note": "Open-seat race with a Democratic edge in the current forecast.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -1939,6 +1960,7 @@
       "winnerProbability": 0.729575,
       "competitive": true,
       "displayName": "New Hampshire Senate",
+      "summary": "Open-seat race with a Democratic edge in the current forecast.",
       "tippingPower": 0.12701309298927285,
       "demTippingPower": 0.1093,
       "repTippingPower": 0.033675,
@@ -1970,7 +1992,7 @@
       "nomination": 0.1,
       "independent": "none",
       "polls": [],
-      "note": "Not part of a normal majority path.",
+      "note": "Cory Booker is the Democratic incumbent; the current forecast gives Democrats a 99% chance.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -2012,6 +2034,7 @@
       "winnerProbability": 0.99485,
       "competitive": false,
       "displayName": "New Jersey Senate",
+      "summary": "Cory Booker is the Democratic incumbent; the current forecast gives Democrats a 99% chance.",
       "tippingPower": 0.008435880690897915,
       "demTippingPower": 0.13085,
       "repTippingPower": 0.0001,
@@ -2043,7 +2066,7 @@
       "nomination": 0.1,
       "independent": "none",
       "polls": [],
-      "note": "Safe Democratic hold.",
+      "note": "Ben Ray Lujan is the Democratic incumbent; the current forecast gives Democrats a 99% chance.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -2085,6 +2108,7 @@
       "winnerProbability": 0.9937,
       "competitive": false,
       "displayName": "New Mexico Senate",
+      "summary": "Ben Ray Lujan is the Democratic incumbent; the current forecast gives Democrats a 99% chance.",
       "tippingPower": 0.00932493754696606,
       "demTippingPower": 0.1308,
       "repTippingPower": 0.00015,
@@ -2133,7 +2157,7 @@
           51
         ]
       ],
-      "note": "The cleanest Democratic pickup after the easier blue-leaning seats.",
+      "note": "Sherrod Brown and Jon Husted start close to even; the model baseline is D+1.4.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -2175,6 +2199,7 @@
       "winnerProbability": 0.551775,
       "competitive": true,
       "displayName": "Ohio Senate",
+      "summary": "Sherrod Brown and Jon Husted start close to even; the model baseline is D+1.4.",
       "tippingPower": 0.27545621275084686,
       "demTippingPower": 0.086225,
       "repTippingPower": 0.063475,
@@ -2206,7 +2231,7 @@
       "nomination": 0.25,
       "independent": "none",
       "polls": [],
-      "note": "Special election, but not competitive in the baseline.",
+      "note": "Special election with Republicans at 100% in the current forecast.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -2248,6 +2273,7 @@
       "winnerProbability": 0.998125,
       "competitive": false,
       "displayName": "Oklahoma Senate",
+      "summary": "Special election with Republicans at 100% in the current forecast.",
       "tippingPower": 0.0035345686543021065,
       "demTippingPower": 0.00005,
       "repTippingPower": 0.14585,
@@ -2279,7 +2305,7 @@
       "nomination": 0.1,
       "independent": "none",
       "polls": [],
-      "note": "High Democratic floor.",
+      "note": "Jeff Merkley is the Democratic incumbent; the current forecast gives Democrats a 100% chance.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -2321,6 +2347,7 @@
       "winnerProbability": 0.99535,
       "competitive": false,
       "displayName": "Oregon Senate",
+      "summary": "Jeff Merkley is the Democratic incumbent; the current forecast gives Democrats a 100% chance.",
       "tippingPower": 0.008013340388286714,
       "demTippingPower": 0.130825,
       "repTippingPower": 0.00005,
@@ -2352,7 +2379,7 @@
       "nomination": 0.1,
       "independent": "none",
       "polls": [],
-      "note": "A safe Democratic hold in nearly all runs.",
+      "note": "Jack Reed is the Democratic incumbent; the current forecast gives Democrats a 100% chance.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -2394,6 +2421,7 @@
       "winnerProbability": 0.996125,
       "competitive": false,
       "displayName": "Rhode Island Senate",
+      "summary": "Jack Reed is the Democratic incumbent; the current forecast gives Democrats a 100% chance.",
       "tippingPower": 0.007315196998585869,
       "demTippingPower": 0.1308,
       "repTippingPower": 0.000025,
@@ -2425,7 +2453,7 @@
       "nomination": 0.5,
       "independent": "none",
       "polls": [],
-      "note": "Long-shot Democratic upside, but not a core path.",
+      "note": "Lindsey Graham is the Republican incumbent; the current forecast gives Republicans a 78% chance.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -2467,6 +2495,7 @@
       "winnerProbability": 0.77595,
       "competitive": false,
       "displayName": "South Carolina Senate",
+      "summary": "Lindsey Graham is the Republican incumbent; the current forecast gives Republicans a 78% chance.",
       "tippingPower": 0.07035701208960762,
       "demTippingPower": 0.032,
       "repTippingPower": 0.1214,
@@ -2498,7 +2527,7 @@
       "nomination": 0.1,
       "independent": "independent longshot, caucus not credited",
       "polls": [],
-      "note": "Republican lock in the baseline.",
+      "note": "Mike Rounds is the Republican incumbent; the current forecast gives Republicans a 100% chance.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -2540,6 +2569,7 @@
       "winnerProbability": 0.996025,
       "competitive": false,
       "displayName": "South Dakota Senate",
+      "summary": "Mike Rounds is the Republican incumbent; the current forecast gives Republicans a 100% chance.",
       "tippingPower": 0.005148040194075223,
       "demTippingPower": 0.00025,
       "repTippingPower": 0.14585,
@@ -2571,7 +2601,7 @@
       "nomination": 0.2,
       "independent": "none",
       "polls": [],
-      "note": "Tail risk only.",
+      "note": "Bill Hagerty is the Republican incumbent; the current forecast gives Republicans a 99% chance.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -2613,6 +2643,7 @@
       "winnerProbability": 0.9856,
       "competitive": false,
       "displayName": "Tennessee Senate",
+      "summary": "Bill Hagerty is the Republican incumbent; the current forecast gives Republicans a 99% chance.",
       "tippingPower": 0.009775328268942084,
       "demTippingPower": 0.00105,
       "repTippingPower": 0.145475,
@@ -2661,7 +2692,7 @@
           46
         ]
       ],
-      "note": "If Ohio flips, Texas or Alaska is the next most realistic majority maker.",
+      "note": "John Cornyn is the Republican incumbent; the current forecast gives Republicans a 58% chance.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -2703,6 +2734,7 @@
       "winnerProbability": 0.577175,
       "competitive": true,
       "displayName": "Texas Senate",
+      "summary": "John Cornyn is the Republican incumbent; the current forecast gives Republicans a 58% chance.",
       "tippingPower": 0.2499952775014941,
       "demTippingPower": 0.06665,
       "repTippingPower": 0.0867,
@@ -2734,7 +2766,7 @@
       "nomination": 0.2,
       "independent": "none",
       "polls": [],
-      "note": "Usually not central unless the environment turns hard red.",
+      "note": "Mark Warner is the Democratic incumbent; the current forecast gives Democrats a 93% chance.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -2776,6 +2808,7 @@
       "winnerProbability": 0.92635,
       "competitive": false,
       "displayName": "Virginia Senate",
+      "summary": "Mark Warner is the Democratic incumbent; the current forecast gives Democrats a 93% chance.",
       "tippingPower": 0.03149489781839841,
       "demTippingPower": 0.128325,
       "repTippingPower": 0.00565,
@@ -2807,7 +2840,7 @@
       "nomination": 0.05,
       "independent": "none",
       "polls": [],
-      "note": "The least Democratic state on the board.",
+      "note": "Shelley Moore Capito is the Republican incumbent; the current forecast gives Republicans a 100% chance.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -2849,6 +2882,7 @@
       "winnerProbability": 0.997975,
       "competitive": false,
       "displayName": "West Virginia Senate",
+      "summary": "Shelley Moore Capito is the Republican incumbent; the current forecast gives Republicans a 100% chance.",
       "tippingPower": 0.003674214198607195,
       "demTippingPower": 0.0001,
       "repTippingPower": 0.14585,
@@ -2880,7 +2914,7 @@
       "nomination": 0.15,
       "independent": "none",
       "polls": [],
-      "note": "Republican floor seat.",
+      "note": "Open-seat race with a Republican edge in the current forecast.",
       "nationalPolling": 1.1070158600724045,
       "sourceInputs": {
         "openFec": {
@@ -2922,6 +2956,7 @@
       "winnerProbability": 0.998525,
       "competitive": false,
       "displayName": "Wyoming Senate",
+      "summary": "Open-seat race with a Republican edge in the current forecast.",
       "tippingPower": 0.0031334374703847795,
       "demTippingPower": 0,
       "repTippingPower": 0.1458,

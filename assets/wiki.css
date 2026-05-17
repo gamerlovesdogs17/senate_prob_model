@@ -29,6 +29,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
@@ -38,6 +39,7 @@ body {
   color: var(--ink);
   font: 16px/1.5 "Segoe UI", Arial, sans-serif;
   animation: page-in .35s ease both;
+  overflow-x: hidden;
 }
 
 .state-shape {
@@ -87,8 +89,9 @@ button {
 }
 
 .brand-mark {
-  width: 88px;
-  height: 26px;
+  width: 112px;
+  height: auto;
+  max-height: 34px;
   display: block;
   border: 1px solid var(--line);
   border-radius: 2px;
@@ -459,18 +462,116 @@ dd {
 
 .hover-card {
   min-height: 300px;
-  padding: 14px;
+  padding: 12px;
   border: 1px solid var(--line);
   border-radius: 4px;
   background: color-mix(in srgb, var(--paper-2) 82%, transparent);
 }
 
 .hover-card h3 {
-  margin-top: 8px;
+  margin-top: 6px;
+  font-size: 1rem;
+  line-height: 1.18;
 }
 
 .hover-card .state-code {
-  font: 950 3.2rem/.9 "Segoe UI", Arial, sans-serif;
+  font: 950 2.75rem/.86 "Segoe UI", Arial, sans-serif;
+}
+
+.map-card-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: start;
+  margin-top: 4px;
+}
+
+.rating-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 7px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  color: var(--ink);
+  font: 900 .72rem/1 "Segoe UI", Arial, sans-serif;
+}
+
+.candidate-table {
+  margin: 11px 0 10px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.candidate-table-head,
+.candidate-row,
+.candidate-margin {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 76px;
+  gap: 8px;
+  align-items: center;
+  padding: 7px 0;
+}
+
+.candidate-table-head,
+.candidate-margin span {
+  color: var(--muted);
+  font: 850 .66rem/1 "Segoe UI", Arial, sans-serif;
+  text-transform: uppercase;
+}
+
+.candidate-table-head span:last-child,
+.candidate-row strong,
+.candidate-margin strong {
+  text-align: right;
+}
+
+.candidate-row {
+  border-top: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+  font: 800 .82rem/1.2 "Segoe UI", Arial, sans-serif;
+}
+
+.candidate-row span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.candidate-row i {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  margin-left: 4px;
+  border-radius: 4px;
+  color: white;
+  font: 900 .62rem/1 "Segoe UI", Arial, sans-serif;
+  font-style: normal;
+}
+
+.dem-row i {
+  background: var(--dem);
+}
+
+.rep-row i {
+  background: var(--rep);
+}
+
+.candidate-row i.ind-badge {
+  background: var(--ind);
+}
+
+.dem-row strong {
+  color: var(--dem);
+}
+
+.rep-row strong {
+  color: var(--rep);
+}
+
+.candidate-margin {
+  border-top: 1px solid var(--line);
+  padding-bottom: 8px;
 }
 
 .hover-card .button-link {
@@ -516,6 +617,7 @@ dd {
 .detail-panel,
 .map-panel {
   position: relative;
+  min-width: 0;
 }
 
 .seat-histogram,
@@ -769,6 +871,7 @@ dd {
 .article-body {
   max-width: 760px;
   margin-top: 22px;
+  min-width: 0;
 }
 
 .article-body p {
@@ -787,6 +890,8 @@ dd {
   box-shadow: none;
   padding: 14px;
   margin: 18px 0;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .article-embed .history-chart {
@@ -831,10 +936,14 @@ dd {
   border-radius: 2px;
   background: #fbfaf6;
   overflow: hidden;
+  max-width: 100%;
+  min-width: 0;
+  touch-action: pan-y;
 }
 
 .history-chart svg {
   width: 100%;
+  max-width: 100%;
   display: block;
 }
 
@@ -1223,8 +1332,9 @@ dd {
   }
 
   .brand-mark {
-    width: 72px;
-    height: 22px;
+    width: 88px;
+    height: auto;
+    max-height: 28px;
   }
 
   .site-nav a,

@@ -124,6 +124,24 @@ function candidateInfo(race) {
   return info;
 }
 
+function forecastSummary(race) {
+  const side = race.winnerParty === "D" ? "Democratic" : "Republican";
+  const sidePlural = race.winnerParty === "D" ? "Democrats" : "Republicans";
+  const probability = Math.round(race.winnerProbability * 100);
+  const margin = race.margin >= 0 ? `D+${race.margin.toFixed(1)}` : `R+${Math.abs(race.margin).toFixed(1)}`;
+  if (race.rating === "Toss-up") {
+    return `${race.dem} and ${race.rep} start close to even; the model baseline is ${margin}.`;
+  }
+  if (race.seat === "Open seat") {
+    return `Open-seat race with a ${side} edge in the current forecast.`;
+  }
+  if (race.seat === "Special election") {
+    return `Special election with ${sidePlural} at ${probability}% in the current forecast.`;
+  }
+  const incumbentParty = race.hold === "D" ? "Democratic" : "Republican";
+  return `${race.incumbent} is the ${incumbentParty} incumbent; the current forecast gives ${sidePlural} a ${probability}% chance.`;
+}
+
 const regionScale = { South: 1, West: .9, Northeast: .78, Midwest: 1, Plains: .9 };
 
 function hashString(value) {
@@ -286,6 +304,8 @@ function runModel(sourceData) {
     race.winnerProbability = Math.max(race.demProbability, 1 - race.demProbability);
     race.competitive = race.winnerProbability < .75;
     race.displayName = `${STATE_NAMES[race.state]} Senate`;
+    race.summary = forecastSummary(race);
+    race.note = race.summary;
     const exactControl = tipping[race.state].any / SETTINGS.simulations;
     const competitiveness = Math.sqrt(race.demProbability * (1 - race.demProbability)) * 2;
     const centrality = PATH_CENTRALITY[race.state] || (race.hold === "R" ? .28 : .45);
