@@ -290,10 +290,18 @@ function updateSummary() {
   }
 }
 
-function hoverMarkup(race) {
+function normalizedMapMode(mode) {
+  return Object.prototype.hasOwnProperty.call(MAP_COLOR_MODES, mode) ? mode : mapColorMode;
+}
+
+function hoverMarkup(race, mode = mapColorMode) {
+  const activeMode = normalizedMapMode(mode);
   if (!race) {
     return `<span class="panel-label">State detail</span><h3>No Senate race</h3><p>This state is not on the regular 2026 Senate board.</p>`;
   }
+  const ratingLabel = ratingLabelForRace(race, activeMode);
+  const ratingBucket = bucketForRace(race, activeMode);
+  const ratingModeLabel = MAP_COLOR_MODES[activeMode];
   const winner = race.winnerParty === "D" ? candidateChanceLabel(race, "D") : "Republican";
   const demCandidate = candidateDisplayName(race, "D");
   const repCandidate = candidateDisplayName(race, "R");
@@ -304,7 +312,7 @@ function hoverMarkup(race) {
     <span class="race-kicker">${race.displayName}</span>
     <div class="map-card-title">
       <div class="state-code">${race.state}</div>
-      <span class="rating-pill ${RATING_BUCKET[race.rating]}">${race.rating}</span>
+      <span class="rating-pill ${ratingBucket}" title="${escapeHtml(ratingModeLabel)}">${ratingLabel}</span>
     </div>
     <h3>${winner} has a ${oneDecimal(race.winnerProbability)} chance.</h3>
     <div class="candidate-table" aria-label="${race.state} candidate forecast">
@@ -326,14 +334,14 @@ function hoverMarkup(race) {
     </div>
     <p class="candidate-key"><b>P</b> Presumptive nominee. <b>I</b> Independent.</p>
     <p>${escapeHtml(race.summary || race.note || "")}</p>
-    <p class="meta">Primary: ${race.primary} / Tipping power: ${oneDecimal(race.tippingPower)}</p>
+    <p class="meta">Color mode: ${escapeHtml(ratingModeLabel)} / Primary: ${race.primary} / Tipping power: ${oneDecimal(race.tippingPower)}</p>
     <a class="button-link" href="race.html?state=${race.state}">Open race page</a>
   `;
 }
 
 function updateHoverCard(race) {
   const card = document.getElementById("map-hover-card");
-  if (card) card.innerHTML = hoverMarkup(race);
+  if (card) card.innerHTML = hoverMarkup(race, mapColorMode);
 }
 
 function renderFallbackMap() {
@@ -962,8 +970,9 @@ function renderEmbed(target, embed) {
   }
   if (["state-card", "state-preview", "map-preview", "map-state"].includes(embed.type)) {
     const race = getRace(String(embed.state || "").toUpperCase());
+    const mode = normalizedMapMode(embed.mode || embed.colorMode);
     target.className = "article-embed-target state-preview-embed";
-    target.innerHTML = race ? hoverMarkup(race) : `<p>State not found.</p>`;
+    target.innerHTML = race ? hoverMarkup(race, mode) : `<p>State not found.</p>`;
     return;
   }
   if (embed.type === "seat-distribution") {
