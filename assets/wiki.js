@@ -74,7 +74,7 @@ function extraCandidateRows(race) {
   return (race.extraCandidates || []).map((candidate) => {
     const party = candidate.party || "D";
     const badgeClass = party === "D" ? "party-badge dem-badge" : party === "R" ? "party-badge rep-badge" : "ind-badge";
-    const label = candidate.note || (party === "D" ? "D-side option" : party === "R" ? "R-side option" : "Independent");
+    const label = Number.isFinite(candidate.probabilityShare) ? oneDecimal(candidate.probabilityShare) : candidate.note || (party === "D" ? "Democratic alternative" : party === "R" ? "Republican alternative" : "Independent");
     return `
       <div class="candidate-row extra-row">
         <span>${escapeHtml(candidate.name)} <i class="${badgeClass}">${party}</i></span>
@@ -446,7 +446,9 @@ function renderLineChart(chart, points, options) {
   const plotHeight = height - plot.top - plot.bottom;
   const demValue = (point) => point.dem;
   const repValue = (point) => point.rep ?? 1 - point.dem;
-  const values = points.flatMap((point) => [demValue(point), repValue(point)]);
+  const extraSeries = options.extraSeries;
+  const extraValue = (point) => Number.isFinite(point?.[extraSeries?.key]) ? point[extraSeries.key] : null;
+  const values = points.flatMap((point) => [demValue(point), repValue(point), extraValue(point)]).filter((value) => value !== null);
   const minValue = Math.min(...values);
   const maxValue = Math.max(...values);
   const domain = options.domain || (minValue >= .28 && maxValue <= .72 ? [.3, .7] : [0, 1]);
@@ -484,8 +486,11 @@ function renderLineChart(chart, points, options) {
   const firstDate = String(points[0].date).slice(5);
   const lastDate = String(points[points.length - 1].date).slice(5);
   const latest = coords[coords.length - 1];
+  const latestExtraValue = extraSeries ? extraValue(latest.point) : null;
+  const latestExtraY = latestExtraValue === null ? null : yFor(latestExtraValue);
   const demLabelY = latest.demY <= latest.repY ? latest.demY - 4 : latest.demY + 14;
   const repLabelY = latest.repY <= latest.demY ? latest.repY - 4 : latest.repY + 14;
+  const extraLabelY = latestExtraY === null ? null : latestExtraY - 6;
   const annotations = CHART_ANNOTATIONS.map((annotation) => {
     const index = points.findIndex((point) => point.date === annotation.date);
     if (index === -1) return null;
@@ -505,20 +510,28 @@ function renderLineChart(chart, points, options) {
       <path class="history-band history-band-rep" d="${areaPath("rep")}"></path>
       <path class="history-line history-line-dem" d="${linePath("dem")}"></path>
       <path class="history-line history-line-rep" d="${linePath("rep")}"></path>
+      ${extraSeries ? `<path class="history-line ${extraSeries.className}" d="${coords.map((coord, index) => `${index ? "L" : "M"} ${coord.x} ${yFor(extraValue(coord.point) ?? demValue(coord.point))}`).join(" ")}"></path>` : ""}
       ${annotations}
       ${coords.map(({ x, demY, repY }, index) => `<g class="history-point" tabindex="0" data-index="${index}"><circle class="history-dot history-dot-dem" cx="${x}" cy="${demY}" r="${coords.length === 1 ? 4.8 : 3.3}"></circle><circle class="history-dot history-dot-rep" cx="${x}" cy="${repY}" r="${coords.length === 1 ? 4.8 : 3.3}"></circle></g>`).join("")}
+      ${extraSeries ? coords.map(({ x, point }, index) => {
+        const value = extraValue(point);
+        return value === null ? "" : `<g class="history-extra-point" tabindex="0" data-index="${index}"><circle class="history-dot ${extraSeries.dotClassName}" cx="${x}" cy="${yFor(value)}" r="${coords.length === 1 ? 4.8 : 3.3}"></circle></g>`;
+      }).join("") : ""}
       <text class="history-date history-date-start" x="${plot.left}" y="${height - 18}">${firstDate}</text>
       <text class="history-date history-date-end" x="${width - plot.right}" y="${height - 18}">${lastDate}</text>
       <text class="history-end-label history-end-label-dem" x="${latest.x + 11}" y="${demLabelY}">${endLabel("dem", demValue(latest.point))}</text>
       <text class="history-end-label history-end-label-rep" x="${latest.x + 11}" y="${repLabelY}">${endLabel("rep", repValue(latest.point))}</text>
+      ${extraSeries && latestExtraY !== null ? `<text class="history-end-label ${extraSeries.labelClassName}" x="${latest.x + 11}" y="${extraLabelY}">${extraSeries.name} ${oneDecimal(latestExtraValue)}</text>` : ""}
       <g class="history-hover" style="display:none">
         <path class="history-hover-rule"></path>
         <circle class="history-hover-dot history-hover-dot-dem" r="4.5"></circle>
         <circle class="history-hover-dot history-hover-dot-rep" r="4.5"></circle>
-        <rect class="history-hover-box" width="132" height="56" rx="2"></rect>
+        ${extraSeries ? `<circle class="history-hover-dot history-hover-dot-extra" r="4.5"></circle>` : ""}
+        <rect class="history-hover-box" width="150" height="${extraSeries ? 72 : 56}" rx="2"></rect>
         <text class="history-hover-title"></text>
         <text class="history-hover-dem"></text>
         <text class="history-hover-rep"></text>
+        ${extraSeries ? `<text class="history-hover-extra"></text>` : ""}
       </g>
       <rect class="history-overlay" x="${plot.left}" y="${plot.top}" width="${plotWidth}" height="${plotHeight}" tabindex="0"></rect>
     </svg>
@@ -529,22 +542,30 @@ function renderLineChart(chart, points, options) {
   const hoverRule = chart.querySelector(".history-hover-rule");
   const hoverDemDot = chart.querySelector(".history-hover-dot-dem");
   const hoverRepDot = chart.querySelector(".history-hover-dot-rep");
+  const hoverExtraDot = chart.querySelector(".history-hover-dot-extra");
   const hoverBox = chart.querySelector(".history-hover-box");
   const hoverTitle = chart.querySelector(".history-hover-title");
   const hoverDem = chart.querySelector(".history-hover-dem");
   const hoverRep = chart.querySelector(".history-hover-rep");
+  const hoverExtra = chart.querySelector(".history-hover-extra");
   const showIndex = (index) => {
     const coord = coords[clamp(index, 0, coords.length - 1)];
     const dem = demValue(coord.point);
     const rep = repValue(coord.point);
-    const boxX = clamp(coord.x + 12, plot.left + 4, width - plot.right - 134);
-    const boxY = clamp(Math.min(coord.demY, coord.repY) - 68, plot.top + 4, height - plot.bottom - 62);
+    const extra = extraSeries ? extraValue(coord.point) : null;
+    const activeYs = [coord.demY, coord.repY, extra === null ? null : yFor(extra)].filter((value) => value !== null);
+    const boxX = clamp(coord.x + 12, plot.left + 4, width - plot.right - 154);
+    const boxY = clamp(Math.min(...activeYs) - (extraSeries ? 84 : 68), plot.top + 4, height - plot.bottom - (extraSeries ? 78 : 62));
     hover.style.display = "block";
     hoverRule.setAttribute("d", `M${coord.x} ${plot.top}V${height - plot.bottom}`);
     hoverDemDot.setAttribute("cx", coord.x);
     hoverDemDot.setAttribute("cy", coord.demY);
     hoverRepDot.setAttribute("cx", coord.x);
     hoverRepDot.setAttribute("cy", coord.repY);
+    if (extraSeries && hoverExtraDot && extra !== null) {
+      hoverExtraDot.setAttribute("cx", coord.x);
+      hoverExtraDot.setAttribute("cy", yFor(extra));
+    }
     hoverBox.setAttribute("x", boxX);
     hoverBox.setAttribute("y", boxY);
     hoverTitle.setAttribute("x", boxX + 9);
@@ -553,6 +574,11 @@ function renderLineChart(chart, points, options) {
     hoverDem.setAttribute("y", boxY + 34);
     hoverRep.setAttribute("x", boxX + 9);
     hoverRep.setAttribute("y", boxY + 48);
+    if (extraSeries && hoverExtra && extra !== null) {
+      hoverExtra.setAttribute("x", boxX + 9);
+      hoverExtra.setAttribute("y", boxY + 62);
+      hoverExtra.textContent = `${extraSeries.name} ${oneDecimal(extra)}`;
+    }
     hoverTitle.textContent = coord.point.date;
     hoverDem.textContent = hoverLabel("dem", dem);
     hoverRep.textContent = hoverLabel("rep", rep);
@@ -582,10 +608,15 @@ function renderLineChart(chart, points, options) {
 function renderHistory(race) {
   const chart = document.getElementById("race-history");
   if (!chart) return;
-  const points = race.history?.length ? race.history : [{ date: forecast.modelDate, dem: race.demProbability }];
+  let points = race.history?.length ? race.history : [{ date: forecast.modelDate, dem: race.demProbability }];
+  const bodnar = (race.extraCandidates || []).find((candidate) => candidate.name === "Seth Bodnar");
+  if (bodnar) {
+    points = points.map((point) => ({ ...point, extra: bodnar.probabilityShare ?? .38 }));
+  }
   renderLineChart(chart, points, {
     label: `${race.displayName} probability history`,
     pointHtml: (point) => `${point.date}<br>D ${pct(point.dem)} / R ${pct(1 - point.dem)}`,
+    extraSeries: bodnar ? { key: "extra", name: "Seth Bodnar", className: "history-line-extra", dotClassName: "history-dot-extra", labelClassName: "history-end-label-extra", colorLabel: "Seth Bodnar" } : null,
     value: (point) => point.dem,
     singleNote: "State history starts with the first generated forecast and grows each daily run."
   });

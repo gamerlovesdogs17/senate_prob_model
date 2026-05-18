@@ -1060,6 +1060,11 @@ dd {
   stroke: var(--rep);
 }
 
+.history-line-extra {
+  stroke: color-mix(in srgb, var(--dem) 58%, var(--ink));
+  stroke-dasharray: 6 5;
+}
+
 .history-dot {
   fill: var(--paper);
   stroke-width: 2.2;
@@ -1073,6 +1078,10 @@ dd {
 
 .history-dot-rep {
   stroke: var(--rep);
+}
+
+.history-dot-extra {
+  stroke: color-mix(in srgb, var(--dem) 58%, var(--ink));
 }
 
 .history-hit {
@@ -1112,6 +1121,10 @@ dd {
   fill: var(--rep);
 }
 
+.history-end-label-extra {
+  fill: color-mix(in srgb, var(--dem) 58%, var(--ink));
+}
+
 .history-annotation path {
   fill: none;
   stroke: rgba(80, 75, 66, .32);
@@ -1149,6 +1162,10 @@ dd {
   stroke: var(--rep);
 }
 
+.history-hover-dot-extra {
+  stroke: color-mix(in srgb, var(--dem) 58%, var(--ink));
+}
+
 .history-hover-box {
   fill: color-mix(in srgb, var(--paper) 96%, white);
   stroke: var(--line);
@@ -1157,7 +1174,8 @@ dd {
 
 .history-hover-title,
 .history-hover-dem,
-.history-hover-rep {
+.history-hover-rep,
+.history-hover-extra {
   font: 800 12px/1 "Segoe UI", Arial, sans-serif;
 }
 
@@ -1171,6 +1189,10 @@ dd {
 
 .history-hover-rep {
   fill: var(--rep);
+}
+
+.history-hover-extra {
+  fill: color-mix(in srgb, var(--dem) 58%, var(--ink));
 }
 
 .history-axis {

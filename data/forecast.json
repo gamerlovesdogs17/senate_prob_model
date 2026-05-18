@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-18T00:02:28.462Z",
+  "generatedAt": "2026-05-18T00:12:39.849Z",
   "modelDate": "2026-05-17",
   "runDate": "May 17, 2026",
   "updateTime": "around 6:00 AM Central",
@@ -22,11 +22,11 @@
     ]
   },
   "sourceStatus": {
-    "checkedAt": "2026-05-18T00:02:26.866Z",
+    "checkedAt": "2026-05-18T00:12:38.054Z",
     "censusPopulation": {
       "ok": true,
       "status": 200,
-      "ms": 325,
+      "ms": 322,
       "url": "https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/state/totals/NST-EST2024-POPCHG2020-2024.csv",
       "rows": 66,
       "states": 51,
@@ -35,7 +35,7 @@
     "mitSenateReturns": {
       "ok": true,
       "status": 200,
-      "ms": 387,
+      "ms": 402,
       "url": "https://raw.githubusercontent.com/MEDSL/constituency-returns/master/1976-2018-senate.csv",
       "rows": 3421,
       "states": 50
@@ -43,32 +43,32 @@
     "civicApiDocs": {
       "ok": true,
       "status": 200,
-      "ms": 415,
+      "ms": 424,
       "url": "https://www.civicapi.org/api-documentation"
     },
     "civicApiEndpoint": {
       "ok": false,
       "status": 404,
-      "ms": 49,
+      "ms": 58,
       "url": "https://www.civicapi.org/api/v1/upcomingraces",
       "error": "{\"message\":\"Route GET:/v1/upcomingraces not found\",\"error\":\"Not Found\",\"statusCode\":404}"
-    },
-    "openFecCandidateSummary": {
-      "ok": true,
-      "status": 200,
-      "ms": 1098,
-      "url": "https://www.fec.gov/files/bulk-downloads/2026/candidate_summary_2026.csv",
-      "rows": 4032,
-      "senateStates": 44
     },
     "votehubGenericBallot": {
       "ok": true,
       "status": 200,
-      "ms": 1215,
+      "ms": 851,
       "url": "https://api.votehub.com/polls?poll_type=generic-ballot&subject=2026",
       "rows": 451,
       "usablePolls": 351,
       "rawUsablePolls": 451
+    },
+    "openFecCandidateSummary": {
+      "ok": true,
+      "status": 200,
+      "ms": 1323,
+      "url": "https://www.fec.gov/files/bulk-downloads/2026/candidate_summary_2026.csv",
+      "rows": 4032,
+      "senateStates": 44
     }
   },
   "sourceSummary": {
@@ -2163,10 +2163,11 @@
         {
           "name": "Seth Bodnar",
           "party": "D",
-          "note": "D-side option"
+          "note": "Democratic alternative",
+          "probabilityShare": 0.38
         }
       ],
-      "primarySummary": "The Democratic primary is unresolved. Seth Bodnar is tracked as an additional D-side option, but Montana Democrats are not assumed to clear the field for him.",
+      "primarySummary": "The Democratic primary is unresolved. Seth Bodnar is tracked as an additional Democratic-side option, but Montana Democrats are not assumed to clear the field for him.",
       "margin": -7.661554214479556,
       "error": 8.007727272727273,
       "demProbability": 0.214275,
