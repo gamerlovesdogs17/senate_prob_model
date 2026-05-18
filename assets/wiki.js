@@ -483,6 +483,18 @@ function renderLineChart(chart, points, options) {
     }).join(" ");
     return `${upper} ${lower} Z`;
   };
+  const extraAreaPath = () => {
+    if (!extraSeries) return "";
+    const upper = coords.map((coord, index) => {
+      const value = extraValue(coord.point);
+      return `${index ? "L" : "M"} ${coord.x} ${yFor(clamp((value ?? demValue(coord.point)) + band, domain[0], domain[1]))}`;
+    }).join(" ");
+    const lower = [...coords].reverse().map((coord) => {
+      const value = extraValue(coord.point);
+      return `L ${coord.x} ${yFor(clamp((value ?? demValue(coord.point)) - band, domain[0], domain[1]))}`;
+    }).join(" ");
+    return `${upper} ${lower} Z`;
+  };
   const firstDate = String(points[0].date).slice(5);
   const lastDate = String(points[points.length - 1].date).slice(5);
   const latest = coords[coords.length - 1];
@@ -509,6 +521,7 @@ function renderLineChart(chart, points, options) {
       }).join("") : ""}
       <path class="history-band history-band-dem" d="${areaPath("dem")}"></path>
       <path class="history-band history-band-rep" d="${areaPath("rep")}"></path>
+      ${extraSeries ? `<path class="history-band history-band-extra" d="${extraAreaPath()}"></path>` : ""}
       <path class="history-line history-line-dem" d="${linePath("dem")}"></path>
       <path class="history-line history-line-rep" d="${linePath("rep")}"></path>
       ${extraSeries ? `<path class="history-line ${extraSeries.className}" d="${coords.map((coord, index) => `${index ? "L" : "M"} ${coord.x} ${yFor(extraValue(coord.point) ?? demValue(coord.point))}`).join(" ")}"></path>` : ""}
