@@ -13,7 +13,10 @@ const SETTINGS = {
     "270toWin / Inside Elections public House map data",
     "Cook Political Report public House ratings when reachable",
     "270toWin House polling reference page",
+    "Race to the WH House and generic-ballot reference pages",
+    "RealClearPolling generic-ballot reference pages when reachable",
     "Generic-ballot polling adapters shared with the Senate model",
+    "OpenFEC House candidate finance bulk files",
     "Census 119th congressional district boundary files for map basis"
   ]
 };
@@ -43,10 +46,11 @@ const RATING_TO_ERROR = {
 };
 
 const MODEL_WEIGHTS = {
-  genericBallot: .42,
-  genericBallotCap: 2.8,
+  genericBallot: .55,
+  genericBallotCap: 3.6,
   ratingBaseline: 1,
   districtPolls: .18,
+  finance: .22,
   incumbencyOpenPenalty: .45,
   seatPartyIncumbency: .45,
   districtFundamentals: .12,
@@ -58,7 +62,10 @@ const CATEGORY_ALIASES = {
   "Solid Democrat": "Safe D",
   "Likely Democrat": "Likely D",
   "Lean Democrat": "Lean D",
-  "Toss Up": "Toss-up",
+    "Toss Up": "Toss-up",
+  "Toss-up": "Toss-up",
+  "Tilt Democrat": "Tilt D",
+  "Tilt Republican": "Tilt R",
   "Lean Republican": "Lean R",
   "Likely Republican": "Likely R",
   "Solid Republican": "Safe R"
@@ -369,14 +376,55 @@ function toNumber(value) {
   return Number.isFinite(number) ? number : null;
 }
 
+function parseCsv(text) {
+  const rows = [];
+  let row = [];
+  let cell = "";
+  let inQuotes = false;
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    const next = text[index + 1];
+    if (char === "\"" && inQuotes && next === "\"") {
+      cell += "\"";
+      index += 1;
+    } else if (char === "\"") {
+      inQuotes = !inQuotes;
+    } else if (char === "," && !inQuotes) {
+      row.push(cell);
+      cell = "";
+    } else if ((char === "\n" || char === "\r") && !inQuotes) {
+      if (char === "\r" && next === "\n") index += 1;
+      row.push(cell);
+      rows.push(row);
+      row = [];
+      cell = "";
+    } else {
+      cell += char;
+    }
+  }
+  if (cell || row.length) {
+    row.push(cell);
+    rows.push(row);
+  }
+  const [headers = [], ...body] = rows;
+  return body
+    .filter((line) => line.some((value) => value !== ""))
+    .map((line) => Object.fromEntries(headers.map((header, index) => [header, line[index] ?? ""])));
+}
+
 async function fetchHouseSources() {
   const status = { checkedAt: new Date().toISOString() };
-  const [cookHtml, insideHtml, mapHtml, pollingHtml, censusHtml, genericPolling] = await Promise.all([
+  const [cookHtml, insideHtml, mapHtml, pollingHtml, raceToTheWhHouse, raceToTheWhGeneric, realClearGeneric, latestHousePolls, censusHtml, fec, genericPolling] = await Promise.all([
     fetchText("https://www.cookpolitical.com/ratings/house-race-ratings", "cookHouseRatings", status),
     fetchText("https://www.270towin.com/2026-house-election/table/inside-elections-2026-house-ratings", "insideElections270ToWinRatings", status),
     fetchText("https://www.270towin.com/2026-house-election/inside-elections-2026-house-ratings", "twoSeventyToWinHouseMapData", status),
     fetchText("https://www.270towin.com/2026-house-election/polls/", "twoSeventyToWinHousePolls", status, { timeoutMs: 12000 }),
+    fetchText("https://www.racetothewh.com/house-3", "raceToTheWhHouseForecast", status, { timeoutMs: 12000 }),
+    fetchText("https://www.racetothewh.com/polls/genericballot", "raceToTheWhGenericBallot", status, { timeoutMs: 12000 }),
+    fetchText("https://www.realclearpolitics.com/epolls/other/2026_generic_congressional_vote-8670.html", "realClearPoliticsGenericBallot", status, { timeoutMs: 12000 }),
+    fetchText("https://www.realclearpolling.com/latest-polls/house", "realClearPollingHousePolls", status, { timeoutMs: 12000 }),
     fetchText("https://www.census.gov/geographies/mapping-files/2025/geo/carto-boundary-file.html", "censusDistrictBoundaries", status, { timeoutMs: 12000 }),
+    fetchHouseFec(status),
     fetchGenericPolling(status)
   ]);
   const mapDistricts = parse270MapDistricts(mapHtml);
@@ -386,8 +434,13 @@ async function fetchHouseSources() {
     cookDistricts,
     mapDistricts,
     insideRatings: parseInsideRatings(insideHtml),
+    fec,
     genericPolling,
     housePollingReferenceReachable: Boolean(pollingHtml),
+    raceToTheWhHouseReachable: Boolean(raceToTheWhHouse),
+    raceToTheWhGenericReachable: Boolean(raceToTheWhGeneric),
+    realClearGenericReachable: Boolean(realClearGeneric),
+    realClearHousePollsReachable: Boolean(latestHousePolls),
     censusDistrictBoundaryPageReachable: Boolean(censusHtml)
   };
 }
@@ -404,7 +457,8 @@ function adjustedDistricts(sourceData) {
     const incumbentParty = district.seatParty === "D" ? 1 : district.seatParty === "R" ? -1 : 0;
     const incumbencyAdjustment = district.open ? 0 : incumbentParty * MODEL_WEIGHTS.seatPartyIncumbency;
     const openPenalty = district.open ? (baselineMargin > 0 ? -MODEL_WEIGHTS.incumbencyOpenPenalty : MODEL_WEIGHTS.incumbencyOpenPenalty) : 0;
-    const margin = baselineMargin * MODEL_WEIGHTS.ratingBaseline + genericShift + incumbencyAdjustment + openPenalty;
+    const financeSignal = sourceData.fec[district.id]?.financeSignal ?? 0;
+    const margin = baselineMargin * MODEL_WEIGHTS.ratingBaseline + genericShift + incumbencyAdjustment + openPenalty + financeSignal * MODEL_WEIGHTS.finance;
     const error = Math.max(RATING_TO_ERROR[sourceRating] ?? 8, inside ? RATING_TO_ERROR[inside.rating] ?? 8 : 0);
     const demProbability = logistic(margin, error);
     return {
@@ -419,9 +473,52 @@ function adjustedDistricts(sourceData) {
       winnerProbability: Number(Math.max(demProbability, 1 - demProbability).toFixed(4)),
       error,
       competitive: Math.abs(margin) < 8 || sourceRating === "Toss-up" || Boolean(inside),
+      sourceInputs: {
+        genericBallotShift: Number(genericShift.toFixed(2)),
+        openPenalty: Number(openPenalty.toFixed(2)),
+        incumbencyAdjustment: Number(incumbencyAdjustment.toFixed(2)),
+        finance: sourceData.fec[district.id] || null
+      },
       sourceBlend: inside ? `${district.ratingSource} + table cross-check` : district.ratingSource
     };
   });
+}
+
+async function fetchHouseFec(status) {
+  const text = await fetchText("https://www.fec.gov/files/bulk-downloads/2026/candidate_summary_2026.csv", "openFecHouseCandidateSummary", status, { timeoutMs: 16000 });
+  if (!text) return {};
+  const rows = parseCsv(text);
+  const byDistrict = {};
+  for (const row of rows) {
+    if (row.Cand_Office !== "H") continue;
+    const state = row.Cand_Office_St;
+    const rawDistrict = String(row.Cand_Office_Dist || row.Cand_District || "").trim();
+    if (!state || !rawDistrict) continue;
+    const district = rawDistrict === "0" || rawDistrict.toUpperCase() === "AL" ? "AL" : String(Number(rawDistrict)).padStart(2, "0");
+    const id = `${state}-${district}`;
+    const party = String(row.Cand_Party_Affiliation || "").toUpperCase();
+    const side = party.startsWith("DEM") ? "dem" : party.startsWith("REP") ? "rep" : "other";
+    byDistrict[id] ||= { demReceipts: 0, repReceipts: 0, demCash: 0, repCash: 0, demDebts: 0, repDebts: 0, candidates: 0 };
+    byDistrict[id].candidates += 1;
+    if (side === "dem") {
+      byDistrict[id].demReceipts += toNumber(row.Total_Receipt) || 0;
+      byDistrict[id].demCash += toNumber(row.Cash_On_Hand_COP) || toNumber(row.Cash_On_Hand) || 0;
+      byDistrict[id].demDebts += toNumber(row.Debts_Owed_By_Committee) || toNumber(row.Debts_Owed) || 0;
+    }
+    if (side === "rep") {
+      byDistrict[id].repReceipts += toNumber(row.Total_Receipt) || 0;
+      byDistrict[id].repCash += toNumber(row.Cash_On_Hand_COP) || toNumber(row.Cash_On_Hand) || 0;
+      byDistrict[id].repDebts += toNumber(row.Debts_Owed_By_Committee) || toNumber(row.Debts_Owed) || 0;
+    }
+  }
+  for (const value of Object.values(byDistrict)) {
+    const demScore = Math.log1p(value.demReceipts + value.demCash * 1.3) - Math.log1p(value.demDebts * 1.2);
+    const repScore = Math.log1p(value.repReceipts + value.repCash * 1.3) - Math.log1p(value.repDebts * 1.2);
+    value.financeSignal = Number(clamp((demScore - repScore) / 3.4, -1.4, 1.4).toFixed(3));
+  }
+  status.openFecHouseCandidateSummary.rows = rows.length;
+  status.openFecHouseCandidateSummary.districts = Object.keys(byDistrict).length;
+  return byDistrict;
 }
 
 function contextualDistrictMargin(district, ratingMargin) {
@@ -493,6 +590,17 @@ function appendSeatHistory(model) {
     .slice(-365);
 }
 
+function appendDistrictHistories(districts) {
+  const stored = new Map((previousForecast?.districts || []).map((district) => [district.id, district.history || []]));
+  return districts.map((district) => {
+    const current = { date: MODEL_DATE_KEY, dem: district.demProbability, rep: district.repProbability };
+    const history = [...(stored.get(district.id) || []).filter((point) => point.date !== current.date && point.date <= MODEL_DATE_KEY), current]
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .slice(-365);
+    return { ...district, history };
+  });
+}
+
 function ratingSummary(districts) {
   return RATING_ORDER.map((rating) => ({
     rating,
@@ -547,6 +655,8 @@ async function writeHouseForecast() {
   }
   const districts = adjustedDistricts(sourceData);
   const model = runModel(districts);
+  model.districts = appendDistrictHistories(model.districts);
+  model.decisiveDistricts = model.decisiveDistricts.map((district) => model.districts.find((item) => item.id === district.id) || district);
   const output = {
     generatedAt: new Date().toISOString(),
     modelDate: MODEL_DATE_KEY,
@@ -563,8 +673,13 @@ async function writeHouseForecast() {
       cookDistricts: sourceData.cookDistricts.length,
       mapDistricts: sourceData.mapDistricts.length,
       insideRatings: Object.keys(sourceData.insideRatings).length,
+      fecDistricts: Object.keys(sourceData.fec).length,
       genericPolling: sourceData.genericPolling,
       housePollingReferenceReachable: sourceData.housePollingReferenceReachable,
+      raceToTheWhHouseReachable: sourceData.raceToTheWhHouseReachable,
+      raceToTheWhGenericReachable: sourceData.raceToTheWhGenericReachable,
+      realClearGenericReachable: sourceData.realClearGenericReachable,
+      realClearHousePollsReachable: sourceData.realClearHousePollsReachable,
       censusDistrictBoundaryPageReachable: sourceData.censusDistrictBoundaryPageReachable
     },
     ratingSummary: ratingSummary(districts),

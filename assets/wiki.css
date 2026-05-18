@@ -561,6 +561,37 @@ dd {
   background: color-mix(in srgb, var(--paper) 82%, transparent);
 }
 
+.district-map {
+  min-height: 430px;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--paper) 82%, transparent);
+}
+
+.district-map svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.district-shape {
+  stroke: color-mix(in srgb, var(--paper) 72%, var(--ink));
+  stroke-width: .45;
+  vector-effect: non-scaling-stroke;
+  cursor: pointer;
+  transition: opacity .16s ease, stroke-width .16s ease, filter .16s ease;
+}
+
+.district-shape:hover,
+.district-shape:focus {
+  opacity: 1;
+  stroke: var(--gold);
+  stroke-width: 1.5;
+  filter: drop-shadow(0 0 7px rgba(244, 185, 66, .45));
+  outline: none;
+}
+
 .district-cell {
   aspect-ratio: 1;
   min-width: 0;
@@ -1632,6 +1663,10 @@ dd {
     padding: 5px;
   }
 
+  .district-map {
+    min-height: 255px;
+  }
+
   .district-cell:hover,
   .district-cell:focus {
     transform: scale(1.15);
@@ -1766,5 +1801,9 @@ dd {
 
   .district-cartogram {
     grid-template-columns: repeat(15, minmax(0, 1fr));
+  }
+
+  .district-map {
+    min-height: 220px;
   }
 }

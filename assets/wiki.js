@@ -25,6 +25,9 @@ let forecast = null;
 let houseForecast = null;
 let articles = [];
 let mapColorMode = "rating";
+let houseViewMode = "diagram";
+
+const HOUSE_DISTRICT_MAP_URL = "https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/USA_119th_Congressional_Districts_no_territories/FeatureServer/0/query?where=1%3D1&outFields=DISTRICTID,STATE_ABBR,CDFIPS,NAME,PARTY&returnGeometry=true&f=geojson&outSR=4326&resultRecordCount=2000";
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
@@ -839,6 +842,15 @@ function houseDistrictLabel(district) {
   return `${district.id} ${district.label || ""}`.trim();
 }
 
+function getHouseDistrict(id) {
+  const normalized = String(id || "").toUpperCase().replace(/\s+/g, "");
+  if (!houseForecast || !normalized) return null;
+  const match = normalized.match(/^([A-Z]{2})-?(AL|\d{1,2})$/);
+  if (!match) return null;
+  const districtId = `${match[1]}-${match[2] === "AL" ? "AL" : String(Number(match[2])).padStart(2, "0")}`;
+  return houseForecast.districts.find((district) => district.id === districtId) || null;
+}
+
 function houseDistrictMarkup(district) {
   if (!district) return "";
   const winner = district.winnerParty === "D" ? "Democrat" : "Republican";
@@ -867,6 +879,7 @@ function updateHouseDistrictCard(district) {
 function renderHouseCartogram() {
   const container = document.getElementById("house-district-cartogram");
   if (!container || !houseForecast) return;
+  container.hidden = houseViewMode !== "diagram";
   const districts = [...houseForecast.districts].sort((a, b) => {
     const ratingDelta = Object.keys(RATING_BUCKET).indexOf(a.rating) - Object.keys(RATING_BUCKET).indexOf(b.rating);
     return ratingDelta || a.id.localeCompare(b.id, undefined, { numeric: true });
@@ -888,6 +901,83 @@ function renderHouseCartogram() {
     node.addEventListener("click", handler);
   });
   updateHouseDistrictCard(houseForecast.decisiveDistricts?.[0] || houseForecast.districts[0]);
+}
+
+function houseDistrictIdFromFeature(feature) {
+  const props = feature?.properties || {};
+  const state = props.STATE_ABBR;
+  const district = String(props.CDFIPS || "").padStart(2, "0");
+  if (!state || !district) return null;
+  return `${state}-${district === "00" ? "AL" : district}`;
+}
+
+async function renderHouseDistrictMap() {
+  const container = document.getElementById("house-district-map");
+  if (!container || !houseForecast) return;
+  container.hidden = houseViewMode !== "map";
+  if (houseViewMode !== "map") return;
+  if (!window.d3) {
+    container.innerHTML = `<p class="map-note">District shape map library unavailable.</p>`;
+    return;
+  }
+  if (container.dataset.loaded === "true") return;
+  try {
+    const geo = await d3.json(HOUSE_DISTRICT_MAP_URL);
+    const features = geo.features || [];
+    const width = 980;
+    const height = 610;
+    const projection = d3.geoAlbersUsa().fitSize([width, height], { type: "FeatureCollection", features });
+    const path = d3.geoPath(projection);
+    container.innerHTML = "";
+    const svg = d3.select(container).append("svg").attr("viewBox", `0 0 ${width} ${height}`).attr("role", "img").attr("aria-label", "House district shape map");
+    svg.selectAll("path")
+      .data(features)
+      .join("path")
+      .attr("class", (feature) => {
+        const district = houseForecast.districts.find((item) => item.id === houseDistrictIdFromFeature(feature));
+        return district ? `district-shape ${houseDistrictBucket(district)}` : "district-shape state-muted";
+      })
+      .attr("d", path)
+      .attr("fill", (feature) => {
+        const district = houseForecast.districts.find((item) => item.id === houseDistrictIdFromFeature(feature));
+        return district ? ratingColor({ rating: district.rating }) : null;
+      })
+      .attr("tabindex", (feature) => houseForecast.districts.find((item) => item.id === houseDistrictIdFromFeature(feature)) ? 0 : -1)
+      .on("mouseenter focus", (event, feature) => {
+        const district = houseForecast.districts.find((item) => item.id === houseDistrictIdFromFeature(feature));
+        updateHouseDistrictCard(district);
+      })
+      .on("click keydown", (event, feature) => {
+        if (event.type === "keydown" && event.key !== "Enter") return;
+        const district = houseForecast.districts.find((item) => item.id === houseDistrictIdFromFeature(feature));
+        updateHouseDistrictCard(district);
+      })
+      .append("title")
+      .text((feature) => {
+        const district = houseForecast.districts.find((item) => item.id === houseDistrictIdFromFeature(feature));
+        return district ? `${houseDistrictLabel(district)}: ${district.rating}` : "";
+      });
+    container.dataset.loaded = "true";
+  } catch (error) {
+    container.innerHTML = `<p class="map-note">District shape map could not load. The cartogram remains available.</p>`;
+  }
+}
+
+function renderHouseViewControls() {
+  const container = document.getElementById("house-view-controls");
+  if (!container) return;
+  const modes = { diagram: "Diagram", map: "Map" };
+  container.innerHTML = Object.entries(modes).map(([mode, label]) => (
+    `<button type="button" class="${mode === houseViewMode ? "active" : ""}" data-house-view="${mode}">${label}</button>`
+  )).join("");
+  container.querySelectorAll("button").forEach((button) => {
+    button.addEventListener("click", () => {
+      houseViewMode = button.dataset.houseView || "diagram";
+      renderHouseViewControls();
+      renderHouseCartogram();
+      renderHouseDistrictMap();
+    });
+  });
 }
 
 function renderHouseLegend() {
@@ -959,6 +1049,16 @@ function renderHouseDecisiveDistricts() {
   bindPanelTooltipFor(container, ".leverage-row", (node) => node.dataset.tip);
 }
 
+function renderHouseDistrictHistoryInto(target, district) {
+  if (!target || !district) return;
+  const points = district.history?.length ? district.history : [{ date: houseForecast.modelDate, dem: district.demProbability, rep: district.repProbability }];
+  renderLineChart(target, points, {
+    label: `${district.id} probability history`,
+    pointHtml: (point) => `${point.date}<br>D ${pct(point.dem)} / R ${pct(point.rep ?? 1 - point.dem)}`,
+    value: (point) => point.dem
+  });
+}
+
 function renderHouseSourceStatus() {
   const container = document.getElementById("house-source-status");
   if (!container || !houseForecast) return;
@@ -968,6 +1068,10 @@ function renderHouseSourceStatus() {
     ["Cook House ratings", status.cookHouseRatings, `${summary.cookDistricts ?? 0} districts`],
     ["Inside / 270toWin", status.insideElections270ToWinRatings, `${summary.insideRatings ?? 0} district ratings`],
     ["House polls", status.twoSeventyToWinHousePolls, summary.housePollingReferenceReachable ? "Reference page reachable" : "Reference page not loaded"],
+    ["Race to the WH", status.raceToTheWhHouseForecast, summary.raceToTheWhHouseReachable ? "House page reachable" : "House page not loaded"],
+    ["RttWH generic", status.raceToTheWhGenericBallot, summary.raceToTheWhGenericReachable ? "Generic page reachable" : "Generic page not loaded"],
+    ["RealClearPolling", status.realClearPoliticsGenericBallot || status.realClearPollingHousePolls, summary.realClearGenericReachable || summary.realClearHousePollsReachable ? "Reference page reachable" : "Blocked or not loaded"],
+    ["OpenFEC House", status.openFecHouseCandidateSummary, `${summary.fecDistricts ?? 0} districts`],
     ["Generic ballot", status.senateGenericPollingFallback || status.votehubGenericBallot, `${summary.genericPolling?.sources?.length ?? 0} sources / D ${summary.genericPolling?.margin?.toFixed?.(1) ?? "--"}`],
     ["Census districts", status.censusDistrictBoundaries, houseForecast.mapBasis?.districtShapeMapStatus || "--"]
   ];
@@ -986,7 +1090,9 @@ function renderHouseSourceStatus() {
 
 function renderHousePage() {
   renderHouseSummary();
+  renderHouseViewControls();
   renderHouseCartogram();
+  renderHouseDistrictMap();
   renderHouseLegend();
   renderHouseControlHistory();
   renderHouseSeatHistogram();
@@ -1077,7 +1183,7 @@ function renderArticleBody(article) {
     if (block.type === "paragraph") return `<p>${escapeHtml(block.text || "")}</p>`;
     if (block.type === "embed") {
       const embed = block.embed || block;
-      const previewTypes = ["state-card", "state-preview", "map-preview", "map-state"];
+      const previewTypes = ["state-card", "state-preview", "map-preview", "map-state", "house-district", "house-district-preview", "house-race", "district-preview"];
       const previewClass = previewTypes.includes(embed.type) ? " article-embed-state-preview" : "";
       return `
         <section class="article-embed chart-panel article-embed-${escapeHtml(embed.size || "small")}${previewClass}" data-block-index="${index}">
@@ -1107,6 +1213,11 @@ function embedTitle(embed) {
   if (embed.type === "control-history") return "National chamber control probability";
   if (embed.type === "state-history") return `${embed.state} probability history`;
   if (["state-card", "state-preview", "map-preview", "map-state"].includes(embed.type)) return `${embed.state} forecast preview`;
+  if (embed.type === "house-control-history") return "House control probability";
+  if (embed.type === "house-seat-distribution") return "House seat distribution";
+  if (embed.type === "house-district-history") return `${embed.district} probability history`;
+  if (["house-district", "house-district-preview", "house-race", "district-preview"].includes(embed.type)) return `${embed.district} forecast preview`;
+  if (embed.type === "house-closest") return "Closest House districts";
   if (embed.type === "seat-distribution") return "Seat distribution";
   if (embed.type === "leverage") return "Most decisive races";
   return "Forecast chart";
@@ -1164,6 +1275,65 @@ function renderEmbed(target, embed) {
   if (embed.type === "seat-distribution") {
     target.className = "article-embed-target seat-histogram";
     renderSeatHistogramInto(target);
+    return;
+  }
+  if (embed.type === "house-control-history") {
+    target.className = "article-embed-target history-chart";
+    if (!houseForecast) {
+      target.innerHTML = `<p>House forecast not loaded.</p>`;
+      return;
+    }
+    const points = houseForecast.controlHistory?.length ? houseForecast.controlHistory : [{ date: houseForecast.modelDate, dem: houseForecast.demControlProbability, rep: houseForecast.repControlProbability }];
+    renderLineChart(target, points, {
+      label: embed.title || "House control probability",
+      pointHtml: (point) => `${point.date}<br>D ${pct(point.dem)} / R ${pct(point.rep ?? 1 - point.dem)}`,
+      value: (point) => point.dem
+    });
+    return;
+  }
+  if (embed.type === "house-seat-distribution") {
+    target.className = "article-embed-target seat-histogram";
+    if (!houseForecast) {
+      target.innerHTML = `<p>House forecast not loaded.</p>`;
+      return;
+    }
+    const seats = Object.keys(houseForecast.seatCounts || {}).map(Number);
+    const center = houseForecast.medianSeats || 218;
+    renderSeatHistogramInto(target, houseForecast, {
+      minSeat: Math.max(180, Math.min(...seats, center - 16)),
+      maxSeat: Math.min(255, Math.max(...seats, center + 16))
+    });
+    return;
+  }
+  if (["house-district", "house-district-preview", "house-race", "district-preview"].includes(embed.type)) {
+    const district = getHouseDistrict(embed.district || embed.id);
+    target.className = "article-embed-target state-preview-embed";
+    target.innerHTML = district ? houseDistrictMarkup(district) : `<p>District not found.</p>`;
+    return;
+  }
+  if (embed.type === "house-district-history") {
+    const district = getHouseDistrict(embed.district || embed.id);
+    target.className = "article-embed-target history-chart";
+    if (!district) {
+      target.innerHTML = `<p>District not found.</p>`;
+      return;
+    }
+    renderHouseDistrictHistoryInto(target, district);
+    return;
+  }
+  if (embed.type === "house-closest") {
+    target.className = "article-embed-target leverage-chart";
+    if (!houseForecast) {
+      target.innerHTML = `<p>House forecast not loaded.</p>`;
+      return;
+    }
+    const ranked = houseForecast.decisiveDistricts || [];
+    const max = Math.max(...ranked.map((district) => district.leverage || 0), .01);
+    target.innerHTML = ranked.slice(0, embed.limit || 10).map((district) => {
+      const width = clamp(((district.leverage || 0) / max) * 100, 8, 100);
+      return `<button class="leverage-row ${houseLeaderClass(district)}" type="button" data-tip="${escapeHtml(houseDistrictLabel(district))}<br>${oneDecimal(district.winnerProbability)} ${district.winnerParty === "D" ? "Democrat" : "Republican"}<br>${escapeHtml(district.rating)}"><strong>${escapeHtml(district.id)}</strong><i style="width:${width}%"></i><span>${oneDecimal(district.leverage || 0)}</span></button>`;
+    }).join("");
+    bindPanelTooltipFor(target, ".leverage-row", (node) => node.dataset.tip);
     return;
   }
   if (embed.type === "leverage") {

@@ -17,6 +17,8 @@ Copy this object, paste it at the top of the array after the opening [, then add
     { "type": "paragraph", "text": "Second paragraph." },
     { "type": "embed", "embed": { "type": "state-history", "state": "OH", "title": "Ohio probability history", "size": "small" } },
     { "type": "embed", "embed": { "type": "state-preview", "state": "OH", "size": "small", "mode": "rating" } },
+    { "type": "embed", "embed": { "type": "house-district-preview", "district": "WI-03", "size": "small" } },
+    { "type": "embed", "embed": { "type": "house-district-history", "district": "WI-03", "title": "Wisconsin 3 probability history", "size": "small" } },
     { "type": "paragraph", "text": "Third paragraph." }
   ]
 }
@@ -35,6 +37,12 @@ Rules:
   - "state-card", "map-preview", and "map-state": aliases for "state-preview".
   - "seat-distribution": national simulated seat distribution.
   - "leverage": most decisive races by control tipping power.
+  - "house-control-history": House chamber-control probability over time.
+  - "house-seat-distribution": House simulated seat distribution.
+  - "house-district-preview": a narrow House district preview card. Requires "district": "WI-03" or another district id.
+  - "house-district", "house-race", and "district-preview": aliases for "house-district-preview".
+  - "house-district-history": a House district probability history. Requires "district": "WI-03" or another district id.
+  - "house-closest": closest House districts by simulated leverage. Optional "limit": 10.
 - The optional "title" field overrides the chart heading shown in the article.
 - The optional "size" field can be "small", "medium", or "large". Use "small" for most article embeds.
 - State-preview embeds can also use "mode": "rating", "margin", or "probability". If omitted, they follow that visitor's current map color mode.

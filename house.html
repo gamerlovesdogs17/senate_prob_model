@@ -61,8 +61,11 @@
       </div>
       <div class="house-board-layout">
         <div>
+          <div id="house-view-controls" class="map-color-controls" aria-label="House view mode"></div>
           <div id="house-district-cartogram" class="district-cartogram"></div>
+          <div id="house-district-map" class="district-map" hidden></div>
           <div id="house-rating-legend" class="map-legend"></div>
+          <p class="map-note">Map source: Esri/Census 119th congressional districts. If states redraw lines before November 2026, district probabilities follow the race ledger first; the shape map updates when a replacement boundary file is available.</p>
         </div>
         <aside id="house-district-card" class="hover-card"></aside>
       </div>
@@ -84,6 +87,7 @@
     </section>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
   <script src="assets/wiki.js"></script>
 </body>
 </html>
