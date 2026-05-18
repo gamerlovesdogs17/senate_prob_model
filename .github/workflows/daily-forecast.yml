@@ -21,10 +21,12 @@ jobs:
           node-version: "22"
 
       - name: Generate forecast data
-        run: node scripts/generate-forecast.mjs
+        run: |
+          node scripts/generate-forecast.mjs
+          node scripts/generate-house-forecast.mjs
 
       - name: Commit forecast data
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Update daily Senate forecast"
-          file_pattern: data/forecast.json
+          commit_message: "Update daily forecasts"
+          file_pattern: data/*.json

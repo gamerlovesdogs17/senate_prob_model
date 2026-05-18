@@ -27,27 +27,33 @@
     <section class="text-panel image-panel compact-page-head">
       <p class="kicker">House</p>
       <h1>Method.</h1>
-      <p class="lede">No public House probability yet.</p>
     </section>
 
     <section class="dashboard-grid" aria-label="House method">
       <article class="chart-panel">
         <span class="chart-label">Inputs</span>
         <dl class="method-list">
-          <div><dt>Districts</dt><dd>Partisan lean, incumbency, retirements, redistricting, and uncontested seats.</dd></div>
-          <div><dt>National mood</dt><dd>Generic ballot, approval, economic data, and special elections.</dd></div>
-          <div><dt>Campaigns</dt><dd>Candidate quality, fundraising, public polling, and late race changes.</dd></div>
+          <div><dt>Ratings</dt><dd>Cook public district ratings for the full 435-seat board; Inside Elections via 270toWin as a secondary check where available.</dd></div>
+          <div><dt>Polling</dt><dd>Generic-ballot blend from the same public adapters used by the Senate model. House race-poll pages are monitored but not force-blended without stable district rows.</dd></div>
+          <div><dt>Districts</dt><dd>Open seats, rating bucket error, state-level correlation, and national error.</dd></div>
         </dl>
       </article>
       <article class="chart-panel">
-        <span class="chart-label">Status</span>
+        <span class="chart-label">Map basis</span>
         <dl class="method-list">
-          <div><dt>Probability</dt><dd>Offline</dd></div>
-          <div><dt>Seat distribution</dt><dd>Offline</dd></div>
-          <div><dt>District map</dt><dd>Offline</dd></div>
+          <div><dt>Current display</dt><dd>435-district cartogram.</dd></div>
+          <div><dt>Boundary source</dt><dd>Census 2025 cartographic boundary files for the 119th congressional districts.</dd></div>
+          <div><dt>Shape map</dt><dd>Not bundled yet; the cartogram is used until a local district GeoJSON is added.</dd></div>
         </dl>
       </article>
     </section>
+
+    <section class="source-panel">
+      <p class="kicker">Run status</p>
+      <div id="house-source-status" class="source-status-grid"></div>
+    </section>
+
   </main>
+  <script src="assets/wiki.js"></script>
 </body>
 </html>

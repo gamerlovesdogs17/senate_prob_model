@@ -22,6 +22,7 @@ const CHART_ANNOTATIONS = [
 ];
 
 let forecast = null;
+let houseForecast = null;
 let articles = [];
 let mapColorMode = "rating";
 
@@ -294,6 +295,18 @@ function updateSummary() {
   }
 }
 
+function updateHomeHouseSummary() {
+  if (!houseForecast) return;
+  const favoredIsDem = houseForecast.demControlProbability >= houseForecast.repControlProbability;
+  const favoredSide = favoredIsDem ? "Democrats" : "Republicans";
+  const favoredProbability = Math.max(houseForecast.demControlProbability, houseForecast.repControlProbability);
+  setText("home-house-status", "Live");
+  setText("home-house-favored", `${favoredSide} ${pct(favoredProbability)}`);
+  setText("home-house-dem", oneDecimal(houseForecast.demControlProbability));
+  setText("home-house-rep", oneDecimal(houseForecast.repControlProbability));
+  setText("home-house-run", houseForecast.runDate || houseForecast.modelDate || "--");
+}
+
 function normalizedMapMode(mode) {
   return Object.prototype.hasOwnProperty.call(MAP_COLOR_MODES, mode) ? mode : mapColorMode;
 }
@@ -439,14 +452,14 @@ function renderHistogram() {
   renderSeatHistogramInto(container);
 }
 
-function renderSeatHistogramInto(container) {
-  const counts = forecast.seatCounts || {};
+function renderSeatHistogramInto(container, model = forecast, options = {}) {
+  const counts = model?.seatCounts || {};
   const seats = Object.keys(counts).map(Number).sort((a, b) => a - b);
   if (!seats.length) return;
-  const minSeat = Math.max(42, Math.min(...seats));
-  const maxSeat = Math.min(57, Math.max(...seats));
+  const minSeat = Math.max(options.minSeat ?? 42, Math.min(...seats));
+  const maxSeat = Math.min(options.maxSeat ?? 57, Math.max(...seats));
   const maxCount = Math.max(...Object.values(counts));
-  const sims = forecast.settings?.simulations || Object.values(counts).reduce((a, b) => a + b, 0);
+  const sims = model?.settings?.simulations || Object.values(counts).reduce((a, b) => a + b, 0);
   container.innerHTML = Array.from({ length: maxSeat - minSeat + 1 }, (_, i) => {
     const seat = minSeat + i;
     const value = counts[seat] || 0;
@@ -812,6 +825,175 @@ function renderSourceStatus() {
   }).join("");
 }
 
+function houseDistrictBucket(district) {
+  return RATING_BUCKET[district?.rating] || "tossup";
+}
+
+function houseLeaderClass(district) {
+  if (!district) return "";
+  if (district.rating === "Toss-up") return "leads-tossup";
+  return district.winnerParty === "D" ? "leads-dem" : "leads-rep";
+}
+
+function houseDistrictLabel(district) {
+  return `${district.id} ${district.label || ""}`.trim();
+}
+
+function houseDistrictMarkup(district) {
+  if (!district) return "";
+  const winner = district.winnerParty === "D" ? "Democrat" : "Republican";
+  return `
+    <span class="race-kicker">${escapeHtml(houseDistrictLabel(district))}</span>
+    <div class="map-card-title">
+      <div class="state-code">${escapeHtml(district.id)}</div>
+      <span class="rating-pill ${houseDistrictBucket(district)}">${escapeHtml(district.rating)}</span>
+    </div>
+    <h3>${winner} ${oneDecimal(district.winnerProbability)}</h3>
+    <div class="candidate-table" aria-label="${district.id} district forecast">
+      <div class="candidate-table-head"><span>Candidate</span><span>Chance</span></div>
+      <div class="candidate-row dem-row"><span>${escapeHtml(district.demCandidate || "Democrat")} <i class="party-badge dem-badge">D</i></span><strong>${oneDecimal(district.demProbability)}</strong></div>
+      <div class="candidate-row rep-row"><span>${escapeHtml(district.repCandidate || "Republican")} <i class="party-badge rep-badge">R</i></span><strong>${oneDecimal(district.repProbability)}</strong></div>
+      <div class="candidate-margin"><span>Projected margin</span><strong>${signedPointMargin(district.margin)}</strong></div>
+    </div>
+    <p class="meta">${escapeHtml(district.sourceBlend || "Cook")} / ${district.open ? "Open seat" : "Incumbent listed"}</p>
+  `;
+}
+
+function updateHouseDistrictCard(district) {
+  const card = document.getElementById("house-district-card");
+  if (card) card.innerHTML = houseDistrictMarkup(district);
+}
+
+function renderHouseCartogram() {
+  const container = document.getElementById("house-district-cartogram");
+  if (!container || !houseForecast) return;
+  const districts = [...houseForecast.districts].sort((a, b) => {
+    const ratingDelta = Object.keys(RATING_BUCKET).indexOf(a.rating) - Object.keys(RATING_BUCKET).indexOf(b.rating);
+    return ratingDelta || a.id.localeCompare(b.id, undefined, { numeric: true });
+  });
+  container.innerHTML = districts.map((district) => `
+    <button class="district-cell ${houseDistrictBucket(district)} ${houseLeaderClass(district)}"
+      type="button"
+      aria-label="${escapeHtml(houseDistrictLabel(district))}, ${escapeHtml(district.rating)}"
+      data-district="${escapeHtml(district.id)}"
+      title="${escapeHtml(houseDistrictLabel(district))}">
+      <span>${escapeHtml(district.id.replace("-", ""))}</span>
+    </button>
+  `).join("");
+  container.querySelectorAll(".district-cell").forEach((node) => {
+    const district = houseForecast.districts.find((item) => item.id === node.dataset.district);
+    const handler = () => updateHouseDistrictCard(district);
+    node.addEventListener("mouseenter", handler);
+    node.addEventListener("focus", handler);
+    node.addEventListener("click", handler);
+  });
+  updateHouseDistrictCard(houseForecast.decisiveDistricts?.[0] || houseForecast.districts[0]);
+}
+
+function renderHouseLegend() {
+  const legend = document.getElementById("house-rating-legend");
+  if (!legend) return;
+  const ratings = ["Safe D", "Likely D", "Lean D", "Tilt D", "Toss-up", "Tilt R", "Lean R", "Likely R", "Safe R"];
+  legend.innerHTML = ratings.map((rating) => `<span><i class="${RATING_BUCKET[rating]}"></i>${rating}</span>`).join("");
+}
+
+function renderHouseSummary() {
+  if (!houseForecast) return;
+  const favoredIsDem = houseForecast.demControlProbability >= houseForecast.repControlProbability;
+  const favoredSide = favoredIsDem ? "Democrats" : "Republicans";
+  const favoredProbability = Math.max(houseForecast.demControlProbability, houseForecast.repControlProbability);
+  const panel = document.getElementById("house-odds-panel");
+  panel?.classList.toggle("control-dem", favoredIsDem);
+  panel?.classList.toggle("control-rep", !favoredIsDem);
+  const odds = document.getElementById("house-odds-phrase");
+  if (odds) odds.innerHTML = `<span>${favoredSide} favored</span><strong>${pct(favoredProbability)}</strong>`;
+  setText("house-control-headline", `${favoredSide} narrowly favored`);
+  setText("house-dem-control", oneDecimal(houseForecast.demControlProbability));
+  setText("house-rep-control", oneDecimal(houseForecast.repControlProbability));
+  setText("house-median-seats", `${houseForecast.medianSeats} D / ${435 - houseForecast.medianSeats} R`);
+  setText("house-run-date", houseForecast.runDate || houseForecast.modelDate || "--");
+  const demBar = document.getElementById("house-dem-control-bar");
+  const repBar = document.getElementById("house-rep-control-bar");
+  if (demBar && repBar) {
+    demBar.style.width = `${houseForecast.demControlProbability * 100}%`;
+    repBar.style.width = `${houseForecast.repControlProbability * 100}%`;
+  }
+}
+
+function renderHouseSeatHistogram() {
+  const container = document.getElementById("house-seat-histogram");
+  if (!container || !houseForecast) return;
+  const seats = Object.keys(houseForecast.seatCounts || {}).map(Number);
+  const center = houseForecast.medianSeats || 218;
+  const minSeat = Math.max(180, Math.min(...seats, center - 16));
+  const maxSeat = Math.min(255, Math.max(...seats, center + 16));
+  renderSeatHistogramInto(container, houseForecast, { minSeat, maxSeat });
+}
+
+function renderHouseControlHistory() {
+  const chart = document.getElementById("house-control-history-chart");
+  if (!chart || !houseForecast) return;
+  const points = houseForecast.controlHistory?.length ? houseForecast.controlHistory : [{ date: houseForecast.modelDate, dem: houseForecast.demControlProbability, rep: houseForecast.repControlProbability }];
+  renderLineChart(chart, points, {
+    label: "House control probability history",
+    pointHtml: (point) => `${point.date}<br>D ${pct(point.dem)} / R ${pct(point.rep ?? 1 - point.dem)}`,
+    value: (point) => point.dem
+  });
+}
+
+function renderHouseDecisiveDistricts() {
+  const container = document.getElementById("house-decisive-districts");
+  if (!container || !houseForecast) return;
+  const ranked = houseForecast.decisiveDistricts || [];
+  const max = Math.max(...ranked.map((district) => district.leverage || 0), .01);
+  container.innerHTML = ranked.map((district) => {
+    const width = clamp(((district.leverage || 0) / max) * 100, 8, 100);
+    return `<button class="leverage-row ${houseLeaderClass(district)}" type="button" data-district="${escapeHtml(district.id)}" data-tip="${escapeHtml(houseDistrictLabel(district))}<br>${oneDecimal(district.winnerProbability)} ${district.winnerParty === "D" ? "Democrat" : "Republican"}<br>${escapeHtml(district.rating)}"><strong>${escapeHtml(district.id)}</strong><i style="width:${width}%"></i><span>${oneDecimal(district.leverage || 0)}</span></button>`;
+  }).join("");
+  container.querySelectorAll(".leverage-row").forEach((node) => {
+    const district = houseForecast.districts.find((item) => item.id === node.dataset.district);
+    node.addEventListener("mouseenter", () => updateHouseDistrictCard(district));
+    node.addEventListener("focus", () => updateHouseDistrictCard(district));
+    node.addEventListener("click", () => updateHouseDistrictCard(district));
+  });
+  bindPanelTooltipFor(container, ".leverage-row", (node) => node.dataset.tip);
+}
+
+function renderHouseSourceStatus() {
+  const container = document.getElementById("house-source-status");
+  if (!container || !houseForecast) return;
+  const status = houseForecast.sourceStatus || {};
+  const summary = houseForecast.sourceSummary || {};
+  const rows = [
+    ["Cook House ratings", status.cookHouseRatings, `${summary.cookDistricts ?? 0} districts`],
+    ["Inside / 270toWin", status.insideElections270ToWinRatings, `${summary.insideRatings ?? 0} district ratings`],
+    ["House polls", status.twoSeventyToWinHousePolls, summary.housePollingReferenceReachable ? "Reference page reachable" : "Reference page not loaded"],
+    ["Generic ballot", status.senateGenericPollingFallback || status.votehubGenericBallot, `${summary.genericPolling?.sources?.length ?? 0} sources / D ${summary.genericPolling?.margin?.toFixed?.(1) ?? "--"}`],
+    ["Census districts", status.censusDistrictBoundaries, houseForecast.mapBasis?.districtShapeMapStatus || "--"]
+  ];
+  container.innerHTML = rows.map(([label, item, detail]) => {
+    const ok = Boolean(item?.ok);
+    return `
+      <div class="source-status-card ${ok ? "is-ok" : "is-warn"}">
+        <span class="source-tag">${ok ? "Loaded" : "Not loaded"}</span>
+        <h3>${label}</h3>
+        <p>${detail}</p>
+        <p class="meta">${item?.ms ? `${item.ms} ms` : item?.status || ""}</p>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderHousePage() {
+  renderHouseSummary();
+  renderHouseCartogram();
+  renderHouseLegend();
+  renderHouseControlHistory();
+  renderHouseSeatHistogram();
+  renderHouseDecisiveDistricts();
+  renderHouseSourceStatus();
+}
+
 function renderBattlegroundList() {
   const container = document.getElementById("battleground-list");
   if (!container || !forecast) return;
@@ -1009,6 +1191,16 @@ async function loadForecast() {
   return response.json();
 }
 
+async function loadHouseForecast() {
+  try {
+    const response = await fetch("data/house-forecast.json", { cache: "no-store" });
+    if (!response.ok) return null;
+    return response.json();
+  } catch {
+    return null;
+  }
+}
+
 function renderLoadError(error) {
   setText("control-headline", "Forecast data unavailable");
   setText("odds-phrase", "--");
@@ -1024,16 +1216,22 @@ function renderLoadError(error) {
 async function init() {
   installInteractionDismiss();
   articles = await loadArticles();
+  houseForecast = await loadHouseForecast();
+  updateHomeHouseSummary();
+  renderHousePage();
   try {
     forecast = await loadForecast();
   } catch (error) {
     renderLoadError(error);
+    updateHomeHouseSummary();
+    renderHousePage();
     renderTopArticle();
     renderArticlesList();
     renderArticlePage();
     return;
   }
   updateSummary();
+  updateHomeHouseSummary();
   renderMapColorControls();
   renderStateMap();
   renderLegend();
@@ -1044,6 +1242,7 @@ async function init() {
   renderRacePage();
   renderRaceSelector();
   renderSourceStatus();
+  renderHousePage();
   renderBattlegroundList();
   renderTopArticle();
   renderArticlesList();

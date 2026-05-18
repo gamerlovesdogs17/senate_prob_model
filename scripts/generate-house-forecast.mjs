@@ -1,0 +1,570 @@
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+
+const OUTPUT_URL = new URL("../data/house-forecast.json", import.meta.url);
+const SENATE_FORECAST_URL = new URL("../data/forecast.json", import.meta.url);
+const previousForecast = readPreviousForecast();
+
+const SETTINGS = {
+  simulations: 30000,
+  controlThreshold: 218,
+  updateTime: "around 6:00 AM Central",
+  updateZone: "America/Chicago",
+  dataSources: [
+    "270toWin / Inside Elections public House map data",
+    "Cook Political Report public House ratings when reachable",
+    "270toWin House polling reference page",
+    "Generic-ballot polling adapters shared with the Senate model",
+    "Census 119th congressional district boundary files for map basis"
+  ]
+};
+
+const RATING_TO_MARGIN = {
+  "Safe D": 17,
+  "Likely D": 8.5,
+  "Lean D": 4.3,
+  "Tilt D": 1.5,
+  "Toss-up": 0,
+  "Tilt R": -1.5,
+  "Lean R": -4.3,
+  "Likely R": -8.5,
+  "Safe R": -17
+};
+
+const RATING_TO_ERROR = {
+  "Safe D": 5.1,
+  "Likely D": 6.3,
+  "Lean D": 7.4,
+  "Tilt D": 8.6,
+  "Toss-up": 9.8,
+  "Tilt R": 8.6,
+  "Lean R": 7.4,
+  "Likely R": 6.3,
+  "Safe R": 5.1
+};
+
+const MODEL_WEIGHTS = {
+  genericBallot: .35,
+  genericBallotCap: 2.2,
+  ratingBaseline: 1,
+  districtPolls: .18,
+  incumbencyOpenPenalty: .55,
+  stateCorrelationSd: 1.6,
+  nationalEnvironmentSd: 3.2
+};
+
+const CATEGORY_ALIASES = {
+  "Solid Democrat": "Safe D",
+  "Likely Democrat": "Likely D",
+  "Lean Democrat": "Lean D",
+  "Toss Up": "Toss-up",
+  "Lean Republican": "Lean R",
+  "Likely Republican": "Likely R",
+  "Solid Republican": "Safe R"
+};
+
+const STATUS_TO_RATING = {
+  D4: "Safe D",
+  D3: "Likely D",
+  D2: "Lean D",
+  D1: "Tilt D",
+  T: "Toss-up",
+  R1: "Tilt R",
+  R2: "Lean R",
+  R3: "Likely R",
+  R4: "Safe R"
+};
+
+const RATING_ORDER = ["Safe D", "Likely D", "Lean D", "Tilt D", "Toss-up", "Tilt R", "Lean R", "Likely R", "Safe R"];
+const STATELESS_DISTRICTS = new Set(["DC-AL"]);
+
+function modelDateKey() {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(process.env.MODEL_DATE || "")) return process.env.MODEL_DATE;
+  const now = new Date();
+  const central = new Date(now.toLocaleString("en-US", { timeZone: SETTINGS.updateZone }));
+  if (central.getHours() < 6) central.setDate(central.getDate() - 1);
+  return central.toISOString().slice(0, 10);
+}
+
+const MODEL_DATE_KEY = modelDateKey();
+const random = mulberry32(hashString(`house-${MODEL_DATE_KEY}`));
+
+async function fetchText(url, label, status, options = {}) {
+  const started = Date.now();
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), options.timeoutMs || 14000);
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        "user-agent": "CapitolForecastBot/1.0 (+https://github.com/)",
+        "accept": "text/html,application/json,text/plain,*/*"
+      }
+    });
+    const text = await response.text();
+    status[label] = {
+      ok: response.ok,
+      status: response.status,
+      ms: Date.now() - started,
+      bytes: text.length,
+      url
+    };
+    return response.ok ? text : "";
+  } catch (error) {
+    status[label] = {
+      ok: false,
+      status: error.name === "AbortError" ? "timeout" : "error",
+      message: error.message,
+      ms: Date.now() - started,
+      url
+    };
+    return "";
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function htmlToLines(html) {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, "\n")
+    .replace(/<style[\s\S]*?<\/style>/gi, "\n")
+    .replace(/<[^>]+>/g, "\n")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&#039;|&apos;/g, "'")
+    .replace(/&quot;/g, "\"")
+    .split(/\r?\n/)
+    .map((line) => line.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+}
+
+function parseCookDistricts(html) {
+  const lines = htmlToLines(html);
+  const districts = [];
+  let rating = null;
+  for (const line of lines) {
+    const category = Object.keys(CATEGORY_ALIASES).find((name) => line.startsWith(`${name} (`) || line === name);
+    if (category) {
+      rating = CATEGORY_ALIASES[category];
+      continue;
+    }
+    const match = line.match(/^([A-Z]{2})-(AL|\d{1,2})\s+(.+)$/);
+    if (!match || !rating) continue;
+    const district = `${match[1]}-${match[2] === "AL" ? "AL" : String(Number(match[2])).padStart(2, "0")}`;
+    if (STATELESS_DISTRICTS.has(district)) continue;
+    const label = match[3].replace(/\s+/g, " ").trim();
+    districts.push({
+      id: district,
+      state: match[1],
+      district: match[2],
+      label,
+      incumbent: label,
+      open: /\bOPEN\b|\bVACANT\b/i.test(label),
+      rating,
+      ratingSource: "Cook"
+    });
+  }
+  return uniqueDistricts(districts);
+}
+
+function extractJsonAssignment(html, marker) {
+  const markerIndex = html.indexOf(marker);
+  if (markerIndex === -1) return null;
+  const start = html.indexOf("{", markerIndex);
+  if (start === -1) return null;
+  let depth = 0;
+  let inString = false;
+  let escape = false;
+  for (let index = start; index < html.length; index += 1) {
+    const char = html[index];
+    if (escape) {
+      escape = false;
+      continue;
+    }
+    if (char === "\\") {
+      escape = true;
+      continue;
+    }
+    if (char === "\"") {
+      inString = !inString;
+      continue;
+    }
+    if (inString) continue;
+    if (char === "{") depth += 1;
+    if (char === "}") depth -= 1;
+    if (depth === 0) return html.slice(start, index + 1);
+  }
+  return null;
+}
+
+function parse270MapDistricts(html) {
+  const json = extractJsonAssignment(html, "map_d3.seats =");
+  if (!json) return [];
+  const parsed = JSON.parse(json);
+  return Object.values(parsed).flat().map((district) => {
+    const state = district.state_abbr;
+    const number = Number(district.district_number);
+    const atLarge = String(district.district_id_combo || "").endsWith("00");
+    const id = `${state}-${atLarge ? "AL" : String(number).padStart(2, "0")}`;
+    const presidentialMargin = toNumber(district.margin_president);
+    const congressionalMargin = toNumber(district.margin_congress);
+    const fundamentalMargin = Number.isFinite(congressionalMargin) && Math.abs(congressionalMargin) > .01
+      ? presidentialMargin * .55 + congressionalMargin * .45
+      : presidentialMargin;
+    const sourceRating = STATUS_TO_RATING[district.pro_status] || null;
+    const rating = ratingFromMargin(fundamentalMargin);
+    const incumbent = String(district.seat_rep_name || "").trim() || "Open seat";
+    const label = district.retired_code ? `${incumbent} / open` : incumbent;
+    const demCandidate = (district.candidates || []).find((candidate) => candidate.party === "D")?.full_name || "Democrat";
+    const repCandidate = (district.candidates || []).find((candidate) => candidate.party === "R")?.full_name || "Republican";
+    return {
+      id,
+      state,
+      district: atLarge ? "AL" : String(number),
+      label,
+      incumbent,
+      open: Boolean(district.retired_code) || /\bopen\b|\bvacant\b/i.test(String(district.retired_notes || "")),
+      rating,
+      sourceRating,
+      ratingSource: "270toWin / Inside Elections",
+      seatParty: district.seat_party || null,
+      presidentialMargin,
+      congressionalMargin,
+      fundamentalMargin: Number.isFinite(fundamentalMargin) ? Number(fundamentalMargin.toFixed(2)) : null,
+      kalshiPrice: toNumber(district.kalshi_price),
+      demCandidate,
+      repCandidate
+    };
+  }).filter((district) => district.id && !STATELESS_DISTRICTS.has(district.id));
+}
+
+function ratingFromMargin(margin) {
+  if (!Number.isFinite(margin)) return "Toss-up";
+  const abs = Math.abs(margin);
+  const side = margin > 0 ? "D" : "R";
+  if (abs >= 16) return `Safe ${side}`;
+  if (abs >= 8) return `Likely ${side}`;
+  if (abs >= 3.5) return `Lean ${side}`;
+  if (abs >= 1) return `Tilt ${side}`;
+  return "Toss-up";
+}
+
+function parseInsideRatings(html) {
+  const lines = htmlToLines(html);
+  const ratings = {};
+  let rating = null;
+  for (const line of lines) {
+    if (/^Likely Dem/.test(line)) rating = "Likely D";
+    else if (/^Leans Dem/.test(line)) rating = "Lean D";
+    else if (/^Tilt Dem/.test(line)) rating = "Tilt D";
+    else if (/^Toss-up/.test(line)) rating = "Toss-up";
+    else if (/^Tilt Rep/.test(line)) rating = "Tilt R";
+    else if (/^Leans Rep/.test(line)) rating = "Lean R";
+    else if (/^Likely Rep/.test(line)) rating = "Likely R";
+    const match = line.match(/^([A-Z]{2})-(AL|\d{1,2})\s+(.+)$/);
+    if (match && rating) {
+      ratings[`${match[1]}-${match[2] === "AL" ? "AL" : String(Number(match[2])).padStart(2, "0")}`] = {
+        rating,
+        label: match[3].trim()
+      };
+    }
+  }
+  return ratings;
+}
+
+function uniqueDistricts(districts) {
+  const seen = new Map();
+  for (const district of districts) seen.set(district.id, district);
+  return [...seen.values()].sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
+}
+
+async function fetchGenericPolling(status) {
+  const [votehubHtml, ddhqJson, pollfinityJson, usPollingHtml] = await Promise.all([
+    fetchText("https://polls.votehub.us/polls/generic-ballot", "votehubGenericBallot", status, { timeoutMs: 12000 }),
+    fetchText("https://static.dwcdn.net/data/9Jctg.json", "ddhqGenericBallot", status, { timeoutMs: 12000 }),
+    fetchText("https://pollfinity.com/api/averages", "pollfinityAverages", status, { timeoutMs: 12000 }),
+    fetchText("https://uspollingdata.com/polls/generic-ballot/", "usPollingDataGenericBallot", status, { timeoutMs: 12000 })
+  ]);
+  const sources = [
+    parseVoteHubGeneric(votehubHtml),
+    parseDdhqGeneric(ddhqJson),
+    parsePollfinityGeneric(pollfinityJson),
+    parseUsPollingDataGeneric(usPollingHtml)
+  ].filter(Boolean);
+  const senateFallback = readSenateGenericPolling();
+  if (!sources.length && senateFallback) {
+    status.senateGenericPollingFallback = { ok: true, status: "local", ms: 0 };
+    return senateFallback;
+  }
+  const totalWeight = sources.reduce((sum, source) => sum + source.weight, 0);
+  const margin = totalWeight ? sources.reduce((sum, source) => sum + source.margin * source.weight, 0) / totalWeight : 0;
+  return { margin, sources };
+}
+
+function readSenateGenericPolling() {
+  try {
+    const senate = JSON.parse(readFileSync(SENATE_FORECAST_URL, "utf8"));
+    const generic = senate.sourceSummary?.genericPolling;
+    if (!Number.isFinite(generic?.genericBallotMargin)) return null;
+    return {
+      margin: generic.genericBallotMargin,
+      sources: (generic.sources || []).map((source) => ({
+        source: `${source.source} via Senate run`,
+        margin: source.margin,
+        dem: source.dem,
+        rep: source.rep,
+        polls: source.polls,
+        weight: source.weight
+      }))
+    };
+  } catch {
+    return null;
+  }
+}
+
+function parseVoteHubGeneric(html) {
+  if (!html) return null;
+  const dem = firstNumberAfter(html, /Democrats?[^0-9]{0,80}([0-9]+(?:\.[0-9]+)?)/i);
+  const rep = firstNumberAfter(html, /Republicans?[^0-9]{0,80}([0-9]+(?:\.[0-9]+)?)/i);
+  const explicit = firstNumberAfter(html, /Democrats?\s*\+([0-9]+(?:\.[0-9]+)?)/i);
+  if (Number.isFinite(dem) && Number.isFinite(rep)) return { source: "VoteHub", margin: dem - rep, dem, rep, weight: 1 };
+  if (Number.isFinite(explicit)) return { source: "VoteHub", margin: explicit, weight: .8 };
+  return null;
+}
+
+function parseDdhqGeneric(json) {
+  if (!json) return null;
+  const nums = [...json.matchAll(/"y"\s*:\s*([0-9]+(?:\.[0-9]+)?)/g)].map((match) => Number(match[1]));
+  if (nums.length < 2) return null;
+  const dem = nums.at(-2);
+  const rep = nums.at(-1);
+  if (!Number.isFinite(dem) || !Number.isFinite(rep)) return null;
+  return { source: "DDHQ", margin: dem - rep, dem, rep, weight: .75 };
+}
+
+function parsePollfinityGeneric(json) {
+  if (!json) return null;
+  const dem = firstNumberAfter(json, /Dem(?:ocrat(?:ic|s)?)?["\s:,_-]{0,30}([0-9]+(?:\.[0-9]+)?)/i);
+  const rep = firstNumberAfter(json, /Rep(?:ublican(?:s)?)?["\s:,_-]{0,30}([0-9]+(?:\.[0-9]+)?)/i);
+  if (!Number.isFinite(dem) || !Number.isFinite(rep)) return null;
+  return { source: "Pollfinity", margin: dem - rep, dem, rep, weight: .45 };
+}
+
+function parseUsPollingDataGeneric(html) {
+  if (!html) return null;
+  const margin = firstNumberAfter(html, /Democrats?\s*\+([0-9]+(?:\.[0-9]+)?)/i);
+  if (Number.isFinite(margin)) return { source: "USPollingData", margin, weight: .45 };
+  return null;
+}
+
+function firstNumberAfter(text, pattern) {
+  const match = text.match(pattern);
+  return match ? Number(match[1]) : null;
+}
+
+function toNumber(value) {
+  const number = Number(String(value ?? "").replace(/[$,%]/g, "").trim());
+  return Number.isFinite(number) ? number : null;
+}
+
+async function fetchHouseSources() {
+  const status = { checkedAt: new Date().toISOString() };
+  const [cookHtml, insideHtml, mapHtml, pollingHtml, censusHtml, genericPolling] = await Promise.all([
+    fetchText("https://www.cookpolitical.com/ratings/house-race-ratings", "cookHouseRatings", status),
+    fetchText("https://www.270towin.com/2026-house-election/table/inside-elections-2026-house-ratings", "insideElections270ToWinRatings", status),
+    fetchText("https://www.270towin.com/2026-house-election/inside-elections-2026-house-ratings", "twoSeventyToWinHouseMapData", status),
+    fetchText("https://www.270towin.com/2026-house-election/polls/", "twoSeventyToWinHousePolls", status, { timeoutMs: 12000 }),
+    fetchText("https://www.census.gov/geographies/mapping-files/2025/geo/carto-boundary-file.html", "censusDistrictBoundaries", status, { timeoutMs: 12000 }),
+    fetchGenericPolling(status)
+  ]);
+  const mapDistricts = parse270MapDistricts(mapHtml);
+  const cookDistricts = parseCookDistricts(cookHtml);
+  return {
+    status,
+    cookDistricts,
+    mapDistricts,
+    insideRatings: parseInsideRatings(insideHtml),
+    genericPolling,
+    housePollingReferenceReachable: Boolean(pollingHtml),
+    censusDistrictBoundaryPageReachable: Boolean(censusHtml)
+  };
+}
+
+function adjustedDistricts(sourceData) {
+  const genericShift = clamp(sourceData.genericPolling.margin * MODEL_WEIGHTS.genericBallot, -MODEL_WEIGHTS.genericBallotCap, MODEL_WEIGHTS.genericBallotCap);
+  const baseDistricts = sourceData.mapDistricts.length >= 400 ? sourceData.mapDistricts : sourceData.cookDistricts;
+  return baseDistricts.map((district) => {
+    const inside = sourceData.insideRatings[district.id];
+    const cookMargin = RATING_TO_MARGIN[district.rating] ?? 0;
+    const insideMargin = inside ? RATING_TO_MARGIN[inside.rating] ?? cookMargin : cookMargin;
+    const fundamentalMargin = Number.isFinite(district.fundamentalMargin) ? clamp(district.fundamentalMargin, -28, 28) : cookMargin;
+    const blendedRatingMargin = inside
+      ? cookMargin * .58 + insideMargin * .22 + fundamentalMargin * .2
+      : cookMargin * .45 + fundamentalMargin * .55;
+    const openPenalty = district.open ? (blendedRatingMargin > 0 ? -MODEL_WEIGHTS.incumbencyOpenPenalty : MODEL_WEIGHTS.incumbencyOpenPenalty) : 0;
+    const margin = blendedRatingMargin * MODEL_WEIGHTS.ratingBaseline + genericShift + openPenalty;
+    const error = Math.max(RATING_TO_ERROR[district.rating] ?? 8, inside ? RATING_TO_ERROR[inside.rating] ?? 8 : 0);
+    const demProbability = logistic(margin, error);
+    return {
+      ...district,
+      baselineRating: district.rating,
+      rating: ratingFromMargin(margin),
+      insideRating: inside?.rating || null,
+      margin: Number(margin.toFixed(2)),
+      demProbability: Number(demProbability.toFixed(4)),
+      repProbability: Number((1 - demProbability).toFixed(4)),
+      winnerParty: demProbability >= .5 ? "D" : "R",
+      winnerProbability: Number(Math.max(demProbability, 1 - demProbability).toFixed(4)),
+      error,
+      competitive: Math.abs(margin) < 8 || district.rating === "Toss-up" || Boolean(inside),
+      sourceBlend: inside ? `${district.ratingSource} + table cross-check` : district.ratingSource
+    };
+  });
+}
+
+function runModel(districts) {
+  const seatCounts = {};
+  const districtWins = Object.fromEntries(districts.map((district) => [district.id, 0]));
+  const controlWins = { dem: 0, rep: 0 };
+  for (let sim = 0; sim < SETTINGS.simulations; sim += 1) {
+    const nationalError = normalRandom() * MODEL_WEIGHTS.nationalEnvironmentSd;
+    const stateErrors = {};
+    let demSeats = 0;
+    for (const district of districts) {
+      stateErrors[district.state] ??= normalRandom() * MODEL_WEIGHTS.stateCorrelationSd;
+      const simulatedMargin = district.margin + nationalError + stateErrors[district.state] + normalRandom() * (district.error ?? RATING_TO_ERROR[district.rating] ?? 8);
+      if (simulatedMargin > 0) {
+        demSeats += 1;
+        districtWins[district.id] += 1;
+      }
+    }
+    seatCounts[demSeats] = (seatCounts[demSeats] || 0) + 1;
+    if (demSeats >= SETTINGS.controlThreshold) controlWins.dem += 1;
+    else controlWins.rep += 1;
+  }
+  const sortedSeatCounts = Object.entries(seatCounts).map(([seat, count]) => ({ seat: Number(seat), count })).sort((a, b) => a.seat - b.seat);
+  let cumulative = 0;
+  const medianSeats = sortedSeatCounts.find((entry) => {
+    cumulative += entry.count;
+    return cumulative >= SETTINGS.simulations / 2;
+  })?.seat ?? Math.round(districts.reduce((sum, district) => sum + district.demProbability, 0));
+  const modeledDistricts = districts.map((district) => ({
+    ...district,
+    demProbability: Number((districtWins[district.id] / SETTINGS.simulations).toFixed(4)),
+    repProbability: Number((1 - districtWins[district.id] / SETTINGS.simulations).toFixed(4)),
+    winnerParty: districtWins[district.id] / SETTINGS.simulations >= .5 ? "D" : "R",
+    winnerProbability: Number(Math.max(districtWins[district.id] / SETTINGS.simulations, 1 - districtWins[district.id] / SETTINGS.simulations).toFixed(4))
+  }));
+  return {
+    demControlProbability: controlWins.dem / SETTINGS.simulations,
+    repControlProbability: controlWins.rep / SETTINGS.simulations,
+    medianSeats,
+    seatCounts,
+    districts: modeledDistricts,
+    decisiveDistricts: modeledDistricts
+      .map((district) => ({ ...district, leverage: district.competitive ? (1 - Math.abs(district.demProbability - .5) * 2) : 0 }))
+      .sort((a, b) => b.leverage - a.leverage)
+      .slice(0, 16)
+  };
+}
+
+function appendControlHistory(model) {
+  const current = { date: MODEL_DATE_KEY, dem: model.demControlProbability, rep: model.repControlProbability };
+  const stored = Array.isArray(previousForecast?.controlHistory) ? previousForecast.controlHistory : [];
+  return [...stored.filter((point) => point.date !== current.date && point.date <= MODEL_DATE_KEY), current]
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(-365);
+}
+
+function appendSeatHistory(model) {
+  const current = { date: MODEL_DATE_KEY, dem: model.medianSeats, rep: 435 - model.medianSeats };
+  const stored = Array.isArray(previousForecast?.seatHistory) ? previousForecast.seatHistory : [];
+  return [...stored.filter((point) => point.date !== current.date && point.date <= MODEL_DATE_KEY), current]
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(-365);
+}
+
+function ratingSummary(districts) {
+  return RATING_ORDER.map((rating) => ({
+    rating,
+    count: districts.filter((district) => district.rating === rating).length
+  }));
+}
+
+function readPreviousForecast() {
+  try {
+    return JSON.parse(readFileSync(OUTPUT_URL, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+function hashString(value) {
+  let hash = 2166136261;
+  for (let i = 0; i < value.length; i += 1) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
+function mulberry32(seed) {
+  return function next() {
+    let t = seed += 0x6D2B79F5;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function normalRandom() {
+  const u1 = Math.max(random(), Number.EPSILON);
+  const u2 = Math.max(random(), Number.EPSILON);
+  return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+}
+
+function logistic(margin, error) {
+  return 1 / (1 + Math.exp(-margin / Math.max(error, .1) * 1.7));
+}
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
+async function writeHouseForecast() {
+  const sourceData = await fetchHouseSources();
+  if (sourceData.mapDistricts.length < 400 && sourceData.cookDistricts.length < 400) {
+    throw new Error(`House ratings parse returned ${sourceData.mapDistricts.length} map districts and ${sourceData.cookDistricts.length} Cook districts`);
+  }
+  const districts = adjustedDistricts(sourceData);
+  const model = runModel(districts);
+  const output = {
+    generatedAt: new Date().toISOString(),
+    modelDate: MODEL_DATE_KEY,
+    runDate: new Date(`${MODEL_DATE_KEY}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+    updateTime: SETTINGS.updateTime,
+    settings: { ...SETTINGS, modelWeights: MODEL_WEIGHTS },
+    mapBasis: {
+      display: "district cartogram",
+      boundarySource: "Census 2025 cartographic boundary files for the 119th congressional districts",
+      districtShapeMapStatus: sourceData.censusDistrictBoundaryPageReachable ? "boundary source reachable; local GeoJSON not bundled yet" : "boundary source not reached during this run"
+    },
+    sourceStatus: sourceData.status,
+    sourceSummary: {
+      cookDistricts: sourceData.cookDistricts.length,
+      mapDistricts: sourceData.mapDistricts.length,
+      insideRatings: Object.keys(sourceData.insideRatings).length,
+      genericPolling: sourceData.genericPolling,
+      housePollingReferenceReachable: sourceData.housePollingReferenceReachable,
+      censusDistrictBoundaryPageReachable: sourceData.censusDistrictBoundaryPageReachable
+    },
+    ratingSummary: ratingSummary(districts),
+    controlHistory: appendControlHistory(model),
+    seatHistory: appendSeatHistory(model),
+    ...model
+  };
+  mkdirSync(new URL("../data/", import.meta.url), { recursive: true });
+  writeFileSync(OUTPUT_URL, `${JSON.stringify(output, null, 2)}\n`);
+  console.log(`Wrote data/house-forecast.json for ${MODEL_DATE_KEY}`);
+}
+
+await writeHouseForecast();

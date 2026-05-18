@@ -545,6 +545,56 @@ dd {
   align-items: start;
 }
 
+.house-board-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 16px;
+  align-items: start;
+}
+
+.district-cartogram {
+  display: grid;
+  grid-template-columns: repeat(29, minmax(0, 1fr));
+  gap: 3px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--paper) 82%, transparent);
+}
+
+.district-cell {
+  aspect-ratio: 1;
+  min-width: 0;
+  border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent);
+  border-radius: 2px;
+  padding: 0;
+  color: transparent;
+  font: 800 .45rem/1 "Segoe UI", Arial, sans-serif;
+  overflow: hidden;
+}
+
+.district-cell span {
+  opacity: 0;
+}
+
+.district-cell:hover,
+.district-cell:focus {
+  color: var(--ink);
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+  transform: scale(1.35);
+  z-index: 2;
+}
+
+.district-cell:hover span,
+.district-cell:focus span {
+  opacity: 1;
+}
+
+.house-board-layout .hover-card {
+  position: sticky;
+  top: 92px;
+}
+
 #senate-map {
   min-height: 430px;
   width: 100%;
@@ -1512,6 +1562,7 @@ dd {
 @media (max-width: 1080px) {
   .hero-grid,
   .map-wrap,
+  .house-board-layout,
   .dashboard-grid,
   .page-grid,
   .race-detail {
@@ -1569,6 +1620,21 @@ dd {
 
   .map-wrap {
     gap: 10px;
+  }
+
+  .house-board-layout {
+    gap: 10px;
+  }
+
+  .district-cartogram {
+    grid-template-columns: repeat(20, minmax(0, 1fr));
+    gap: 2px;
+    padding: 5px;
+  }
+
+  .district-cell:hover,
+  .district-cell:focus {
+    transform: scale(1.15);
   }
 
   #senate-map {
@@ -1696,5 +1762,9 @@ dd {
 
   .history-end-label {
     display: none;
+  }
+
+  .district-cartogram {
+    grid-template-columns: repeat(15, minmax(0, 1fr));
   }
 }
