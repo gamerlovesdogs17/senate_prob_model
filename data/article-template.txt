@@ -16,6 +16,7 @@ Copy this object, paste it at the top of the array after the opening [, then add
     { "type": "embed", "embed": { "type": "control-history", "title": "National chamber control probability", "size": "small" } },
     { "type": "paragraph", "text": "Second paragraph." },
     { "type": "embed", "embed": { "type": "state-history", "state": "OH", "title": "Ohio probability history", "size": "small" } },
+    { "type": "embed", "embed": { "type": "state-preview", "state": "OH", "size": "small" } },
     { "type": "paragraph", "text": "Third paragraph." }
   ]
 }
@@ -30,7 +31,8 @@ Rules:
 - Embed types:
   - "control-history": national chamber-control probability over time.
   - "state-history": a state's probability history. Requires "state": "OH" or another two-letter state code.
-  - "state-card": a compact state forecast card. Requires "state": "OH" or another two-letter state code.
+  - "state-preview": a narrow map-style state preview card. Requires "state": "OH" or another two-letter state code.
+  - "state-card", "map-preview", and "map-state": aliases for "state-preview".
   - "seat-distribution": national simulated seat distribution.
   - "leverage": most decisive races by control tipping power.
 - The optional "title" field overrides the chart heading shown in the article.

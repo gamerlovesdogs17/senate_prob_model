@@ -978,6 +978,48 @@ dd {
   max-width: 100%;
 }
 
+.article-embed-state-preview {
+  max-width: 250px;
+  padding: 0;
+  overflow: visible;
+}
+
+.article-embed-state-preview > .chart-label {
+  display: none;
+}
+
+.state-preview-embed {
+  display: block;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--ink);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--paper-2) 86%, white);
+}
+
+.state-preview-embed .state-code {
+  font-size: 2.8rem;
+}
+
+.state-preview-embed h3 {
+  font-size: .92rem;
+  line-height: 1.15;
+}
+
+.state-preview-embed p {
+  font-size: .86rem;
+  line-height: 1.35;
+}
+
+.state-preview-embed .candidate-row,
+.state-preview-embed .candidate-margin {
+  font-size: .72rem;
+}
+
+.state-preview-embed .button-link {
+  margin-top: 6px;
+}
+
 .article-embed-small .history-chart svg {
   max-height: 250px;
 }

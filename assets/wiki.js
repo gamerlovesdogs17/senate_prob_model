@@ -817,8 +817,10 @@ function renderArticleBody(article) {
     if (block.type === "paragraph") return `<p>${escapeHtml(block.text || "")}</p>`;
     if (block.type === "embed") {
       const embed = block.embed || block;
+      const previewTypes = ["state-card", "state-preview", "map-preview", "map-state"];
+      const previewClass = previewTypes.includes(embed.type) ? " article-embed-state-preview" : "";
       return `
-        <section class="article-embed chart-panel article-embed-${escapeHtml(embed.size || "small")}" data-block-index="${index}">
+        <section class="article-embed chart-panel article-embed-${escapeHtml(embed.size || "small")}${previewClass}" data-block-index="${index}">
           <span class="chart-label">${escapeHtml(embed.title || embedTitle(embed))}</span>
           <div class="article-embed-target"></div>
         </section>
@@ -844,7 +846,7 @@ function legacyArticleBlocks(article) {
 function embedTitle(embed) {
   if (embed.type === "control-history") return "National chamber control probability";
   if (embed.type === "state-history") return `${embed.state} probability history`;
-  if (embed.type === "state-card") return `${embed.state} forecast card`;
+  if (["state-card", "state-preview", "map-preview", "map-state"].includes(embed.type)) return `${embed.state} forecast preview`;
   if (embed.type === "seat-distribution") return "Seat distribution";
   if (embed.type === "leverage") return "Most decisive races";
   return "Forecast chart";
@@ -892,9 +894,9 @@ function renderEmbed(target, embed) {
     });
     return;
   }
-  if (embed.type === "state-card") {
+  if (["state-card", "state-preview", "map-preview", "map-state"].includes(embed.type)) {
     const race = getRace(String(embed.state || "").toUpperCase());
-    target.className = "article-embed-target";
+    target.className = "article-embed-target state-preview-embed";
     target.innerHTML = race ? hoverMarkup(race) : `<p>State not found.</p>`;
     return;
   }
