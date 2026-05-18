@@ -638,6 +638,7 @@ function renderHistory(race) {
     points = points.map((point) => ({ ...point, extra: bodnar.probabilityShare ?? .38 }));
   }
   const demIsIndependent = race.demDisplayParty === "I" || race.dem.toLowerCase().includes("independent");
+  const demHistoryLabel = demIsIndependent ? candidateDisplayName(race, "D") : "Democrat";
   renderLineChart(chart, points, {
     label: `${race.displayName} probability history`,
     pointHtml: (point) => `${point.date}<br>D ${pct(point.dem)} / R ${pct(1 - point.dem)}`,
@@ -648,8 +649,8 @@ function renderHistory(race) {
     demHoverDotClass: demIsIndependent ? "history-hover-dot-ind" : "history-hover-dot-dem",
     demEndLabelClass: demIsIndependent ? "history-end-label-ind" : "history-end-label-dem",
     demHoverTextClass: demIsIndependent ? "history-hover-ind" : "",
-    endLabel: demIsIndependent ? (party, value) => `${party === "dem" ? "Independent" : "Republican"} ${oneDecimal(value)}` : null,
-    hoverLabel: demIsIndependent ? (party, value) => `${party === "dem" ? "Independent" : "Republican"} ${oneDecimal(value)}` : null,
+    endLabel: demIsIndependent ? (party, value) => `${party === "dem" ? demHistoryLabel : "Republican"} ${oneDecimal(value)}` : null,
+    hoverLabel: demIsIndependent ? (party, value) => `${party === "dem" ? demHistoryLabel : "Republican"} ${oneDecimal(value)}` : null,
     value: (point) => point.dem,
     singleNote: "State history starts with the first generated forecast and grows each daily run."
   });
@@ -874,6 +875,7 @@ function renderEmbed(target, embed) {
       points = points.map((point) => ({ ...point, extra: bodnar.probabilityShare ?? .38 }));
     }
     const demIsIndependent = race.demDisplayParty === "I" || race.dem.toLowerCase().includes("independent");
+    const demHistoryLabel = demIsIndependent ? candidateDisplayName(race, "D") : "Democrat";
     renderLineChart(target, points, {
       label: embed.title || `${race.displayName} probability history`,
       pointHtml: (point) => `${point.date}<br>D ${pct(point.dem)} / R ${pct(1 - point.dem)}`,
@@ -884,8 +886,8 @@ function renderEmbed(target, embed) {
       demHoverDotClass: demIsIndependent ? "history-hover-dot-ind" : "history-hover-dot-dem",
       demEndLabelClass: demIsIndependent ? "history-end-label-ind" : "history-end-label-dem",
       demHoverTextClass: demIsIndependent ? "history-hover-ind" : "",
-      endLabel: demIsIndependent ? (party, value) => `${party === "dem" ? "Independent" : "Republican"} ${oneDecimal(value)}` : null,
-      hoverLabel: demIsIndependent ? (party, value) => `${party === "dem" ? "Independent" : "Republican"} ${oneDecimal(value)}` : null,
+      endLabel: demIsIndependent ? (party, value) => `${party === "dem" ? demHistoryLabel : "Republican"} ${oneDecimal(value)}` : null,
+      hoverLabel: demIsIndependent ? (party, value) => `${party === "dem" ? demHistoryLabel : "Republican"} ${oneDecimal(value)}` : null,
       value: (point) => point.dem
     });
     return;
