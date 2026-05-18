@@ -1,10 +1,10 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Capitol Forecast</title>
-  <meta name="description" content="A U.S. Senate forecast with probabilities, charts, and race detail pages.">
+  <meta name="description" content="Election forecasts for Senate, House, and the 2028 presidential race.">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <meta name="theme-color" content="#fffdf8">
   <link rel="stylesheet" href="assets/wiki.css">
@@ -13,11 +13,13 @@
   <header class="site-header">
     <a class="brand" href="index.html">
       <img class="brand-mark" src="assets/img/spd_logo.jpg" alt="Capitol Forecast">
-      <span><strong>Capitol Forecast</strong><small>2026 control forecast</small></span>
+      <span><strong>Capitol Forecast</strong><small>Election forecasts</small></span>
     </a>
     <nav class="site-nav" aria-label="Primary navigation">
-      <a class="active" href="index.html">Forecast</a>
-      <a href="races.html">Races</a>
+      <a class="active" href="index.html">Senate</a>
+      <a href="house.html">House</a>
+      <a href="president.html">2028 Pres</a>
+      <a href="races.html">Senate Races</a>
       <a href="methodology.html">Method</a>
       <a href="articles.html">Articles</a>
     </nav>
@@ -26,11 +28,13 @@
   <main>
     <section class="hero-grid" aria-labelledby="page-title">
       <div class="hero-main">
-        <p class="kicker">Daily forecast</p>
+        <p class="kicker">Senate</p>
         <h1 id="page-title">Senate control forecast.</h1>
-        <p class="lede">Probabilities for the chamber and the races most likely to decide it.</p>
+        <p class="lede">The live forecast on Capitol Forecast. House and 2028 presidential models now have their own framework pages and will be added as their models mature.</p>
         <div class="hero-actions">
-          <a class="button-link" href="races.html">Races</a>
+          <a class="button-link" href="races.html">Senate races</a>
+          <a class="button-link" href="house.html">House</a>
+          <a class="button-link" href="president.html">2028 president</a>
           <a class="button-link" href="methodology.html">Method</a>
         </div>
       </div>
@@ -52,6 +56,24 @@
           <div><dt>Schedule</dt><dd id="update-time">--</dd></div>
         </dl>
       </aside>
+    </section>
+
+    <section class="forecast-family" aria-label="Forecast sections">
+      <a class="forecast-family-card active" href="index.html">
+        <span>Live</span>
+        <strong>Senate</strong>
+        <small>Daily chamber-control model with state detail pages.</small>
+      </a>
+      <a class="forecast-family-card" href="house.html">
+        <span>Framework</span>
+        <strong>House</strong>
+        <small>Seat-rating and generic-ballot model shell is staged.</small>
+      </a>
+      <a class="forecast-family-card" href="president.html">
+        <span>Framework</span>
+        <strong>2028 President</strong>
+        <small>Electoral College structure without fake early probabilities.</small>
+      </a>
     </section>
 
     <section class="map-panel" aria-labelledby="map-title">

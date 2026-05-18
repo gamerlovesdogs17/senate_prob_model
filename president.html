@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>2028 President | Capitol Forecast</title>
+  <meta name="description" content="2028 presidential forecast framework for Capitol Forecast.">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#fffdf8">
+  <link rel="stylesheet" href="assets/wiki.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html">
+      <img class="brand-mark" src="assets/img/spd_logo.jpg" alt="Capitol Forecast">
+      <span><strong>Capitol Forecast</strong><small>Election forecasts</small></span>
+    </a>
+    <nav class="site-nav" aria-label="Primary navigation">
+      <a href="index.html">Senate</a>
+      <a href="house.html">House</a>
+      <a class="active" href="president.html">2028 Pres</a>
+      <a href="races.html">Senate Races</a>
+      <a href="methodology.html">Method</a>
+      <a href="articles.html">Articles</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="text-panel image-panel compact-page-head" aria-labelledby="pres-title">
+      <div class="section-head">
+        <div>
+          <p class="kicker">2028 President</p>
+          <h1 id="pres-title">Presidential forecast framework.</h1>
+          <p class="lede">This page is staged for a 2028 Electoral College model once candidate fields and real polling are strong enough to justify probabilities.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="forecast-family" aria-label="Forecast sections">
+      <a class="forecast-family-card" href="index.html">
+        <span>Live</span>
+        <strong>Senate</strong>
+        <small>Daily chamber-control model with state detail pages.</small>
+      </a>
+      <a class="forecast-family-card" href="house.html">
+        <span>Framework</span>
+        <strong>House</strong>
+        <small>Prepared for district ratings, national environment, and seat simulations.</small>
+      </a>
+      <a class="forecast-family-card active" href="president.html">
+        <span>Framework</span>
+        <strong>2028 President</strong>
+        <small>Electoral College structure without fake early probabilities.</small>
+      </a>
+    </section>
+
+    <section class="dashboard-grid" aria-label="Presidential forecast framework">
+      <article class="chart-panel">
+        <span class="chart-label">Model pieces</span>
+        <dl class="method-list">
+          <div><dt>State baseline</dt><dd>2020 and 2024 presidential results, state elasticity, demographic trend, and turnout history.</dd></div>
+          <div><dt>National environment</dt><dd>Generic ballot, presidential approval, economic data, and candidate favorability once available.</dd></div>
+          <div><dt>Electoral College</dt><dd>State simulations, tipping-point state tracking, and path-to-270 summaries.</dd></div>
+        </dl>
+      </article>
+      <article class="chart-panel">
+        <span class="chart-label">Status</span>
+        <dl class="method-list">
+          <div><dt>Published probability</dt><dd>Not yet published.</dd></div>
+          <div><dt>Next data file</dt><dd><code>data/president-2028.json</code></dd></div>
+          <div><dt>Target output</dt><dd>National probability, Electoral College distribution, state map, and state detail pages.</dd></div>
+        </dl>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

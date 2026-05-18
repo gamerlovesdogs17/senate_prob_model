@@ -274,6 +274,49 @@ h3 {
   margin-top: 26px;
 }
 
+.forecast-family {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.forecast-family-card {
+  min-height: 116px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--ink);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  color: var(--ink);
+  text-decoration: none;
+  box-shadow: var(--shadow);
+}
+
+.forecast-family-card.active {
+  border-top-color: var(--dem);
+}
+
+.forecast-family-card span {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--muted);
+  font: 850 .7rem/1.1 "Segoe UI", Arial, sans-serif;
+  text-transform: uppercase;
+}
+
+.forecast-family-card strong {
+  display: block;
+  font: 950 1.45rem/1 "Segoe UI", Arial, sans-serif;
+}
+
+.forecast-family-card small {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: .88rem;
+}
+
 .odds-panel {
   display: flex;
   flex-direction: column;
@@ -1446,6 +1489,10 @@ dd {
 
   .hero-grid {
     min-height: 0;
+  }
+
+  .forecast-family {
+    grid-template-columns: 1fr;
   }
 
   .big-odds strong {
