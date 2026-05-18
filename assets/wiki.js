@@ -461,6 +461,12 @@ function renderLineChart(chart, points, options) {
   const valueFormat = options.valueFormat || ((value) => (value * 100).toFixed(domain[0] === .3 ? 1 : 0));
   const endLabel = options.endLabel || ((party, value) => `${party === "dem" ? "Democrat" : "Republican"} ${oneDecimal(value)}`);
   const hoverLabel = options.hoverLabel || ((party, value) => `${party === "dem" ? "Democrat" : "Republican"} ${oneDecimal(value)}`);
+  const demSeriesClass = options.demSeriesClass || "history-line-dem";
+  const demBandClass = options.demBandClass || "history-band-dem";
+  const demDotClass = options.demDotClass || "history-dot-dem";
+  const demHoverDotClass = options.demHoverDotClass || "history-hover-dot-dem";
+  const demEndLabelClass = options.demEndLabelClass || "history-end-label-dem";
+  const demHoverTextClass = options.demHoverTextClass || "";
   const xFor = (index) => points.length === 1 ? plot.left + plotWidth / 2 : plot.left + index * (plotWidth / (points.length - 1));
   const yFor = (value) => plot.top + ((domain[1] - value) / (domain[1] - domain[0])) * plotHeight;
   const coords = points.map((point, index) => ({
@@ -523,31 +529,31 @@ function renderLineChart(chart, points, options) {
         const x = plot.left + (plotWidth / 5) * step;
         return `<path class="history-vgrid" d="M${x} ${plot.top}V${height - plot.bottom}"></path>`;
       }).join("") : ""}
-      <path class="history-band history-band-dem" d="${areaPath("dem")}"></path>
+      <path class="history-band ${demBandClass}" d="${areaPath("dem")}"></path>
       <path class="history-band history-band-rep" d="${areaPath("rep")}"></path>
       ${extraSeries ? `<path class="history-band history-band-extra" d="${extraAreaPath()}"></path>` : ""}
-      <path class="history-line history-line-dem" d="${linePath("dem")}"></path>
+      <path class="history-line ${demSeriesClass}" d="${linePath("dem")}"></path>
       <path class="history-line history-line-rep" d="${linePath("rep")}"></path>
       ${extraSeries ? `<path class="history-line ${extraSeries.className}" d="${coords.map((coord, index) => `${index ? "L" : "M"} ${coord.x} ${yFor(extraValue(coord.point) ?? demValue(coord.point))}`).join(" ")}"></path>` : ""}
       ${annotations}
-      ${coords.map(({ x, demY, repY }, index) => `<g class="history-point" tabindex="0" data-index="${index}"><circle class="history-dot history-dot-dem" cx="${x}" cy="${demY}" r="${coords.length === 1 ? 4.8 : 3.3}"></circle><circle class="history-dot history-dot-rep" cx="${x}" cy="${repY}" r="${coords.length === 1 ? 4.8 : 3.3}"></circle></g>`).join("")}
+      ${coords.map(({ x, demY, repY }, index) => `<g class="history-point" tabindex="0" data-index="${index}"><circle class="history-dot ${demDotClass}" cx="${x}" cy="${demY}" r="${coords.length === 1 ? 4.8 : 3.3}"></circle><circle class="history-dot history-dot-rep" cx="${x}" cy="${repY}" r="${coords.length === 1 ? 4.8 : 3.3}"></circle></g>`).join("")}
       ${extraSeries ? coords.map(({ x, point }, index) => {
         const value = extraValue(point);
         return value === null ? "" : `<g class="history-extra-point" tabindex="0" data-index="${index}"><circle class="history-dot ${extraSeries.dotClassName}" cx="${x}" cy="${yFor(value)}" r="${coords.length === 1 ? 4.8 : 3.3}"></circle></g>`;
       }).join("") : ""}
       <text class="history-date history-date-start" x="${plot.left}" y="${height - 18}">${firstDate}</text>
       <text class="history-date history-date-end" x="${width - plot.right}" y="${height - 18}">${lastDate}</text>
-      <text class="history-end-label history-end-label-dem" x="${latest.x + 11}" y="${demLabelY}">${endLabel("dem", demValue(latest.point))}</text>
+      <text class="history-end-label ${demEndLabelClass}" x="${latest.x + 11}" y="${demLabelY}">${endLabel("dem", demValue(latest.point))}</text>
       <text class="history-end-label history-end-label-rep" x="${latest.x + 11}" y="${repLabelY}">${endLabel("rep", repValue(latest.point))}</text>
       ${extraSeries && latestExtraY !== null ? `<text class="history-end-label ${extraSeries.labelClassName}" x="${latest.x + 11}" y="${extraLabelY}">${extraSeries.name} ${oneDecimal(latestExtraValue)}</text>` : ""}
       <g class="history-hover" style="display:none">
         <path class="history-hover-rule"></path>
-        <circle class="history-hover-dot history-hover-dot-dem" r="4.5"></circle>
+        <circle class="history-hover-dot history-hover-dot-dem ${demHoverDotClass === "history-hover-dot-dem" ? "" : demHoverDotClass}" r="4.5"></circle>
         <circle class="history-hover-dot history-hover-dot-rep" r="4.5"></circle>
         ${extraSeries ? `<circle class="history-hover-dot history-hover-dot-extra" r="4.5"></circle>` : ""}
         <rect class="history-hover-box" width="150" height="${extraSeries ? 72 : 56}" rx="2"></rect>
         <text class="history-hover-title"></text>
-        <text class="history-hover-dem"></text>
+        <text class="history-hover-dem ${demHoverTextClass}"></text>
         <text class="history-hover-rep"></text>
         ${extraSeries ? `<text class="history-hover-extra"></text>` : ""}
       </g>
@@ -631,10 +637,19 @@ function renderHistory(race) {
   if (bodnar) {
     points = points.map((point) => ({ ...point, extra: bodnar.probabilityShare ?? .38 }));
   }
+  const demIsIndependent = race.demDisplayParty === "I" || race.dem.toLowerCase().includes("independent");
   renderLineChart(chart, points, {
     label: `${race.displayName} probability history`,
     pointHtml: (point) => `${point.date}<br>D ${pct(point.dem)} / R ${pct(1 - point.dem)}`,
     extraSeries: bodnar ? { key: "extra", name: "Seth Bodnar", className: "history-line-extra", dotClassName: "history-dot-extra", labelClassName: "history-end-label-extra", colorLabel: "Seth Bodnar" } : null,
+    demSeriesClass: demIsIndependent ? "history-line-ind" : "history-line-dem",
+    demBandClass: demIsIndependent ? "history-band-ind" : "history-band-dem",
+    demDotClass: demIsIndependent ? "history-dot-ind" : "history-dot-dem",
+    demHoverDotClass: demIsIndependent ? "history-hover-dot-ind" : "history-hover-dot-dem",
+    demEndLabelClass: demIsIndependent ? "history-end-label-ind" : "history-end-label-dem",
+    demHoverTextClass: demIsIndependent ? "history-hover-ind" : "",
+    endLabel: demIsIndependent ? (party, value) => `${party === "dem" ? "Independent" : "Republican"} ${oneDecimal(value)}` : null,
+    hoverLabel: demIsIndependent ? (party, value) => `${party === "dem" ? "Independent" : "Republican"} ${oneDecimal(value)}` : null,
     value: (point) => point.dem,
     singleNote: "State history starts with the first generated forecast and grows each daily run."
   });
@@ -853,10 +868,24 @@ function renderEmbed(target, embed) {
       target.innerHTML = `<p>State not found.</p>`;
       return;
     }
-    const points = race.history?.length ? race.history : [{ date: forecast.modelDate, dem: race.demProbability }];
+    const bodnar = (race.extraCandidates || []).find((candidate) => candidate.name === "Seth Bodnar");
+    let points = race.history?.length ? race.history : [{ date: forecast.modelDate, dem: race.demProbability }];
+    if (bodnar) {
+      points = points.map((point) => ({ ...point, extra: bodnar.probabilityShare ?? .38 }));
+    }
+    const demIsIndependent = race.demDisplayParty === "I" || race.dem.toLowerCase().includes("independent");
     renderLineChart(target, points, {
       label: embed.title || `${race.displayName} probability history`,
       pointHtml: (point) => `${point.date}<br>D ${pct(point.dem)} / R ${pct(1 - point.dem)}`,
+      extraSeries: bodnar ? { key: "extra", name: "Seth Bodnar", className: "history-line-extra", dotClassName: "history-dot-extra", labelClassName: "history-end-label-extra", colorLabel: "Seth Bodnar" } : null,
+      demSeriesClass: demIsIndependent ? "history-line-ind" : "history-line-dem",
+      demBandClass: demIsIndependent ? "history-band-ind" : "history-band-dem",
+      demDotClass: demIsIndependent ? "history-dot-ind" : "history-dot-dem",
+      demHoverDotClass: demIsIndependent ? "history-hover-dot-ind" : "history-hover-dot-dem",
+      demEndLabelClass: demIsIndependent ? "history-end-label-ind" : "history-end-label-dem",
+      demHoverTextClass: demIsIndependent ? "history-hover-ind" : "",
+      endLabel: demIsIndependent ? (party, value) => `${party === "dem" ? "Independent" : "Republican"} ${oneDecimal(value)}` : null,
+      hoverLabel: demIsIndependent ? (party, value) => `${party === "dem" ? "Independent" : "Republican"} ${oneDecimal(value)}` : null,
       value: (point) => point.dem
     });
     return;
