@@ -1,4 +1,4 @@
-# Senate Probability Desk
+# Capitol Forecast
 
 A static prototype for a daily automated U.S. Senate forecast.
 

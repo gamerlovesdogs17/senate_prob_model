@@ -644,7 +644,7 @@ function renderRacePage() {
   if (!page || !forecast) return;
   const state = new URLSearchParams(window.location.search).get("state")?.toUpperCase() || "OH";
   const race = getRace(state) || getRace("OH") || forecast.races[0];
-  document.title = `${race.displayName} | Senate Probability Desk`;
+  document.title = `${race.displayName} | Capitol Forecast`;
   setText("race-state", race.state);
   setText("race-name", race.displayName);
   setText("race-incumbent", race.incumbent);
@@ -733,7 +733,7 @@ function renderTopArticle() {
   if (!container || !articles.length) return;
   const article = sortedArticles().find((item) => item.featured) || sortedArticles()[0];
   container.innerHTML = `
-    <p class="meta">${escapeHtml(article.date)} / ${escapeHtml(article.author || "Senate Probability Desk")}</p>
+    <p class="meta">${escapeHtml(article.date)} / ${escapeHtml(article.author || "Capitol Forecast")}</p>
     <h2 id="top-article-title"><a href="${articleUrl(article)}">${escapeHtml(article.title)}</a></h2>
     <p>${escapeHtml(article.dek || "")}</p>
     <a class="button-link" href="${articleUrl(article)}">Read article</a>
@@ -746,7 +746,7 @@ function renderArticlesList() {
   const list = sortedArticles();
   container.innerHTML = list.length ? list.map((article) => `
     <article class="article-card">
-      <p class="meta">${escapeHtml(article.date)} / ${escapeHtml(article.author || "Senate Probability Desk")}</p>
+      <p class="meta">${escapeHtml(article.date)} / ${escapeHtml(article.author || "Capitol Forecast")}</p>
       <h2><a href="${articleUrl(article)}">${escapeHtml(article.title)}</a></h2>
       <p>${escapeHtml(article.dek || "")}</p>
     </article>
@@ -762,12 +762,12 @@ function renderArticlePage() {
     container.innerHTML = `<p class="kicker">Article</p><h1>Article not found.</h1><p><a class="button-link" href="articles.html">Back to articles</a></p>`;
     return;
   }
-  document.title = `${article.title} | Senate Probability Desk`;
+  document.title = `${article.title} | Capitol Forecast`;
   container.innerHTML = `
     <p class="kicker">Article</p>
     <h1>${escapeHtml(article.title)}</h1>
     <p class="lede">${escapeHtml(article.dek || "")}</p>
-    <p class="meta">${escapeHtml(article.date)} / ${escapeHtml(article.author || "Senate Probability Desk")}</p>
+    <p class="meta">${escapeHtml(article.date)} / ${escapeHtml(article.author || "Capitol Forecast")}</p>
     <div id="article-body" class="article-body"></div>
     <p><a class="button-link" href="articles.html">Back to articles</a></p>
   `;
