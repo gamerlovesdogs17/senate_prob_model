@@ -52,6 +52,38 @@ function candidateBadgeClass(badge, party) {
   return "";
 }
 
+function candidateRowClass(race, party) {
+  const name = party === "D" ? race.dem : race.rep;
+  if (String(name || "").toLowerCase().includes("independent")) return "candidate-row independent-row";
+  return `candidate-row ${party === "D" ? "dem-row" : "rep-row"}`;
+}
+
+function candidateChanceLabel(race, party) {
+  const name = party === "D" ? race.dem : race.rep;
+  if (String(name || "").toLowerCase().includes("independent")) return "Independent";
+  return party === "D" ? "Democrat" : "Republican";
+}
+
+function leaderClassForRace(race) {
+  if (race.winnerParty === "D" && String(race.dem || "").toLowerCase().includes("independent")) return "leads-ind";
+  if (race.rating === "Toss-up") return "leads-tossup";
+  return race.winnerParty === "D" ? "leads-dem" : "leads-rep";
+}
+
+function extraCandidateRows(race) {
+  return (race.extraCandidates || []).map((candidate) => {
+    const party = candidate.party || "D";
+    const badgeClass = party === "D" ? "party-badge dem-badge" : party === "R" ? "party-badge rep-badge" : "ind-badge";
+    const label = candidate.note || (party === "D" ? "D-side option" : party === "R" ? "R-side option" : "Independent");
+    return `
+      <div class="candidate-row extra-row">
+        <span>${escapeHtml(candidate.name)} <i class="${badgeClass}">${party}</i></span>
+        <strong>${escapeHtml(label)}</strong>
+      </div>
+    `;
+  }).join("");
+}
+
 function presumptiveBadge(race, party) {
   const status = party === "D" ? race.demStatus : race.repStatus;
   return status === "presumptive" ? `<i class="presumptive-badge">P</i>` : "";
@@ -218,11 +250,12 @@ function hoverMarkup(race) {
   if (!race) {
     return `<span class="panel-label">State detail</span><h3>No Senate race</h3><p>This state is not on the regular 2026 Senate board.</p>`;
   }
-  const winner = race.winnerParty === "D" ? "Democrat" : "Republican";
+  const winner = race.winnerParty === "D" ? candidateChanceLabel(race, "D") : "Republican";
   const demCandidate = candidateDisplayName(race, "D");
   const repCandidate = candidateDisplayName(race, "R");
   const demBadge = candidateStatusBadge(race, "D");
   const repBadge = candidateStatusBadge(race, "R");
+  const demIsIndependent = String(race.dem || "").toLowerCase().includes("independent");
   return `
     <span class="race-kicker">${race.displayName}</span>
     <div class="map-card-title">
@@ -232,17 +265,18 @@ function hoverMarkup(race) {
     <h3>${winner} has a ${oneDecimal(race.winnerProbability)} chance.</h3>
     <div class="candidate-table" aria-label="${race.state} candidate forecast">
       <div class="candidate-table-head"><span>Candidate</span><span>Chance</span></div>
-      <div class="candidate-row dem-row">
+      <div class="${candidateRowClass(race, "D")}">
         <span>${escapeHtml(demCandidate)} <i class="${candidateBadgeClass(demBadge, "D")}">${demBadge}</i>${presumptiveBadge(race, "D")}</span>
         <strong>${oneDecimal(race.demProbability)}</strong>
       </div>
-      <div class="candidate-row rep-row">
+      ${extraCandidateRows(race)}
+      <div class="${candidateRowClass(race, "R")}">
         <span>${escapeHtml(repCandidate)} <i class="${candidateBadgeClass(repBadge, "R")}">${repBadge}</i>${presumptiveBadge(race, "R")}</span>
         <strong>${oneDecimal(1 - race.demProbability)}</strong>
       </div>
       <div class="candidate-margin"><span>Projected margin</span><strong>${signedPointMargin(race.margin)}</strong></div>
     </div>
-    <div class="prob-track" aria-label="${race.state} probability split">
+    <div class="prob-track ${demIsIndependent ? "independent-track" : ""}" aria-label="${race.state} probability split">
       <span style="width:${race.demProbability * 100}%"></span>
       <span style="width:${(1 - race.demProbability) * 100}%"></span>
     </div>
@@ -362,7 +396,7 @@ function renderLeverageInto(chart) {
   const max = Math.max(...ranked.map((race) => race.tippingPower));
   chart.innerHTML = ranked.map((race) => {
     const width = max ? clamp((race.tippingPower / max) * 100, 8, 100) : 8;
-    const leaderClass = race.rating === "Toss-up" ? "leads-tossup" : race.winnerParty === "D" ? "leads-dem" : "leads-rep";
+    const leaderClass = leaderClassForRace(race);
     return `<a class="leverage-row ${leaderClass}" href="race.html?state=${race.state}" data-tip="${race.displayName}<br>${oneDecimal(race.tippingPower)} control tipping power<br>${pct(race.demProbability)} Democrat"><strong>${race.state}</strong><i style="width:${width}%"></i><span>${oneDecimal(race.tippingPower)}</span></a>`;
   }).join("");
   bindPanelTooltipFor(chart, ".leverage-row", (node) => node.dataset.tip);
@@ -563,10 +597,13 @@ function renderPrimaryPanel(race) {
   setText("race-caucus", race.caucusTarget === "D" ? "Counts as Democrat for control if elected" : "Counts as Republican for control");
   setText("race-dem-candidate", race.dem);
   setText("race-rep-candidate", race.rep);
-  setText("race-primary-summary", race.primarySummary);
+  const extras = (race.extraCandidates || []).map((candidate) => `${candidate.name} (${candidate.note || candidate.party || "additional option"})`).join("; ");
+  setText("race-primary-summary", extras ? `${race.primarySummary} Additional tracked option: ${extras}.` : race.primarySummary);
   const demNode = document.getElementById("race-dem-candidate");
   if (demNode && demNode.parentElement) {
     demNode.parentElement.classList.toggle("independent-candidate", race.dem.toLowerCase().includes("independent"));
+    const label = demNode.parentElement.querySelector(".meta");
+    if (label) label.textContent = race.dem.toLowerCase().includes("independent") ? "Independent" : "Democrat";
   }
 }
 
@@ -581,10 +618,15 @@ function renderRacePage() {
   setText("race-incumbent", race.incumbent);
   setText("race-seat", race.seat);
   setText("race-rating", race.rating);
-  setText("race-winner", `${race.winnerParty === "D" ? "Democrat" : "Republican"} ${pct(race.winnerProbability)}`);
+  setText("race-winner", `${race.winnerParty === "D" ? candidateChanceLabel(race, "D") : "Republican"} ${pct(race.winnerProbability)}`);
   setText("race-note", race.summary || race.note);
   setText("race-dem", pct(race.demProbability));
   setText("race-rep", pct(1 - race.demProbability));
+  const demWinNode = document.getElementById("race-dem");
+  if (demWinNode?.parentElement) {
+    const label = demWinNode.parentElement.querySelector("dt");
+    if (label) label.textContent = `${candidateChanceLabel(race, "D")} win`;
+  }
   setText("race-margin", signedPointMargin(race.margin));
   setText("race-prob-margin", signedMargin(race.demProbability));
   setText("race-tipping", oneDecimal(race.tippingPower));
@@ -594,6 +636,7 @@ function renderRacePage() {
   if (demTrack && repTrack) {
     demTrack.style.width = `${race.demProbability * 100}%`;
     repTrack.style.width = `${(1 - race.demProbability) * 100}%`;
+    demTrack.parentElement?.classList.toggle("independent-track", race.dem.toLowerCase().includes("independent"));
   }
   renderHistory(race);
   renderPrimaryPanel(race);
@@ -632,7 +675,7 @@ function renderBattlegroundList() {
     .sort((a, b) => b.tippingPower - a.tippingPower);
   container.innerHTML = races.map((race) => {
     const leader = race.winnerParty === "D" ? "Democrat" : "Republican";
-    const leaderClass = race.rating === "Toss-up" ? "leads-tossup" : race.winnerParty === "D" ? "leads-dem" : "leads-rep";
+    const leaderClass = leaderClassForRace(race);
     return `
       <a class="race-board-row ${leaderClass}" href="race.html?state=${race.state}">
         <strong>${escapeHtml(race.state)}</strong>
