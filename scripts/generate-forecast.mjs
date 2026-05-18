@@ -59,6 +59,16 @@ const RATING_BUCKET = {
   "Tilt R": "tilt-r", "Lean R": "lean-r", "Likely R": "likely-r", "Safe R": "safe-r"
 };
 
+const MODEL_WEIGHTS = {
+  racePollsBase: .08,
+  racePollsPerWeight: .045,
+  racePollsPerPollster: .012,
+  racePollsCap: .22,
+  fundamentalsWithPolls: .9,
+  genericBallot: .12,
+  genericBallotCap: .9
+};
+
 const PATH_CENTRALITY = {
   OH: 1.85, TX: 1.65, AK: 1.6, MI: 1.35, GA: 1.25, NC: 1.12, ME: 1.1, NH: 1,
   IA: .75, NE: .72, MT: .68, SC: .55, KS: .45, FL: .25
@@ -259,18 +269,69 @@ function logistic(margin, error) {
   return 1 / (1 + Math.exp(-margin / Math.max(error, .1)));
 }
 
-function latestPollMargin(race) {
+function sourceQualityForPoll(poll) {
+  if (Array.isArray(poll)) return .42;
+  const source = String(poll.source || "").toLowerCase();
+  if (source.includes("realclear")) return .92;
+  if (source.includes("270towin")) return .84;
+  return .78;
+}
+
+function populationWeightForPoll(population) {
+  const value = String(population || "").toLowerCase();
+  if (value === "lv" || value.includes("likely")) return 1.08;
+  if (value === "rv" || value.includes("registered")) return 1;
+  if (value === "a" || value.includes("adult")) return .82;
+  return .9;
+}
+
+function sampleWeightForPoll(sampleSize) {
+  if (!Number.isFinite(sampleSize) || sampleSize <= 0) return .82;
+  return clamp(Math.sqrt(sampleSize) / 32, .65, 1.45);
+}
+
+function pollWeightMetrics(race) {
   if (!race.polls.length) return null;
-  const weighted = race.polls.reduce((sum, poll, index) => {
+  const pollsterWeights = {};
+  const weighted = race.polls.reduce((sum, poll) => {
     const days = Array.isArray(poll) ? poll[0] : poll.days;
     const rawMargin = Array.isArray(poll) ? poll[1] : poll.margin;
     const margin = Math.abs(rawMargin) > 20 ? (rawMargin - 50) / 2 : rawMargin;
-    const recency = Math.exp((days || 0) / 105);
-    const sourceWeight = Array.isArray(poll) ? 1 : poll.weight || .9;
-    const weight = recency * (1 + index * .12) * sourceWeight;
-    return { value: sum.value + margin * weight, weight: sum.weight + weight };
-  }, { value: 0, weight: 0 });
-  return weighted.value / weighted.weight;
+    if (!Number.isFinite(margin)) return sum;
+    const age = Math.max(0, -(days || 0));
+    const recency = Math.pow(.5, age / 90);
+    const providedWeight = Array.isArray(poll) ? 1 : clamp(poll.weight || 1, .35, 1.25);
+    const pollster = Array.isArray(poll) ? `manual-${sum.count}` : String(poll.pollster || poll.source || "unknown");
+    const repeatWeight = 1 / Math.sqrt(1 + (pollsterWeights[pollster] || 0));
+    const quality = sourceQualityForPoll(poll) * populationWeightForPoll(poll.population) * sampleWeightForPoll(poll.sampleSize);
+    const weight = recency * providedWeight * quality * repeatWeight;
+    pollsterWeights[pollster] = (pollsterWeights[pollster] || 0) + weight;
+    return {
+      value: sum.value + margin * weight,
+      weight: sum.weight + weight,
+      count: sum.count + 1
+    };
+  }, { value: 0, weight: 0, count: 0 });
+  if (!weighted.weight) return null;
+  const pollsters = Object.keys(pollsterWeights).length;
+  const blendWeight = clamp(
+    MODEL_WEIGHTS.racePollsBase +
+      Math.log1p(weighted.weight) * MODEL_WEIGHTS.racePollsPerWeight +
+      pollsters * MODEL_WEIGHTS.racePollsPerPollster,
+    MODEL_WEIGHTS.racePollsBase,
+    MODEL_WEIGHTS.racePollsCap
+  );
+  return {
+    margin: weighted.value / weighted.weight,
+    totalWeight: weighted.weight,
+    pollCount: weighted.count,
+    pollsters,
+    blendWeight
+  };
+}
+
+function latestPollMargin(race) {
+  return pollWeightMetrics(race)?.margin ?? null;
 }
 
 function primaryRisk(race) {
@@ -318,9 +379,9 @@ function baselineMargin(race) {
   const rating = RATING_TO_MARGIN[race.rating] || 0;
   const fundamentals = race.pvi * .24 + race.pastSenate * .20;
   const signals = race.money * .9 + race.candidate * 1.05 + race.approval * .75;
-  const pollMargin = latestPollMargin(race);
-  const pollBlend = pollMargin === null ? 0 : pollMargin * (race.polls.length >= 3 ? .48 : .34);
-  const fundamentalsBlend = pollMargin === null ? 1 : .78;
+  const pollSignal = pollWeightMetrics(race);
+  const pollBlend = pollSignal === null ? 0 : pollSignal.margin * pollSignal.blendWeight;
+  const fundamentalsBlend = pollSignal === null ? 1 : MODEL_WEIGHTS.fundamentalsWithPolls;
   const incumbentPenalty = race.seat === "Open seat" || race.seat === "Special election" ? -.25 : (race.hold === "D" ? .45 : -.45);
   const nationalPolling = race.nationalPolling || 0;
   return (rating * .48 + fundamentals * fundamentalsBlend + signals + incumbentPenalty + caucusDiscount(race)) +
@@ -332,6 +393,7 @@ function runModel(sourceData) {
   const enriched = adjustedRaces.map((race) => {
     const candidates = candidateInfo(race);
     const withCandidates = { ...race, ...candidates };
+    const pollSignal = pollWeightMetrics(withCandidates);
     const margin = baselineMargin(withCandidates);
     const error = (RATING_TO_ERROR[race.rating] || 8) + primaryRisk(race);
     return {
@@ -339,7 +401,8 @@ function runModel(sourceData) {
       margin,
       error,
       demProbability: logistic(margin, error),
-      pollMargin: latestPollMargin(race),
+      pollMargin: pollSignal?.margin ?? null,
+      pollSignal,
       primaryRisk: primaryRisk(race),
       stateElasticity: stateElasticity(race),
       candidateHistoryAdjustment: candidateHistoryAdjustment(race),
@@ -1193,7 +1256,11 @@ function applySourceInputs(baseRaces, sourceData) {
       sourceInputs.census = { ...census, growth, growthSignal };
     }
     if (sourceData?.genericPolling?.genericBallotMargin !== null) {
-      const nationalPolling = clamp(sourceData.genericPolling.genericBallotMargin * .22, -1.5, 1.5);
+      const nationalPolling = clamp(
+        sourceData.genericPolling.genericBallotMargin * MODEL_WEIGHTS.genericBallot,
+        -MODEL_WEIGHTS.genericBallotCap,
+        MODEL_WEIGHTS.genericBallotCap
+      );
       sourceInputs.votehub = {
         genericBallotPolls: sourceData.votehub.genericBallotPolls,
         usableGenericBallotPolls: sourceData.votehub.usableGenericBallotPolls,
@@ -1302,7 +1369,7 @@ async function writeForecast() {
     modelDate: MODEL_DATE_KEY,
     runDate: new Date(`${MODEL_DATE_KEY}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
     updateTime: "around 6:00 AM Central",
-    settings: SETTINGS,
+    settings: { ...SETTINGS, modelWeights: MODEL_WEIGHTS },
     sourceStatus: sourceData.status,
     sourceSummary: {
       votehub: sourceData.votehub,

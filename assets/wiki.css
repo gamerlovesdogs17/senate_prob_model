@@ -284,12 +284,36 @@ h3 {
   overflow: hidden;
 }
 
+.odds-panel.control-dem {
+  border-top-color: var(--dem);
+}
+
+.odds-panel.control-rep {
+  border-top-color: var(--rep);
+}
+
 .big-odds {
   display: grid;
   gap: 2px;
   color: var(--rep);
   font-family: "Segoe UI", Arial, sans-serif;
   letter-spacing: 0;
+}
+
+.odds-panel.control-dem .big-odds {
+  color: var(--dem);
+}
+
+.odds-panel.control-rep .big-odds {
+  color: var(--rep);
+}
+
+.odds-panel.control-dem #control-headline {
+  color: var(--dem);
+}
+
+.odds-panel.control-rep #control-headline {
+  color: var(--rep);
 }
 
 .big-odds span,
@@ -368,6 +392,31 @@ dd {
   margin-top: 12px;
   padding: clamp(14px, 2.5vw, 24px);
   border-top: 4px solid var(--dem);
+}
+
+.map-color-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0 8px;
+}
+
+.map-color-controls button {
+  min-height: 30px;
+  padding: 5px 9px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--paper);
+  color: var(--muted);
+  font: 850 .78rem/1 "Segoe UI", Arial, sans-serif;
+}
+
+.map-color-controls button:hover,
+.map-color-controls button:focus,
+.map-color-controls button.active {
+  border-color: var(--ink);
+  background: var(--paper-2);
+  color: var(--ink);
 }
 
 .section-head {

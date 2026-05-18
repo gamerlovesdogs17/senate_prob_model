@@ -11,12 +11,19 @@ const RATING_BUCKET = {
   "Tilt R": "tilt-r", "Lean R": "lean-r", "Likely R": "likely-r", "Safe R": "safe-r"
 };
 
+const MAP_COLOR_MODES = {
+  rating: "Rating",
+  margin: "Projected margin",
+  probability: "Win probability"
+};
+
 const CHART_ANNOTATIONS = [
   { date: "2026-05-17", label: "Model reworked" }
 ];
 
 let forecast = null;
 let articles = [];
+let mapColorMode = "rating";
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
@@ -104,6 +111,17 @@ function signedPointMargin(value) {
   return `${value > 0 ? "D" : "R"}+${Math.abs(value).toFixed(1)} pts`;
 }
 
+function ratingFromSignedValue(value, thresholds) {
+  if (!Number.isFinite(value)) return "Toss-up";
+  const abs = Math.abs(value);
+  if (abs < thresholds.tilt) return "Toss-up";
+  const side = value > 0 ? "D" : "R";
+  if (abs >= thresholds.safe) return `Safe ${side}`;
+  if (abs >= thresholds.likely) return `Likely ${side}`;
+  if (abs >= thresholds.lean) return `Lean ${side}`;
+  return `Tilt ${side}`;
+}
+
 function pollingInputText(race) {
   if (race.pollMargin === null) return "No recent public race-poll margin";
   return `${signedPointMargin(race.pollMargin)} weighted race-poll margin`;
@@ -128,9 +146,26 @@ function getRace(state) {
   return forecast?.races?.find((race) => race.state === state);
 }
 
-function ratingColor(race) {
+function bucketForRace(race, mode = mapColorMode) {
+  if (!race) return "state-muted";
+  if (mode === "margin") return RATING_BUCKET[ratingFromSignedValue(race.margin, { tilt: 1, lean: 3, likely: 7, safe: 12 })] || "tossup";
+  if (mode === "probability") {
+    const probMargin = (race.demProbability - .5) * 100;
+    return RATING_BUCKET[ratingFromSignedValue(probMargin, { tilt: 2.5, lean: 10, likely: 25, safe: 45 })] || "tossup";
+  }
+  return RATING_BUCKET[race.rating] || "tossup";
+}
+
+function ratingLabelForRace(race, mode = mapColorMode) {
+  if (!race) return "No race";
+  if (mode === "margin") return ratingFromSignedValue(race.margin, { tilt: 1, lean: 3, likely: 7, safe: 12 });
+  if (mode === "probability") return ratingFromSignedValue((race.demProbability - .5) * 100, { tilt: 2.5, lean: 10, likely: 25, safe: 45 });
+  return race.rating;
+}
+
+function ratingColor(race, mode = mapColorMode) {
   const root = getComputedStyle(document.documentElement);
-  const bucket = RATING_BUCKET[race.rating];
+  const bucket = bucketForRace(race, mode);
   const colors = {
     "safe-d": "--safe-d", "likely-d": "--likely-d", "lean-d": "--lean-d", "tilt-d": "--tilt-d",
     tossup: "--toss", "tilt-r": "--tilt-r", "lean-r": "--lean-r", "likely-r": "--likely-r", "safe-r": "--safe-r"
@@ -233,13 +268,18 @@ function updateSummary() {
   setText("dem-control", oneDecimal(forecast.demControlProbability));
   setText("rep-control", oneDecimal(forecast.repControlProbability));
   setText("median-seats", `${forecast.medianSeats} D`);
-  setText("control-headline", forecast.demControlProbability >= .5 ? "Democrats narrowly favored" : "Republicans narrowly favored");
+  const favoredIsDem = forecast.demControlProbability >= forecast.repControlProbability;
+  setText("control-headline", favoredIsDem ? "Democrats narrowly favored" : "Republicans narrowly favored");
   const favoredSide = forecast.demControlProbability >= forecast.repControlProbability ? "Democrats" : "Republicans";
   const favoredProbability = Math.max(forecast.demControlProbability, forecast.repControlProbability);
   const oddsNode = document.getElementById("odds-phrase");
   if (oddsNode) {
     oddsNode.innerHTML = `<span>${favoredSide} favored</span><strong>${pct(favoredProbability)}</strong>`;
   }
+  document.querySelectorAll(".odds-panel").forEach((panel) => {
+    panel.classList.toggle("control-dem", favoredIsDem);
+    panel.classList.toggle("control-rep", !favoredIsDem);
+  });
   setText("update-time", `Updates daily at ${forecast.updateTime || "6:00 AM Central"}`);
 
   const demBar = document.getElementById("dem-control-bar");
@@ -301,7 +341,7 @@ function renderFallbackMap() {
   if (!container || !forecast) return;
   container.innerHTML = `
     <div class="fallback-list">
-      ${forecast.races.map((race) => `<a href="race.html?state=${race.state}" style="background:${ratingColor(race)}">${race.state}</a>`).join("")}
+      ${forecast.races.map((race) => `<a href="race.html?state=${race.state}" style="background:${ratingColor(race)}" title="${escapeHtml(ratingLabelForRace(race))}">${race.state}</a>`).join("")}
     </div>
     <p class="map-note">State map library unavailable. Race links remain available.</p>
   `;
@@ -328,7 +368,7 @@ async function renderStateMap() {
       .join("path")
       .attr("class", (feature) => {
         const race = getRace(FIPS_TO_STATE[String(feature.id).padStart(2, "0")]);
-        return race ? `state-shape ${RATING_BUCKET[race.rating]}` : "state-shape state-muted";
+        return race ? `state-shape ${bucketForRace(race)}` : "state-shape state-muted";
       })
       .attr("d", path)
       .attr("fill", (feature) => {
@@ -350,7 +390,7 @@ async function renderStateMap() {
       .text((feature) => {
         const state = FIPS_TO_STATE[String(feature.id).padStart(2, "0")];
         const race = getRace(state);
-        return race ? `${STATE_NAMES[state]}: ${race.rating}, ${race.winnerParty} ${pct(race.winnerProbability)}` : STATE_NAMES[state];
+        return race ? `${STATE_NAMES[state]}: ${ratingLabelForRace(race)}, ${race.winnerParty} ${pct(race.winnerProbability)}` : STATE_NAMES[state];
       });
     updateHoverCard([...forecast.races].sort((a, b) => b.tippingPower - a.tippingPower)[0]);
   } catch (error) {
@@ -363,6 +403,22 @@ function renderLegend() {
   if (!legend) return;
   const ratings = ["Safe D", "Likely D", "Lean D", "Tilt D", "Toss-up", "Tilt R", "Lean R", "Likely R", "Safe R"];
   legend.innerHTML = ratings.map((rating) => `<span><i class="${RATING_BUCKET[rating]}"></i>${rating}</span>`).join("");
+}
+
+function renderMapColorControls() {
+  const container = document.getElementById("map-color-controls");
+  if (!container) return;
+  container.innerHTML = Object.entries(MAP_COLOR_MODES).map(([mode, label]) => (
+    `<button type="button" class="${mode === mapColorMode ? "active" : ""}" data-map-color="${mode}">${label}</button>`
+  )).join("");
+  container.querySelectorAll("button").forEach((button) => {
+    button.addEventListener("click", () => {
+      mapColorMode = button.dataset.mapColor || "rating";
+      renderMapColorControls();
+      renderLegend();
+      renderStateMap();
+    });
+  });
 }
 
 function renderHistogram() {
@@ -965,6 +1021,7 @@ async function init() {
     return;
   }
   updateSummary();
+  renderMapColorControls();
   renderStateMap();
   renderLegend();
   renderHistogram();
