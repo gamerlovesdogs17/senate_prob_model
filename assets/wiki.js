@@ -488,8 +488,9 @@ function renderLineChart(chart, points, options) {
   const latest = coords[coords.length - 1];
   const latestExtraValue = extraSeries ? extraValue(latest.point) : null;
   const latestExtraY = latestExtraValue === null ? null : yFor(latestExtraValue);
-  const demLabelY = latest.demY <= latest.repY ? latest.demY - 4 : latest.demY + 14;
-  const repLabelY = latest.repY <= latest.demY ? latest.repY - 4 : latest.repY + 14;
+  const closeEndLabels = Math.abs(latest.demY - latest.repY) < 22;
+  const demLabelY = closeEndLabels ? latest.demY - 12 : latest.demY <= latest.repY ? latest.demY - 4 : latest.demY + 14;
+  const repLabelY = closeEndLabels ? latest.repY + 22 : latest.repY <= latest.demY ? latest.repY - 4 : latest.repY + 14;
   const extraLabelY = latestExtraY === null ? null : latestExtraY - 6;
   const annotations = CHART_ANNOTATIONS.map((annotation) => {
     const index = points.findIndex((point) => point.date === annotation.date);

@@ -125,7 +125,7 @@ const CANDIDATE_STATUS = {
   AR: { dem: "Hallie Shoffner", rep: "Tom Cotton", demStatus: "nominee", repStatus: "nominee", primarySummary: "Primaries held March 3. Shoffner won the Democratic nomination; Cotton secured the Republican nomination." },
   IL: { dem: "Juliana Stratton", rep: "Don Tracy", demStatus: "nominee", repStatus: "nominee", primarySummary: "Primaries held March 17. Stratton and Tracy are the general-election nominees." },
   MS: { dem: "Scott Colom", rep: "Cindy Hyde-Smith", demStatus: "nominee", repStatus: "nominee", primarySummary: "Primaries held March 10. Hyde-Smith defeated a GOP challenger; Colom is the Democratic nominee." },
-  MT: { dem: "Democrat", rep: "Republican", demStatus: "unresolved", repStatus: "unresolved", extraCandidates: [{ name: "Seth Bodnar", party: "D", note: "Democratic alternative", probabilityShare: .38 }], primarySummary: "The Democratic primary is unresolved. Seth Bodnar is tracked as an additional Democratic-side option, but Montana Democrats are not assumed to clear the field for him." },
+  MT: { dem: "Democrat", rep: "Republican", demStatus: "unresolved", repStatus: "unresolved", extraCandidates: [{ name: "Seth Bodnar", party: "I", caucusTarget: "D", note: "Independent, counts with Democrats for control", probabilityShare: .38 }], primarySummary: "The Democratic primary is unresolved. Seth Bodnar is tracked as an independent option who would count with Democrats for control, but Montana Democrats are not assumed to clear the field for him." },
   NC: { dem: "Roy Cooper", rep: "Michael Whatley", demStatus: "nominee", repStatus: "nominee", primarySummary: "Primaries held March 3. Cooper and Whatley won their nominations." },
   OH: { dem: "Sherrod Brown", rep: "Jon Husted", demStatus: "nominee", repStatus: "nominee", primarySummary: "Primaries held May 5. Brown won the Democratic primary; Husted was unopposed for the GOP nomination." },
   TX: { dem: "James Talarico", rep: "John Cornyn / Ken Paxton runoff", demStatus: "nominee", repStatus: "unresolved", primarySummary: "Democratic primary held March 3. Talarico is nominated; Cornyn and Paxton face a May 26 Republican runoff." },
@@ -413,8 +413,8 @@ function buildHistory(race) {
   const current = { date: MODEL_DATE_KEY, dem: race.demProbability };
   const previousRace = previousForecast?.races?.find((item) => item.state === race.state);
   const stored = Array.isArray(previousRace?.history) ? previousRace.history : [];
-  const withoutToday = stored.filter((point) => point.date !== current.date);
-  return [...withoutToday, current].slice(-180);
+  const withoutToday = stored.filter((point) => point.date !== current.date && point.date <= MODEL_DATE_KEY);
+  return [...withoutToday, current].sort((a, b) => a.date.localeCompare(b.date)).slice(-180);
 }
 
 function readPreviousForecast() {
@@ -804,7 +804,9 @@ function applySourceInputs(baseRaces, sourceData) {
 function appendControlHistory(model) {
   const current = { date: MODEL_DATE_KEY, dem: model.demControlProbability, rep: model.repControlProbability };
   const stored = Array.isArray(previousForecast?.controlHistory) ? previousForecast.controlHistory : [];
-  return [...stored.filter((point) => point.date !== current.date), current].slice(-365);
+  return [...stored.filter((point) => point.date !== current.date && point.date <= MODEL_DATE_KEY), current]
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(-365);
 }
 
 function appendSeatHistory(model) {
@@ -814,7 +816,9 @@ function appendSeatHistory(model) {
     rep: 100 - model.medianSeats
   };
   const stored = Array.isArray(previousForecast?.seatHistory) ? previousForecast.seatHistory : [];
-  return [...stored.filter((point) => point.date !== current.date), current].slice(-365);
+  return [...stored.filter((point) => point.date !== current.date && point.date <= MODEL_DATE_KEY), current]
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(-365);
 }
 
 function buildCalibrationReport(sourceData, model) {
