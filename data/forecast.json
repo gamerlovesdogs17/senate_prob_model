@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-18T00:29:58.403Z",
+  "generatedAt": "2026-05-18T00:44:26.399Z",
   "modelDate": "2026-05-17",
   "runDate": "May 17, 2026",
   "updateTime": "around 6:00 AM Central",
@@ -22,11 +22,11 @@
     ]
   },
   "sourceStatus": {
-    "checkedAt": "2026-05-18T00:29:56.751Z",
+    "checkedAt": "2026-05-18T00:44:23.561Z",
     "censusPopulation": {
       "ok": true,
       "status": 200,
-      "ms": 342,
+      "ms": 504,
       "url": "https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/state/totals/NST-EST2024-POPCHG2020-2024.csv",
       "rows": 66,
       "states": 51,
@@ -35,13 +35,13 @@
     "civicApiDocs": {
       "ok": true,
       "status": 200,
-      "ms": 607,
+      "ms": 522,
       "url": "https://www.civicapi.org/api-documentation"
     },
     "mitSenateReturns": {
       "ok": true,
       "status": 200,
-      "ms": 659,
+      "ms": 584,
       "url": "https://raw.githubusercontent.com/MEDSL/constituency-returns/master/1976-2018-senate.csv",
       "rows": 3421,
       "states": 50
@@ -49,26 +49,26 @@
     "civicApiEndpoint": {
       "ok": false,
       "status": 404,
-      "ms": 77,
+      "ms": 87,
       "url": "https://www.civicapi.org/api/v1/upcomingraces",
       "error": "{\"message\":\"Route GET:/v1/upcomingraces not found\",\"error\":\"Not Found\",\"statusCode\":404}"
-    },
-    "votehubGenericBallot": {
-      "ok": true,
-      "status": 200,
-      "ms": 912,
-      "url": "https://api.votehub.com/polls?poll_type=generic-ballot&subject=2026",
-      "rows": 451,
-      "usablePolls": 351,
-      "rawUsablePolls": 451
     },
     "openFecCandidateSummary": {
       "ok": true,
       "status": 200,
-      "ms": 1190,
+      "ms": 1943,
       "url": "https://www.fec.gov/files/bulk-downloads/2026/candidate_summary_2026.csv",
       "rows": 4032,
       "senateStates": 44
+    },
+    "votehubGenericBallot": {
+      "ok": true,
+      "status": 200,
+      "ms": 2448,
+      "url": "https://api.votehub.com/polls?poll_type=generic-ballot&subject=2026",
+      "rows": 451,
+      "usablePolls": 351,
+      "rawUsablePolls": 451
     }
   },
   "sourceSummary": {
@@ -2300,10 +2300,11 @@
           "nationalPolling": 1.1070158600724045
         }
       },
-      "dem": "Dan Osborn (independent)",
+      "dem": "Dan Osborn",
       "rep": "Pete Ricketts",
       "demStatus": "nominee",
       "repStatus": "nominee",
+      "demDisplayParty": "I",
       "primarySummary": "Ricketts won the Republican primary. The Democratic primary is over and the Democratic nominee said they will withdraw so Osborn can consolidate the anti-Ricketts vote.",
       "margin": -4.7690512277466,
       "error": 7.2,

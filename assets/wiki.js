@@ -40,6 +40,8 @@ function candidateDisplayName(race, party) {
 function candidateStatusBadge(race, party) {
   const name = party === "D" ? race.dem : race.rep;
   const status = party === "D" ? race.demStatus : race.repStatus;
+  const displayParty = party === "D" ? race.demDisplayParty : race.repDisplayParty;
+  if (displayParty) return displayParty;
   if (status === "unresolved") return party;
   if (String(name || "").toLowerCase().includes("independent")) return "I";
   return party;
@@ -54,18 +56,20 @@ function candidateBadgeClass(badge, party) {
 
 function candidateRowClass(race, party) {
   const name = party === "D" ? race.dem : race.rep;
-  if (String(name || "").toLowerCase().includes("independent")) return "candidate-row independent-row";
+  const displayParty = party === "D" ? race.demDisplayParty : race.repDisplayParty;
+  if (displayParty === "I" || String(name || "").toLowerCase().includes("independent")) return "candidate-row independent-row";
   return `candidate-row ${party === "D" ? "dem-row" : "rep-row"}`;
 }
 
 function candidateChanceLabel(race, party) {
   const name = party === "D" ? race.dem : race.rep;
-  if (String(name || "").toLowerCase().includes("independent")) return "Independent";
+  const displayParty = party === "D" ? race.demDisplayParty : race.repDisplayParty;
+  if (displayParty === "I" || String(name || "").toLowerCase().includes("independent")) return "Independent";
   return party === "D" ? "Democrat" : "Republican";
 }
 
 function leaderClassForRace(race) {
-  if (race.winnerParty === "D" && String(race.dem || "").toLowerCase().includes("independent")) return "leads-ind";
+  if (race.winnerParty === "D" && (race.demDisplayParty === "I" || String(race.dem || "").toLowerCase().includes("independent"))) return "leads-ind";
   if (race.rating === "Toss-up") return "leads-tossup";
   return race.winnerParty === "D" ? "leads-dem" : "leads-rep";
 }
@@ -255,7 +259,7 @@ function hoverMarkup(race) {
   const repCandidate = candidateDisplayName(race, "R");
   const demBadge = candidateStatusBadge(race, "D");
   const repBadge = candidateStatusBadge(race, "R");
-  const demIsIndependent = String(race.dem || "").toLowerCase().includes("independent");
+  const demIsIndependent = race.demDisplayParty === "I" || String(race.dem || "").toLowerCase().includes("independent");
   return `
     <span class="race-kicker">${race.displayName}</span>
     <div class="map-card-title">
@@ -646,9 +650,10 @@ function renderPrimaryPanel(race) {
   setText("race-primary-summary", extras ? `${race.primarySummary} Additional tracked option: ${extras}.` : race.primarySummary);
   const demNode = document.getElementById("race-dem-candidate");
   if (demNode && demNode.parentElement) {
-    demNode.parentElement.classList.toggle("independent-candidate", race.dem.toLowerCase().includes("independent"));
+    const isIndependent = race.demDisplayParty === "I" || race.dem.toLowerCase().includes("independent");
+    demNode.parentElement.classList.toggle("independent-candidate", isIndependent);
     const label = demNode.parentElement.querySelector(".meta");
-    if (label) label.textContent = race.dem.toLowerCase().includes("independent") ? "Independent" : "Democrat";
+    if (label) label.textContent = isIndependent ? "Independent" : "Democrat";
   }
 }
 
@@ -681,7 +686,7 @@ function renderRacePage() {
   if (demTrack && repTrack) {
     demTrack.style.width = `${race.demProbability * 100}%`;
     repTrack.style.width = `${(1 - race.demProbability) * 100}%`;
-    demTrack.parentElement?.classList.toggle("independent-track", race.dem.toLowerCase().includes("independent"));
+    demTrack.parentElement?.classList.toggle("independent-track", race.demDisplayParty === "I" || race.dem.toLowerCase().includes("independent"));
   }
   renderHistory(race);
   renderPrimaryPanel(race);
