@@ -189,6 +189,11 @@ main {
   border-top: 6px solid var(--ink);
 }
 
+.home-hero {
+  grid-column: 1 / -1;
+  min-height: 330px;
+}
+
 .hero-main::before {
   content: "";
   position: absolute;
@@ -315,6 +320,61 @@ h3 {
   margin-top: 8px;
   color: var(--muted);
   font-size: .88rem;
+}
+
+.forecast-overviews {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.forecast-overview-card {
+  min-height: 172px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-top: 5px solid var(--ink);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  color: var(--ink);
+  text-decoration: none;
+  box-shadow: var(--shadow);
+}
+
+.forecast-overview-card.active {
+  border-top-color: var(--dem);
+}
+
+.forecast-overview-card span {
+  display: block;
+  color: var(--muted);
+  font: 850 .7rem/1.1 "Segoe UI", Arial, sans-serif;
+  text-transform: uppercase;
+}
+
+.forecast-overview-card strong {
+  display: block;
+  margin-top: 8px;
+  font: 950 1.45rem/1 "Segoe UI", Arial, sans-serif;
+}
+
+.forecast-overview-card b {
+  display: block;
+  margin-top: 15px;
+  color: var(--ink);
+  font: 950 clamp(1.65rem, 3vw, 2.6rem)/.95 "Segoe UI", Arial, sans-serif;
+}
+
+.forecast-overview-card small {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: .9rem;
+}
+
+.forecast-overview-card i {
+  font-style: normal;
+  font-weight: 900;
 }
 
 .odds-panel {
@@ -1492,6 +1552,10 @@ dd {
   }
 
   .forecast-family {
+    grid-template-columns: 1fr;
+  }
+
+  .forecast-overviews {
     grid-template-columns: 1fr;
   }
 

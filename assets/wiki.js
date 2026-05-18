@@ -276,6 +276,10 @@ function updateSummary() {
   if (oddsNode) {
     oddsNode.innerHTML = `<span>${favoredSide} favored</span><strong>${pct(favoredProbability)}</strong>`;
   }
+  setText("home-senate-favored", `${favoredSide} ${pct(favoredProbability)}`);
+  setText("home-senate-dem", oneDecimal(forecast.demControlProbability));
+  setText("home-senate-rep", oneDecimal(forecast.repControlProbability));
+  setText("home-senate-run", forecast.runDate || forecast.modelDate || "--");
   document.querySelectorAll(".odds-panel").forEach((panel) => {
     panel.classList.toggle("control-dem", favoredIsDem);
     panel.classList.toggle("control-rep", !favoredIsDem);
