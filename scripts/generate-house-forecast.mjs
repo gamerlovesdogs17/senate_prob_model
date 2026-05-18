@@ -19,15 +19,15 @@ const SETTINGS = {
 };
 
 const RATING_TO_MARGIN = {
-  "Safe D": 17,
-  "Likely D": 8.5,
-  "Lean D": 4.3,
+  "Safe D": 21,
+  "Likely D": 9,
+  "Lean D": 4.5,
   "Tilt D": 1.5,
   "Toss-up": 0,
   "Tilt R": -1.5,
   "Lean R": -4.3,
-  "Likely R": -8.5,
-  "Safe R": -17
+  "Likely R": -9,
+  "Safe R": -21
 };
 
 const RATING_TO_ERROR = {
@@ -43,13 +43,15 @@ const RATING_TO_ERROR = {
 };
 
 const MODEL_WEIGHTS = {
-  genericBallot: .35,
-  genericBallotCap: 2.2,
+  genericBallot: .42,
+  genericBallotCap: 2.8,
   ratingBaseline: 1,
   districtPolls: .18,
-  incumbencyOpenPenalty: .55,
-  stateCorrelationSd: 1.6,
-  nationalEnvironmentSd: 3.2
+  incumbencyOpenPenalty: .45,
+  seatPartyIncumbency: .45,
+  districtFundamentals: .12,
+  stateCorrelationSd: 1.3,
+  nationalEnvironmentSd: 2.6
 };
 
 const CATEGORY_ALIASES = {
@@ -211,7 +213,7 @@ function parse270MapDistricts(html) {
       ? presidentialMargin * .55 + congressionalMargin * .45
       : presidentialMargin;
     const sourceRating = STATUS_TO_RATING[district.pro_status] || null;
-    const rating = ratingFromMargin(fundamentalMargin);
+    const rating = sourceRating || ratingFromMargin(fundamentalMargin);
     const incumbent = String(district.seat_rep_name || "").trim() || "Open seat";
     const label = district.retired_code ? `${incumbent} / open` : incumbent;
     const demCandidate = (district.candidates || []).find((candidate) => candidate.party === "D")?.full_name || "Democrat";
@@ -230,6 +232,7 @@ function parse270MapDistricts(html) {
       presidentialMargin,
       congressionalMargin,
       fundamentalMargin: Number.isFinite(fundamentalMargin) ? Number(fundamentalMargin.toFixed(2)) : null,
+      rawMarginNote: "Raw 270toWin district margin fields are stored for context only; the model does not assume they are signed Democratic margins.",
       kalshiPrice: toNumber(district.kalshi_price),
       demCandidate,
       repCandidate
@@ -394,19 +397,19 @@ function adjustedDistricts(sourceData) {
   const baseDistricts = sourceData.mapDistricts.length >= 400 ? sourceData.mapDistricts : sourceData.cookDistricts;
   return baseDistricts.map((district) => {
     const inside = sourceData.insideRatings[district.id];
-    const cookMargin = RATING_TO_MARGIN[district.rating] ?? 0;
-    const insideMargin = inside ? RATING_TO_MARGIN[inside.rating] ?? cookMargin : cookMargin;
-    const fundamentalMargin = Number.isFinite(district.fundamentalMargin) ? clamp(district.fundamentalMargin, -28, 28) : cookMargin;
-    const blendedRatingMargin = inside
-      ? cookMargin * .58 + insideMargin * .22 + fundamentalMargin * .2
-      : cookMargin * .45 + fundamentalMargin * .55;
-    const openPenalty = district.open ? (blendedRatingMargin > 0 ? -MODEL_WEIGHTS.incumbencyOpenPenalty : MODEL_WEIGHTS.incumbencyOpenPenalty) : 0;
-    const margin = blendedRatingMargin * MODEL_WEIGHTS.ratingBaseline + genericShift + openPenalty;
-    const error = Math.max(RATING_TO_ERROR[district.rating] ?? 8, inside ? RATING_TO_ERROR[inside.rating] ?? 8 : 0);
+    const sourceRating = inside?.rating || district.sourceRating || district.rating;
+    const ratingMargin = RATING_TO_MARGIN[sourceRating] ?? 0;
+    const contextMargin = contextualDistrictMargin(district, ratingMargin);
+    const baselineMargin = ratingMargin * .88 + contextMargin * MODEL_WEIGHTS.districtFundamentals;
+    const incumbentParty = district.seatParty === "D" ? 1 : district.seatParty === "R" ? -1 : 0;
+    const incumbencyAdjustment = district.open ? 0 : incumbentParty * MODEL_WEIGHTS.seatPartyIncumbency;
+    const openPenalty = district.open ? (baselineMargin > 0 ? -MODEL_WEIGHTS.incumbencyOpenPenalty : MODEL_WEIGHTS.incumbencyOpenPenalty) : 0;
+    const margin = baselineMargin * MODEL_WEIGHTS.ratingBaseline + genericShift + incumbencyAdjustment + openPenalty;
+    const error = Math.max(RATING_TO_ERROR[sourceRating] ?? 8, inside ? RATING_TO_ERROR[inside.rating] ?? 8 : 0);
     const demProbability = logistic(margin, error);
     return {
       ...district,
-      baselineRating: district.rating,
+      baselineRating: sourceRating,
       rating: ratingFromMargin(margin),
       insideRating: inside?.rating || null,
       margin: Number(margin.toFixed(2)),
@@ -415,10 +418,17 @@ function adjustedDistricts(sourceData) {
       winnerParty: demProbability >= .5 ? "D" : "R",
       winnerProbability: Number(Math.max(demProbability, 1 - demProbability).toFixed(4)),
       error,
-      competitive: Math.abs(margin) < 8 || district.rating === "Toss-up" || Boolean(inside),
+      competitive: Math.abs(margin) < 8 || sourceRating === "Toss-up" || Boolean(inside),
       sourceBlend: inside ? `${district.ratingSource} + table cross-check` : district.ratingSource
     };
   });
+}
+
+function contextualDistrictMargin(district, ratingMargin) {
+  if (!Number.isFinite(district.fundamentalMargin)) return ratingMargin;
+  const side = Math.sign(ratingMargin) || (district.seatParty === "D" ? 1 : district.seatParty === "R" ? -1 : 0);
+  if (!side) return 0;
+  return side * Math.min(Math.abs(district.fundamentalMargin), 16);
 }
 
 function runModel(districts) {
