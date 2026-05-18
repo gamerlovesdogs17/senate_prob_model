@@ -16,11 +16,10 @@
       <span><strong>Capitol Forecast</strong><small>Election forecasts</small></span>
     </a>
     <nav class="site-nav" aria-label="Primary navigation">
-      <a class="active" href="index.html">Senate</a>
+      <a class="active" href="index.html">Home</a>
+      <a href="senate.html">Senate</a>
       <a href="house.html">House</a>
       <a href="president.html">2028 Pres</a>
-      <a href="races.html">Senate Races</a>
-      <a href="methodology.html">Method</a>
       <a href="articles.html">Articles</a>
     </nav>
   </header>
@@ -28,18 +27,18 @@
   <main>
     <section class="hero-grid" aria-labelledby="page-title">
       <div class="hero-main">
-        <p class="kicker">Senate</p>
-        <h1 id="page-title">Senate control forecast.</h1>
-        <p class="lede">The live forecast on Capitol Forecast. House and 2028 presidential models now have their own framework pages and will be added as their models mature.</p>
+        <p class="kicker">Capitol Forecast</p>
+        <h1 id="page-title">Forecasts for American elections.</h1>
+        <p class="lede">Senate is live now. House and 2028 presidential pages are staged so they can become full models without rebuilding the site again.</p>
         <div class="hero-actions">
-          <a class="button-link" href="races.html">Senate races</a>
-          <a class="button-link" href="house.html">House</a>
+          <a class="button-link" href="senate.html">Senate forecast</a>
+          <a class="button-link" href="house.html">House framework</a>
           <a class="button-link" href="president.html">2028 president</a>
-          <a class="button-link" href="methodology.html">Method</a>
+          <a class="button-link" href="articles.html">Articles</a>
         </div>
       </div>
-      <aside class="odds-panel" aria-label="Control forecast">
-        <span class="panel-label">Chamber control</span>
+      <aside class="odds-panel" aria-label="Current Senate control forecast">
+        <span class="panel-label">Live model</span>
         <div>
           <div id="odds-phrase" class="big-odds">--</div>
           <p id="control-headline">Calculating</p>
@@ -49,75 +48,48 @@
           <span id="rep-control-bar"></span>
         </div>
         <dl>
-          <div><dt>Democratic control</dt><dd id="dem-control">--</dd></div>
-          <div><dt>Republican control</dt><dd id="rep-control">--</dd></div>
-          <div><dt>Median outcome</dt><dd id="median-seats">--</dd></div>
+          <div><dt>Senate Democratic control</dt><dd id="dem-control">--</dd></div>
+          <div><dt>Senate Republican control</dt><dd id="rep-control">--</dd></div>
           <div><dt>Run</dt><dd id="run-date">--</dd></div>
-          <div><dt>Schedule</dt><dd id="update-time">--</dd></div>
         </dl>
       </aside>
     </section>
 
     <section class="forecast-family" aria-label="Forecast sections">
-      <a class="forecast-family-card active" href="index.html">
+      <a class="forecast-family-card active" href="senate.html">
         <span>Live</span>
         <strong>Senate</strong>
-        <small>Daily chamber-control model with state detail pages.</small>
+        <small>Control probability, state map, race pages, history charts, and source status.</small>
       </a>
       <a class="forecast-family-card" href="house.html">
         <span>Framework</span>
         <strong>House</strong>
-        <small>Seat-rating and generic-ballot model shell is staged.</small>
+        <small>Prepared for district ratings, national environment, and seat simulations.</small>
       </a>
       <a class="forecast-family-card" href="president.html">
         <span>Framework</span>
         <strong>2028 President</strong>
-        <small>Electoral College structure without fake early probabilities.</small>
+        <small>Prepared for an Electoral College model once real inputs are usable.</small>
       </a>
     </section>
 
-    <section class="map-panel" aria-labelledby="map-title">
-      <div class="section-head">
-        <div>
-          <p class="kicker">Ratings</p>
-          <h2 id="map-title">The Senate battleground.</h2>
-        </div>
-        <p><span id="sim-count">--</span> simulations. <span id="watch-count">--</span> races below 75 percent certainty.</p>
-      </div>
-      <div class="map-wrap">
-        <div>
-          <div id="senate-map"></div>
-          <div id="map-color-controls" class="map-color-controls" aria-label="Map color mode"></div>
-          <div id="map-legend" class="map-legend" aria-label="Race rating legend"></div>
-          <p class="map-note">Muted states do not hold regular 2026 Senate contests.</p>
-        </div>
-        <aside id="map-hover-card" class="hover-card"></aside>
-      </div>
-    </section>
-
-    <section class="dashboard-grid" aria-label="Forecast charts">
+    <section class="dashboard-grid" aria-label="Site overview">
       <article class="chart-panel">
-        <span class="chart-label">Seat distribution</span>
-        <div id="seat-histogram" class="seat-histogram"></div>
+        <span class="chart-label">What is live</span>
+        <dl class="method-list">
+          <div><dt>Senate</dt><dd>Daily generated forecast shared by every visitor.</dd></div>
+          <div><dt>Articles</dt><dd>Shared analysis feed across all forecast sections.</dd></div>
+          <div><dt>Sources</dt><dd>Polling, finance, historical returns, Census, and manual candidate ledgers.</dd></div>
+        </dl>
       </article>
       <article class="chart-panel">
-        <span class="chart-label">Most decisive races by simulated control tipping power</span>
-        <div id="leverage-chart" class="leverage-chart"></div>
+        <span class="chart-label">Next sections</span>
+        <dl class="method-list">
+          <div><dt>House</dt><dd>Needs district baseline data, uncontested-seat handling, and national environment calibration.</dd></div>
+          <div><dt>2028 President</dt><dd>Needs candidate fields, state polling, and Electoral College simulation scaffolding.</dd></div>
+          <div><dt>Shared backend</dt><dd>Future generators can write separate JSON files beside the Senate forecast.</dd></div>
+        </dl>
       </article>
-      <article class="chart-panel chart-wide">
-        <span class="chart-label">National chamber control probability over time</span>
-        <div id="control-history-chart" class="history-chart"></div>
-      </article>
-      <article class="chart-panel chart-wide">
-        <span class="chart-label">Projected chamber seats over time</span>
-        <div id="seat-history-chart" class="history-chart"></div>
-      </article>
-    </section>
-
-    <section class="confidence-note text-panel" aria-labelledby="confidence-title">
-      <p class="kicker">Model confidence</p>
-      <h2 id="confidence-title">Early forecast, wide error bands.</h2>
-      <p>The 40,000 simulations make the model internally stable, but May 2026 data is still thin. Probabilities should be read as today's best estimate from current polling, candidate, finance, and fundamentals inputs, not as November-level certainty.</p>
     </section>
 
     <section class="text-panel" aria-labelledby="top-article-title">
@@ -126,8 +98,6 @@
     </section>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
   <script src="assets/wiki.js"></script>
 </body>
 </html>
