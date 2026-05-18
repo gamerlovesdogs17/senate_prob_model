@@ -15,6 +15,12 @@ const SETTINGS = {
   dataSources: [
     "Manual ratings and candidate ledger",
     "Public polling adapter when reachable from GitHub Actions",
+    "DDHQ generic-ballot polling average",
+    "Pollfinity public averages JSON",
+    "RealClearPolling latest Senate polls page",
+    "270toWin state Senate polling pages",
+    "Race to the WH public polling pages when parseable",
+    "Electoral-Vote.com downloadable Senate polling archive",
     "OpenFEC candidate finance bulk files",
     "MIT/MEDSL historical Senate returns",
     "Census state population estimates",
@@ -135,6 +141,22 @@ const CANDIDATE_STATUS = {
   DEFAULT: { dem: "Democrat", rep: "Republican", demStatus: "unresolved", repStatus: "unresolved", primarySummary: "Primary not yet resolved or not entered in the manual candidate ledger." }
 };
 
+const RCP_CANDIDATE_SIDE = {
+  AK: { peltola: "D", sullivan: "R" },
+  FL: { nixon: "D", moody: "R" },
+  GA: { ossoff: "D", collins: "R", dooley: "R", carter: "R", coyne: "R" },
+  IA: { franken: "D", ernst: "R" },
+  ME: { mills: "D", platner: "D", collins: "R" },
+  MI: { elsayed: "D", "el-sayed": "D", stevens: "D", mcmorrow: "D", rogers: "R" },
+  NC: { cooper: "D", whatley: "R" },
+  NE: { osborn: "D", ricketts: "R" },
+  NH: { pappas: "D", manzur: "D", sullivan: "D", sununu: "R", brown: "R" },
+  OH: { brown: "D", husted: "R" },
+  RI: { reed: "D", mckay: "R" },
+  TX: { talarico: "D", cornyn: "R", paxton: "R" },
+  VA: { warner: "D" }
+};
+
 function candidateInfo(race) {
   const entered = CANDIDATE_STATUS[race.state];
   if (entered) return entered;
@@ -239,10 +261,13 @@ function logistic(margin, error) {
 
 function latestPollMargin(race) {
   if (!race.polls.length) return null;
-  const weighted = race.polls.reduce((sum, [days, rawMargin], index) => {
+  const weighted = race.polls.reduce((sum, poll, index) => {
+    const days = Array.isArray(poll) ? poll[0] : poll.days;
+    const rawMargin = Array.isArray(poll) ? poll[1] : poll.margin;
     const margin = Math.abs(rawMargin) > 20 ? (rawMargin - 50) / 2 : rawMargin;
-    const recency = Math.exp(days / 105);
-    const weight = recency * (1 + index * .12);
+    const recency = Math.exp((days || 0) / 105);
+    const sourceWeight = Array.isArray(poll) ? 1 : poll.weight || .9;
+    const weight = recency * (1 + index * .12) * sourceWeight;
     return { value: sum.value + margin * weight, weight: sum.weight + weight };
   }, { value: 0, weight: 0 });
   return weighted.value / weighted.weight;
@@ -506,6 +531,245 @@ function rowNumber(row, names) {
   return 0;
 }
 
+function decodeHtml(value) {
+  return String(value || "")
+    .replace(/&amp;/g, "&")
+    .replace(/&#x27;|&#39;/g, "'")
+    .replace(/&quot;/g, "\"")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
+}
+
+function htmlToLines(html) {
+  return decodeHtml(html)
+    .replace(/<script[\s\S]*?<\/script>/gi, "\n")
+    .replace(/<style[\s\S]*?<\/style>/gi, "\n")
+    .replace(/<(?:br|p|div|li|tr|td|th|h[1-6]|span|a)\b[^>]*>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .split(/\n+/)
+    .map((line) => line.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+}
+
+function stateFromRaceTitle(title) {
+  const normalized = String(title || "").toLowerCase();
+  for (const [state, name] of Object.entries(STATE_NAMES)) {
+    if (normalized.includes(`${name.toLowerCase()} senate`)) return state;
+  }
+  return null;
+}
+
+function pollDateFromLines(lines, startIndex) {
+  const datePattern = /^(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday),\s+([A-Z][a-z]+)\s+(\d{1,2})$/;
+  for (let offset = 0; offset <= 14; offset += 1) {
+    for (const index of [startIndex - offset, startIndex + offset]) {
+      const match = lines[index]?.match(datePattern);
+      if (match) {
+        const parsed = new Date(`${match[1]} ${match[2]}, 2026 12:00:00`);
+        if (!Number.isNaN(parsed.getTime())) return parsed.toISOString().slice(0, 10);
+      }
+    }
+  }
+  return MODEL_DATE_KEY;
+}
+
+function normalizeCandidateKey(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z\s-]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function candidateTokensForRace(race, party) {
+  const text = party === "D" ? race.dem : race.rep;
+  return String(text || "")
+    .split(/\s*\/\s*|\s+or\s+|\s+and\s+/i)
+    .map(normalizeCandidateKey)
+    .flatMap((name) => {
+      const parts = name.split(" ").filter(Boolean);
+      return [name, parts[parts.length - 1]].filter(Boolean);
+    });
+}
+
+function sideForRcpCandidate(race, candidate) {
+  const key = normalizeCandidateKey(candidate);
+  const last = key.split(" ").filter(Boolean).at(-1) || key;
+  const overrides = RCP_CANDIDATE_SIDE[race.state] || {};
+  if (overrides[key]) return overrides[key];
+  if (overrides[last]) return overrides[last];
+  if (candidateTokensForRace(race, "D").includes(key) || candidateTokensForRace(race, "D").includes(last)) return "D";
+  if (candidateTokensForRace(race, "R").includes(key) || candidateTokensForRace(race, "R").includes(last)) return "R";
+  return null;
+}
+
+function parseRcpSpread(spread) {
+  const clean = String(spread || "").replace(/\*\*/g, "").trim();
+  if (/^tie$/i.test(clean)) return { candidate: "Tie", margin: 0 };
+  const match = clean.match(/^(.+?)\s+\+([0-9]+(?:\.[0-9]+)?)$/);
+  if (!match) return null;
+  return { candidate: match[1].trim(), margin: Number(match[2]) };
+}
+
+async function fetchRealClearPolling(status) {
+  const url = "https://www.realclearpolling.com/latest-polls/senate";
+  const text = await fetchText(url, "realClearPollingSenate", status, {
+    headers: { accept: "text/html", "user-agent": "CapitolForecastBot/1.0 (+https://github.com/)" }
+  });
+  const byState = {};
+  if (!text) return { byState, polls: 0, usablePolls: 0 };
+  const lines = htmlToLines(text);
+  const baseWithCandidates = races.map((race) => ({ ...race, ...candidateInfo(race) }));
+  const byStateRace = Object.fromEntries(baseWithCandidates.map((race) => [race.state, race]));
+  let polls = 0;
+  let usablePolls = 0;
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const title = lines[index];
+    if (!/^2026\b/i.test(title) || !/senate/i.test(title)) continue;
+    polls += 1;
+    if (/primary|runoff/i.test(title)) continue;
+    const state = stateFromRaceTitle(title);
+    const race = byStateRace[state];
+    if (!race) continue;
+    const spreadIndex = lines.findIndex((line, candidateIndex) => candidateIndex > index && candidateIndex < index + 14 && line === "Spread");
+    const resultIndex = lines.findIndex((line, candidateIndex) => candidateIndex > index && candidateIndex < index + 12 && line === "Results");
+    if (spreadIndex === -1 || !lines[spreadIndex + 1]) continue;
+    const parsed = parseRcpSpread(lines[spreadIndex + 1]);
+    if (!parsed) continue;
+    const side = parsed.margin === 0 ? "D" : sideForRcpCandidate(race, parsed.candidate);
+    if (!side) continue;
+    const date = pollDateFromLines(lines, index);
+    const days = Math.min(0, Math.round((new Date(`${date}T12:00:00Z`) - new Date(`${MODEL_DATE_KEY}T12:00:00Z`)) / 86400000));
+    const pollster = lines[index + 2] && lines[index + 1] === "Poll" ? lines[index + 2].replace(/\*\*/g, "") : "RealClearPolling";
+    const margin = parsed.margin === 0 ? 0 : (side === "D" ? parsed.margin : -parsed.margin);
+    byState[state] ||= [];
+    byState[state].push({
+      days,
+      margin,
+      source: "RealClearPolling",
+      pollster,
+      endDate: date,
+      title,
+      result: resultIndex !== -1 ? lines[resultIndex + 1] : "",
+      spread: lines[spreadIndex + 1],
+      weight: .95
+    });
+    usablePolls += 1;
+  }
+
+  status.realClearPollingSenate.rows = polls;
+  status.realClearPollingSenate.usablePolls = usablePolls;
+  status.realClearPollingSenate.states = Object.keys(byState).length;
+  return { byState, polls, usablePolls };
+}
+
+function stateSlug(state) {
+  return STATE_NAMES[state].toLowerCase().replace(/\s+/g, "-");
+}
+
+function parseSample(sampleText) {
+  const text = decodeHtml(sampleText);
+  const sampleSize = toNumber(text.match(/([\d,]+)/)?.[1]);
+  const population = /\bLV\b/i.test(text) ? "lv" : /\bRV\b/i.test(text) ? "rv" : "a";
+  return { sampleSize, population };
+}
+
+function parseTwoSeventyToWinStatePolls(state, html) {
+  const race = { ...races.find((item) => item.state === state), ...candidateInfo(races.find((item) => item.state === state) || {}) };
+  if (!race.state) return [];
+  const geStart = html.search(/<div id="GE"[\s\S]*?<h2[^>]*>[\s\S]*?General Election/i);
+  if (geStart === -1) return [];
+  const nextSubtype = html.slice(geStart + 1).search(/<div id="[A-Z_]+" class="polls-subtype-wrapper/i);
+  const geHtml = nextSubtype === -1 ? html.slice(geStart) : html.slice(geStart, geStart + 1 + nextSubtype);
+  const blocks = geHtml.split(/<h4[^>]*>/i).slice(1);
+  const polls = [];
+
+  for (const block of blocks) {
+    const title = decodeHtml((block.match(/([\s\S]*?)<\/h4>/i)?.[1] || "")).replace(/\s+/g, " ").trim();
+    if (!title || !/vs\./i.test(title)) continue;
+    const tableHtml = block.match(/<table id="polls"[\s\S]*?<\/table>/i)?.[0];
+    if (!tableHtml) continue;
+    const headers = [...tableHtml.matchAll(/<th candidate_id="([^"]+)" class="can_name[^"]*"[^>]*>([\s\S]*?)<\/th>/gi)]
+      .map((match) => ({
+        id: match[1],
+        name: decodeHtml(match[2]).replace(/\*/g, "").replace(/\s+/g, " ").trim()
+      }))
+      .filter((header) => header.name);
+    const demHeader = headers.find((header) => sideForRcpCandidate(race, header.name) === "D");
+    const repHeader = headers.find((header) => sideForRcpCandidate(race, header.name) === "R");
+    if (!demHeader || !repHeader) continue;
+
+    for (const rowMatch of tableHtml.matchAll(/<tr poll_id="([^"]+)" class="poll_row([^"]*)"[^>]*>([\s\S]*?)<\/tr>/gi)) {
+      const inAverage = /in_average_calculation/.test(rowMatch[2]);
+      const row = rowMatch[3];
+      const pollster = decodeHtml(row.match(/<td class="poll_src">([\s\S]*?)<\/td>/i)?.[1] || "")
+        .replace(/\s+/g, " ")
+        .trim();
+      const endDateRaw = decodeHtml(row.match(/<td class="poll_date[^"]*">([\s\S]*?)<\/td>/i)?.[1] || "").trim();
+      const sampleRaw = row.match(/<td class="poll_sample[^"]*">([\s\S]*?)<\/td>/i)?.[1] || "";
+      const { sampleSize, population } = parseSample(sampleRaw);
+      const values = Object.fromEntries([...row.matchAll(/<td candidate_id="([^"]+)" class="poll_data[\s\S]*?>([\s\S]*?)<\/td>/gi)]
+        .map((match) => [match[1], toNumber(decodeHtml(match[2]).replace(/%/g, ""))]));
+      const dem = values[demHeader.id];
+      const rep = values[repHeader.id];
+      const parsedDate = new Date(`${endDateRaw} 12:00:00`);
+      if (!Number.isFinite(dem) || !Number.isFinite(rep) || Number.isNaN(parsedDate.getTime())) continue;
+      const endDate = parsedDate.toISOString().slice(0, 10);
+      const days = Math.min(0, Math.round((new Date(`${endDate}T12:00:00Z`) - new Date(`${MODEL_DATE_KEY}T12:00:00Z`)) / 86400000));
+      polls.push({
+        days,
+        margin: dem - rep,
+        source: "270toWin",
+        pollster: pollster || "270toWin",
+        endDate,
+        title: `${STATE_NAMES[state]} Senate - ${title}`,
+        result: `${demHeader.name} ${dem} / ${repHeader.name} ${rep}`,
+        spread: dem >= rep ? `${demHeader.name} +${(dem - rep).toFixed(1)}` : `${repHeader.name} +${(rep - dem).toFixed(1)}`,
+        sampleSize,
+        population,
+        weight: inAverage ? 1.06 : .72
+      });
+    }
+  }
+  return polls;
+}
+
+async function fetchTwoSeventyToWinRacePolls(status) {
+  const byState = {};
+  const sourceStates = [...new Set(races.map((race) => race.state))];
+  const startedAt = Date.now();
+  let pages = 0;
+  let okPages = 0;
+  let usablePolls = 0;
+
+  await Promise.all(sourceStates.map(async (state) => {
+    pages += 1;
+    const url = `https://www.270towin.com/2026-senate-polls/${stateSlug(state)}`;
+    const text = await fetchText(url, `twoSeventyToWinPolls${state}`, status, { timeoutMs: 15000 });
+    if (!text) return;
+    okPages += 1;
+    const polls = parseTwoSeventyToWinStatePolls(state, text);
+    if (polls.length) {
+      byState[state] = polls;
+      usablePolls += polls.length;
+    }
+  }));
+
+  status.twoSeventyToWinRacePolls = {
+    ok: okPages > 0,
+    status: okPages > 0 ? 200 : "no-pages",
+    ms: Date.now() - startedAt,
+    url: "https://www.270towin.com/2026-senate-polls/{state}",
+    pages,
+    okPages,
+    usablePolls,
+    states: Object.keys(byState).length
+  };
+  return { byState, pages, okPages, usablePolls };
+}
+
 async function fetchVoteHub(status) {
   const text = await fetchText("https://api.votehub.com/polls?poll_type=generic-ballot&subject=2026", "votehubGenericBallot", status, {
     headers: { accept: "application/json" }
@@ -588,6 +852,82 @@ async function fetchVoteHub(status) {
     status.votehubGenericBallot.parseError = error.message;
     return { genericBallotPolls: 0, usableGenericBallotPolls: 0, genericBallotMargin: null };
   }
+}
+
+async function fetchDdhqGenericBallot(status) {
+  const url = "https://polls.decisiondeskhq.com/averages/generic-ballot/national/lv-rv-adults";
+  const text = await fetchText(url, "ddhqGenericBallot", status, { timeoutMs: 15000 });
+  if (!text) return { genericBallotMargin: null, polls: 0 };
+  if (/Vercel Security Checkpoint/i.test(text)) {
+    status.ddhqGenericBallot.ok = false;
+    status.ddhqGenericBallot.status = "security-checkpoint";
+    status.ddhqGenericBallot.error = "Vercel security checkpoint returned instead of polling data.";
+    return { genericBallotMargin: null, polls: 0 };
+  }
+  const flat = decodeHtml(text).replace(/\s+/g, " ");
+  const dem = Number(flat.match(/Democrat\s+([0-9]+(?:\.[0-9]+)?)%/i)?.[1]);
+  const rep = Number(flat.match(/Republican\s+([0-9]+(?:\.[0-9]+)?)%/i)?.[1]);
+  const polls = Number(flat.match(/([0-9,]+)\s+polls included in this average/i)?.[1]?.replace(/,/g, ""));
+  const result = Number.isFinite(dem) && Number.isFinite(rep)
+    ? { genericBallotMargin: dem - rep, genericBallotDem: dem, genericBallotRep: rep, polls: Number.isFinite(polls) ? polls : 0 }
+    : { genericBallotMargin: null, polls: 0 };
+  status.ddhqGenericBallot.polls = result.polls;
+  status.ddhqGenericBallot.margin = result.genericBallotMargin;
+  return result;
+}
+
+async function fetchPollfinityAverages(status) {
+  const url = "https://pollfinity.com/averages.json";
+  const text = await fetchText(url, "pollfinityAverages", status, {
+    headers: { accept: "application/json" },
+    timeoutMs: 15000
+  });
+  if (!text) return { genericBallotMargin: null, approvalNet: null };
+  try {
+    const data = JSON.parse(text);
+    const generic = data.tracks?.generic_ballot?.current;
+    const approval = data.tracks?.trump_approval?.current;
+    const dem = Number(generic?.democrat ?? generic?.dem ?? generic?.democratic);
+    const rep = Number(generic?.republican ?? generic?.rep ?? generic?.gop);
+    const margin = Number(generic?.dem_lead);
+    const genericBallotMargin = Number.isFinite(margin) ? margin : Number.isFinite(dem) && Number.isFinite(rep) ? dem - rep : null;
+    const approvalNet = Number.isFinite(Number(approval?.net))
+      ? Number(approval.net)
+      : Number.isFinite(Number(approval?.approve)) && Number.isFinite(Number(approval?.disapprove))
+        ? Number(approval.approve) - Number(approval.disapprove)
+        : null;
+    const result = {
+      generatedAt: data.generated_at,
+      genericBallotMargin,
+      genericBallotDem: Number.isFinite(dem) ? dem : null,
+      genericBallotRep: Number.isFinite(rep) ? rep : null,
+      genericBallotPolls: Number(data.tracks?.generic_ballot?.polls_in_average || 0),
+      approvalNet,
+      approvalPolls: Number(data.tracks?.trump_approval?.polls_in_average || 0)
+    };
+    status.pollfinityAverages.genericBallotPolls = result.genericBallotPolls;
+    status.pollfinityAverages.genericBallotMargin = result.genericBallotMargin;
+    status.pollfinityAverages.approvalPolls = result.approvalPolls;
+    status.pollfinityAverages.approvalNet = result.approvalNet;
+    return result;
+  } catch (error) {
+    status.pollfinityAverages.parseError = error.message;
+    return { genericBallotMargin: null, approvalNet: null };
+  }
+}
+
+async function fetchUsPollingDataGeneric(status) {
+  const url = "https://uspollingdata.com/polls/generic-ballot/";
+  const text = await fetchText(url, "usPollingDataGenericBallot", status, { timeoutMs: 15000 });
+  if (!text) return { genericBallotMargin: null };
+  const flat = decodeHtml(text).replace(/\s+/g, " ");
+  const match = flat.match(/Democrats lead Republicans \+?([0-9]+(?:\.[0-9]+)?) points \(([0-9]+(?:\.[0-9]+)?)% vs ([0-9]+(?:\.[0-9]+)?)%\)/i)
+    || flat.match(/Democrats lead D\+([0-9]+(?:\.[0-9]+)).*?Democrats\s+([0-9]+(?:\.[0-9]+)?)%.*?Republicans\s+([0-9]+(?:\.[0-9]+)?)%/i);
+  const genericBallotMargin = match ? Number(match[1]) : null;
+  const genericBallotDem = match ? Number(match[2]) : null;
+  const genericBallotRep = match ? Number(match[3]) : null;
+  status.usPollingDataGenericBallot.margin = genericBallotMargin;
+  return { genericBallotMargin, genericBallotDem, genericBallotRep };
 }
 
 function collapseSamePollsterDay(polls) {
@@ -745,16 +1085,81 @@ async function fetchCivicApi(status) {
   };
 }
 
+async function fetchPollingReferencePages(status) {
+  const [towinStatePage, towinLatestPage, raceToTheWhPage, raceToTheWhGeneric, electoralVoteCsv, usPollingDataSenate] = await Promise.all([
+    fetchText("https://www.270towin.com/content/2026-senate-polling", "twoSeventyToWinPollingIndex", status, { timeoutMs: 12000 }),
+    fetchText("https://www.270towin.com/polls/latest-2026-senate-election-polls/", "twoSeventyToWinLatestPolls", status, { timeoutMs: 12000 }),
+    fetchText("https://www.racetothewh.com/senate/26polls", "raceToTheWhSenatePolls", status, { timeoutMs: 12000 }),
+    fetchText("https://www.racetothewh.com/polls/genericballot", "raceToTheWhGenericBallot", status, { timeoutMs: 12000 }),
+    fetchText("https://electoral-vote.com/evp2026/Senate/senate_polls.csv", "electoralVoteSenatePolls", status, { timeoutMs: 12000 }),
+    fetchText("https://uspollingdata.com/polls/senate-polling/", "usPollingDataSenatePolling", status, { timeoutMs: 12000 })
+  ]);
+  if (electoralVoteCsv && status.electoralVoteSenatePolls) {
+    const rows = parseCsv(electoralVoteCsv);
+    status.electoralVoteSenatePolls.rows = rows.length;
+    status.electoralVoteSenatePolls.currentCycleRows = rows.filter((row) => !/^Election/i.test(row.Pollster || "")).length;
+  }
+  if (usPollingDataSenate && status.usPollingDataSenatePolling) {
+    status.usPollingDataSenatePolling.hasSenateTable = /Competitive Senate Races/i.test(usPollingDataSenate);
+    status.usPollingDataSenatePolling.note = "Reachable, but not blended because several listed races/candidates do not match this Senate cycle ledger.";
+  }
+  if (raceToTheWhPage && status.raceToTheWhSenatePolls) {
+    status.raceToTheWhSenatePolls.hasStaticRows = /<table|poll_row|candidate_id/i.test(raceToTheWhPage);
+    status.raceToTheWhSenatePolls.note = status.raceToTheWhSenatePolls.hasStaticRows
+      ? "Static poll rows detected."
+      : "Reachable, but no stable row-level poll data was present in the fetched HTML.";
+  }
+  return {
+    twoSeventyToWin: {
+      pollingIndexReachable: Boolean(towinStatePage),
+      latestPollsReachable: Boolean(towinLatestPage),
+      note: "Tracked as a polling reference page. No stable public row-level API was detected, so rows are not blended unless a structured endpoint is added."
+    },
+    raceToTheWh: {
+      senatePollsReachable: Boolean(raceToTheWhPage),
+      genericBallotReachable: Boolean(raceToTheWhGeneric),
+      note: "Tracked as a polling-average reference page. No stable public row-level API was detected, so rows are not blended unless a structured endpoint is added."
+    },
+    electoralVote: {
+      senatePollCsvReachable: Boolean(electoralVoteCsv),
+      note: "Downloadable Senate polling CSV is tracked. It is only blended when current-cycle non-election poll rows are present."
+    },
+    usPollingData: {
+      senatePollingReachable: Boolean(usPollingDataSenate),
+      note: "Tracked as a public polling reference. Senate table is not blended when race/candidate ledger conflicts are detected."
+    }
+  };
+}
+
 async function fetchAllSources() {
   const status = { checkedAt: new Date().toISOString() };
-  const [votehub, fec, mit, census, civic] = await Promise.all([
+  const [votehub, ddhqGeneric, pollfinity, usPollingDataGeneric, realClearPolling, twoSeventyToWin, fec, mit, census, civic, pollingReferences] = await Promise.all([
     fetchVoteHub(status),
+    fetchDdhqGenericBallot(status),
+    fetchPollfinityAverages(status),
+    fetchUsPollingDataGeneric(status),
+    fetchRealClearPolling(status),
+    fetchTwoSeventyToWinRacePolls(status),
     fetchFec(status),
     fetchMitSenate(status),
     fetchCensus(status),
-    fetchCivicApi(status)
+    fetchCivicApi(status),
+    fetchPollingReferencePages(status)
   ]);
-  return { status, votehub, fec, mit, census, civic };
+  const genericPollingSources = [
+    { source: "VoteHub", margin: votehub.genericBallotMargin, dem: votehub.genericBallotDem, rep: votehub.genericBallotRep, polls: votehub.usableGenericBallotPolls, weight: 1 },
+    { source: "DDHQ", margin: ddhqGeneric.genericBallotMargin, dem: ddhqGeneric.genericBallotDem, rep: ddhqGeneric.genericBallotRep, polls: ddhqGeneric.polls, weight: .75 },
+    { source: "Pollfinity", margin: pollfinity.genericBallotMargin, dem: pollfinity.genericBallotDem, rep: pollfinity.genericBallotRep, polls: pollfinity.genericBallotPolls, weight: .55 },
+    { source: "USPollingData", margin: usPollingDataGeneric.genericBallotMargin, dem: usPollingDataGeneric.genericBallotDem, rep: usPollingDataGeneric.genericBallotRep, polls: 0, weight: .45 }
+  ].filter((source) => Number.isFinite(source.margin));
+  const genericWeight = genericPollingSources.reduce((sum, source) => sum + source.weight, 0);
+  const genericPolling = {
+    sources: genericPollingSources,
+    genericBallotMargin: genericWeight ? genericPollingSources.reduce((sum, source) => sum + source.margin * source.weight, 0) / genericWeight : null,
+    genericBallotDem: genericWeight ? genericPollingSources.reduce((sum, source) => sum + (Number.isFinite(source.dem) ? source.dem : 0) * source.weight, 0) / genericWeight : null,
+    genericBallotRep: genericWeight ? genericPollingSources.reduce((sum, source) => sum + (Number.isFinite(source.rep) ? source.rep : 0) * source.weight, 0) / genericWeight : null
+  };
+  return { status, votehub, ddhqGeneric, pollfinity, usPollingDataGeneric, genericPolling, realClearPolling, twoSeventyToWin, fec, mit, census, civic, pollingReferences };
 }
 
 function applySourceInputs(baseRaces, sourceData) {
@@ -766,6 +1171,7 @@ function applySourceInputs(baseRaces, sourceData) {
     let money = race.money;
     let pastSenate = race.pastSenate;
     let pvi = race.pvi;
+    let polls = race.polls;
 
     if (fec) {
       const demEfficiency = (fec.demCash + fec.demIndividual * .45 - fec.demDebts * .7) / Math.sqrt(1 + Math.max(fec.demDisbursements, 1));
@@ -786,18 +1192,55 @@ function applySourceInputs(baseRaces, sourceData) {
       pvi = race.pvi + growthSignal;
       sourceInputs.census = { ...census, growth, growthSignal };
     }
-    if (sourceData?.votehub?.genericBallotMargin !== null) {
-      const nationalPolling = clamp(sourceData.votehub.genericBallotMargin * .22, -1.5, 1.5);
+    if (sourceData?.genericPolling?.genericBallotMargin !== null) {
+      const nationalPolling = clamp(sourceData.genericPolling.genericBallotMargin * .22, -1.5, 1.5);
       sourceInputs.votehub = {
         genericBallotPolls: sourceData.votehub.genericBallotPolls,
         usableGenericBallotPolls: sourceData.votehub.usableGenericBallotPolls,
         genericBallotMargin: sourceData.votehub.genericBallotMargin,
         nationalPolling
       };
-      return { ...race, money, pastSenate, pvi, nationalPolling, sourceInputs };
+      sourceInputs.genericPolling = {
+        genericBallotMargin: sourceData.genericPolling.genericBallotMargin,
+        sources: sourceData.genericPolling.sources.map(({ source, margin, polls, weight }) => ({ source, margin, polls, weight }))
+      };
+      if (sourceData?.realClearPolling?.byState?.[race.state]?.length) {
+        const rcpPolls = sourceData.realClearPolling.byState[race.state];
+        polls = [...polls, ...rcpPolls];
+        sourceInputs.realClearPolling = {
+          polls: rcpPolls.length,
+          recent: rcpPolls.slice(0, 5).map(({ pollster, endDate, margin, title, result, spread }) => ({ pollster, endDate, margin, title, result, spread }))
+        };
+      }
+      if (sourceData?.twoSeventyToWin?.byState?.[race.state]?.length) {
+        const towinPolls = sourceData.twoSeventyToWin.byState[race.state];
+        polls = [...polls, ...towinPolls];
+        sourceInputs.twoSeventyToWin = {
+          polls: towinPolls.length,
+          recent: towinPolls.slice(0, 5).map(({ pollster, endDate, margin, title, result, spread, sampleSize, population }) => ({ pollster, endDate, margin, title, result, spread, sampleSize, population }))
+        };
+      }
+      return { ...race, money, pastSenate, pvi, polls, nationalPolling, sourceInputs };
     }
 
-    return { ...race, money, pastSenate, pvi, sourceInputs };
+    if (sourceData?.realClearPolling?.byState?.[race.state]?.length) {
+      const rcpPolls = sourceData.realClearPolling.byState[race.state];
+      polls = [...polls, ...rcpPolls];
+      sourceInputs.realClearPolling = {
+        polls: rcpPolls.length,
+        recent: rcpPolls.slice(0, 5).map(({ pollster, endDate, margin, title, result, spread }) => ({ pollster, endDate, margin, title, result, spread }))
+      };
+    }
+    if (sourceData?.twoSeventyToWin?.byState?.[race.state]?.length) {
+      const towinPolls = sourceData.twoSeventyToWin.byState[race.state];
+      polls = [...polls, ...towinPolls];
+      sourceInputs.twoSeventyToWin = {
+        polls: towinPolls.length,
+        recent: towinPolls.slice(0, 5).map(({ pollster, endDate, margin, title, result, spread, sampleSize, population }) => ({ pollster, endDate, margin, title, result, spread, sampleSize, population }))
+      };
+    }
+
+    return { ...race, money, pastSenate, pvi, polls, sourceInputs };
   });
 }
 
@@ -863,10 +1306,26 @@ async function writeForecast() {
     sourceStatus: sourceData.status,
     sourceSummary: {
       votehub: sourceData.votehub,
+      genericPolling: sourceData.genericPolling,
+      ddhqGeneric: sourceData.ddhqGeneric,
+      pollfinity: sourceData.pollfinity,
+      usPollingDataGeneric: sourceData.usPollingDataGeneric,
+      realClearPolling: {
+        polls: sourceData.realClearPolling.polls,
+        usablePolls: sourceData.realClearPolling.usablePolls,
+        states: Object.keys(sourceData.realClearPolling.byState || {}).length
+      },
+      twoSeventyToWin: {
+        pages: sourceData.twoSeventyToWin.pages,
+        okPages: sourceData.twoSeventyToWin.okPages,
+        usablePolls: sourceData.twoSeventyToWin.usablePolls,
+        states: Object.keys(sourceData.twoSeventyToWin.byState || {}).length
+      },
       fecStates: Object.keys(sourceData.fec).length,
       mitStates: Object.keys(sourceData.mit).length,
       censusStates: Object.keys(sourceData.census).length,
-      civicApi: sourceData.civic
+      civicApi: sourceData.civic,
+      pollingReferences: sourceData.pollingReferences
     },
     calibration: buildCalibrationReport(sourceData, model),
     controlHistory: appendControlHistory(model),

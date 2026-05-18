@@ -715,6 +715,16 @@ function renderSourceStatus() {
   const summary = forecast.sourceSummary || {};
   const rows = [
     ["VoteHub polling", status.votehubGenericBallot, `${summary.votehub?.usableGenericBallotPolls ?? 0} usable generic-ballot polls / D ${summary.votehub?.genericBallotMargin?.toFixed?.(1) ?? "--"}`],
+    ["Generic blend", status.checkedAt ? { ok: summary.genericPolling?.sources?.length > 0, status: "computed", ms: 0 } : null, `${summary.genericPolling?.sources?.length ?? 0} sources / D ${summary.genericPolling?.genericBallotMargin?.toFixed?.(1) ?? "--"}`],
+    ["DDHQ generic ballot", status.ddhqGenericBallot, `${summary.ddhqGeneric?.polls ?? 0} polls / D ${summary.ddhqGeneric?.genericBallotMargin?.toFixed?.(1) ?? "--"}`],
+    ["Pollfinity averages", status.pollfinityAverages, `${summary.pollfinity?.genericBallotPolls ?? 0} generic polls / approval net ${summary.pollfinity?.approvalNet?.toFixed?.(1) ?? "--"}`],
+    ["USPollingData generic", status.usPollingDataGenericBallot, `D ${summary.usPollingDataGeneric?.genericBallotMargin?.toFixed?.(1) ?? "--"}`],
+    ["RealClearPolling", status.realClearPollingSenate, `${summary.realClearPolling?.usablePolls ?? 0} usable race polls / ${summary.realClearPolling?.states ?? 0} states`],
+    ["270toWin race polls", status.twoSeventyToWinRacePolls, `${summary.twoSeventyToWin?.usablePolls ?? 0} usable race polls / ${summary.twoSeventyToWin?.states ?? 0} states`],
+    ["270toWin latest polls", status.twoSeventyToWinLatestPolls, status.twoSeventyToWinLatestPolls?.ok ? "Reference page reachable" : "Reference page not loaded"],
+    ["Race to the WH polls", status.raceToTheWhSenatePolls, status.raceToTheWhSenatePolls?.ok ? "Reference page reachable" : "Reference page not loaded"],
+    ["Electoral-Vote CSV", status.electoralVoteSenatePolls, `${status.electoralVoteSenatePolls?.currentCycleRows ?? 0} current poll rows`],
+    ["USPollingData Senate", status.usPollingDataSenatePolling, status.usPollingDataSenatePolling?.ok ? "Reference page reachable" : "Reference page not loaded"],
     ["OpenFEC finance", status.openFecCandidateSummary, `${summary.fecStates ?? 0} Senate states`],
     ["Census population", status.censusPopulation, `${summary.censusStates ?? 0} states from no-key CSV`],
     ["Historical results", status.mitSenateReturns, `${summary.mitStates ?? 0} states from MIT/MEDSL; used instead of broken civicAPI endpoints`]
