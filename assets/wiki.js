@@ -17,6 +17,12 @@ const MAP_COLOR_MODES = {
   probability: "Win probability"
 };
 
+const HOUSE_COLOR_MODES = {
+  rating: "Rating",
+  margin: "Projected margin",
+  probability: "Win probability"
+};
+
 const CHART_ANNOTATIONS = [
   { date: "2026-05-17", label: "Model reworked" }
 ];
@@ -26,6 +32,8 @@ let houseForecast = null;
 let articles = [];
 let mapColorMode = "rating";
 let houseViewMode = "diagram";
+let houseColorMode = "rating";
+let selectedHouseDistrictId = null;
 
 const HOUSE_DISTRICT_MAP_URL = "https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/USA_119th_Congressional_Districts_no_territories/FeatureServer/0/query?where=1%3D1&outFields=DISTRICTID,STATE_ABBR,CDFIPS,NAME,PARTY&returnGeometry=true&f=geojson&outSR=4326&resultRecordCount=2000";
 
@@ -463,7 +471,9 @@ function renderSeatHistogramInto(container, model = forecast, options = {}) {
   const maxSeat = Math.min(options.maxSeat ?? 57, Math.max(...seats));
   const maxCount = Math.max(...Object.values(counts));
   const sims = model?.settings?.simulations || Object.values(counts).reduce((a, b) => a + b, 0);
-  container.innerHTML = Array.from({ length: maxSeat - minSeat + 1 }, (_, i) => {
+  const binCount = maxSeat - minSeat + 1;
+  container.style.gridTemplateColumns = `repeat(${binCount}, minmax(0, 1fr))`;
+  container.innerHTML = Array.from({ length: binCount }, (_, i) => {
     const seat = minSeat + i;
     const value = counts[seat] || 0;
     const share = sims ? value / sims : 0;
@@ -829,7 +839,17 @@ function renderSourceStatus() {
 }
 
 function houseDistrictBucket(district) {
-  return RATING_BUCKET[district?.rating] || "tossup";
+  if (!district) return "tossup";
+  if (houseColorMode === "margin") return RATING_BUCKET[ratingFromSignedValue(district.margin, { tilt: 1, lean: 3, likely: 7, safe: 12 })] || "tossup";
+  if (houseColorMode === "probability") return RATING_BUCKET[ratingFromSignedValue((district.demProbability - .5) * 100, { tilt: 2.5, lean: 10, likely: 25, safe: 45 })] || "tossup";
+  return RATING_BUCKET[district.rating] || "tossup";
+}
+
+function houseDistrictColorLabel(district) {
+  if (!district) return "Toss-up";
+  if (houseColorMode === "margin") return ratingFromSignedValue(district.margin, { tilt: 1, lean: 3, likely: 7, safe: 12 });
+  if (houseColorMode === "probability") return ratingFromSignedValue((district.demProbability - .5) * 100, { tilt: 2.5, lean: 10, likely: 25, safe: 45 });
+  return district.rating;
 }
 
 function houseLeaderClass(district) {
@@ -854,11 +874,12 @@ function getHouseDistrict(id) {
 function houseDistrictMarkup(district) {
   if (!district) return "";
   const winner = district.winnerParty === "D" ? "Democrat" : "Republican";
+  const colorLabel = houseDistrictColorLabel(district);
   return `
     <span class="race-kicker">${escapeHtml(houseDistrictLabel(district))}</span>
     <div class="map-card-title">
       <div class="state-code">${escapeHtml(district.id)}</div>
-      <span class="rating-pill ${houseDistrictBucket(district)}">${escapeHtml(district.rating)}</span>
+      <span class="rating-pill ${houseDistrictBucket(district)}">${escapeHtml(colorLabel)}</span>
     </div>
     <h3>${winner} ${oneDecimal(district.winnerProbability)}</h3>
     <div class="candidate-table" aria-label="${district.id} district forecast">
@@ -872,6 +893,7 @@ function houseDistrictMarkup(district) {
 }
 
 function updateHouseDistrictCard(district) {
+  if (district?.id) selectedHouseDistrictId = district.id;
   const card = document.getElementById("house-district-card");
   if (card) card.innerHTML = houseDistrictMarkup(district);
 }
@@ -881,15 +903,15 @@ function renderHouseCartogram() {
   if (!container || !houseForecast) return;
   container.hidden = false;
   const districts = [...houseForecast.districts].sort((a, b) => {
-    const ratingDelta = Object.keys(RATING_BUCKET).indexOf(a.rating) - Object.keys(RATING_BUCKET).indexOf(b.rating);
+    const ratingDelta = Object.values(RATING_BUCKET).indexOf(houseDistrictBucket(a)) - Object.values(RATING_BUCKET).indexOf(houseDistrictBucket(b));
     return ratingDelta || a.id.localeCompare(b.id, undefined, { numeric: true });
   });
   container.innerHTML = districts.map((district) => `
     <button class="district-cell ${houseDistrictBucket(district)} ${houseLeaderClass(district)}"
       type="button"
-      aria-label="${escapeHtml(houseDistrictLabel(district))}, ${escapeHtml(district.rating)}"
+      aria-label="${escapeHtml(houseDistrictLabel(district))}, ${escapeHtml(houseDistrictColorLabel(district))}"
       data-district="${escapeHtml(district.id)}"
-      style="background:${ratingColor({ rating: district.rating })}"
+      style="background:${ratingColor(district, houseColorMode)}"
       title="${escapeHtml(houseDistrictLabel(district))}">
       <span>${escapeHtml(district.id.replace("-", ""))}</span>
     </button>
@@ -901,7 +923,7 @@ function renderHouseCartogram() {
     node.addEventListener("focus", handler);
     node.addEventListener("click", handler);
   });
-  updateHouseDistrictCard(houseForecast.decisiveDistricts?.[0] || houseForecast.districts[0]);
+  updateHouseDistrictCard(houseForecast.districts.find((district) => district.id === selectedHouseDistrictId) || houseForecast.decisiveDistricts?.[0] || houseForecast.districts[0]);
 }
 
 function houseDistrictIdFromFeature(feature) {
@@ -941,7 +963,7 @@ async function renderHouseDistrictMap() {
       .attr("d", path)
       .attr("fill", (feature) => {
         const district = houseForecast.districts.find((item) => item.id === houseDistrictIdFromFeature(feature));
-        return district ? ratingColor({ rating: district.rating }) : null;
+        return district ? ratingColor(district, houseColorMode) : null;
       })
       .attr("tabindex", (feature) => houseForecast.districts.find((item) => item.id === houseDistrictIdFromFeature(feature)) ? 0 : -1)
       .on("mouseenter focus", (event, feature) => {
@@ -968,7 +990,17 @@ function renderHouseViewControls() {
   const container = document.getElementById("house-view-controls");
   if (!container) return;
   houseViewMode = "diagram";
-  container.innerHTML = `<button type="button" class="active" data-house-view="diagram">District board</button>`;
+  container.innerHTML = Object.entries(HOUSE_COLOR_MODES).map(([mode, label]) => (
+    `<button type="button" class="${mode === houseColorMode ? "active" : ""}" data-house-color="${mode}">${label}</button>`
+  )).join("");
+  container.querySelectorAll("button").forEach((button) => {
+    button.addEventListener("click", () => {
+      houseColorMode = button.dataset.houseColor || "rating";
+      renderHouseViewControls();
+      renderHouseLegend();
+      renderHouseCartogram();
+    });
+  });
 }
 
 function renderHouseLegend() {

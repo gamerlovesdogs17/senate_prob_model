@@ -884,6 +884,7 @@ dd {
   grid-template-columns: 1.25fr 1fr;
   gap: 12px;
   margin-top: 12px;
+  align-items: start;
 }
 
 .chart-wide {
@@ -924,11 +925,14 @@ dd {
 }
 
 .seat-histogram {
-  grid-template-columns: repeat(16, minmax(22px, 1fr));
   align-items: end;
   min-height: 190px;
   overflow-x: auto;
   padding-bottom: 4px;
+}
+
+#house-seat-histogram {
+  min-height: 112px;
 }
 
 .seat-bin {
@@ -948,6 +952,10 @@ dd {
   min-height: 4px;
   border-radius: 2px 2px 0 0;
   background: var(--dem);
+}
+
+#house-seat-histogram .seat-bin i {
+  height: calc(var(--bar-scale, .02) * 118px);
 }
 
 .seat-bin:hover i,

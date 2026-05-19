@@ -695,7 +695,8 @@ async function writeHouseForecast() {
     mapBasis: {
       display: "district cartogram",
       boundarySource: "Census 2025 cartographic boundary files for the 119th congressional districts",
-      districtShapeMapStatus: sourceData.censusDistrictBoundaryPageReachable ? "boundary source reachable; local GeoJSON not bundled yet" : "boundary source not reached during this run"
+      districtShapeMapStatus: sourceData.censusDistrictBoundaryPageReachable ? "boundary source reachable; local GeoJSON not bundled yet" : "boundary source not reached during this run",
+      redistrictingTreatment: "Current district-by-district ratings and margins are used directly; no separate redistricting bonus is added on top of the seat ratings."
     },
     sourceStatus: sourceData.status,
     sourceSummary: {
