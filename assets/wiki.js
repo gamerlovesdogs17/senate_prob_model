@@ -32,6 +32,10 @@ const CHART_ANNOTATIONS = [
   { date: "2026-05-17", label: "Model reworked" }
 ];
 
+const MONTANA_CHART_ANNOTATIONS = [
+  { date: "2026-05-19", label: "Bodnar modeled" }
+];
+
 let forecast = null;
 let houseForecast = null;
 let articles = [];
@@ -651,7 +655,7 @@ function renderLineChart(chart, points, options) {
   const demLabelY = closeEndLabels ? latest.demY - 12 : latest.demY <= latest.repY ? latest.demY - 4 : latest.demY + 14;
   const repLabelY = closeEndLabels ? latest.repY + 22 : latest.repY <= latest.demY ? latest.repY - 4 : latest.repY + 14;
   const extraLabelY = latestExtraY === null ? null : latestExtraY - 6;
-  const annotations = CHART_ANNOTATIONS.map((annotation) => {
+  const annotations = (options.annotations || CHART_ANNOTATIONS).map((annotation) => {
     const index = points.findIndex((point) => point.date === annotation.date);
     if (index === -1) return null;
     const x = coords[index].x;
@@ -671,7 +675,7 @@ function renderLineChart(chart, points, options) {
       ${extraSeries ? `<path class="history-band history-band-extra" d="${extraAreaPath()}"></path>` : ""}
       <path class="history-line ${demSeriesClass}" d="${linePath("dem")}"></path>
       <path class="history-line history-line-rep" d="${linePath("rep")}"></path>
-      ${extraSeries ? `<path class="history-line ${extraSeries.className}" d="${coords.map((coord, index) => `${index ? "L" : "M"} ${coord.x} ${yFor(extraValue(coord.point) ?? demValue(coord.point))}`).join(" ")}"></path>` : ""}
+      ${extraSeries ? `<path class="history-line ${extraSeries.className}" d="${coords.filter((coord) => extraValue(coord.point) !== null).map((coord, index) => `${index ? "L" : "M"} ${coord.x} ${yFor(extraValue(coord.point))}`).join(" ")}"></path>` : ""}
       ${annotations}
       ${coords.map(({ x, demY, repY }, index) => `<g class="history-point" tabindex="0" data-index="${index}"><circle class="history-dot ${demDotClass}" cx="${x}" cy="${demY}" r="${coords.length === 1 ? 4.8 : 3.3}"></circle><circle class="history-dot history-dot-rep" cx="${x}" cy="${repY}" r="${coords.length === 1 ? 4.8 : 3.3}"></circle></g>`).join("")}
       ${extraSeries ? coords.map(({ x, point }, index) => {
@@ -772,7 +776,8 @@ function renderHistory(race) {
   let points = race.history?.length ? race.history : [{ date: forecast.modelDate, dem: race.demProbability }];
   const bodnar = (race.extraCandidates || []).find((candidate) => candidate.name === "Seth Bodnar");
   if (bodnar) {
-    points = points.map((point) => ({ ...point, extra: bodnar.probabilityShare ?? .38 }));
+    const bodnarHistory = new Map((race.extraHistory || []).map((point) => [point.date, point["Seth Bodnar"]]));
+    points = points.map((point) => ({ ...point, extra: bodnarHistory.get(point.date) ?? null }));
   }
   const demIsIndependent = race.demDisplayParty === "I" || race.dem.toLowerCase().includes("independent");
   const demHistoryLabel = demIsIndependent ? candidateDisplayName(race, "D") : "Democrat";
@@ -788,6 +793,7 @@ function renderHistory(race) {
     demHoverTextClass: demIsIndependent ? "history-hover-ind" : "",
     endLabel: demIsIndependent ? (party, value) => `${party === "dem" ? demHistoryLabel : "Republican"} ${oneDecimal(value)}` : null,
     hoverLabel: demIsIndependent ? (party, value) => `${party === "dem" ? demHistoryLabel : "Republican"} ${oneDecimal(value)}` : null,
+    annotations: race.state === "MT" ? [...CHART_ANNOTATIONS, ...MONTANA_CHART_ANNOTATIONS] : CHART_ANNOTATIONS,
     value: (point) => point.dem,
     singleNote: "State history starts with the first generated forecast and grows each daily run."
   });
@@ -1401,7 +1407,8 @@ function renderEmbed(target, embed) {
     const bodnar = (race.extraCandidates || []).find((candidate) => candidate.name === "Seth Bodnar");
     let points = race.history?.length ? race.history : [{ date: forecast.modelDate, dem: race.demProbability }];
     if (bodnar) {
-      points = points.map((point) => ({ ...point, extra: bodnar.probabilityShare ?? .38 }));
+      const bodnarHistory = new Map((race.extraHistory || []).map((point) => [point.date, point["Seth Bodnar"]]));
+      points = points.map((point) => ({ ...point, extra: bodnarHistory.get(point.date) ?? null }));
     }
     const demIsIndependent = race.demDisplayParty === "I" || race.dem.toLowerCase().includes("independent");
     const demHistoryLabel = demIsIndependent ? candidateDisplayName(race, "D") : "Democrat";
@@ -1417,6 +1424,7 @@ function renderEmbed(target, embed) {
       demHoverTextClass: demIsIndependent ? "history-hover-ind" : "",
       endLabel: demIsIndependent ? (party, value) => `${party === "dem" ? demHistoryLabel : "Republican"} ${oneDecimal(value)}` : null,
       hoverLabel: demIsIndependent ? (party, value) => `${party === "dem" ? demHistoryLabel : "Republican"} ${oneDecimal(value)}` : null,
+      annotations: race.state === "MT" ? [...CHART_ANNOTATIONS, ...MONTANA_CHART_ANNOTATIONS] : CHART_ANNOTATIONS,
       value: (point) => point.dem
     });
     return;
