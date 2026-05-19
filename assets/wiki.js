@@ -170,6 +170,12 @@ function inputQualityText(race) {
   return `${quality.label} (${quality.score}/100)`;
 }
 
+function signedDriverChange(value) {
+  if (!Number.isFinite(value)) return "";
+  if (Math.abs(value) < .05) return "0.0";
+  return `${value > 0 ? "+" : "-"}${Math.abs(value).toFixed(1)}`;
+}
+
 function setText(id, value) {
   const node = document.getElementById(id);
   if (node) node.textContent = value;
@@ -430,6 +436,7 @@ function hoverMarkup(race, mode = mapColorMode) {
       <span style="width:${(1 - race.demProbability) * 100}%"></span>
     </div>
     <p class="candidate-key"><b>P</b> Presumptive nominee. <b>I</b> Independent.</p>
+    <div class="badge-row">${(race.uncertaintyBadges || []).slice(0, 4).map((badge) => `<span>${escapeHtml(badge)}</span>`).join("")}</div>
     <p>${escapeHtml(race.summary || race.note || "")}</p>
     <p class="meta">Color mode: ${escapeHtml(ratingModeLabel)} / Primary: ${race.primary} / Tipping power: ${oneDecimal(race.tippingPower)}</p>
     <a class="button-link" href="race.html?state=${race.state}">Open race page</a>
@@ -893,12 +900,17 @@ function renderRaceInputCards(race) {
     `<li>${escapeHtml(race.primarySummary || "")}</li>`,
     ...(race.extraCandidates || []).map((candidate) => `<li>${escapeHtml(candidate.name)}: ${escapeHtml(candidate.note || candidate.party || "tracked option")}</li>`)
   ].join("");
+  const driverRows = (race.movementDrivers || []).length
+    ? race.movementDrivers.map((driver) => `<li><strong>${escapeHtml(driver.label)} ${signedDriverChange(driver.change)}</strong> ${escapeHtml(driver.detail || "")}</li>`).join("")
+    : `<li>No previous generated run to compare.</li>`;
+  const badgeRows = (race.uncertaintyBadges || []).map((badge) => `<li>${escapeHtml(badge)}</li>`).join("");
   container.innerHTML = `
+    <details open><summary>Why it moved</summary><ul>${driverRows}</ul></details>
     <details open><summary>Polling</summary><ul>${pollRows}</ul></details>
     <details><summary>Fundamentals</summary><ul>${fundamentalRows}</ul></details>
     <details><summary>Finance</summary><ul>${financeRows}</ul></details>
     <details><summary>Candidates</summary><ul>${candidateRows}</ul></details>
-    <details><summary>Input quality</summary><ul><li>${inputQualityText(race)}</li>${(race.inputQuality?.reasons || []).map((reason) => `<li>${escapeHtml(reason)}</li>`).join("")}</ul></details>
+    <details><summary>Input quality</summary><ul><li>${inputQualityText(race)}</li>${badgeRows}${(race.inputQuality?.reasons || []).map((reason) => `<li>${escapeHtml(reason)}</li>`).join("")}</ul></details>
   `;
 }
 
@@ -1013,6 +1025,13 @@ function houseDistrictMarkup(district) {
   if (!district) return "";
   const winner = district.winnerParty === "D" ? "Democrat" : "Republican";
   const colorLabel = houseDistrictColorLabel(district);
+  const inputs = district.sourceInputs || {};
+  const baselineLine = [
+    `2024 pres ${signedPointMargin(inputs.presidentialBaseline)}`,
+    `2022 House ${signedPointMargin(inputs.congressionalBaseline)}`,
+    `generic ${signedPointMargin(inputs.genericBallotShift)}`,
+    district.open ? "open seat" : "incumbent seat"
+  ].join(" / ");
   return `
     <span class="race-kicker">${escapeHtml(houseDistrictLabel(district))}</span>
     <div class="map-card-title">
@@ -1026,7 +1045,8 @@ function houseDistrictMarkup(district) {
       <div class="candidate-row rep-row"><span>${escapeHtml(district.repCandidate || "Republican")} <i class="party-badge rep-badge">R</i></span><strong>${oneDecimal(district.repProbability)}</strong></div>
       <div class="candidate-margin"><span>Projected margin</span><strong>${signedPointMargin(district.margin)}</strong></div>
     </div>
-    <p class="meta">${escapeHtml(district.sourceBlend || "Cook")} / ${district.open ? "Open seat" : "Incumbent listed"}</p>
+    <p class="meta">${escapeHtml(baselineLine)}</p>
+    <p class="meta">${escapeHtml(district.sourceBlend || "Cook")} / rating baseline ${signedPointMargin(inputs.ratingBaseline)} / contextual baseline ${signedPointMargin(inputs.contextualBaseline)}</p>
   `;
 }
 
@@ -1377,6 +1397,39 @@ function renderCalibrationPage() {
   setText("calibration-sample", `${calibration.sample ?? "--"} races`);
   setText("calibration-brier", Number.isFinite(calibration.meanBrier) ? calibration.meanBrier.toFixed(3) : "--");
   setText("calibration-margin-error", Number.isFinite(calibration.meanAbsoluteMarginError) ? `${calibration.meanAbsoluteMarginError.toFixed(1)} pts` : "--");
+  const backtest = document.getElementById("historical-backtest-status");
+  const historical = calibration.historicalBacktest || {};
+  if (backtest) {
+    backtest.innerHTML = `
+      <div class="backtest-card ${historical.status === "ready" ? "is-ok" : "is-warn"}">
+        <strong>${escapeHtml(historical.label || "Historical backtest")}</strong>
+        <span>${escapeHtml(historical.status || "not-ready")}</span>
+        <p>${escapeHtml(historical.note || "")}</p>
+        <p class="meta">Target cycles: ${(historical.cyclesTargeted || []).join(", ") || "--"} / archived cycles: ${(historical.availableCycles || []).join(", ") || "none yet"}</p>
+      </div>
+    `;
+  }
+  const breakdowns = document.getElementById("calibration-breakdowns");
+  if (breakdowns) {
+    const rows = calibration.breakdowns || [];
+    breakdowns.innerHTML = `
+      <table>
+        <thead>
+          <tr><th>Race type</th><th>Sample</th><th>Brier</th><th>Mean margin miss</th></tr>
+        </thead>
+        <tbody>
+          ${rows.map((row) => `
+            <tr>
+              <td>${escapeHtml(row.label)}</td>
+              <td>${row.sample}</td>
+              <td>${row.meanBrier === null ? "--" : row.meanBrier.toFixed(3)}</td>
+              <td>${row.meanAbsoluteMarginError === null ? "--" : `${row.meanAbsoluteMarginError.toFixed(1)} pts`}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+  }
   const worst = document.getElementById("calibration-worst");
   if (worst) {
     const max = Math.max(...(calibration.worstStates || []).map((row) => row.absoluteMarginError || 0), 1);

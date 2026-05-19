@@ -1349,6 +1349,52 @@ button.leverage-row {
   font-size: .72rem;
 }
 
+.backtest-card {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--toss);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--paper-2) 72%, transparent);
+}
+
+.backtest-card.is-ok {
+  border-top-color: var(--dem);
+}
+
+.backtest-card.is-warn {
+  border-top-color: var(--toss);
+}
+
+.backtest-card strong {
+  display: block;
+  font: 950 1.15rem/1.1 "Segoe UI", Arial, sans-serif;
+}
+
+.backtest-card span {
+  display: inline-block;
+  margin-top: 6px;
+  color: var(--muted);
+  font: 850 .72rem/1.1 "Segoe UI", Arial, sans-serif;
+  text-transform: uppercase;
+}
+
+.badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 9px 0;
+}
+
+.badge-row span {
+  padding: 4px 7px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--paper-2) 78%, transparent);
+  color: var(--muted);
+  font: 850 .68rem/1 "Segoe UI", Arial, sans-serif;
+  text-transform: uppercase;
+}
+
 .race-board-row:hover,
 .race-board-row:focus {
   background: color-mix(in srgb, var(--paper-2) 72%, transparent);

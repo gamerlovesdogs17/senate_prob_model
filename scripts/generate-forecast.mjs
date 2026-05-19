@@ -417,6 +417,38 @@ function inputQuality(race, pollSignal) {
   };
 }
 
+function uncertaintyBadges(race, pollSignal) {
+  const badges = [];
+  if (!pollSignal || pollSignal.pollCount < 3) badges.push("thin polling");
+  if (race.primary !== "resolved") badges.push(race.primary === "runoff" ? "runoff pending" : "primary unresolved");
+  if (race.independent && race.independent !== "none") badges.push("independent factor");
+  if (RCV_STATES[race.state]) badges.push("ranked-choice");
+  if ((race.inputQuality?.score ?? 100) < 55) badges.push("low input confidence");
+  if (Math.abs(race.margin) < 2.5) badges.push("near toss-up");
+  if (!badges.length) badges.push("stable inputs");
+  return badges;
+}
+
+function movementDrivers(race) {
+  const previousRace = previousForecast?.races?.find((item) => item.state === race.state);
+  if (!previousRace) return [{ label: "First saved run", detail: "No previous generated race file to compare." }];
+  const drivers = [];
+  const addDriver = (label, value, detail) => {
+    if (!Number.isFinite(value) || Math.abs(value) < .05) return;
+    drivers.push({ label, change: Number(value.toFixed(2)), detail });
+  };
+  addDriver("Polling", (race.pollMargin ?? 0) - (previousRace.pollMargin ?? 0), "Weighted race-poll margin changed.");
+  addDriver("Projected margin", race.margin - previousRace.margin, "Combined model margin changed.");
+  addDriver("Primary risk", (race.primaryRisk ?? 0) - (previousRace.primaryRisk ?? 0), "Primary or nomination uncertainty changed.");
+  addDriver("Finance", (race.sourceInputs?.openFec?.financeSignal ?? 0) - (previousRace.sourceInputs?.openFec?.financeSignal ?? 0), "OpenFEC finance signal changed.");
+  addDriver("Generic ballot", (race.sourceInputs?.genericPolling?.genericBallotMargin ?? 0) - (previousRace.sourceInputs?.genericPolling?.genericBallotMargin ?? 0), "National generic-ballot blend changed.");
+  addDriver("National finance", (race.sourceInputs?.nationalFinance?.nationalFinance ?? 0) - (previousRace.sourceInputs?.nationalFinance?.nationalFinance ?? 0), "National finance environment changed.");
+  if (race.rating !== previousRace.rating) drivers.push({ label: "Rating", change: null, detail: `${previousRace.rating} to ${race.rating}` });
+  return drivers
+    .sort((a, b) => Math.abs(b.change || 0) - Math.abs(a.change || 0))
+    .slice(0, 5);
+}
+
 function incumbencyAdjustment(race) {
   const base = race.seat === "Open seat" || race.seat === "Special election" ? -.25 : (race.hold === "D" ? .45 : -.45);
   if (race.seat === "Open seat" || !race.hold) return base;
@@ -549,6 +581,8 @@ function runModel(sourceData) {
     race.tippingPower = exactControl * competitiveness * centrality;
     race.demTippingPower = tipping[race.state].dem / SETTINGS.simulations;
     race.repTippingPower = tipping[race.state].rep / SETTINGS.simulations;
+    race.uncertaintyBadges = uncertaintyBadges(race, race.pollSignal);
+    race.movementDrivers = movementDrivers(race);
     race.history = buildHistory(race);
     race.movement = probabilityMovement(race.history);
     race.extraHistory = buildExtraHistory(race);
@@ -1496,17 +1530,34 @@ function buildCalibrationReport(sourceData, model) {
       const actual = historical.margin > 0 ? 1 : 0;
       const brier = (predicted - actual) ** 2;
       const absoluteMarginError = Math.abs(race.margin - historical.margin);
+      const tags = [
+        race.rating,
+        race.seat === "Open seat" ? "Open seat" : "Incumbent race",
+        RCV_STATES[race.state] ? "Ranked-choice" : "Normal voting",
+        race.independent && race.independent !== "none" ? "Independent factor" : "Major-party baseline",
+        race.primary === "resolved" ? "Primary resolved" : "Primary unresolved"
+      ];
       return {
         state: race.state,
         latestHistoricalYear: historical.year,
         predicted: Number(predicted.toFixed(4)),
         actual,
         brier: Number(brier.toFixed(4)),
-        absoluteMarginError: Number(absoluteMarginError.toFixed(2))
+        absoluteMarginError: Number(absoluteMarginError.toFixed(2)),
+        tags
       };
     })
     .filter(Boolean);
   const mean = (field) => rows.length ? rows.reduce((sum, row) => sum + row[field], 0) / rows.length : null;
+  const summarize = (label, filter) => {
+    const sample = rows.filter(filter);
+    return {
+      label,
+      sample: sample.length,
+      meanBrier: sample.length ? Number((sample.reduce((sum, row) => sum + row.brier, 0) / sample.length).toFixed(3)) : null,
+      meanAbsoluteMarginError: sample.length ? Number((sample.reduce((sum, row) => sum + row.absoluteMarginError, 0) / sample.length).toFixed(1)) : null
+    };
+  };
   const buckets = [
     [0.5, 0.6, "50-60%"],
     [0.6, 0.7, "60-70%"],
@@ -1530,8 +1581,26 @@ function buildCalibrationReport(sourceData, model) {
     sample: rows.length,
     meanBrier: mean("brier"),
     meanAbsoluteMarginError: mean("absoluteMarginError"),
-    note: "Diagnostic only: compares current-cycle model structure against each state's latest available MIT/MEDSL Senate result, not a true historical forecast archive.",
+    note: "Current diagnostic only: compares the live model shape against each state's latest available MIT/MEDSL Senate result. The true archived-input backtest is tracked separately below.",
     buckets,
+    breakdowns: [
+      summarize("Toss-up / tilt races", (row) => row.tags.includes("Toss-up") || row.tags.includes("Tilt D") || row.tags.includes("Tilt R")),
+      summarize("Lean races", (row) => row.tags.includes("Lean D") || row.tags.includes("Lean R")),
+      summarize("Likely races", (row) => row.tags.includes("Likely D") || row.tags.includes("Likely R")),
+      summarize("Safe races", (row) => row.tags.includes("Safe D") || row.tags.includes("Safe R")),
+      summarize("Open seats", (row) => row.tags.includes("Open seat")),
+      summarize("Incumbent races", (row) => row.tags.includes("Incumbent race")),
+      summarize("Ranked-choice races", (row) => row.tags.includes("Ranked-choice")),
+      summarize("Independent-factor races", (row) => row.tags.includes("Independent factor"))
+    ],
+    historicalBacktest: {
+      status: "not-ready",
+      label: "True historical backtest",
+      cyclesTargeted: [2016, 2018, 2020, 2022, 2024],
+      availableCycles: [],
+      sample: 0,
+      note: "A real backtest needs frozen pre-election ratings, polls, candidate fields, finance snapshots, and generic-ballot inputs for each cycle. Final election returns alone are not enough, so this site does not claim full historical calibration yet."
+    },
     worstStates: [...rows].sort((a, b) => b.absoluteMarginError - a.absoluteMarginError).slice(0, 5)
   };
 }
