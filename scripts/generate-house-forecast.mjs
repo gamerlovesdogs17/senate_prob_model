@@ -46,16 +46,17 @@ const RATING_TO_ERROR = {
 };
 
 const MODEL_WEIGHTS = {
-  genericBallot: .55,
-  genericBallotCap: 3.6,
+  genericBallot: .82,
+  genericBallotCap: 5.4,
   ratingBaseline: 1,
   districtPolls: .18,
   finance: .22,
   incumbencyOpenPenalty: .45,
   seatPartyIncumbency: .45,
-  districtFundamentals: .12,
+  districtFundamentals: .07,
+  historicalMidterm: 1.15,
   stateCorrelationSd: 1.3,
-  nationalEnvironmentSd: 2.6
+  nationalEnvironmentSd: 3.1
 };
 
 const CATEGORY_ALIASES = {
@@ -251,9 +252,9 @@ function ratingFromMargin(margin) {
   if (!Number.isFinite(margin)) return "Toss-up";
   const abs = Math.abs(margin);
   const side = margin > 0 ? "D" : "R";
-  if (abs >= 16) return `Safe ${side}`;
-  if (abs >= 8) return `Likely ${side}`;
-  if (abs >= 3.5) return `Lean ${side}`;
+  if (abs >= 14) return `Safe ${side}`;
+  if (abs >= 7) return `Likely ${side}`;
+  if (abs >= 3) return `Lean ${side}`;
   if (abs >= 1) return `Tilt ${side}`;
   return "Toss-up";
 }
@@ -458,7 +459,7 @@ function adjustedDistricts(sourceData) {
     const incumbencyAdjustment = district.open ? 0 : incumbentParty * MODEL_WEIGHTS.seatPartyIncumbency;
     const openPenalty = district.open ? (baselineMargin > 0 ? -MODEL_WEIGHTS.incumbencyOpenPenalty : MODEL_WEIGHTS.incumbencyOpenPenalty) : 0;
     const financeSignal = sourceData.fec[district.id]?.financeSignal ?? 0;
-    const margin = baselineMargin * MODEL_WEIGHTS.ratingBaseline + genericShift + incumbencyAdjustment + openPenalty + financeSignal * MODEL_WEIGHTS.finance;
+    const margin = baselineMargin * MODEL_WEIGHTS.ratingBaseline + genericShift + MODEL_WEIGHTS.historicalMidterm + incumbencyAdjustment + openPenalty + financeSignal * MODEL_WEIGHTS.finance;
     const error = Math.max(RATING_TO_ERROR[sourceRating] ?? 8, inside ? RATING_TO_ERROR[inside.rating] ?? 8 : 0);
     const demProbability = logistic(margin, error);
     return {

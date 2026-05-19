@@ -601,6 +601,9 @@ dd {
   color: transparent;
   font: 800 .45rem/1 "Segoe UI", Arial, sans-serif;
   overflow: hidden;
+  display: grid;
+  place-items: center;
+  appearance: none;
 }
 
 .district-cell span {
@@ -971,6 +974,15 @@ dd {
 .leverage-row {
   color: inherit;
   text-decoration: none;
+}
+
+button.leverage-row {
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  text-align: left;
+  appearance: none;
 }
 
 .leverage-row i,

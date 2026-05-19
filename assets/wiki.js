@@ -879,7 +879,7 @@ function updateHouseDistrictCard(district) {
 function renderHouseCartogram() {
   const container = document.getElementById("house-district-cartogram");
   if (!container || !houseForecast) return;
-  container.hidden = houseViewMode !== "diagram";
+  container.hidden = false;
   const districts = [...houseForecast.districts].sort((a, b) => {
     const ratingDelta = Object.keys(RATING_BUCKET).indexOf(a.rating) - Object.keys(RATING_BUCKET).indexOf(b.rating);
     return ratingDelta || a.id.localeCompare(b.id, undefined, { numeric: true });
@@ -889,6 +889,7 @@ function renderHouseCartogram() {
       type="button"
       aria-label="${escapeHtml(houseDistrictLabel(district))}, ${escapeHtml(district.rating)}"
       data-district="${escapeHtml(district.id)}"
+      style="background:${ratingColor({ rating: district.rating })}"
       title="${escapeHtml(houseDistrictLabel(district))}">
       <span>${escapeHtml(district.id.replace("-", ""))}</span>
     </button>
@@ -966,18 +967,8 @@ async function renderHouseDistrictMap() {
 function renderHouseViewControls() {
   const container = document.getElementById("house-view-controls");
   if (!container) return;
-  const modes = { diagram: "Diagram", map: "Map" };
-  container.innerHTML = Object.entries(modes).map(([mode, label]) => (
-    `<button type="button" class="${mode === houseViewMode ? "active" : ""}" data-house-view="${mode}">${label}</button>`
-  )).join("");
-  container.querySelectorAll("button").forEach((button) => {
-    button.addEventListener("click", () => {
-      houseViewMode = button.dataset.houseView || "diagram";
-      renderHouseViewControls();
-      renderHouseCartogram();
-      renderHouseDistrictMap();
-    });
-  });
+  houseViewMode = "diagram";
+  container.innerHTML = `<button type="button" class="active" data-house-view="diagram">District board</button>`;
 }
 
 function renderHouseLegend() {
@@ -1015,8 +1006,8 @@ function renderHouseSeatHistogram() {
   if (!container || !houseForecast) return;
   const seats = Object.keys(houseForecast.seatCounts || {}).map(Number);
   const center = houseForecast.medianSeats || 218;
-  const minSeat = Math.max(180, Math.min(...seats, center - 16));
-  const maxSeat = Math.min(255, Math.max(...seats, center + 16));
+  const minSeat = Math.max(195, Math.min(...seats, center - 10));
+  const maxSeat = Math.min(245, Math.max(...seats, center + 10));
   renderSeatHistogramInto(container, houseForecast, { minSeat, maxSeat });
 }
 
