@@ -1405,9 +1405,46 @@ function renderCalibrationPage() {
         <strong>${escapeHtml(historical.label || "Historical backtest")}</strong>
         <span>${escapeHtml(historical.status || "not-ready")}</span>
         <p>${escapeHtml(historical.note || "")}</p>
-        <p class="meta">Target cycles: ${(historical.cyclesTargeted || []).join(", ") || "--"} / archived cycles: ${(historical.availableCycles || []).join(", ") || "none yet"}</p>
+        <p class="meta">Target cycles: ${(historical.cyclesTargeted || []).join(", ") || "--"} / archived cycles: ${(historical.availableCycles || []).join(", ") || "none yet"} / sample: ${historical.sample ?? 0}</p>
       </div>
     `;
+  }
+  const archivedBuckets = document.getElementById("archived-backtest-buckets");
+  if (archivedBuckets) {
+    const archivedRows = historical.buckets || [];
+    archivedBuckets.innerHTML = `
+      <table>
+        <thead>
+          <tr><th>Forecast bucket</th><th>Expected win rate</th><th>Actual win rate</th><th>Sample</th></tr>
+        </thead>
+        <tbody>
+          ${archivedRows.map((row) => `
+            <tr>
+              <td>${escapeHtml(row.label)}</td>
+              <td>${oneDecimal(row.expectedWinRate)}</td>
+              <td>${row.actualWinRate === null ? "--" : oneDecimal(row.actualWinRate)}</td>
+              <td>${row.sample}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+      <p class="meta">Archived-input sample, not the current-cycle diagnostic.</p>
+    `;
+  }
+  const archivedWorst = document.getElementById("archived-backtest-worst");
+  if (archivedWorst) {
+    const worstRows = historical.worstRaces || [];
+    const max = Math.max(...worstRows.map((row) => row.marginMiss || 0), 1);
+    archivedWorst.innerHTML = worstRows.map((row) => {
+      const width = clamp(((row.marginMiss || 0) / max) * 100, 12, 100);
+      const notes = row.explanation?.length ? row.explanation.join("; ") : "No specific driver identified.";
+      return `
+        <div class="calibration-miss-row">
+          <div class="leverage-row"><strong>${escapeHtml(`${row.cycle} ${row.state}`)}</strong><i style="width:${width}%"></i><span>${Number(row.marginMiss || 0).toFixed(1)}</span></div>
+          <p>${escapeHtml(row.rating)} / ${escapeHtml(row.favorite)} ${oneDecimal(row.probability)} / ${escapeHtml(notes)}</p>
+        </div>
+      `;
+    }).join("");
   }
   const breakdowns = document.getElementById("calibration-breakdowns");
   if (breakdowns) {

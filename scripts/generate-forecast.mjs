@@ -107,6 +107,34 @@ const RCV_STATES = {
   ME: { transferMean: .55, transferSd: .9, exhaustedSd: .45 }
 };
 
+const ARCHIVED_SENATE_BACKTESTS = [
+  {
+    cycle: 2024,
+    chamber: "Senate",
+    freezeDate: "2024-10-15",
+    status: "partial",
+    note: "Partial archived-input seed for competitive and high-attention 2024 Senate races. Inputs are frozen late-cycle probability estimates from public race ratings, polling-average context, incumbency, candidate field, and generic-ballot environment. This is not yet the complete 34-seat cycle.",
+    races: [
+      { state: "AZ", rating: "Lean D", probability: .73, favorite: "D", actualMargin: 2.4, tags: ["Open seat", "Major-party baseline"] },
+      { state: "MI", rating: "Toss-up", probability: .55, favorite: "D", actualMargin: .34, tags: ["Open seat", "Major-party baseline"] },
+      { state: "NV", rating: "Lean D", probability: .63, favorite: "D", actualMargin: 1.7, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "WI", rating: "Lean D", probability: .64, favorite: "D", actualMargin: .85, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "PA", rating: "Lean D", probability: .61, favorite: "D", actualMargin: -.22, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "OH", rating: "Toss-up", probability: .55, favorite: "R", actualMargin: -3.62, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "MT", rating: "Lean R", probability: .69, favorite: "R", actualMargin: -7.14, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "NE", rating: "Likely R", probability: .78, favorite: "R", actualMargin: -6.6, tags: ["Incumbent race", "Independent factor"] },
+      { state: "TX", rating: "Likely R", probability: .86, favorite: "R", actualMargin: -10.86, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "FL", rating: "Likely R", probability: .88, favorite: "R", actualMargin: -12.77, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "MD", rating: "Likely D", probability: .85, favorite: "D", actualMargin: 10.1, tags: ["Open seat", "Major-party baseline"] }
+    ],
+    sources: [
+      "Late-cycle public race ratings and polling-average context",
+      "Final certified or reported state Senate margins",
+      "Manual candidate/open-seat notes"
+    ]
+  }
+];
+
 const races = [
   { state: "AL", seat: "Open seat", incumbent: "Tommy Tuberville", hold: "R", caucusTarget: "D", rating: "Safe R", pvi: -15, pastSenate: -16, money: -1, candidate: -1, approval: -1, primary: "unresolved", primaryDate: "2026-05-19", nomination: .25, independent: "none", polls: [], note: "The Republican primary matters more than the general-election baseline." },
   { state: "AK", seat: "Dan Sullivan", incumbent: "Dan Sullivan", hold: "R", caucusTarget: "D", rating: "Toss-up", pvi: -8, pastSenate: -12, money: .3, candidate: 1.2, approval: .1, primary: "unresolved", primaryDate: "2026-08-18", nomination: .6, independent: "possible D-aligned independent or coalition-backed challenger", challengerStrength: "majorOffice", polls: [[-150, 31], [-105, 36], [-62, 42], [-20, 47]], note: "Alaska is modeled as a coalition/independent route, not a normal Democratic-label race." },
@@ -1597,30 +1625,16 @@ function buildCalibrationReport(sourceData, model) {
       meanAbsoluteMarginError: sample.length ? Number((sample.reduce((sum, row) => sum + row.absoluteMarginError, 0) / sample.length).toFixed(1)) : null
     };
   };
-  const buckets = [
-    [0.5, 0.6, "50-60%"],
-    [0.6, 0.7, "60-70%"],
-    [0.7, 0.8, "70-80%"],
-    [0.8, 0.9, "80-90%"],
-    [0.9, 1.01, "90-100%"]
-  ].map(([min, max, label]) => {
-    const sample = rows.filter((row) => {
-      const favoriteProbability = Math.max(row.predicted, 1 - row.predicted);
-      return favoriteProbability >= min && favoriteProbability < max;
-    });
-    const actualWins = sample.filter((row) => row.predicted >= .5 ? row.actual === 1 : row.actual === 0).length;
-    return {
-      label,
-      expectedWinRate: Number(((min + Math.min(max, 1)) / 2).toFixed(3)),
-      actualWinRate: sample.length ? Number((actualWins / sample.length).toFixed(3)) : null,
-      sample: sample.length
-    };
-  });
+  const buckets = bucketCalibrationRows(rows.map((row) => ({
+    probability: Math.max(row.predicted, 1 - row.predicted),
+    favoriteWon: row.predicted >= .5 ? row.actual === 1 : row.actual === 0
+  })));
+  const historicalBacktest = buildArchivedBacktestReport();
   return {
     sample: rows.length,
     meanBrier: mean("brier"),
     meanAbsoluteMarginError: mean("absoluteMarginError"),
-    note: "Current diagnostic only: compares the live model shape against each state's latest available MIT/MEDSL Senate result. The true archived-input backtest is tracked separately below.",
+    note: "Current diagnostic only: compares the live model shape against each state's latest available MIT/MEDSL Senate result. The archived-input backtest is tracked separately below.",
     buckets,
     breakdowns: [
       summarize("Toss-up / tilt races", (row) => row.tags.includes("Toss-up") || row.tags.includes("Tilt D") || row.tags.includes("Tilt R")),
@@ -1632,16 +1646,28 @@ function buildCalibrationReport(sourceData, model) {
       summarize("Ranked-choice races", (row) => row.tags.includes("Ranked-choice")),
       summarize("Independent-factor races", (row) => row.tags.includes("Independent factor"))
     ],
-    historicalBacktest: {
-      status: "not-ready",
-      label: "True historical backtest",
-      cyclesTargeted: [2016, 2018, 2020, 2022, 2024],
-      availableCycles: [],
-      sample: 0,
-      note: "A real backtest needs frozen pre-election ratings, polls, candidate fields, finance snapshots, and generic-ballot inputs for each cycle. Final election returns alone are not enough, so this site does not claim full historical calibration yet."
-    },
+    historicalBacktest,
     worstStates: [...rows].sort((a, b) => b.absoluteMarginError - a.absoluteMarginError).slice(0, 5)
   };
+}
+
+function bucketCalibrationRows(items) {
+  return [
+    [0.5, 0.6, "50-60%"],
+    [0.6, 0.7, "60-70%"],
+    [0.7, 0.8, "70-80%"],
+    [0.8, 0.9, "80-90%"],
+    [0.9, 1.01, "90-100%"]
+  ].map(([min, max, label]) => {
+    const sample = items.filter((item) => item.probability >= min && item.probability < max);
+    const actualWins = sample.filter((item) => item.favoriteWon).length;
+    return {
+      label,
+      expectedWinRate: Number(((min + Math.min(max, 1)) / 2).toFixed(3)),
+      actualWinRate: sample.length ? Number((actualWins / sample.length).toFixed(3)) : null,
+      sample: sample.length
+    };
+  });
 }
 
 function calibrationMissExplanation(race, historical, predicted, absoluteMarginError) {
@@ -1661,6 +1687,76 @@ function calibrationMissExplanation(race, historical, predicted, absoluteMarginE
     miss: Number(absoluteMarginError.toFixed(1)),
     notes: notes.slice(0, 4)
   };
+}
+
+function buildArchivedBacktestReport() {
+  const races = ARCHIVED_SENATE_BACKTESTS.flatMap((cycle) => cycle.races.map((race) => {
+    const favoriteWon = race.favorite === "D" ? race.actualMargin > 0 : race.actualMargin < 0;
+    const predictedMargin = race.favorite === "D"
+      ? RATING_TO_MARGIN[race.rating] || 0
+      : -(Math.abs(RATING_TO_MARGIN[race.rating] || 0));
+    const marginMiss = Math.abs(predictedMargin - race.actualMargin);
+    return {
+      ...race,
+      cycle: cycle.cycle,
+      freezeDate: cycle.freezeDate,
+      favoriteWon,
+      predictedMargin: Number(predictedMargin.toFixed(1)),
+      marginMiss: Number(marginMiss.toFixed(1)),
+      brier: Number(((race.probability - (favoriteWon ? 1 : 0)) ** 2).toFixed(3)),
+      explanation: archivedBacktestExplanation(race, favoriteWon, marginMiss)
+    };
+  }));
+  const mean = (field) => races.length ? races.reduce((sum, race) => sum + race[field], 0) / races.length : null;
+  const summarize = (label, filter) => {
+    const sample = races.filter(filter);
+    return {
+      label,
+      sample: sample.length,
+      meanBrier: sample.length ? Number((sample.reduce((sum, race) => sum + race.brier, 0) / sample.length).toFixed(3)) : null,
+      meanMarginMiss: sample.length ? Number((sample.reduce((sum, race) => sum + race.marginMiss, 0) / sample.length).toFixed(1)) : null
+    };
+  };
+  return {
+    status: races.length ? "partial" : "not-ready",
+    label: "Archived-input historical backtest",
+    cyclesTargeted: [2016, 2018, 2020, 2022, 2024],
+    availableCycles: [...new Set(ARCHIVED_SENATE_BACKTESTS.map((cycle) => cycle.cycle))],
+    sample: races.length,
+    meanBrier: mean("brier"),
+    meanMarginMiss: mean("marginMiss"),
+    note: races.length
+      ? "Partial frozen-input backtest started with a 2024 Senate seed. It is separate from the current-cycle MIT diagnostic and should expand before being treated as full historical validation."
+      : "A real backtest needs frozen pre-election ratings, polls, candidate fields, finance snapshots, and generic-ballot inputs for each cycle. Final election returns alone are not enough.",
+    buckets: bucketCalibrationRows(races.map((race) => ({ probability: race.probability, favoriteWon: race.favoriteWon }))),
+    breakdowns: [
+      summarize("Toss-up / tilt races", (race) => race.rating === "Toss-up" || /^Tilt/.test(race.rating)),
+      summarize("Lean races", (race) => /^Lean/.test(race.rating)),
+      summarize("Likely races", (race) => /^Likely/.test(race.rating)),
+      summarize("Open seats", (race) => race.tags.includes("Open seat")),
+      summarize("Incumbent races", (race) => race.tags.includes("Incumbent race")),
+      summarize("Independent-factor races", (race) => race.tags.includes("Independent factor"))
+    ],
+    worstRaces: [...races].sort((a, b) => b.marginMiss - a.marginMiss).slice(0, 8),
+    cycles: ARCHIVED_SENATE_BACKTESTS.map(({ cycle, freezeDate, status, note, races: cycleRaces, sources }) => ({
+      cycle,
+      freezeDate,
+      status,
+      sample: cycleRaces.length,
+      note,
+      sources
+    }))
+  };
+}
+
+function archivedBacktestExplanation(race, favoriteWon, marginMiss) {
+  const notes = [];
+  if (!favoriteWon) notes.push("favorite lost");
+  if (race.tags.includes("Independent factor")) notes.push("independent candidate environment");
+  if (race.tags.includes("Open seat")) notes.push("open-seat candidate uncertainty");
+  if (marginMiss > 6) notes.push("rating-implied margin missed by more than six points");
+  if (/Toss-up|Lean/.test(race.rating)) notes.push("competitive rating bucket");
+  return notes.length ? notes : ["within expected directional range"];
 }
 
 async function writeForecast() {
