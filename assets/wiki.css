@@ -624,6 +624,58 @@ dd {
   opacity: 1;
 }
 
+.district-list {
+  max-height: 520px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--paper) 82%, transparent);
+}
+
+.district-list-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 58px minmax(110px, 1fr) 88px 78px 72px;
+  gap: 9px;
+  align-items: center;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-left: 5px solid var(--toss);
+  padding: 8px 10px;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  appearance: none;
+}
+
+.district-list-row.leads-dem {
+  border-left-color: var(--dem);
+}
+
+.district-list-row.leads-rep {
+  border-left-color: var(--rep);
+}
+
+.district-list-row:hover,
+.district-list-row:focus {
+  background: color-mix(in srgb, var(--gold) 12%, transparent);
+  outline: none;
+}
+
+.district-list-row strong,
+.district-list-row em,
+.district-list-row i {
+  font: 900 .78rem/1.1 "Segoe UI", Arial, sans-serif;
+  font-style: normal;
+}
+
+.district-list-row span {
+  color: var(--muted);
+  font-size: .8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .house-board-layout .hover-card {
   position: sticky;
   top: 92px;

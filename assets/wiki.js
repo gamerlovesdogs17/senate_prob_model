@@ -23,6 +23,11 @@ const HOUSE_COLOR_MODES = {
   probability: "Win probability"
 };
 
+const HOUSE_PREVIEW_MODES = {
+  board: "Board",
+  list: "List"
+};
+
 const CHART_ANNOTATIONS = [
   { date: "2026-05-17", label: "Model reworked" }
 ];
@@ -31,7 +36,7 @@ let forecast = null;
 let houseForecast = null;
 let articles = [];
 let mapColorMode = "rating";
-let houseViewMode = "diagram";
+let houseViewMode = "board";
 let houseColorMode = "rating";
 let selectedHouseDistrictId = null;
 
@@ -892,6 +897,13 @@ function houseDistrictMarkup(district) {
   `;
 }
 
+function controlProbabilityPhrase(probability) {
+  if (probability >= .9) return "strongly favored";
+  if (probability >= .75) return "clearly favored";
+  if (probability >= .6) return "favored";
+  return "narrowly favored";
+}
+
 function updateHouseDistrictCard(district) {
   if (district?.id) selectedHouseDistrictId = district.id;
   const card = document.getElementById("house-district-card");
@@ -901,7 +913,8 @@ function updateHouseDistrictCard(district) {
 function renderHouseCartogram() {
   const container = document.getElementById("house-district-cartogram");
   if (!container || !houseForecast) return;
-  container.hidden = false;
+  container.hidden = houseViewMode !== "board";
+  if (houseViewMode !== "board") return;
   const districts = [...houseForecast.districts].sort((a, b) => {
     const ratingDelta = Object.values(RATING_BUCKET).indexOf(houseDistrictBucket(a)) - Object.values(RATING_BUCKET).indexOf(houseDistrictBucket(b));
     return ratingDelta || a.id.localeCompare(b.id, undefined, { numeric: true });
@@ -917,6 +930,34 @@ function renderHouseCartogram() {
     </button>
   `).join("");
   container.querySelectorAll(".district-cell").forEach((node) => {
+    const district = houseForecast.districts.find((item) => item.id === node.dataset.district);
+    const handler = () => updateHouseDistrictCard(district);
+    node.addEventListener("mouseenter", handler);
+    node.addEventListener("focus", handler);
+    node.addEventListener("click", handler);
+  });
+  updateHouseDistrictCard(houseForecast.districts.find((district) => district.id === selectedHouseDistrictId) || houseForecast.decisiveDistricts?.[0] || houseForecast.districts[0]);
+}
+
+function renderHouseDistrictList() {
+  const container = document.getElementById("house-district-list");
+  if (!container || !houseForecast) return;
+  container.hidden = houseViewMode !== "list";
+  if (houseViewMode !== "list") return;
+  const districts = [...houseForecast.districts].sort((a, b) => {
+    const competitiveDelta = Math.abs(a.margin) - Math.abs(b.margin);
+    return competitiveDelta || a.id.localeCompare(b.id, undefined, { numeric: true });
+  });
+  container.innerHTML = districts.map((district) => `
+    <button class="district-list-row ${houseLeaderClass(district)}" type="button" data-district="${escapeHtml(district.id)}">
+      <strong>${escapeHtml(district.id)}</strong>
+      <span>${escapeHtml(district.label || (district.open ? "Open seat" : ""))}</span>
+      <b class="rating-pill ${houseDistrictBucket(district)}">${escapeHtml(houseDistrictColorLabel(district))}</b>
+      <em>${district.winnerParty === "D" ? "D" : "R"} ${oneDecimal(district.winnerProbability)}</em>
+      <i>${signedPointMargin(district.margin)}</i>
+    </button>
+  `).join("");
+  container.querySelectorAll(".district-list-row").forEach((node) => {
     const district = houseForecast.districts.find((item) => item.id === node.dataset.district);
     const handler = () => updateHouseDistrictCard(district);
     node.addEventListener("mouseenter", handler);
@@ -989,7 +1030,6 @@ async function renderHouseDistrictMap() {
 function renderHouseViewControls() {
   const container = document.getElementById("house-view-controls");
   if (!container) return;
-  houseViewMode = "diagram";
   container.innerHTML = Object.entries(HOUSE_COLOR_MODES).map(([mode, label]) => (
     `<button type="button" class="${mode === houseColorMode ? "active" : ""}" data-house-color="${mode}">${label}</button>`
   )).join("");
@@ -999,6 +1039,23 @@ function renderHouseViewControls() {
       renderHouseViewControls();
       renderHouseLegend();
       renderHouseCartogram();
+      renderHouseDistrictList();
+    });
+  });
+}
+
+function renderHousePreviewControls() {
+  const container = document.getElementById("house-preview-controls");
+  if (!container) return;
+  container.innerHTML = Object.entries(HOUSE_PREVIEW_MODES).map(([mode, label]) => (
+    `<button type="button" class="${mode === houseViewMode ? "active" : ""}" data-house-preview="${mode}">${label}</button>`
+  )).join("");
+  container.querySelectorAll("button").forEach((button) => {
+    button.addEventListener("click", () => {
+      houseViewMode = button.dataset.housePreview || "board";
+      renderHousePreviewControls();
+      renderHouseCartogram();
+      renderHouseDistrictList();
     });
   });
 }
@@ -1020,7 +1077,7 @@ function renderHouseSummary() {
   panel?.classList.toggle("control-rep", !favoredIsDem);
   const odds = document.getElementById("house-odds-phrase");
   if (odds) odds.innerHTML = `<span>${favoredSide} favored</span><strong>${pct(favoredProbability)}</strong>`;
-  setText("house-control-headline", `${favoredSide} narrowly favored`);
+  setText("house-control-headline", `${favoredSide} ${controlProbabilityPhrase(favoredProbability)}`);
   setText("house-dem-control", oneDecimal(houseForecast.demControlProbability));
   setText("house-rep-control", oneDecimal(houseForecast.repControlProbability));
   setText("house-median-seats", `${houseForecast.medianSeats} D / ${435 - houseForecast.medianSeats} R`);
@@ -1113,8 +1170,10 @@ function renderHouseSourceStatus() {
 
 function renderHousePage() {
   renderHouseSummary();
+  renderHousePreviewControls();
   renderHouseViewControls();
   renderHouseCartogram();
+  renderHouseDistrictList();
   renderHouseDistrictMap();
   renderHouseLegend();
   renderHouseControlHistory();
