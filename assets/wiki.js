@@ -1153,10 +1153,22 @@ function renderHouseSeatHistory() {
   const chart = document.getElementById("house-seat-history-chart");
   if (!chart || !houseForecast) return;
   const points = houseForecast.seatHistory?.length ? houseForecast.seatHistory : [{ date: houseForecast.modelDate, dem: houseForecast.medianSeats, rep: 435 - houseForecast.medianSeats }];
+  const values = points.flatMap((point) => [point.dem, point.rep ?? 435 - point.dem]);
+  const min = Math.max(190, Math.floor((Math.min(...values) - 5) / 5) * 5);
+  const max = Math.min(245, Math.ceil((Math.max(...values) + 5) / 5) * 5);
+  const midpoint = 217.5;
+  const ticks = Array.from(new Set([max, Math.round((max + midpoint) / 2), midpoint, Math.round((min + midpoint) / 2), min]));
   renderLineChart(chart, points, {
     label: "Projected House seats history",
     pointHtml: (point) => `${point.date}<br>D ${point.dem} / R ${point.rep ?? 435 - point.dem}`,
-    value: (point) => point.dem
+    value: (point) => point.dem,
+    domain: [min, max],
+    ticks,
+    midline: midpoint,
+    band: 3,
+    valueFormat: (value) => Number.isInteger(value) ? String(value) : value.toFixed(1),
+    endLabel: (party, value) => `${party === "dem" ? "Democrat" : "Republican"} ${Math.round(value)}`,
+    hoverLabel: (party, value) => `${party === "dem" ? "Democrat" : "Republican"} ${Math.round(value)}`
   });
 }
 
