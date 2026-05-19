@@ -429,6 +429,41 @@ function uncertaintyBadges(race, pollSignal) {
   return badges;
 }
 
+function raceTypeUncertainty(race, pollSignal, quality) {
+  let extra = 0;
+  const reasons = [];
+  const thinPolling = !pollSignal || pollSignal.pollCount < 3;
+  const leanOrLikely = /^Lean|^Likely/.test(race.rating);
+  if (thinPolling) {
+    extra += .55;
+    reasons.push("thin polling");
+  }
+  if (leanOrLikely && thinPolling) {
+    extra += .55;
+    reasons.push("lean/likely race with sparse polls");
+  }
+  if (race.independent && race.independent !== "none") {
+    extra += .85;
+    reasons.push("independent candidate environment");
+  }
+  if (RCV_STATES[race.state]) {
+    extra += .65;
+    reasons.push("ranked-choice transfer uncertainty");
+  }
+  if (race.primary !== "resolved") {
+    extra += race.primary === "runoff" ? .55 : .35;
+    reasons.push(race.primary === "runoff" ? "runoff pending" : "primary unresolved");
+  }
+  if ((quality?.score ?? 100) < 55) {
+    extra += .45;
+    reasons.push("low input confidence");
+  }
+  return {
+    extraError: Number(extra.toFixed(2)),
+    reasons
+  };
+}
+
 function movementDrivers(race) {
   const previousRace = previousForecast?.races?.find((item) => item.state === race.state);
   if (!previousRace) return [{ label: "First saved run", detail: "No previous generated race file to compare." }];
@@ -476,7 +511,9 @@ function runModel(sourceData) {
     const withCandidates = { ...race, ...candidates };
     const pollSignal = pollWeightMetrics(withCandidates);
     const margin = baselineMargin(withCandidates);
-    const error = (RATING_TO_ERROR[race.rating] || 8) + primaryRisk(race);
+    const quality = inputQuality(withCandidates, pollSignal);
+    const uncertainty = raceTypeUncertainty(withCandidates, pollSignal, quality);
+    const error = (RATING_TO_ERROR[race.rating] || 8) + primaryRisk(race) + uncertainty.extraError;
     return {
       ...withCandidates,
       margin,
@@ -484,7 +521,8 @@ function runModel(sourceData) {
       demProbability: logistic(margin, error),
       pollMargin: pollSignal?.margin ?? null,
       pollSignal,
-      inputQuality: inputQuality(withCandidates, pollSignal),
+      inputQuality: quality,
+      uncertaintyAdjustment: uncertainty,
       primaryRisk: primaryRisk(race),
       stateElasticity: stateElasticity(race),
       incumbencyAdjustment: incumbencyAdjustment(withCandidates),
@@ -523,7 +561,7 @@ function runModel(sourceData) {
       }
 
       const primaryShock = race.primaryRisk > 0 ? normalRandom() * race.primaryRisk : 0;
-      const independentShock = race.independent !== "none" ? normalRandom() * 1.1 : 0;
+      const independentShock = race.independent !== "none" ? normalRandom() * 1.45 : 0;
       const rcv = RCV_STATES[race.state];
       const rcvShock = rcv ? normalRandom() * rcv.transferSd + normalRandom() * rcv.exhaustedSd : 0;
       const elasticNationalSwing = nationalSwing * race.stateElasticity;
@@ -1544,7 +1582,8 @@ function buildCalibrationReport(sourceData, model) {
         actual,
         brier: Number(brier.toFixed(4)),
         absoluteMarginError: Number(absoluteMarginError.toFixed(2)),
-        tags
+        tags,
+        explanation: calibrationMissExplanation(race, historical, predicted, absoluteMarginError)
       };
     })
     .filter(Boolean);
@@ -1602,6 +1641,25 @@ function buildCalibrationReport(sourceData, model) {
       note: "A real backtest needs frozen pre-election ratings, polls, candidate fields, finance snapshots, and generic-ballot inputs for each cycle. Final election returns alone are not enough, so this site does not claim full historical calibration yet."
     },
     worstStates: [...rows].sort((a, b) => b.absoluteMarginError - a.absoluteMarginError).slice(0, 5)
+  };
+}
+
+function calibrationMissExplanation(race, historical, predicted, absoluteMarginError) {
+  const notes = [];
+  if (historical.year !== 2024) notes.push(`comparison uses ${historical.year}, not a frozen 2026-like pre-election snapshot`);
+  if (!race.pollSignal || race.pollSignal.pollCount < 3) notes.push("little or no race polling");
+  if (race.independent && race.independent !== "none") notes.push("independent or caucus-treatment assumptions");
+  if (RCV_STATES[race.state]) notes.push("ranked-choice transfer uncertainty");
+  if (race.primary !== "resolved") notes.push("unresolved nomination effects");
+  if (Math.abs(race.margin - historical.margin) > 15) notes.push("state fundamentals differ sharply from latest historical Senate result");
+  if (race.sourceInputs?.genericPolling) notes.push("national environment is applied to the current cycle, not the historical race");
+  const favorite = predicted >= .5 ? "Democratic" : "Republican";
+  return {
+    favorite,
+    predictedMargin: Number(race.margin.toFixed(1)),
+    historicalMargin: Number(historical.margin.toFixed(1)),
+    miss: Number(absoluteMarginError.toFixed(1)),
+    notes: notes.slice(0, 4)
   };
 }
 

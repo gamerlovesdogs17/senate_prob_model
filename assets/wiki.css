@@ -1395,6 +1395,21 @@ button.leverage-row {
   text-transform: uppercase;
 }
 
+.calibration-miss-row {
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.calibration-miss-row .leverage-row {
+  border-bottom: 0;
+}
+
+.calibration-miss-row p {
+  margin: 4px 0 0 44px;
+  color: var(--muted);
+  font: 750 .78rem/1.3 "Segoe UI", Arial, sans-serif;
+}
+
 .race-board-row:hover,
 .race-board-row:focus {
   background: color-mix(in srgb, var(--paper-2) 72%, transparent);

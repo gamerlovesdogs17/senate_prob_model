@@ -1435,7 +1435,13 @@ function renderCalibrationPage() {
     const max = Math.max(...(calibration.worstStates || []).map((row) => row.absoluteMarginError || 0), 1);
     worst.innerHTML = (calibration.worstStates || []).map((row) => {
       const width = clamp(((row.absoluteMarginError || 0) / max) * 100, 12, 100);
-      return `<div class="leverage-row"><strong>${escapeHtml(row.state)}</strong><i style="width:${width}%"></i><span>${Number(row.absoluteMarginError || 0).toFixed(1)}</span></div>`;
+      const notes = row.explanation?.notes?.length ? row.explanation.notes.join("; ") : "No specific driver identified.";
+      return `
+        <div class="calibration-miss-row">
+          <div class="leverage-row"><strong>${escapeHtml(row.state)}</strong><i style="width:${width}%"></i><span>${Number(row.absoluteMarginError || 0).toFixed(1)}</span></div>
+          <p>${escapeHtml(notes)}</p>
+        </div>
+      `;
     }).join("");
   }
 }
