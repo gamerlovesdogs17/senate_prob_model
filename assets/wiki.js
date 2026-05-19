@@ -1006,8 +1006,8 @@ function renderHouseSeatHistogram() {
   if (!container || !houseForecast) return;
   const seats = Object.keys(houseForecast.seatCounts || {}).map(Number);
   const center = houseForecast.medianSeats || 218;
-  const minSeat = Math.max(195, Math.min(...seats, center - 10));
-  const maxSeat = Math.min(245, Math.max(...seats, center + 10));
+  const minSeat = Math.max(200, center - 7);
+  const maxSeat = Math.min(235, center + 7);
   renderSeatHistogramInto(container, houseForecast, { minSeat, maxSeat });
 }
 

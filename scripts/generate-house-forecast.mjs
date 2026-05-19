@@ -485,6 +485,25 @@ function adjustedDistricts(sourceData) {
   });
 }
 
+function validateDistricts(districts, phase) {
+  const ids = new Set();
+  const failures = [];
+  for (const district of districts) {
+    if (ids.has(district.id)) failures.push(`${district.id}: duplicate id`);
+    ids.add(district.id);
+    if (!Number.isFinite(district.margin)) failures.push(`${district.id}: non-finite margin`);
+    if (!Number.isFinite(district.demProbability) || !Number.isFinite(district.repProbability)) failures.push(`${district.id}: non-finite probability`);
+    if (district.sourceRating === "Safe D" && Number.isFinite(district.margin) && district.margin < 8) failures.push(`${district.id}: Safe D source collapsed to ${district.margin}`);
+    if (district.sourceRating === "Safe R" && Number.isFinite(district.margin) && district.margin > -8) failures.push(`${district.id}: Safe R source collapsed to ${district.margin}`);
+    if (phase === "simulation" && district.sourceRating === "Safe D" && district.demProbability < .9) failures.push(`${district.id}: Safe D source simulated at ${district.demProbability}`);
+    if (phase === "simulation" && district.sourceRating === "Safe R" && district.repProbability < .9) failures.push(`${district.id}: Safe R source simulated at ${district.repProbability}`);
+  }
+  if (districts.length !== 435) failures.push(`expected 435 districts, found ${districts.length}`);
+  if (failures.length) {
+    throw new Error(`House district validation failed during ${phase}: ${failures.slice(0, 12).join("; ")}`);
+  }
+}
+
 async function fetchHouseFec(status) {
   const text = await fetchText("https://www.fec.gov/files/bulk-downloads/2026/candidate_summary_2026.csv", "openFecHouseCandidateSummary", status, { timeoutMs: 16000 });
   if (!text) return {};
@@ -502,14 +521,14 @@ async function fetchHouseFec(status) {
     byDistrict[id] ||= { demReceipts: 0, repReceipts: 0, demCash: 0, repCash: 0, demDebts: 0, repDebts: 0, candidates: 0 };
     byDistrict[id].candidates += 1;
     if (side === "dem") {
-      byDistrict[id].demReceipts += toNumber(row.Total_Receipt) || 0;
-      byDistrict[id].demCash += toNumber(row.Cash_On_Hand_COP) || toNumber(row.Cash_On_Hand) || 0;
-      byDistrict[id].demDebts += toNumber(row.Debts_Owed_By_Committee) || toNumber(row.Debts_Owed) || 0;
+      byDistrict[id].demReceipts += nonNegative(row.Total_Receipt);
+      byDistrict[id].demCash += nonNegative(row.Cash_On_Hand_COP) || nonNegative(row.Cash_On_Hand);
+      byDistrict[id].demDebts += nonNegative(row.Debts_Owed_By_Committee) || nonNegative(row.Debts_Owed);
     }
     if (side === "rep") {
-      byDistrict[id].repReceipts += toNumber(row.Total_Receipt) || 0;
-      byDistrict[id].repCash += toNumber(row.Cash_On_Hand_COP) || toNumber(row.Cash_On_Hand) || 0;
-      byDistrict[id].repDebts += toNumber(row.Debts_Owed_By_Committee) || toNumber(row.Debts_Owed) || 0;
+      byDistrict[id].repReceipts += nonNegative(row.Total_Receipt);
+      byDistrict[id].repCash += nonNegative(row.Cash_On_Hand_COP) || nonNegative(row.Cash_On_Hand);
+      byDistrict[id].repDebts += nonNegative(row.Debts_Owed_By_Committee) || nonNegative(row.Debts_Owed);
     }
   }
   for (const value of Object.values(byDistrict)) {
@@ -520,6 +539,10 @@ async function fetchHouseFec(status) {
   status.openFecHouseCandidateSummary.rows = rows.length;
   status.openFecHouseCandidateSummary.districts = Object.keys(byDistrict).length;
   return byDistrict;
+}
+
+function nonNegative(value) {
+  return Math.max(toNumber(value) || 0, 0);
 }
 
 function contextualDistrictMargin(district, ratingMargin) {
@@ -655,9 +678,14 @@ async function writeHouseForecast() {
     throw new Error(`House ratings parse returned ${sourceData.mapDistricts.length} map districts and ${sourceData.cookDistricts.length} Cook districts`);
   }
   const districts = adjustedDistricts(sourceData);
+  validateDistricts(districts, "district adjustment");
   const model = runModel(districts);
   model.districts = appendDistrictHistories(model.districts);
-  model.decisiveDistricts = model.decisiveDistricts.map((district) => model.districts.find((item) => item.id === district.id) || district);
+  validateDistricts(model.districts, "simulation");
+  model.decisiveDistricts = model.decisiveDistricts.map((district) => ({
+    ...(model.districts.find((item) => item.id === district.id) || district),
+    leverage: district.leverage
+  }));
   const output = {
     generatedAt: new Date().toISOString(),
     modelDate: MODEL_DATE_KEY,
