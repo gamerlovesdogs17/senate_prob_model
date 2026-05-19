@@ -28,8 +28,8 @@
     <section class="hero-grid" aria-labelledby="page-title">
       <div class="hero-main home-hero">
         <p class="kicker">Capitol Forecast</p>
-        <h1 id="page-title">Forecasts for American elections.</h1>
-        <p class="lede">Probabilities, maps, and campaign analysis.</p>
+        <h1 id="page-title">American election odds.</h1>
+        <p class="lede">Senate, House, and presidential forecasts.</p>
         <div class="hero-actions">
           <a class="button-link" href="senate.html">Senate</a>
           <a class="button-link" href="house.html">House</a>
@@ -37,6 +37,15 @@
           <a class="button-link" href="articles.html">Articles</a>
         </div>
       </div>
+      <aside class="home-run-panel">
+        <p class="kicker">Latest run</p>
+        <dl>
+          <div><dt>Senate</dt><dd id="home-senate-run">--</dd></div>
+          <div><dt>House</dt><dd id="home-house-run">--</dd></div>
+          <div><dt>Senate median</dt><dd id="home-senate-median">--</dd></div>
+          <div><dt>House median</dt><dd id="home-house-median">--</dd></div>
+        </dl>
+      </aside>
     </section>
 
     <section class="forecast-overviews" aria-label="Forecast overviews">
@@ -45,14 +54,14 @@
         <strong>Senate</strong>
         <b id="home-senate-favored">--</b>
         <small><i id="home-senate-dem">--</i> D / <i id="home-senate-rep">--</i> R</small>
-        <small id="home-senate-run">--</small>
+        <small id="home-senate-note">--</small>
       </a>
       <a class="forecast-overview-card" href="house.html">
         <span id="home-house-status">Live</span>
         <strong>House</strong>
         <b id="home-house-favored">--</b>
         <small><i id="home-house-dem">--</i> D / <i id="home-house-rep">--</i> R</small>
-        <small id="home-house-run">--</small>
+        <small id="home-house-note">--</small>
       </a>
       <a class="forecast-overview-card" href="president.html">
         <span>Offline</span>
@@ -63,9 +72,26 @@
       </a>
     </section>
 
-    <section class="text-panel" aria-labelledby="top-article-title">
-      <p class="kicker">Latest article</p>
-      <div id="top-article" class="article-teaser"></div>
+    <section class="home-radar-grid" aria-label="Forecast radar">
+      <article class="chart-panel">
+        <span class="chart-label">Senate watch</span>
+        <div id="home-senate-radar" class="home-radar-list"></div>
+      </article>
+      <article class="chart-panel">
+        <span class="chart-label">House watch</span>
+        <div id="home-house-radar" class="home-radar-list"></div>
+      </article>
+    </section>
+
+    <section class="home-news-grid" aria-label="Latest writing">
+      <article class="text-panel" aria-labelledby="top-article-title">
+        <p class="kicker">Latest article</p>
+        <div id="top-article" class="article-teaser"></div>
+      </article>
+      <aside class="text-panel">
+        <p class="kicker">More articles</p>
+        <div id="home-article-list" class="home-article-list"></div>
+      </aside>
     </section>
   </main>
 

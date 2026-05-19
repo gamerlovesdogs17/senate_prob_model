@@ -297,6 +297,8 @@ function updateSummary() {
   setText("home-senate-dem", oneDecimal(forecast.demControlProbability));
   setText("home-senate-rep", oneDecimal(forecast.repControlProbability));
   setText("home-senate-run", forecast.runDate || forecast.modelDate || "--");
+  setText("home-senate-median", `${forecast.medianSeats} D / ${100 - forecast.medianSeats} R`);
+  setText("home-senate-note", `${forecast.races.filter((race) => race.competitive).length} competitive races`);
   document.querySelectorAll(".odds-panel").forEach((panel) => {
     panel.classList.toggle("control-dem", favoredIsDem);
     panel.classList.toggle("control-rep", !favoredIsDem);
@@ -321,6 +323,42 @@ function updateHomeHouseSummary() {
   setText("home-house-dem", oneDecimal(houseForecast.demControlProbability));
   setText("home-house-rep", oneDecimal(houseForecast.repControlProbability));
   setText("home-house-run", houseForecast.runDate || houseForecast.modelDate || "--");
+  setText("home-house-median", `${houseForecast.medianSeats} D / ${435 - houseForecast.medianSeats} R`);
+  setText("home-house-note", `${houseForecast.districts?.filter((district) => district.competitive).length ?? "--"} competitive districts`);
+}
+
+function renderHomeRadar() {
+  const senate = document.getElementById("home-senate-radar");
+  if (senate && forecast) {
+    const races = [...forecast.races]
+      .filter((race) => race.competitive || race.tippingPower > .05)
+      .sort((a, b) => b.tippingPower - a.tippingPower)
+      .slice(0, 6);
+    senate.innerHTML = races.map((race) => {
+      const leader = race.winnerParty === "D" ? candidateChanceLabel(race, "D") : "Republican";
+      return `
+        <a class="home-radar-row ${leaderClassForRace(race)}" href="race.html?state=${race.state}">
+          <strong>${escapeHtml(race.state)}</strong>
+          <span>${escapeHtml(race.displayName.replace(" Senate", ""))}</span>
+          <b>${escapeHtml(leader)} ${oneDecimal(race.winnerProbability)}</b>
+          <i>${oneDecimal(race.tippingPower)}</i>
+        </a>
+      `;
+    }).join("");
+  }
+
+  const house = document.getElementById("home-house-radar");
+  if (house && houseForecast) {
+    const districts = [...(houseForecast.decisiveDistricts || [])].slice(0, 6);
+    house.innerHTML = districts.map((district) => `
+      <a class="home-radar-row ${houseLeaderClass(district)}" href="house.html">
+        <strong>${escapeHtml(district.id)}</strong>
+        <span>${escapeHtml(district.label || district.rating)}</span>
+        <b>${district.winnerParty === "D" ? "D" : "R"} ${oneDecimal(district.winnerProbability)}</b>
+        <i>${oneDecimal(district.leverage || 0)}</i>
+      </a>
+    `).join("");
+  }
 }
 
 function normalizedMapMode(mode) {
@@ -1222,6 +1260,18 @@ function renderTopArticle() {
   `;
 }
 
+function renderHomeArticleList() {
+  const container = document.getElementById("home-article-list");
+  if (!container) return;
+  const list = sortedArticles().slice(0, 4);
+  container.innerHTML = list.length ? list.map((article) => `
+    <a href="${articleUrl(article)}">
+      <strong>${escapeHtml(article.title)}</strong>
+      <span>${escapeHtml(article.date)}</span>
+    </a>
+  `).join("") : `<p class="meta">No articles yet.</p>`;
+}
+
 function renderArticlesList() {
   const container = document.getElementById("articles-list");
   if (!container) return;
@@ -1478,6 +1528,7 @@ async function init() {
     updateHomeHouseSummary();
     renderHousePage();
     renderTopArticle();
+    renderHomeArticleList();
     renderArticlesList();
     renderArticlePage();
     return;
@@ -1496,7 +1547,9 @@ async function init() {
   renderSourceStatus();
   renderHousePage();
   renderBattlegroundList();
+  renderHomeRadar();
   renderTopArticle();
+  renderHomeArticleList();
   renderArticlesList();
   renderArticlePage();
 }
