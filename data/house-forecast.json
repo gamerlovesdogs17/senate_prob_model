@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-19T11:38:21.097Z",
+  "generatedAt": "2026-05-19T14:07:48.310Z",
   "modelDate": "2026-05-19",
   "runDate": "May 19, 2026",
   "updateTime": "around 6:20 AM Central",
@@ -40,95 +40,81 @@
     "redistrictingTreatment": "Current district-by-district ratings and margins are used directly; no separate redistricting bonus is added on top of the seat ratings."
   },
   "sourceStatus": {
-    "checkedAt": "2026-05-19T11:38:15.266Z",
-    "insideElections270ToWinRatings": {
-      "ok": true,
-      "status": 200,
-      "ms": 384,
-      "bytes": 485900,
-      "url": "https://www.270towin.com/2026-house-election/table/inside-elections-2026-house-ratings"
+    "checkedAt": "2026-05-19T14:07:44.674Z",
+    "realClearPollingHousePolls": {
+      "ok": false,
+      "status": 403,
+      "ms": 134,
+      "bytes": 1278,
+      "url": "https://www.realclearpolling.com/latest-polls/house"
     },
-    "raceToTheWhHouseForecast": {
-      "ok": true,
-      "status": 200,
-      "ms": 403,
-      "bytes": 125191,
-      "url": "https://www.racetothewh.com/house-3"
+    "cookHouseRatings": {
+      "ok": false,
+      "status": 403,
+      "ms": 176,
+      "bytes": 5532,
+      "url": "https://www.cookpolitical.com/ratings/house-race-ratings"
     },
     "raceToTheWhGenericBallot": {
       "ok": true,
       "status": 200,
-      "ms": 516,
-      "bytes": 225068,
+      "ms": 149,
+      "bytes": 202982,
       "url": "https://www.racetothewh.com/polls/genericballot"
     },
     "realClearPoliticsGenericBallot": {
       "ok": false,
       "status": 403,
-      "ms": 549,
+      "ms": 166,
       "bytes": 781,
       "url": "https://www.realclearpolitics.com/epolls/other/2026_generic_congressional_vote-8670.html"
     },
     "twoSeventyToWinHouseMapData": {
       "ok": true,
       "status": 200,
-      "ms": 557,
-      "bytes": 7046702,
+      "ms": 208,
+      "bytes": 7046703,
       "url": "https://www.270towin.com/2026-house-election/inside-elections-2026-house-ratings"
     },
-    "realClearPollingHousePolls": {
+    "pollfinityAverages": {
       "ok": false,
-      "status": 403,
-      "ms": 585,
-      "bytes": 1278,
-      "url": "https://www.realclearpolling.com/latest-polls/house"
-    },
-    "votehubGenericBallot": {
-      "ok": false,
-      "status": 403,
-      "ms": 598,
-      "bytes": 5438,
-      "url": "https://polls.votehub.us/polls/generic-ballot"
+      "status": 404,
+      "ms": 200,
+      "bytes": 0,
+      "url": "https://pollfinity.com/api/averages"
     },
     "ddhqGenericBallot": {
       "ok": false,
       "status": 404,
-      "ms": 625,
-      "bytes": 370,
+      "ms": 259,
+      "bytes": 350,
       "url": "https://static.dwcdn.net/data/9Jctg.json"
     },
     "twoSeventyToWinHousePolls": {
       "ok": true,
       "status": 200,
-      "ms": 692,
-      "bytes": 7046411,
+      "ms": 332,
+      "bytes": 7046412,
       "url": "https://www.270towin.com/2026-house-election/polls/"
     },
-    "pollfinityAverages": {
-      "ok": false,
-      "status": 404,
-      "ms": 685,
-      "bytes": 0,
-      "url": "https://pollfinity.com/api/averages"
-    },
-    "cookHouseRatings": {
-      "ok": false,
-      "status": 403,
-      "ms": 751,
-      "bytes": 5554,
-      "url": "https://www.cookpolitical.com/ratings/house-race-ratings"
-    },
-    "censusDistrictBoundaries": {
+    "raceToTheWhHouseForecast": {
       "ok": true,
       "status": 200,
-      "ms": 1319,
-      "bytes": 1036282,
-      "url": "https://www.census.gov/geographies/mapping-files/2025/geo/carto-boundary-file.html"
+      "ms": 337,
+      "bytes": 125523,
+      "url": "https://www.racetothewh.com/house-3"
+    },
+    "votehubGenericBallot": {
+      "ok": false,
+      "status": 403,
+      "ms": 449,
+      "bytes": 5395,
+      "url": "https://polls.votehub.us/polls/generic-ballot"
     },
     "usPollingDataGenericBallot": {
       "ok": true,
       "status": 200,
-      "ms": 1832,
+      "ms": 726,
       "bytes": 107521,
       "url": "https://uspollingdata.com/polls/generic-ballot/"
     },
@@ -137,10 +123,24 @@
       "status": "local",
       "ms": 0
     },
+    "censusDistrictBoundaries": {
+      "ok": true,
+      "status": 200,
+      "ms": 990,
+      "bytes": 1043499,
+      "url": "https://www.census.gov/geographies/mapping-files/2025/geo/carto-boundary-file.html"
+    },
+    "insideElections270ToWinRatings": {
+      "ok": true,
+      "status": 200,
+      "ms": 1044,
+      "bytes": 485900,
+      "url": "https://www.270towin.com/2026-house-election/table/inside-elections-2026-house-ratings"
+    },
     "openFecHouseCandidateSummary": {
       "ok": true,
       "status": 200,
-      "ms": 3960,
+      "ms": 1542,
       "bytes": 1546276,
       "url": "https://www.fec.gov/files/bulk-downloads/2026/candidate_summary_2026.csv",
       "rows": 4036,
@@ -896,7 +896,7 @@
       "congressionalMargin": 0,
       "fundamentalMargin": -18,
       "rawMarginNote": "Raw 270toWin district margin fields are stored for context only; the model does not assume they are signed Democratic margins.",
-      "kalshiPrice": 61,
+      "kalshiPrice": 60,
       "demCandidate": "Democrat",
       "repCandidate": "Republican",
       "baselineRating": "Likely R",
@@ -5478,7 +5478,7 @@
       "congressionalMargin": 39.6,
       "fundamentalMargin": 35.2,
       "rawMarginNote": "Raw 270toWin district margin fields are stored for context only; the model does not assume they are signed Democratic margins.",
-      "kalshiPrice": 91,
+      "kalshiPrice": 90,
       "demCandidate": "Democrat",
       "repCandidate": "Republican",
       "baselineRating": "Safe D",
@@ -21499,7 +21499,7 @@
       "congressionalMargin": -20.8,
       "fundamentalMargin": -20.3,
       "rawMarginNote": "Raw 270toWin district margin fields are stored for context only; the model does not assume they are signed Democratic margins.",
-      "kalshiPrice": 84,
+      "kalshiPrice": 83,
       "demCandidate": "Democrat",
       "repCandidate": "Republican",
       "baselineRating": "Safe R",
