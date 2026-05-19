@@ -103,10 +103,12 @@ function leaderClassForRace(race) {
 }
 
 function extraCandidateRows(race) {
+  const latestExtra = new Map((race.extraHistory?.at(-1) ? Object.entries(race.extraHistory.at(-1)) : []).filter(([key]) => key !== "date"));
   return (race.extraCandidates || []).map((candidate) => {
     const party = candidate.party || "D";
     const badgeClass = party === "D" ? "party-badge dem-badge" : party === "R" ? "party-badge rep-badge" : "ind-badge";
-    const label = Number.isFinite(candidate.probabilityShare) ? oneDecimal(candidate.probabilityShare) : candidate.note || (party === "D" ? "Democratic alternative" : party === "R" ? "Republican alternative" : "Independent");
+    const modeledShare = latestExtra.get(candidate.name);
+    const label = Number.isFinite(modeledShare) ? oneDecimal(modeledShare) : Number.isFinite(candidate.probabilityShare) ? oneDecimal(candidate.probabilityShare) : party === "D" ? "Democratic alternative" : party === "R" ? "Republican alternative" : "Independent";
     return `
       <div class="candidate-row extra-row">
         <span>${escapeHtml(candidate.name)} <i class="${badgeClass}">${party}</i></span>
