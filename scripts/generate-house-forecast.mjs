@@ -7,7 +7,7 @@ const previousForecast = readPreviousForecast();
 const SETTINGS = {
   simulations: 30000,
   controlThreshold: 218,
-  updateTime: "around 6:00 AM Central",
+  updateTime: "around 6:20 AM Central",
   updateZone: "America/Chicago",
   dataSources: [
     "270toWin / Inside Elections public House map data",

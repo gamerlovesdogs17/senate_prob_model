@@ -303,7 +303,7 @@ function updateSummary() {
     panel.classList.toggle("control-dem", favoredIsDem);
     panel.classList.toggle("control-rep", !favoredIsDem);
   });
-  setText("update-time", `Updates daily at ${forecast.updateTime || "6:00 AM Central"}`);
+  setText("update-time", `Updates daily at ${forecast.updateTime || "6:20 AM Central"}`);
 
   const demBar = document.getElementById("dem-control-bar");
   const repBar = document.getElementById("rep-control-bar");
