@@ -1149,6 +1149,17 @@ function renderHouseControlHistory() {
   });
 }
 
+function renderHouseSeatHistory() {
+  const chart = document.getElementById("house-seat-history-chart");
+  if (!chart || !houseForecast) return;
+  const points = houseForecast.seatHistory?.length ? houseForecast.seatHistory : [{ date: houseForecast.modelDate, dem: houseForecast.medianSeats, rep: 435 - houseForecast.medianSeats }];
+  renderLineChart(chart, points, {
+    label: "Projected House seats history",
+    pointHtml: (point) => `${point.date}<br>D ${point.dem} / R ${point.rep ?? 435 - point.dem}`,
+    value: (point) => point.dem
+  });
+}
+
 function renderHouseDecisiveDistricts() {
   const container = document.getElementById("house-decisive-districts");
   if (!container || !houseForecast) return;
@@ -1215,6 +1226,7 @@ function renderHousePage() {
   renderHouseDistrictMap();
   renderHouseLegend();
   renderHouseControlHistory();
+  renderHouseSeatHistory();
   renderHouseSeatHistogram();
   renderHouseDecisiveDistricts();
   renderHouseSourceStatus();
