@@ -384,6 +384,39 @@ function rcvBaselineAdjustment(race) {
   return rcv.transferMean + independentContext;
 }
 
+function inputQuality(race, pollSignal) {
+  let score = 42;
+  const reasons = [];
+  if (pollSignal) {
+    const pollScore = Math.min(24, 8 + pollSignal.pollCount * 2.4 + pollSignal.pollsters * 3);
+    score += pollScore;
+    reasons.push(`${pollSignal.pollCount} weighted poll${pollSignal.pollCount === 1 ? "" : "s"}`);
+  } else {
+    reasons.push("no recent public race polling");
+  }
+  if (race.sourceInputs?.openFec) {
+    score += 9;
+    reasons.push("finance filing matched");
+  }
+  if (race.demStatus === "resolved" || race.demStatus === "presumptive") score += 6;
+  else score -= 7;
+  if (race.repStatus === "resolved" || race.repStatus === "presumptive") score += 6;
+  else score -= 7;
+  if (race.primary === "resolved") score += 8;
+  if (race.primary === "runoff") score -= 8;
+  if (race.independent && race.independent !== "none") score -= 4;
+  if (race.sourceInputs?.twoSeventyToWin || race.sourceInputs?.realClearPolling) {
+    score += 5;
+    reasons.push("race-poll page parsed");
+  }
+  const value = Math.round(clamp(score, 18, 94));
+  return {
+    score: value,
+    label: value >= 72 ? "High" : value >= 50 ? "Medium" : "Low",
+    reasons
+  };
+}
+
 function incumbencyAdjustment(race) {
   const base = race.seat === "Open seat" || race.seat === "Special election" ? -.25 : (race.hold === "D" ? .45 : -.45);
   if (race.seat === "Open seat" || !race.hold) return base;
@@ -419,6 +452,7 @@ function runModel(sourceData) {
       demProbability: logistic(margin, error),
       pollMargin: pollSignal?.margin ?? null,
       pollSignal,
+      inputQuality: inputQuality(withCandidates, pollSignal),
       primaryRisk: primaryRisk(race),
       stateElasticity: stateElasticity(race),
       incumbencyAdjustment: incumbencyAdjustment(withCandidates),
@@ -430,9 +464,12 @@ function runModel(sourceData) {
   });
 
   const wins = Object.fromEntries(enriched.map((race) => [race.state, 0]));
+  const demControlPathWins = Object.fromEntries(enriched.map((race) => [race.state, 0]));
+  const repControlPathWins = Object.fromEntries(enriched.map((race) => [race.state, 0]));
   const tipping = Object.fromEntries(enriched.map((race) => [race.state, { dem: 0, rep: 0, any: 0 }]));
   const seatCounts = {};
   let demControl = 0;
+  let repControl = 0;
   const demSeatsAll = [];
 
   for (let sim = 0; sim < SETTINGS.simulations; sim += 1) {
@@ -469,7 +506,16 @@ function runModel(sourceData) {
 
     demSeatsAll.push(demSeats);
     seatCounts[demSeats] = (seatCounts[demSeats] || 0) + 1;
-    if (demSeats >= SETTINGS.demControlThreshold) demControl += 1;
+    const demControls = demSeats >= SETTINGS.demControlThreshold;
+    if (demControls) demControl += 1;
+    else repControl += 1;
+
+    for (const [state, demWin] of results) {
+      const race = enriched.find((item) => item.state === state);
+      const countsWithDem = race.caucusTarget === "D" ? demWin : !demWin;
+      if (demControls && countsWithDem) demControlPathWins[state] += 1;
+      if (!demControls && !countsWithDem) repControlPathWins[state] += 1;
+    }
 
     for (const [state, demWin] of results) {
       const race = enriched.find((item) => item.state === state);
@@ -504,6 +550,7 @@ function runModel(sourceData) {
     race.demTippingPower = tipping[race.state].dem / SETTINGS.simulations;
     race.repTippingPower = tipping[race.state].rep / SETTINGS.simulations;
     race.history = buildHistory(race);
+    race.movement = probabilityMovement(race.history);
     race.extraHistory = buildExtraHistory(race);
   }
 
@@ -512,7 +559,37 @@ function runModel(sourceData) {
     demControlProbability: demControl / SETTINGS.simulations,
     repControlProbability: 1 - demControl / SETTINGS.simulations,
     medianSeats: sortedSeats[Math.floor(sortedSeats.length / 2)],
-    seatCounts
+    seatCounts,
+    controlPaths: buildControlPaths(enriched, demControlPathWins, repControlPathWins, demControl, repControl)
+  };
+}
+
+function buildControlPaths(races, demPathWins, repPathWins, demControl, repControl) {
+  const ranked = (wins, total, party) => [...races]
+    .map((race) => {
+      const probability = total ? wins[race.state] / total : 0;
+      return {
+        state: race.state,
+        displayName: race.displayName || `${STATE_NAMES[race.state]} Senate`,
+        probability: Number(probability.toFixed(4)),
+        overallProbability: Number((party === "D" ? race.demProbability : 1 - race.demProbability).toFixed(4)),
+        rating: race.rating,
+        tippingPower: Number((race.tippingPower || 0).toFixed(4))
+      };
+    })
+    .filter((item) => item.probability >= .35 || item.tippingPower > .04)
+    .filter((item) => item.rating !== "Safe D" && item.rating !== "Safe R")
+    .sort((a, b) => b.probability - a.probability || b.tippingPower - a.tippingPower)
+    .slice(0, 10);
+  return {
+    dem: {
+      controlSimulations: demControl,
+      commonWins: ranked(demPathWins, demControl, "D")
+    },
+    rep: {
+      controlSimulations: repControl,
+      commonWins: ranked(repPathWins, repControl, "R")
+    }
   };
 }
 
@@ -532,6 +609,24 @@ function buildHistory(race) {
   const stored = Array.isArray(previousRace?.history) ? previousRace.history : [];
   const withoutToday = stored.filter((point) => point.date !== current.date && point.date <= MODEL_DATE_KEY);
   return [...withoutToday, current].sort((a, b) => a.date.localeCompare(b.date)).slice(-180);
+}
+
+function probabilityMovement(history) {
+  if (!Array.isArray(history) || history.length < 2) {
+    return { sinceLastRun: 0, sinceWeek: 0, previousDate: null, weekDate: null };
+  }
+  const latest = history.at(-1);
+  const previous = history.at(-2);
+  const latestDate = new Date(`${latest.date}T00:00:00Z`);
+  const weekCutoff = new Date(latestDate);
+  weekCutoff.setUTCDate(weekCutoff.getUTCDate() - 7);
+  const weekPoint = [...history].reverse().find((point) => new Date(`${point.date}T00:00:00Z`) <= weekCutoff) || history[0];
+  return {
+    sinceLastRun: Number(((latest.dem - previous.dem) * 100).toFixed(1)),
+    sinceWeek: Number(((latest.dem - weekPoint.dem) * 100).toFixed(1)),
+    previousDate: previous.date,
+    weekDate: weekPoint.date
+  };
 }
 
 function buildExtraHistory(race) {
@@ -1412,11 +1507,31 @@ function buildCalibrationReport(sourceData, model) {
     })
     .filter(Boolean);
   const mean = (field) => rows.length ? rows.reduce((sum, row) => sum + row[field], 0) / rows.length : null;
+  const buckets = [
+    [0.5, 0.6, "50-60%"],
+    [0.6, 0.7, "60-70%"],
+    [0.7, 0.8, "70-80%"],
+    [0.8, 0.9, "80-90%"],
+    [0.9, 1.01, "90-100%"]
+  ].map(([min, max, label]) => {
+    const sample = rows.filter((row) => {
+      const favoriteProbability = Math.max(row.predicted, 1 - row.predicted);
+      return favoriteProbability >= min && favoriteProbability < max;
+    });
+    const actualWins = sample.filter((row) => row.predicted >= .5 ? row.actual === 1 : row.actual === 0).length;
+    return {
+      label,
+      expectedWinRate: Number(((min + Math.min(max, 1)) / 2).toFixed(3)),
+      actualWinRate: sample.length ? Number((actualWins / sample.length).toFixed(3)) : null,
+      sample: sample.length
+    };
+  });
   return {
     sample: rows.length,
     meanBrier: mean("brier"),
     meanAbsoluteMarginError: mean("absoluteMarginError"),
     note: "Diagnostic only: compares current-cycle model structure against each state's latest available MIT/MEDSL Senate result, not a true historical forecast archive.",
+    buckets,
     worstStates: [...rows].sort((a, b) => b.absoluteMarginError - a.absoluteMarginError).slice(0, 5)
   };
 }

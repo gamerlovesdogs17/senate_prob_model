@@ -492,6 +492,11 @@ function adjustedDistricts(sourceData) {
       sourceInputs: {
         genericBallotShift: Number(genericShift.toFixed(2)),
         nationalFinanceShift: Number(nationalFinanceShift.toFixed(2)),
+        presidentialBaseline: Number.isFinite(district.presidentialMargin) ? Number(district.presidentialMargin.toFixed(2)) : null,
+        congressionalBaseline: Number.isFinite(district.congressionalMargin) ? Number(district.congressionalMargin.toFixed(2)) : null,
+        districtFundamentalMargin: Number.isFinite(district.fundamentalMargin) ? Number(district.fundamentalMargin.toFixed(2)) : null,
+        contextualBaseline: Number(contextMargin.toFixed(2)),
+        ratingBaseline: Number(ratingMargin.toFixed(2)),
         openPenalty: Number(openPenalty.toFixed(2)),
         incumbencyAdjustment: Number(incumbencyAdjustment.toFixed(2)),
         challengerStrength,
@@ -605,21 +610,48 @@ function runModel(districts) {
   const seatCounts = {};
   const districtWins = Object.fromEntries(districts.map((district) => [district.id, 0]));
   const controlWins = { dem: 0, rep: 0 };
+  const demControlPath = { tossupWins: 0, tiltRWins: 0, leanRWins: 0, vulnerableDHolds: 0, controlSims: 0 };
+  const repControlPath = { tossupWins: 0, tiltDWins: 0, leanDWins: 0, vulnerableRHolds: 0, controlSims: 0 };
   for (let sim = 0; sim < SETTINGS.simulations; sim += 1) {
     const nationalError = normalRandom() * MODEL_WEIGHTS.nationalEnvironmentSd;
     const stateErrors = {};
     let demSeats = 0;
+    const pathCounts = { tossupD: 0, tossupR: 0, tiltRD: 0, leanRD: 0, vulnerableDHolds: 0, tiltDR: 0, leanDR: 0, vulnerableRHolds: 0 };
     for (const district of districts) {
       stateErrors[district.state] ??= normalRandom() * MODEL_WEIGHTS.stateCorrelationSd;
       const simulatedMargin = district.margin + nationalError + stateErrors[district.state] + normalRandom() * (district.error ?? RATING_TO_ERROR[district.rating] ?? 8);
-      if (simulatedMargin > 0) {
+      const demWin = simulatedMargin > 0;
+      if (demWin) {
         demSeats += 1;
         districtWins[district.id] += 1;
       }
+      if (district.baselineRating === "Toss-up") {
+        if (demWin) pathCounts.tossupD += 1;
+        else pathCounts.tossupR += 1;
+      }
+      if (demWin && district.baselineRating === "Tilt R") pathCounts.tiltRD += 1;
+      if (demWin && district.baselineRating === "Lean R") pathCounts.leanRD += 1;
+      if (!demWin && district.baselineRating === "Tilt D") pathCounts.tiltDR += 1;
+      if (!demWin && district.baselineRating === "Lean D") pathCounts.leanDR += 1;
+      if (demWin && district.seatParty === "D" && district.competitive) pathCounts.vulnerableDHolds += 1;
+      if (!demWin && district.seatParty === "R" && district.competitive) pathCounts.vulnerableRHolds += 1;
     }
     seatCounts[demSeats] = (seatCounts[demSeats] || 0) + 1;
-    if (demSeats >= SETTINGS.controlThreshold) controlWins.dem += 1;
-    else controlWins.rep += 1;
+    if (demSeats >= SETTINGS.controlThreshold) {
+      controlWins.dem += 1;
+      demControlPath.controlSims += 1;
+      demControlPath.tossupWins += pathCounts.tossupD;
+      demControlPath.tiltRWins += pathCounts.tiltRD;
+      demControlPath.leanRWins += pathCounts.leanRD;
+      demControlPath.vulnerableDHolds += pathCounts.vulnerableDHolds;
+    } else {
+      controlWins.rep += 1;
+      repControlPath.controlSims += 1;
+      repControlPath.tossupWins += pathCounts.tossupR;
+      repControlPath.tiltDWins += pathCounts.tiltDR;
+      repControlPath.leanDWins += pathCounts.leanDR;
+      repControlPath.vulnerableRHolds += pathCounts.vulnerableRHolds;
+    }
   }
   const sortedSeatCounts = Object.entries(seatCounts).map(([seat, count]) => ({ seat: Number(seat), count })).sort((a, b) => a.seat - b.seat);
   let cumulative = 0;
@@ -639,11 +671,30 @@ function runModel(districts) {
     repControlProbability: controlWins.rep / SETTINGS.simulations,
     medianSeats,
     seatCounts,
+    controlPaths: {
+      dem: averageHousePath(demControlPath),
+      rep: averageHousePath(repControlPath)
+    },
     districts: modeledDistricts,
     decisiveDistricts: modeledDistricts
       .map((district) => ({ ...district, leverage: district.competitive ? (1 - Math.abs(district.demProbability - .5) * 2) : 0 }))
       .sort((a, b) => b.leverage - a.leverage)
       .slice(0, 16)
+  };
+}
+
+function averageHousePath(path) {
+  const sims = path.controlSims || 0;
+  const average = (value) => sims && Number.isFinite(value) ? Number((value / sims).toFixed(1)) : 0;
+  return {
+    controlSimulations: sims,
+    tossupWins: average(path.tossupWins),
+    tiltRWins: average(path.tiltRWins),
+    leanRWins: average(path.leanRWins),
+    vulnerableDHolds: average(path.vulnerableDHolds),
+    tiltDWins: average(path.tiltDWins),
+    leanDWins: average(path.leanDWins),
+    vulnerableRHolds: average(path.vulnerableRHolds)
   };
 }
 

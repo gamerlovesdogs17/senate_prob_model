@@ -20,6 +20,7 @@
       <a href="senate.html">Senate</a>
       <a class="active" href="races.html">Races</a>
       <a href="methodology.html">Method</a>
+      <a href="calibration.html">Calibration</a>
       <a href="articles.html">Articles</a>
     </nav>
   </header>
@@ -51,6 +52,8 @@
           <div><dt>Race polling margin</dt><dd id="race-polling">--</dd></div>
           <div><dt>Projected margin</dt><dd id="race-margin">--</dd></div>
           <div><dt>Probability margin</dt><dd id="race-prob-margin">--</dd></div>
+          <div><dt>Movement</dt><dd id="race-movement">--</dd></div>
+          <div><dt>Input quality</dt><dd id="race-input-quality">--</dd></div>
           <div><dt>Seat</dt><dd id="race-seat">--</dd></div>
           <div><dt>Incumbent</dt><dd id="race-incumbent">--</dd></div>
         </dl>
@@ -75,6 +78,12 @@
         <div class="detail-chip"><span class="meta">Control credit</span><strong id="race-caucus">--</strong></div>
         <div class="detail-chip"><span class="meta">Primary summary</span><strong id="race-primary-summary">--</strong></div>
       </div>
+    </section>
+
+    <section class="detail-panel" aria-labelledby="race-inputs-title">
+      <p class="kicker">Inputs</p>
+      <h2 id="race-inputs-title">Race file.</h2>
+      <div id="race-input-cards" class="accordion-list"></div>
     </section>
 
     <section class="text-panel" aria-labelledby="nav-title">

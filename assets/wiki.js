@@ -150,6 +150,26 @@ function pollingInputText(race) {
   return `${signedPointMargin(race.pollMargin)} weighted race-poll margin`;
 }
 
+function movementText(race) {
+  const value = race?.movement?.sinceLastRun;
+  if (!Number.isFinite(value) || Math.abs(value) < .05) return "No change since last run";
+  const party = value > 0 ? "D" : "R";
+  const arrow = value > 0 ? "up" : "down";
+  return `${party} ${Math.abs(value).toFixed(1)} pts ${arrow} since last run`;
+}
+
+function compactMovementText(race) {
+  const value = race?.movement?.sinceLastRun;
+  if (!Number.isFinite(value) || Math.abs(value) < .05) return "0.0";
+  return `${value > 0 ? "D" : "R"} +${Math.abs(value).toFixed(1)}`;
+}
+
+function inputQualityText(race) {
+  const quality = race?.inputQuality;
+  if (!quality) return "Not scored";
+  return `${quality.label} (${quality.score}/100)`;
+}
+
 function setText(id, value) {
   const node = document.getElementById(id);
   if (node) node.textContent = value;
@@ -549,6 +569,31 @@ function renderLeverageInto(chart) {
   bindPanelTooltipFor(chart, ".leverage-row", (node) => node.dataset.tip);
 }
 
+function renderSenateControlPath() {
+  const container = document.getElementById("senate-control-path");
+  if (!container || !forecast) return;
+  const demPath = forecast.controlPaths?.dem?.commonWins || [];
+  const repPath = forecast.controlPaths?.rep?.commonWins || [];
+  const row = (item, party) => `
+    <a class="path-chip ${party === "D" ? "leads-dem" : "leads-rep"}" href="race.html?state=${escapeHtml(item.state)}">
+      <strong>${escapeHtml(item.state)}</strong>
+      <span>${escapeHtml((item.displayName || "").replace(" Senate", ""))}</span>
+      <b>${oneDecimal(item.probability)}</b>
+    </a>`;
+  container.innerHTML = `
+    <div>
+      <h3>Democratic-control simulations</h3>
+      <p>${demPath.slice(0, 8).map((item) => item.state).join(", ") || "--"}</p>
+      <div class="path-chip-grid">${demPath.slice(0, 8).map((item) => row(item, "D")).join("")}</div>
+    </div>
+    <div>
+      <h3>Republican-control simulations</h3>
+      <p>${repPath.slice(0, 8).map((item) => item.state).join(", ") || "--"}</p>
+      <div class="path-chip-grid">${repPath.slice(0, 8).map((item) => row(item, "R")).join("")}</div>
+    </div>
+  `;
+}
+
 function renderControlHistory() {
   const chart = document.getElementById("control-history-chart");
   if (!chart || !forecast) return;
@@ -818,6 +863,45 @@ function renderPrimaryPanel(race) {
   }
 }
 
+function renderRaceInputCards(race) {
+  const container = document.getElementById("race-input-cards");
+  if (!container) return;
+  const finance = race.sourceInputs?.openFec;
+  const pollRows = [
+    `<li>${pollingInputText(race)}</li>`,
+    race.pollSignal ? `<li>${race.pollSignal.pollCount} polls, ${race.pollSignal.pollsters} pollsters, ${(race.pollSignal.blendWeight * 100).toFixed(0)}% blend weight</li>` : `<li>Poll weight is zero until usable public race polls are found.</li>`,
+    race.sourceInputs?.twoSeventyToWin ? `<li>270toWin rows blended: ${race.sourceInputs.twoSeventyToWin.polls}</li>` : "",
+    race.sourceInputs?.realClearPolling ? `<li>RealClearPolling rows blended: ${race.sourceInputs.realClearPolling.polls}</li>` : ""
+  ].filter(Boolean).join("");
+  const fundamentalRows = [
+    `<li>Rating input: ${escapeHtml(race.rating)}</li>`,
+    `<li>Baseline margin: ${signedPointMargin(race.margin)}</li>`,
+    `<li>Primary risk: ${Number(race.primaryRisk || 0).toFixed(1)} pts</li>`,
+    `<li>Incumbency adjustment: ${signedPointMargin(race.incumbencyAdjustment || 0)}</li>`,
+    `<li>Candidate-history adjustment: ${signedPointMargin(race.candidateHistoryAdjustment || 0)}</li>`
+  ].join("");
+  const financeRows = finance ? [
+    `<li>Finance signal: ${Number(finance.financeSignal || 0).toFixed(2)} pts</li>`,
+    `<li>Dem receipts: $${Math.round(finance.demReceipts || 0).toLocaleString()}</li>`,
+    `<li>Rep receipts: $${Math.round(finance.repReceipts || 0).toLocaleString()}</li>`,
+    `<li>Dem cash: $${Math.round(finance.demCash || 0).toLocaleString()}</li>`,
+    `<li>Rep cash: $${Math.round(finance.repCash || 0).toLocaleString()}</li>`
+  ].join("") : `<li>No matched OpenFEC state-race finance row in this run.</li>`;
+  const candidateRows = [
+    `<li>${escapeHtml(candidateDisplayName(race, "D"))}: ${escapeHtml(race.demStatus || "unresolved")}</li>`,
+    `<li>${escapeHtml(candidateDisplayName(race, "R"))}: ${escapeHtml(race.repStatus || "unresolved")}</li>`,
+    `<li>${escapeHtml(race.primarySummary || "")}</li>`,
+    ...(race.extraCandidates || []).map((candidate) => `<li>${escapeHtml(candidate.name)}: ${escapeHtml(candidate.note || candidate.party || "tracked option")}</li>`)
+  ].join("");
+  container.innerHTML = `
+    <details open><summary>Polling</summary><ul>${pollRows}</ul></details>
+    <details><summary>Fundamentals</summary><ul>${fundamentalRows}</ul></details>
+    <details><summary>Finance</summary><ul>${financeRows}</ul></details>
+    <details><summary>Candidates</summary><ul>${candidateRows}</ul></details>
+    <details><summary>Input quality</summary><ul><li>${inputQualityText(race)}</li>${(race.inputQuality?.reasons || []).map((reason) => `<li>${escapeHtml(reason)}</li>`).join("")}</ul></details>
+  `;
+}
+
 function renderRacePage() {
   const page = document.getElementById("race-detail-page");
   if (!page || !forecast) return;
@@ -840,6 +924,8 @@ function renderRacePage() {
   }
   setText("race-margin", signedPointMargin(race.margin));
   setText("race-prob-margin", signedMargin(race.demProbability));
+  setText("race-movement", movementText(race));
+  setText("race-input-quality", inputQualityText(race));
   setText("race-tipping", oneDecimal(race.tippingPower));
   setText("race-polling", pollingInputText(race));
   const demTrack = document.getElementById("race-dem-track");
@@ -851,6 +937,7 @@ function renderRacePage() {
   }
   renderHistory(race);
   renderPrimaryPanel(race);
+  renderRaceInputCards(race);
 }
 
 function renderSourceStatus() {
@@ -1198,6 +1285,33 @@ function renderHouseDecisiveDistricts() {
   bindPanelTooltipFor(container, ".leverage-row", (node) => node.dataset.tip);
 }
 
+function renderHouseControlPath() {
+  const container = document.getElementById("house-control-path");
+  if (!container || !houseForecast) return;
+  const dem = houseForecast.controlPaths?.dem || {};
+  const rep = houseForecast.controlPaths?.rep || {};
+  container.innerHTML = `
+    <div>
+      <h3>Democratic-control simulations</h3>
+      <div class="path-stat-grid">
+        <div><span>Toss-up districts won</span><strong>${dem.tossupWins ?? "--"}</strong></div>
+        <div><span>Tilt R districts won</span><strong>${dem.tiltRWins ?? "--"}</strong></div>
+        <div><span>Lean R districts won</span><strong>${dem.leanRWins ?? "--"}</strong></div>
+        <div><span>Vulnerable D seats held</span><strong>${dem.vulnerableDHolds ?? "--"}</strong></div>
+      </div>
+    </div>
+    <div>
+      <h3>Republican-control simulations</h3>
+      <div class="path-stat-grid">
+        <div><span>Toss-up districts won</span><strong>${rep.tossupWins ?? "--"}</strong></div>
+        <div><span>Tilt D districts won</span><strong>${rep.tiltDWins ?? "--"}</strong></div>
+        <div><span>Lean D districts won</span><strong>${rep.leanDWins ?? "--"}</strong></div>
+        <div><span>Vulnerable R seats held</span><strong>${rep.vulnerableRHolds ?? "--"}</strong></div>
+      </div>
+    </div>
+  `;
+}
+
 function renderHouseDistrictHistoryInto(target, district) {
   if (!target || !district) return;
   const points = district.history?.length ? district.history : [{ date: houseForecast.modelDate, dem: district.demProbability, rep: district.repProbability }];
@@ -1237,6 +1351,42 @@ function renderHouseSourceStatus() {
   }).join("");
 }
 
+function renderCalibrationPage() {
+  const buckets = document.getElementById("calibration-buckets");
+  if (!buckets || !forecast) return;
+  const calibration = forecast.calibration || {};
+  const rows = calibration.buckets || [];
+  buckets.innerHTML = `
+    <table>
+      <thead>
+        <tr><th>Forecast bucket</th><th>Expected win rate</th><th>Historical win rate</th><th>Sample</th></tr>
+      </thead>
+      <tbody>
+        ${rows.map((row) => `
+          <tr>
+            <td>${escapeHtml(row.label)}</td>
+            <td>${oneDecimal(row.expectedWinRate)}</td>
+            <td>${row.actualWinRate === null ? "--" : oneDecimal(row.actualWinRate)}</td>
+            <td>${row.sample}</td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+    <p class="meta">${escapeHtml(calibration.note || "")}</p>
+  `;
+  setText("calibration-sample", `${calibration.sample ?? "--"} races`);
+  setText("calibration-brier", Number.isFinite(calibration.meanBrier) ? calibration.meanBrier.toFixed(3) : "--");
+  setText("calibration-margin-error", Number.isFinite(calibration.meanAbsoluteMarginError) ? `${calibration.meanAbsoluteMarginError.toFixed(1)} pts` : "--");
+  const worst = document.getElementById("calibration-worst");
+  if (worst) {
+    const max = Math.max(...(calibration.worstStates || []).map((row) => row.absoluteMarginError || 0), 1);
+    worst.innerHTML = (calibration.worstStates || []).map((row) => {
+      const width = clamp(((row.absoluteMarginError || 0) / max) * 100, 12, 100);
+      return `<div class="leverage-row"><strong>${escapeHtml(row.state)}</strong><i style="width:${width}%"></i><span>${Number(row.absoluteMarginError || 0).toFixed(1)}</span></div>`;
+    }).join("");
+  }
+}
+
 function renderHousePage() {
   renderHouseSummary();
   renderHousePreviewControls();
@@ -1249,6 +1399,7 @@ function renderHousePage() {
   renderHouseSeatHistory();
   renderHouseSeatHistogram();
   renderHouseDecisiveDistricts();
+  renderHouseControlPath();
   renderHouseSourceStatus();
 }
 
@@ -1266,6 +1417,8 @@ function renderBattlegroundList() {
         <span>${escapeHtml(race.displayName.replace(" Senate", ""))}</span>
         <span>${escapeHtml(race.rating)}</span>
         <span>${leader} ${pct(race.winnerProbability)}</span>
+        <span>${compactMovementText(race)}</span>
+        <span>${inputQualityText(race)}</span>
         <span>${oneDecimal(race.tippingPower)}</span>
       </a>
     `;
@@ -1574,6 +1727,7 @@ async function init() {
   renderLegend();
   renderHistogram();
   renderLeverageChart();
+  renderSenateControlPath();
   renderControlHistory();
   renderSeatHistory();
   renderRacePage();
@@ -1586,6 +1740,7 @@ async function init() {
   renderHomeArticleList();
   renderArticlesList();
   renderArticlePage();
+  renderCalibrationPage();
 }
 
 init();
