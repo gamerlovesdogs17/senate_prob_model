@@ -66,7 +66,16 @@ const MODEL_WEIGHTS = {
   racePollsCap: .22,
   fundamentalsWithPolls: .9,
   genericBallot: .12,
-  genericBallotCap: .9
+  genericBallotCap: .9,
+  nationalFinance: .45
+};
+
+const CHALLENGER_STRENGTH_DISCOUNTS = {
+  sameSeat: .85,
+  statewide: .55,
+  majorOffice: .35,
+  notable: .22,
+  none: 0
 };
 
 const PATH_CENTRALITY = {
@@ -100,7 +109,7 @@ const RCV_STATES = {
 
 const races = [
   { state: "AL", seat: "Open seat", incumbent: "Tommy Tuberville", hold: "R", caucusTarget: "D", rating: "Safe R", pvi: -15, pastSenate: -16, money: -1, candidate: -1, approval: -1, primary: "unresolved", primaryDate: "2026-05-19", nomination: .25, independent: "none", polls: [], note: "The Republican primary matters more than the general-election baseline." },
-  { state: "AK", seat: "Dan Sullivan", incumbent: "Dan Sullivan", hold: "R", caucusTarget: "D", rating: "Toss-up", pvi: -8, pastSenate: -12, money: .3, candidate: 1.2, approval: .1, primary: "unresolved", primaryDate: "2026-08-18", nomination: .6, independent: "possible D-aligned independent or coalition-backed challenger", polls: [[-150, 31], [-105, 36], [-62, 42], [-20, 47]], note: "Alaska is modeled as a coalition/independent route, not a normal Democratic-label race." },
+  { state: "AK", seat: "Dan Sullivan", incumbent: "Dan Sullivan", hold: "R", caucusTarget: "D", rating: "Toss-up", pvi: -8, pastSenate: -12, money: .3, candidate: 1.2, approval: .1, primary: "unresolved", primaryDate: "2026-08-18", nomination: .6, independent: "possible D-aligned independent or coalition-backed challenger", challengerStrength: "majorOffice", polls: [[-150, 31], [-105, 36], [-62, 42], [-20, 47]], note: "Alaska is modeled as a coalition/independent route, not a normal Democratic-label race." },
   { state: "AR", seat: "Tom Cotton", incumbent: "Tom Cotton", hold: "R", caucusTarget: "D", rating: "Safe R", pvi: -18, pastSenate: -24, money: -1, candidate: -1, approval: -1, primary: "resolved", primaryDate: "2026-03-03", nomination: .05, independent: "none", polls: [], note: "A deeply Republican state with no normal Democratic path." },
   { state: "CO", seat: "John Hickenlooper", incumbent: "John Hickenlooper", hold: "D", caucusTarget: "D", rating: "Safe D", pvi: 8, pastSenate: 12, money: 1, candidate: 1, approval: .5, primary: "unresolved", primaryDate: "2026-06-30", nomination: .15, independent: "none", polls: [], note: "Colorado starts outside the serious battleground set." },
   { state: "DE", seat: "Chris Coons", incumbent: "Chris Coons", hold: "D", caucusTarget: "D", rating: "Safe D", pvi: 14, pastSenate: 16, money: 1, candidate: 1, approval: .6, primary: "unresolved", primaryDate: "2026-09-15", nomination: .12, independent: "none", polls: [], note: "Safe Democratic hold under ordinary conditions." },
@@ -112,7 +121,7 @@ const races = [
   { state: "KS", seat: "Roger Marshall", incumbent: "Roger Marshall", hold: "R", caucusTarget: "D", rating: "Lean R", pvi: -10, pastSenate: -11, money: -1, candidate: -.5, approval: -.5, primary: "unresolved", primaryDate: "2026-08-04", nomination: .25, independent: "none", polls: [], note: "Kansas becomes live only in a large wave." },
   { state: "KY", seat: "Open seat", incumbent: "Mitch McConnell", hold: "R", caucusTarget: "D", rating: "Safe R", pvi: -16, pastSenate: -18, money: -1, candidate: -1, approval: -.7, primary: "unresolved", primaryDate: "2026-05-19", nomination: .35, independent: "none", polls: [], note: "Open seat, but fundamentals remain heavily Republican." },
   { state: "LA", seat: "Incumbent eliminated", incumbent: "Bill Cassidy", hold: "R", caucusTarget: "D", rating: "Safe R", pvi: -12, pastSenate: -18, money: -1, candidate: -1, approval: -.8, primary: "runoff", primaryDate: "2026-06-27", nomination: .25, independent: "none", polls: [], note: "Not enough evidence for a serious control path." },
-  { state: "ME", seat: "Susan Collins", incumbent: "Susan Collins", hold: "R", caucusTarget: "D", rating: "Lean D", pvi: 5, pastSenate: 8, money: .7, candidate: .4, approval: .2, primary: "unresolved", primaryDate: "2026-06-09", nomination: .7, independent: "possible independent spoiler risk", polls: [[-140, 46], [-90, 49], [-45, 51], [-12, 54]], note: "Collins' personal brand keeps the race contested, but the state lean has moved against Republicans." },
+  { state: "ME", seat: "Susan Collins", incumbent: "Susan Collins", hold: "R", caucusTarget: "D", rating: "Lean D", pvi: 5, pastSenate: 8, money: .7, candidate: .4, approval: .2, primary: "unresolved", primaryDate: "2026-06-09", nomination: .7, independent: "possible independent spoiler risk", challengerStrength: "statewide", polls: [[-140, 46], [-90, 49], [-45, 51], [-12, 54]], note: "Collins' personal brand keeps the race contested, but the state lean has moved against Republicans." },
   { state: "MA", seat: "Ed Markey", incumbent: "Ed Markey", hold: "D", caucusTarget: "D", rating: "Safe D", pvi: 16, pastSenate: 20, money: 1, candidate: 1, approval: .7, primary: "unresolved", primaryDate: "2026-09-01", nomination: .1, independent: "none", polls: [], note: "A safe Democratic anchor." },
   { state: "MI", seat: "Open seat", incumbent: "Gary Peters", hold: "D", caucusTarget: "D", rating: "Lean D", pvi: 1, pastSenate: 2, money: .4, candidate: .3, approval: .2, primary: "unresolved", primaryDate: "2026-08-04", nomination: .65, independent: "none", polls: [[-160, 48], [-100, 50], [-52, 52], [-18, 54]], note: "Democrats probably need to hold Michigan before the pickup path matters." },
   { state: "MN", seat: "Open seat", incumbent: "Tina Smith", hold: "D", caucusTarget: "D", rating: "Lean D", pvi: 4, pastSenate: 7, money: .6, candidate: .2, approval: .2, primary: "unresolved", primaryDate: "2026-08-11", nomination: .45, independent: "none", polls: [], note: "Competitive mainly under a poor Democratic national climate." },
@@ -123,7 +132,7 @@ const races = [
   { state: "NH", seat: "Open seat", incumbent: "Jeanne Shaheen", hold: "D", caucusTarget: "D", rating: "Lean D", pvi: 3, pastSenate: 5, money: .4, candidate: .4, approval: .2, primary: "unresolved", primaryDate: "2026-09-08", nomination: .55, independent: "none", polls: [[-90, 50], [-40, 52], [-12, 54]], note: "A necessary Democratic hold in almost every route to a majority." },
   { state: "NJ", seat: "Cory Booker", incumbent: "Cory Booker", hold: "D", caucusTarget: "D", rating: "Safe D", pvi: 12, pastSenate: 13, money: 1, candidate: 1, approval: .5, primary: "unresolved", primaryDate: "2026-06-02", nomination: .1, independent: "none", polls: [], note: "Not part of a normal majority path." },
   { state: "NM", seat: "Ben Ray Lujan", incumbent: "Ben Ray Lujan", hold: "D", caucusTarget: "D", rating: "Safe D", pvi: 10, pastSenate: 12, money: 1, candidate: 1, approval: .4, primary: "unresolved", primaryDate: "2026-06-02", nomination: .1, independent: "none", polls: [], note: "Safe Democratic hold." },
-  { state: "OH", seat: "Special election", incumbent: "Jon Husted", hold: "R", caucusTarget: "D", rating: "Toss-up", pvi: -7, pastSenate: -1, money: .7, candidate: 1.2, approval: .1, primary: "resolved", primaryDate: "2026-05-05", nomination: .2, independent: "none", polls: [[-160, 42], [-110, 45], [-55, 48], [-15, 51]], note: "The cleanest Democratic pickup after the easier blue-leaning seats." },
+  { state: "OH", seat: "Special election", incumbent: "Jon Husted", hold: "R", caucusTarget: "D", rating: "Toss-up", pvi: -7, pastSenate: -1, money: .7, candidate: 1.2, approval: .1, primary: "resolved", primaryDate: "2026-05-05", nomination: .2, independent: "none", challengerStrength: "sameSeat", polls: [[-160, 42], [-110, 45], [-55, 48], [-15, 51]], note: "The cleanest Democratic pickup after the easier blue-leaning seats." },
   { state: "OK", seat: "Special election", incumbent: "Open", hold: "R", caucusTarget: "D", rating: "Safe R", pvi: -20, pastSenate: -30, money: -1, candidate: -1, approval: -.9, primary: "unresolved", primaryDate: "2026-06-16", nomination: .25, independent: "none", polls: [], note: "Special election, but not competitive in the baseline." },
   { state: "OR", seat: "Jeff Merkley", incumbent: "Jeff Merkley", hold: "D", caucusTarget: "D", rating: "Safe D", pvi: 10, pastSenate: 15, money: 1, candidate: 1, approval: .5, primary: "unresolved", primaryDate: "2026-05-19", nomination: .1, independent: "none", polls: [], note: "High Democratic floor." },
   { state: "RI", seat: "Jack Reed", incumbent: "Jack Reed", hold: "D", caucusTarget: "D", rating: "Safe D", pvi: 15, pastSenate: 18, money: 1, candidate: 1, approval: .7, primary: "unresolved", primaryDate: "2026-09-09", nomination: .1, independent: "none", polls: [], note: "A safe Democratic hold in nearly all runs." },
@@ -375,6 +384,13 @@ function rcvBaselineAdjustment(race) {
   return rcv.transferMean + independentContext;
 }
 
+function incumbencyAdjustment(race) {
+  const base = race.seat === "Open seat" || race.seat === "Special election" ? -.25 : (race.hold === "D" ? .45 : -.45);
+  if (race.seat === "Open seat" || !race.hold) return base;
+  const discount = CHALLENGER_STRENGTH_DISCOUNTS[race.challengerStrength || "none"] || 0;
+  return base * (1 - discount);
+}
+
 function baselineMargin(race) {
   const rating = RATING_TO_MARGIN[race.rating] || 0;
   const fundamentals = race.pvi * .24 + race.pastSenate * .20;
@@ -382,7 +398,7 @@ function baselineMargin(race) {
   const pollSignal = pollWeightMetrics(race);
   const pollBlend = pollSignal === null ? 0 : pollSignal.margin * pollSignal.blendWeight;
   const fundamentalsBlend = pollSignal === null ? 1 : MODEL_WEIGHTS.fundamentalsWithPolls;
-  const incumbentPenalty = race.seat === "Open seat" || race.seat === "Special election" ? -.25 : (race.hold === "D" ? .45 : -.45);
+  const incumbentPenalty = incumbencyAdjustment(race);
   const nationalPolling = race.nationalPolling || 0;
   return (rating * .48 + fundamentals * fundamentalsBlend + signals + incumbentPenalty + caucusDiscount(race)) +
     pollBlend + nationalPolling + candidateHistoryAdjustment(race) + primaryScenarioAdjustment(race) + rcvBaselineAdjustment(race);
@@ -405,6 +421,8 @@ function runModel(sourceData) {
       pollSignal,
       primaryRisk: primaryRisk(race),
       stateElasticity: stateElasticity(race),
+      incumbencyAdjustment: incumbencyAdjustment(withCandidates),
+      challengerStrength: withCandidates.challengerStrength || "none",
       candidateHistoryAdjustment: candidateHistoryAdjustment(race),
       primaryScenarioAdjustment: primaryScenarioAdjustment(withCandidates),
       rcvAdjustment: rcvBaselineAdjustment(race)
@@ -1038,6 +1056,12 @@ function populationRank(population) {
 async function fetchFec(status) {
   const text = await fetchText("https://www.fec.gov/files/bulk-downloads/2026/candidate_summary_2026.csv", "openFecCandidateSummary", status);
   const byState = {};
+  const national = {
+    demReceipts: 0, repReceipts: 0,
+    demCash: 0, repCash: 0,
+    demDebts: 0, repDebts: 0,
+    demCandidates: 0, repCandidates: 0
+  };
   if (!text) return byState;
   const rows = parseCsv(text);
   for (const row of rows) {
@@ -1067,18 +1091,35 @@ async function fetchFec(status) {
       byState[state].demCash += cash;
       byState[state].demDebts += debts;
       byState[state].demIndividual += individual;
+      national.demReceipts += receipts;
+      national.demCash += cash;
+      national.demDebts += debts;
+      national.demCandidates += 1;
     } else if (side === "rep") {
       byState[state].repReceipts += receipts;
       byState[state].repDisbursements += disbursements;
       byState[state].repCash += cash;
       byState[state].repDebts += debts;
       byState[state].repIndividual += individual;
+      national.repReceipts += receipts;
+      national.repCash += cash;
+      national.repDebts += debts;
+      national.repCandidates += 1;
     }
     else byState[state].otherReceipts += receipts;
   }
+  national.financeSignal = nationalFinanceSignal(national);
+  byState.__national = national;
   status.openFecCandidateSummary.rows = rows.length;
-  status.openFecCandidateSummary.senateStates = Object.keys(byState).length;
+  status.openFecCandidateSummary.senateStates = Object.keys(byState).filter((state) => STATE_NAMES[state]).length;
+  status.openFecCandidateSummary.nationalFinanceSignal = national.financeSignal;
   return byState;
+}
+
+function nationalFinanceSignal(finance) {
+  const demScore = Math.log1p(Math.max(finance.demReceipts, 0) + Math.max(finance.demCash, 0) * 1.1) - Math.log1p(Math.max(finance.demDebts, 0) * 1.2);
+  const repScore = Math.log1p(Math.max(finance.repReceipts, 0) + Math.max(finance.repCash, 0) * 1.1) - Math.log1p(Math.max(finance.repDebts, 0) * 1.2);
+  return Number(clamp((demScore - repScore) / 5, -.8, .8).toFixed(3));
 }
 
 async function fetchMitSenate(status) {
@@ -1235,6 +1276,7 @@ function applySourceInputs(baseRaces, sourceData) {
     let pastSenate = race.pastSenate;
     let pvi = race.pvi;
     let polls = race.polls;
+    let nationalPolling = 0;
 
     if (fec) {
       const demEfficiency = (fec.demCash + fec.demIndividual * .45 - fec.demDebts * .7) / Math.sqrt(1 + Math.max(fec.demDisbursements, 1));
@@ -1256,7 +1298,7 @@ function applySourceInputs(baseRaces, sourceData) {
       sourceInputs.census = { ...census, growth, growthSignal };
     }
     if (sourceData?.genericPolling?.genericBallotMargin !== null) {
-      const nationalPolling = clamp(
+      nationalPolling = clamp(
         sourceData.genericPolling.genericBallotMargin * MODEL_WEIGHTS.genericBallot,
         -MODEL_WEIGHTS.genericBallotCap,
         MODEL_WEIGHTS.genericBallotCap
@@ -1271,23 +1313,16 @@ function applySourceInputs(baseRaces, sourceData) {
         genericBallotMargin: sourceData.genericPolling.genericBallotMargin,
         sources: sourceData.genericPolling.sources.map(({ source, margin, polls, weight }) => ({ source, margin, polls, weight }))
       };
-      if (sourceData?.realClearPolling?.byState?.[race.state]?.length) {
-        const rcpPolls = sourceData.realClearPolling.byState[race.state];
-        polls = [...polls, ...rcpPolls];
-        sourceInputs.realClearPolling = {
-          polls: rcpPolls.length,
-          recent: rcpPolls.slice(0, 5).map(({ pollster, endDate, margin, title, result, spread }) => ({ pollster, endDate, margin, title, result, spread }))
-        };
-      }
-      if (sourceData?.twoSeventyToWin?.byState?.[race.state]?.length) {
-        const towinPolls = sourceData.twoSeventyToWin.byState[race.state];
-        polls = [...polls, ...towinPolls];
-        sourceInputs.twoSeventyToWin = {
-          polls: towinPolls.length,
-          recent: towinPolls.slice(0, 5).map(({ pollster, endDate, margin, title, result, spread, sampleSize, population }) => ({ pollster, endDate, margin, title, result, spread, sampleSize, population }))
-        };
-      }
-      return { ...race, money, pastSenate, pvi, polls, nationalPolling, sourceInputs };
+    }
+
+    const nationalFinance = sourceData?.fec?.__national?.financeSignal
+      ? sourceData.fec.__national.financeSignal * MODEL_WEIGHTS.nationalFinance
+      : 0;
+    if (sourceData?.fec?.__national) {
+      sourceInputs.nationalFinance = {
+        ...sourceData.fec.__national,
+        nationalFinance
+      };
     }
 
     if (sourceData?.realClearPolling?.byState?.[race.state]?.length) {
@@ -1307,7 +1342,7 @@ function applySourceInputs(baseRaces, sourceData) {
       };
     }
 
-    return { ...race, money, pastSenate, pvi, polls, sourceInputs };
+    return { ...race, money, pastSenate, pvi, polls, nationalPolling: nationalPolling + nationalFinance, sourceInputs };
   });
 }
 
@@ -1388,7 +1423,8 @@ async function writeForecast() {
         usablePolls: sourceData.twoSeventyToWin.usablePolls,
         states: Object.keys(sourceData.twoSeventyToWin.byState || {}).length
       },
-      fecStates: Object.keys(sourceData.fec).length,
+      fecStates: Object.keys(sourceData.fec).filter((state) => STATE_NAMES[state]).length,
+      nationalFinance: sourceData.fec.__national || null,
       mitStates: Object.keys(sourceData.mit).length,
       censusStates: Object.keys(sourceData.census).length,
       civicApi: sourceData.civic,

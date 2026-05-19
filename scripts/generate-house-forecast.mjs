@@ -51,12 +51,25 @@ const MODEL_WEIGHTS = {
   ratingBaseline: 1,
   districtPolls: .18,
   finance: .22,
+  nationalFinance: .35,
   incumbencyOpenPenalty: .45,
   seatPartyIncumbency: .45,
   districtFundamentals: .07,
   historicalMidterm: 1.15,
   stateCorrelationSd: 1.3,
   nationalEnvironmentSd: 3.1
+};
+
+const CHALLENGER_STRENGTH_DISCOUNTS = {
+  sameDistrict: .85,
+  statewide: .55,
+  majorOffice: .35,
+  notable: .22,
+  none: 0
+};
+
+const MANUAL_HOUSE_CHALLENGER_STRENGTH = {
+  // Use entries such as "PA-07": { D: "notable" } when a challenger has prior office strength.
 };
 
 const CATEGORY_ALIASES = {
@@ -448,6 +461,7 @@ async function fetchHouseSources() {
 
 function adjustedDistricts(sourceData) {
   const genericShift = clamp(sourceData.genericPolling.margin * MODEL_WEIGHTS.genericBallot, -MODEL_WEIGHTS.genericBallotCap, MODEL_WEIGHTS.genericBallotCap);
+  const nationalFinanceShift = (sourceData.fec.__national?.financeSignal || 0) * MODEL_WEIGHTS.nationalFinance;
   const baseDistricts = sourceData.mapDistricts.length >= 400 ? sourceData.mapDistricts : sourceData.cookDistricts;
   return baseDistricts.map((district) => {
     const inside = sourceData.insideRatings[district.id];
@@ -456,10 +470,11 @@ function adjustedDistricts(sourceData) {
     const contextMargin = contextualDistrictMargin(district, ratingMargin);
     const baselineMargin = ratingMargin * .88 + contextMargin * MODEL_WEIGHTS.districtFundamentals;
     const incumbentParty = district.seatParty === "D" ? 1 : district.seatParty === "R" ? -1 : 0;
-    const incumbencyAdjustment = district.open ? 0 : incumbentParty * MODEL_WEIGHTS.seatPartyIncumbency;
+    const challengerStrength = districtChallengerStrength(district);
+    const incumbencyAdjustment = district.open ? 0 : incumbentParty * MODEL_WEIGHTS.seatPartyIncumbency * (1 - (CHALLENGER_STRENGTH_DISCOUNTS[challengerStrength] || 0));
     const openPenalty = district.open ? (baselineMargin > 0 ? -MODEL_WEIGHTS.incumbencyOpenPenalty : MODEL_WEIGHTS.incumbencyOpenPenalty) : 0;
     const financeSignal = sourceData.fec[district.id]?.financeSignal ?? 0;
-    const margin = baselineMargin * MODEL_WEIGHTS.ratingBaseline + genericShift + MODEL_WEIGHTS.historicalMidterm + incumbencyAdjustment + openPenalty + financeSignal * MODEL_WEIGHTS.finance;
+    const margin = baselineMargin * MODEL_WEIGHTS.ratingBaseline + genericShift + nationalFinanceShift + MODEL_WEIGHTS.historicalMidterm + incumbencyAdjustment + openPenalty + financeSignal * MODEL_WEIGHTS.finance;
     const error = Math.max(RATING_TO_ERROR[sourceRating] ?? 8, inside ? RATING_TO_ERROR[inside.rating] ?? 8 : 0);
     const demProbability = logistic(margin, error);
     return {
@@ -476,13 +491,23 @@ function adjustedDistricts(sourceData) {
       competitive: Math.abs(margin) < 8 || sourceRating === "Toss-up" || Boolean(inside),
       sourceInputs: {
         genericBallotShift: Number(genericShift.toFixed(2)),
+        nationalFinanceShift: Number(nationalFinanceShift.toFixed(2)),
         openPenalty: Number(openPenalty.toFixed(2)),
         incumbencyAdjustment: Number(incumbencyAdjustment.toFixed(2)),
+        challengerStrength,
         finance: sourceData.fec[district.id] || null
       },
       sourceBlend: inside ? `${district.ratingSource} + table cross-check` : district.ratingSource
     };
   });
+}
+
+function districtChallengerStrength(district) {
+  const override = MANUAL_HOUSE_CHALLENGER_STRENGTH[district.id];
+  if (!override || district.open) return "none";
+  if (district.seatParty === "D") return override.R || "none";
+  if (district.seatParty === "R") return override.D || "none";
+  return "none";
 }
 
 function validateDistricts(districts, phase) {
@@ -509,6 +534,7 @@ async function fetchHouseFec(status) {
   if (!text) return {};
   const rows = parseCsv(text);
   const byDistrict = {};
+  const national = { demReceipts: 0, repReceipts: 0, demCash: 0, repCash: 0, demDebts: 0, repDebts: 0, demCandidates: 0, repCandidates: 0 };
   for (const row of rows) {
     if (row.Cand_Office !== "H") continue;
     const state = row.Cand_Office_St;
@@ -521,14 +547,28 @@ async function fetchHouseFec(status) {
     byDistrict[id] ||= { demReceipts: 0, repReceipts: 0, demCash: 0, repCash: 0, demDebts: 0, repDebts: 0, candidates: 0 };
     byDistrict[id].candidates += 1;
     if (side === "dem") {
-      byDistrict[id].demReceipts += nonNegative(row.Total_Receipt);
-      byDistrict[id].demCash += nonNegative(row.Cash_On_Hand_COP) || nonNegative(row.Cash_On_Hand);
-      byDistrict[id].demDebts += nonNegative(row.Debts_Owed_By_Committee) || nonNegative(row.Debts_Owed);
+      const receipts = nonNegative(row.Total_Receipt);
+      const cash = nonNegative(row.Cash_On_Hand_COP) || nonNegative(row.Cash_On_Hand);
+      const debts = nonNegative(row.Debts_Owed_By_Committee) || nonNegative(row.Debts_Owed);
+      byDistrict[id].demReceipts += receipts;
+      byDistrict[id].demCash += cash;
+      byDistrict[id].demDebts += debts;
+      national.demReceipts += receipts;
+      national.demCash += cash;
+      national.demDebts += debts;
+      national.demCandidates += 1;
     }
     if (side === "rep") {
-      byDistrict[id].repReceipts += nonNegative(row.Total_Receipt);
-      byDistrict[id].repCash += nonNegative(row.Cash_On_Hand_COP) || nonNegative(row.Cash_On_Hand);
-      byDistrict[id].repDebts += nonNegative(row.Debts_Owed_By_Committee) || nonNegative(row.Debts_Owed);
+      const receipts = nonNegative(row.Total_Receipt);
+      const cash = nonNegative(row.Cash_On_Hand_COP) || nonNegative(row.Cash_On_Hand);
+      const debts = nonNegative(row.Debts_Owed_By_Committee) || nonNegative(row.Debts_Owed);
+      byDistrict[id].repReceipts += receipts;
+      byDistrict[id].repCash += cash;
+      byDistrict[id].repDebts += debts;
+      national.repReceipts += receipts;
+      national.repCash += cash;
+      national.repDebts += debts;
+      national.repCandidates += 1;
     }
   }
   for (const value of Object.values(byDistrict)) {
@@ -536,13 +576,22 @@ async function fetchHouseFec(status) {
     const repScore = Math.log1p(value.repReceipts + value.repCash * 1.3) - Math.log1p(value.repDebts * 1.2);
     value.financeSignal = Number(clamp((demScore - repScore) / 3.4, -1.4, 1.4).toFixed(3));
   }
+  national.financeSignal = nationalFinanceSignal(national);
+  byDistrict.__national = national;
   status.openFecHouseCandidateSummary.rows = rows.length;
-  status.openFecHouseCandidateSummary.districts = Object.keys(byDistrict).length;
+  status.openFecHouseCandidateSummary.districts = Object.keys(byDistrict).filter((id) => id !== "__national").length;
+  status.openFecHouseCandidateSummary.nationalFinanceSignal = national.financeSignal;
   return byDistrict;
 }
 
 function nonNegative(value) {
   return Math.max(toNumber(value) || 0, 0);
+}
+
+function nationalFinanceSignal(finance) {
+  const demScore = Math.log1p(finance.demReceipts + finance.demCash * 1.1) - Math.log1p(finance.demDebts * 1.2);
+  const repScore = Math.log1p(finance.repReceipts + finance.repCash * 1.1) - Math.log1p(finance.repDebts * 1.2);
+  return Number(clamp((demScore - repScore) / 5, -.8, .8).toFixed(3));
 }
 
 function contextualDistrictMargin(district, ratingMargin) {
@@ -703,7 +752,8 @@ async function writeHouseForecast() {
       cookDistricts: sourceData.cookDistricts.length,
       mapDistricts: sourceData.mapDistricts.length,
       insideRatings: Object.keys(sourceData.insideRatings).length,
-      fecDistricts: Object.keys(sourceData.fec).length,
+      fecDistricts: Object.keys(sourceData.fec).filter((id) => id !== "__national").length,
+      nationalFinance: sourceData.fec.__national || null,
       genericPolling: sourceData.genericPolling,
       housePollingReferenceReachable: sourceData.housePollingReferenceReachable,
       raceToTheWhHouseReachable: sourceData.raceToTheWhHouseReachable,
