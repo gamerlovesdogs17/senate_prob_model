@@ -3,29 +3,33 @@
   "slug": "model-calibration-backtest-diagnostics",
   "title": "What Our Backtest Says About the Senate Model",
   "date": "2026-05-19",
-  "dek": "Our model is still being tested, but the early results are positive. The main test uses saved 2024 model data, while the other test is a rough check meant to find problems before the full calibration update is finished.",
+  "dek": "Our Senate model is still being tested, but the early signs are good. The archived-input backtest is the main score, while the current diagnostic is mostly a tool for spotting possible weak points.",
   "author": "Capitol Forecast",
   "featured": true,
   "content": [
     {
       "type": "paragraph",
-      "text": "Our Senate model is still being tested, but the early results are encouraging."
+      "text": "Our Senate model is still being tested, but the early results are looking good."
     },
     {
       "type": "paragraph",
-      "text": "When people look at a forecast, they usually ask one question first: did it pick the winner? That matters, but it is not enough. A good forecast also needs to give reasonable odds."
+      "text": "When people look at a forecast, they might first wonder if it picked the winner. That matters, but a good forecast also needs reasonable odds."
     },
     {
       "type": "paragraph",
-      "text": "For example, if the model says a candidate has a 65 percent chance to win, then candidates with similar odds should win close to 65 percent of the time across many races. That is what we mean by calibration."
+      "text": "For example, if a model says a candidate has a 65% chance to win, then candidates with similar odds should win around 65% of the time. This is what calibration means."
     },
     {
       "type": "paragraph",
-      "text": "The calibration page currently has two different sections, and they are easy to mix up."
+      "text": "When we published the current calibration findings, the page had two different sections that I poorly formatted unintentionally, and they are easy to mix up."
     },
     {
       "type": "paragraph",
-      "text": "The first and more important section is the archived-input historical backtest. That means we use saved model inputs from an older election and check how the model would have done at the time. In simpler terms, it is the closest thing to asking: if this model existed before the election, how accurate would it have been?"
+      "text": "The more important section is the archived-input historical backtest. This means we use the model and put in information about a race that it might have had before Election Day. Then we test it against the result in historical elections, such as 2024, 2018, 2016, and other cycles."
+    },
+    {
+      "type": "paragraph",
+      "text": "Basically, if the model existed before this election, how accurate would it have been? This is key in seeing if the model can be called strong as we move closer to Election Day."
     },
     {
       "type": "paragraph",
@@ -33,79 +37,91 @@
     },
     {
       "type": "paragraph",
-      "text": "Right now, the archived-input test only uses 11 races from the 2024 Senate cycle. That is a small sample, so it should not be treated as the final word. But it gives us a useful early check."
+      "text": "Currently, the archived-input test only has 11 races from the 2024 Senate elections. This is a small sample, so it is not the final word, but it gives an early check."
     },
     {
       "type": "paragraph",
-      "text": "So far, the model has performed well in that test. In the 50 to 60 percent range, the model went 2 for 2. In the 60 to 70 percent range, it went 3 for 4. In the 70 to 80 percent range, it went 2 for 2. In the 80 to 90 percent range, it went 3 for 3."
+      "text": "So far, the model is doing well. In the 50-60% range, the model got all races correct. In the 60-70% range, it got 3 out of the 4 races correct. In the 70-80% range, it got all races correct. In the 80-90% range, it got all races correct."
     },
     {
       "type": "paragraph",
-      "text": "That does not mean the model is perfect. A few races are not enough to prove that. But it does show that the model is placing races into reasonable probability ranges."
+      "text": "This does not mean we have the perfect model. A few races are not enough to prove that. It does, however, show that the model is placing races into fair probability ranges."
     },
     {
       "type": "paragraph",
-      "text": "The second section is the current diagnostic. That word means a rough check for problems. It compares the current version of the model to older Senate results. This can help us find weak spots, but it is not the cleanest way to judge the model."
+      "text": "The other section is the current diagnostic. This means it is a rough check for problems. It compares the current version of the model to older Senate results. This helps find weak spots, but it is not clean or the proper way to judge the model."
     },
     {
       "type": "paragraph",
-      "text": "The current diagnostic has 35 races, which sounds better because the sample is larger. But the comparisons are less direct. Some states are being compared to races from 2016 or 2018. Some had very different candidates. Some had little polling. Some had independent candidates or special state-level factors."
+      "text": "The current diagnostic has 35 races, which might sound better because of the larger sample size. However, the comparisons are less direct. States are compared from 2016 or 2018. Some had very different candidates, little polling, independents, or special state-level factors."
     },
     {
       "type": "paragraph",
-      "text": "That is why the current diagnostic should be used as a warning system, not as the main grade."
+      "text": "The current diagnostic is a warning system, not a grade. The archived-input test, in comparison, is properly organized to be a fair assessment."
     },
     {
       "type": "paragraph",
-      "text": "Even with those limits, the current diagnostic does not show a broken model. The 60 to 70 percent range had a 62.5 percent win rate, which is close to the expected 65 percent. The 90 to 100 percent range had a 95 percent win rate, exactly matching the expected 95 percent."
+      "text": "Even with this issue, the current diagnostic seems mixed but not negative. The 60-70% range has a 62.5% win rate, which is close to the expected 65%. The 90-100% range had a 95% win rate, which was spot on."
     },
     {
       "type": "paragraph",
-      "text": "The weakest-looking part is the 80 to 90 percent range. In the current diagnostic, that range only had a 33.3 percent win rate. But that came from only three races, so it is too small to treat as proof of a major problem."
+      "text": "However, the weakest part is the 80-90% range, which had only a 33.3% win rate. Though admittedly, this came from just three races, which is hardly enough to be proof of a big issue."
     },
     {
       "type": "paragraph",
-      "text": "The archived-input margin misses also look normal. The largest misses were Pennsylvania at 5.2 points, Wisconsin at 4.2 points, Ohio at 3.6 points, Nebraska at 3.4 points, Nevada at 3.3 points, Florida at 2.8 points, Arizona at 2.6 points, and Montana at 2.1 points."
+      "text": "The archived-input margin misses appear normal. The largest was Pennsylvania at 5.2 points, Wisconsin at 4.2, Ohio at 3.6, Nebraska at 3.4, Nevada at 3.3, Florida at 2.8, and so on, going closer and closer to the actual margin."
     },
     {
       "type": "paragraph",
-      "text": "For Senate races, those misses are not alarming. Senate races are hard to forecast. Candidate strength, incumbency, polling quality, independent campaigns, and late movement all affect the final result. A model missing several races by two to five points is within a normal range."
+      "text": "For Senate races, this is not alarming. Senate races are hard to forecast because of late movements and state-by-state differences in factors. If a model misses a couple races by 2-5 points, that is within range, though not preferable."
     },
     {
       "type": "paragraph",
-      "text": "The page also shows a Brier score. A Brier score is a way to measure how close the model's probabilities were to the final results. Lower is better. The current diagnostic shows a mean Brier score of 0.143. That is a useful number to track, but it should be read with the same caution as the rest of the current diagnostic."
+      "text": "We will get a clearer picture once the archived-input backtesting is complete."
     },
     {
       "type": "paragraph",
-      "text": "The page also shows a mean margin miss of 12.5 points in the current diagnostic. That number looks high, but it comes from the rougher test, not the cleaner archived-input backtest. Some of those comparisons are not a fair one-to-one test of what the model would have forecast before a real election."
+      "text": "A Brier score is also included in the public release. A Brier score measures how close the model's probabilities were to the final results. We are looking for a lower score as the better outcome."
     },
     {
       "type": "paragraph",
-      "text": "That is the main issue right now. The page has one section that is closer to a real backtest and another section that is more of a rough problem-checker. Both are useful, but they should not be read the same way."
+      "text": "The current diagnostic has a mean score of 0.134. This is useful, but should be read with caution like the rest of the diagnostic."
     },
     {
       "type": "paragraph",
-      "text": "By May 23, 2026, we plan to finish the calibration cleanup and make the page easier to understand. The update should separate the true backtest from the rough diagnostic more clearly."
+      "text": "The page has a mean margin miss of 12.5 points with the current diagnostic. Due to the nature of the rougher diagnostic test, this is expected, and the cleaner archived-input backtest will show the final average miss."
     },
     {
       "type": "paragraph",
-      "text": "After that update, readers should have a clearer answer to three questions. How did the model perform when tested against saved past-election inputs? Which numbers are only meant to catch possible problems? Which results should be used to judge the model?"
+      "text": "Some of those comparisons are not a fair one-to-one test of what the model would have forecast before a real election."
     },
     {
       "type": "paragraph",
-      "text": "The honest view is this: the model is not fully proven yet. More past cycles need to be added. Some probability ranges still have small samples. The current diagnostic includes some noisy comparisons."
+      "text": "This is the main issue with our calibration page. We have two different systems of calibrating that should be interpreted totally differently."
     },
     {
       "type": "paragraph",
-      "text": "But the evidence so far does not show a bad model. The cleaner archived-input test looks promising. The largest archived misses are reasonable. Several probability ranges are lining up well with the outcomes."
+      "text": "By May 23rd, 2026, we plan to finish the calibration and the cleanup thereafter to properly convey the accuracy of the model with complete transparency."
     },
     {
       "type": "paragraph",
-      "text": "The model is still being improved, but the early signs are positive. For now, readers should use the archived-input backtest as the main score and use the current diagnostic as a tool for spotting possible weak points."
+      "text": "After this, readers will have clearer answers to some accuracy questions. How did the model perform when tested against past elections and their inputs? Which numbers are only meant to catch possible problems? Which results should be used to judge the model?"
     },
     {
       "type": "paragraph",
-      "text": "Once the May 23 calibration update is finished, the model should be easier to judge and easier for regular readers to understand."
+      "text": "Honestly, the model is not fully proven yet. We await the archived-input test to be finished and have it be proven or disproven. The current diagnostic does include some noisy comparisons, which dull any ability it has to prove much."
+    },
+    {
+      "type": "paragraph",
+      "text": "What we have now, however, does not show a bad model. The archived-input test looks promising. The largest misses are fair, and several probability ranges are lining up as they should."
+    },
+    {
+      "type": "paragraph",
+      "text": "The model is still being improved, but the early signs are good. To summarize, the archived-input backtest is the main score, and the diagnostic is a tool for spotting possible weak points."
+    },
+    {
+      "type": "paragraph",
+      "text": "Once we finish by May 23rd, judging it should be easier and more final."
     }
   ]
 },
