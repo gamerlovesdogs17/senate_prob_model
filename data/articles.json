@@ -1,5 +1,96 @@
 [
 {
+  "slug": "model-calibration-backtest-diagnostics",
+  "title": "What Our Backtest Says About the Senate Model",
+  "date": "2026-05-17",
+  "dek": "Our calibration page shows a model that is still being tested, but not one that is failing. The archived-input backtest is the main calibration source, while the live diagnostic is a temporary stress test that will be cleaned up by May 23, 2026.",
+  "author": "Capitol Forecast",
+  "featured": false,
+  "content": [
+    {
+      "type": "paragraph",
+      "text": "A forecast model should not be judged only by whether it picks winners. It should also be judged by calibration. If a model gives candidates a 65 percent chance to win, candidates in that range should win close to 65 percent of the time across enough races."
+    },
+    {
+      "type": "paragraph",
+      "text": "Our Senate model is still early in its calibration work. The page currently shows two different tests, and that has caused some confusion. The archived-input backtest is the main one to use. The current diagnostic is more of a live-model stress test."
+    },
+    {
+      "type": "paragraph",
+      "text": "The archived-input backtest is the cleaner test because it uses frozen historical inputs. That means it asks a direct question. If this model had existed with past-cycle information, how close would it have been?"
+    },
+    {
+      "type": "paragraph",
+      "text": "The answer so far is positive, but incomplete. The archived-input sample currently has 11 races. That is not enough for a final verdict, but it is enough to see whether the model is behaving in a reasonable way."
+    },
+    {
+      "type": "paragraph",
+      "text": "In the archived-input test, the 50 to 60 percent bucket went 2 for 2. The 60 to 70 percent bucket went 3 for 4. The 70 to 80 percent bucket went 2 for 2. The 80 to 90 percent bucket went 3 for 3. The 90 to 100 percent bucket has no races yet."
+    },
+    {
+      "type": "paragraph",
+      "text": "Those results defend the model better than a simple win-loss record would. The model is not missing races in a random or chaotic way. The early archived-input test suggests the model is sorting races into reasonable probability ranges."
+    },
+    {
+      "type": "paragraph",
+      "text": "The main limit is sample size. A bucket with two or three races does not prove perfect calibration. It only tells us the model has started in the right direction. More archived cycles are needed before the calibration score should be treated as stable."
+    },
+    {
+      "type": "paragraph",
+      "text": "The current diagnostic has a larger 35-race sample, but it is not the full calibration test. It compares the live model shape against each state's latest available Senate result. That helps find risk areas, but it is not the same as using frozen historical forecast inputs."
+    },
+    {
+      "type": "paragraph",
+      "text": "That distinction matters. The current diagnostic includes states where the comparison is not a clean election-to-election match. Some states use 2016 or 2018 comparisons. Some have little polling. Some have major candidate differences. Some have current-cycle conditions that differ from the last Senate race."
+    },
+    {
+      "type": "paragraph",
+      "text": "That is why the current diagnostic should not be used as the main grade for the model. It is useful as a warning system. It shows where the model might be too confident, too cautious, or too dependent on state fundamentals. It does not replace the archived-input test."
+    },
+    {
+      "type": "paragraph",
+      "text": "Even with those limits, the current diagnostic does not show a broken model. The 60 to 70 percent bucket has a 62.5 percent historical win rate against a 65 percent expected win rate. The 90 to 100 percent bucket has a 95 percent historical win rate against a 95 percent expected win rate. Those are strong signs."
+    },
+    {
+      "type": "paragraph",
+      "text": "The weakest-looking area is the 80 to 90 percent bucket, where the current diagnostic shows a 33.3 percent historical win rate from only three races. That should be watched, but not overread. Three races are not enough to prove the model is overconfident in that range."
+    },
+    {
+      "type": "paragraph",
+      "text": "The archived-input misses are also not alarming. The largest archived-input misses are Pennsylvania at 5.2 points, Wisconsin at 4.2 points, Ohio at 3.6 points, Nebraska at 3.4 points, Nevada at 3.3 points, Florida at 2.8 points, Arizona at 2.6 points, and Montana at 2.1 points."
+    },
+    {
+      "type": "paragraph",
+      "text": "Those misses are normal for Senate forecasting. Senate races are candidate-driven. State polling is often sparse. Independent campaigns, open seats, incumbency effects, and late-cycle shifts all create uncertainty. A model that misses several races by two to five points is not failing. It is operating within a normal error range."
+    },
+    {
+      "type": "paragraph",
+      "text": "The model's mean Brier score in the current diagnostic is 0.143, and the mean margin miss is 12.5 points. That margin number looks high, but it comes from a diagnostic that includes imperfect comparisons. The largest margin misses panel even flags several cases where the historical comparison does not match a frozen 2026-like pre-election snapshot."
+    },
+    {
+      "type": "paragraph",
+      "text": "That is the main source of confusion on the page. One section is a cleaner archived-input backtest. The other section is a live diagnostic that compares current model behavior against past results. Both are useful, but they should not be read the same way."
+    },
+    {
+      "type": "paragraph",
+      "text": "By May 23, 2026, we plan to finish the calibration cleanup and end this confusion. The goal is to make the page clearer, separate archived-input calibration from live diagnostics, and expand the historical backtest so readers know which numbers matter most."
+    },
+    {
+      "type": "paragraph",
+      "text": "The model should be defended honestly. It is not fully validated yet. It does not have enough archived races yet. Some buckets are still too small. Some diagnostic comparisons are noisy. But the available evidence does not show a bad model."
+    },
+    {
+      "type": "paragraph",
+      "text": "The better read is this. The archived-input backtest is promising. The live diagnostic is useful but imperfect. The model has normal Senate-forecasting error, not evidence of collapse. More archived cycles will make the calibration page stronger."
+    },
+    {
+      "type": "paragraph",
+      "text": "For now, the archived-input backtest should be treated as the main calibration source. The current diagnostic should be treated as a stress test. Once the May 23 cleanup is complete, the model will have a clearer calibration system and a more direct way to judge its accuracy."
+    }
+  ]
+},
+
+{
   "slug": "dan-osborn-democratic-strategy-deep-red",
   "title": "How Dan Osborn has Redefined the Democratic Strategy of the Deep Red",
   "date": "2026-05-17",
