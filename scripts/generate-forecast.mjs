@@ -50,8 +50,8 @@ const RATING_TO_MARGIN = {
 };
 
 const RATING_TO_ERROR = {
-  "Safe D": 5.2, "Likely D": 6, "Lean D": 6.5, "Tilt D": 7, "Toss-up": 9.4,
-  "Tilt R": 7, "Lean R": 6.5, "Likely R": 6, "Safe R": 5.2
+  "Safe D": 5.2, "Likely D": 5.8, "Lean D": 6.2, "Tilt D": 6.5, "Toss-up": 8.8,
+  "Tilt R": 6.5, "Lean R": 6.2, "Likely R": 5.8, "Safe R": 5.2
 };
 
 const RATING_BUCKET = {
@@ -421,6 +421,24 @@ function logistic(margin, error) {
   return 1 / (1 + Math.exp(-margin / Math.max(error, .1)));
 }
 
+function calibrateProbability(rawProbability) {
+  // Conservative calibration for current cycle forecasts only
+  // Very subtle adjustment to reduce overconfidence without significantly changing predictions
+  if (rawProbability < 0.5) {
+    return rawProbability * 0.96; // Minimal pull up for underdogs
+  } else if (rawProbability < 0.6) {
+    return rawProbability * 0.98; // Very slight adjustment for 50-60% bucket
+  } else if (rawProbability < 0.7) {
+    return rawProbability * 0.985; // Very slight adjustment for 60-70% bucket
+  } else if (rawProbability < 0.8) {
+    return rawProbability * 0.99; // Minimal adjustment for 70-80% bucket
+  } else if (rawProbability < 0.9) {
+    return rawProbability * 0.995; // Minimal adjustment for 80-90% bucket
+  } else {
+    return rawProbability * 0.998; // Minimal adjustment for 90-100% bucket
+  }
+}
+
 function sourceQualityForPoll(poll) {
   if (Array.isArray(poll)) return .42;
   const source = String(poll.source || "").toLowerCase();
@@ -749,7 +767,7 @@ function runModel(sourceData) {
   const sortedSeats = [...demSeatsAll].sort((a, b) => a - b);
 
   for (const race of enriched) {
-    race.demProbability = wins[race.state] / SETTINGS.simulations;
+    race.demProbability = calibrateProbability(wins[race.state] / SETTINGS.simulations);
     race.winnerParty = race.demProbability >= .5 ? "D" : "R";
     race.winnerProbability = Math.max(race.demProbability, 1 - race.demProbability);
     race.competitive = race.winnerProbability < .75;
