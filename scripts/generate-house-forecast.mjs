@@ -23,25 +23,25 @@ const SETTINGS = {
 
 const RATING_TO_MARGIN = {
   "Safe D": 21,
-  "Likely D": 9,
+  "Likely D": 7,
   "Lean D": 4.5,
   "Tilt D": 1.5,
   "Toss-up": 0,
   "Tilt R": -1.5,
   "Lean R": -4.3,
-  "Likely R": -9,
+  "Likely R": -7,
   "Safe R": -21
 };
 
 const RATING_TO_ERROR = {
   "Safe D": 5.1,
-  "Likely D": 6.3,
+  "Likely D": 8.5,
   "Lean D": 7.4,
   "Tilt D": 8.6,
   "Toss-up": 9.8,
   "Tilt R": 8.6,
   "Lean R": 7.4,
-  "Likely R": 6.3,
+  "Likely R": 8.5,
   "Safe R": 5.1
 };
 
@@ -103,9 +103,7 @@ const STATELESS_DISTRICTS = new Set(["DC-AL"]);
 function modelDateKey() {
   if (/^\d{4}-\d{2}-\d{2}$/.test(process.env.MODEL_DATE || "")) return process.env.MODEL_DATE;
   const now = new Date();
-  const central = new Date(now.toLocaleString("en-US", { timeZone: SETTINGS.updateZone }));
-  if (central.getHours() < 6) central.setDate(central.getDate() - 1);
-  return central.toISOString().slice(0, 10);
+  return now.toISOString().slice(0, 10);
 }
 
 const MODEL_DATE_KEY = modelDateKey();

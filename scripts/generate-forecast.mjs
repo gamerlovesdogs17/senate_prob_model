@@ -45,13 +45,13 @@ const REGION_BY_STATE = {
 };
 
 const RATING_TO_MARGIN = {
-  "Safe D": 18, "Likely D": 10, "Lean D": 5, "Tilt D": 1.8, "Toss-up": 0,
-  "Tilt R": -1.8, "Lean R": -5, "Likely R": -10, "Safe R": -18
+  "Safe D": 18, "Likely D": 8, "Lean D": 5, "Tilt D": 1.8, "Toss-up": 0,
+  "Tilt R": -1.8, "Lean R": -5, "Likely R": -8, "Safe R": -18
 };
 
 const RATING_TO_ERROR = {
-  "Safe D": 5.2, "Likely D": 6.2, "Lean D": 7.2, "Tilt D": 8.4, "Toss-up": 9.4,
-  "Tilt R": 8.4, "Lean R": 7.2, "Likely R": 6.2, "Safe R": 5.2
+  "Safe D": 5.2, "Likely D": 8.5, "Lean D": 7.2, "Tilt D": 8.4, "Toss-up": 9.4,
+  "Tilt R": 8.4, "Lean R": 7.2, "Likely R": 8.5, "Safe R": 5.2
 };
 
 const RATING_BUCKET = {
@@ -370,11 +370,7 @@ function mulberry32(seed) {
 function modelDateKey() {
   if (/^\d{4}-\d{2}-\d{2}$/.test(process.env.MODEL_DATE || "")) return process.env.MODEL_DATE;
   const now = new Date();
-  const central = new Date(now.toLocaleString("en-US", { timeZone: SETTINGS.updateZone }));
-  if (central.getHours() < SETTINGS.updateHour || (central.getHours() === SETTINGS.updateHour && central.getMinutes() < SETTINGS.updateMinute)) {
-    central.setDate(central.getDate() - 1);
-  }
-  return central.toISOString().slice(0, 10);
+  return now.toISOString().slice(0, 10);
 }
 
 const MODEL_DATE_KEY = modelDateKey();

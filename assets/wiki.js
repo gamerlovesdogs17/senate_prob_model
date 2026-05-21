@@ -29,7 +29,7 @@ const HOUSE_PREVIEW_MODES = {
 };
 
 const CHART_ANNOTATIONS = [
-  { date: "2026-05-17", label: "Model reworked" }
+  { date: "2026-05-21", label: "Model reworked" }
 ];
 
 const MONTANA_CHART_ANNOTATIONS = [
