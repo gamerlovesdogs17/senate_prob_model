@@ -46,7 +46,7 @@ const RATING_TO_ERROR = {
 };
 
 const MODEL_WEIGHTS = {
-  genericBallot: .82,
+  genericBallot: .65,
   genericBallotCap: 5.4,
   ratingBaseline: 1,
   districtPolls: .18,
@@ -55,7 +55,7 @@ const MODEL_WEIGHTS = {
   incumbencyOpenPenalty: .45,
   seatPartyIncumbency: .45,
   districtFundamentals: .07,
-  historicalMidterm: 1.15,
+  historicalMidterm: 1.0,
   stateCorrelationSd: 1.3,
   nationalEnvironmentSd: 3.1
 };
@@ -103,7 +103,11 @@ const STATELESS_DISTRICTS = new Set(["DC-AL"]);
 function modelDateKey() {
   if (/^\d{4}-\d{2}-\d{2}$/.test(process.env.MODEL_DATE || "")) return process.env.MODEL_DATE;
   const now = new Date();
-  return now.toISOString().slice(0, 10);
+  const central = new Date(now.toLocaleString("en-US", { timeZone: SETTINGS.updateZone }));
+  if (central.getHours() < 6 || (central.getHours() === 6 && central.getMinutes() < 20)) {
+    central.setDate(central.getDate() - 1);
+  }
+  return central.toISOString().slice(0, 10);
 }
 
 const MODEL_DATE_KEY = modelDateKey();

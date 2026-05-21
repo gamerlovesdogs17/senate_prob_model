@@ -370,7 +370,11 @@ function mulberry32(seed) {
 function modelDateKey() {
   if (/^\d{4}-\d{2}-\d{2}$/.test(process.env.MODEL_DATE || "")) return process.env.MODEL_DATE;
   const now = new Date();
-  return now.toISOString().slice(0, 10);
+  const central = new Date(now.toLocaleString("en-US", { timeZone: SETTINGS.updateZone }));
+  if (central.getHours() < SETTINGS.updateHour || (central.getHours() === SETTINGS.updateHour && central.getMinutes() < SETTINGS.updateMinute)) {
+    central.setDate(central.getDate() - 1);
+  }
+  return central.toISOString().slice(0, 10);
 }
 
 const MODEL_DATE_KEY = modelDateKey();
