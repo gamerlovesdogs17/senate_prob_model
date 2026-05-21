@@ -31,11 +31,18 @@
       <h1>Backtest diagnostics.</h1>
     </section>
 
-    <section class="dashboard-grid" aria-label="Calibration summaries">
-      <article class="chart-panel chart-wide">
-        <span class="chart-label">Senate probability buckets</span>
-        <div id="calibration-buckets" class="calibration-table"></div>
-      </article>
+    <section class="text-panel">
+      <p class="kicker">Important distinction</p>
+      <p>This page has two separate sections. The <strong>archived-input historical backtest</strong> is the main score—it uses frozen pre-election inputs tested against actual results. The <strong>current diagnostic</strong> is a rough warning system that compares the live model to historical results and should not be used to judge the model.</p>
+    </section>
+
+    <section class="text-panel" style="border-top: 3px solid var(--line); padding-top: 24px;">
+      <p class="kicker">Archived-input historical backtest</p>
+      <h2>Main model score.</h2>
+      <p>This section uses frozen pre-election inputs (ratings, polls, fundamentals) and tests them against actual election results. This is the proper way to judge model accuracy.</p>
+    </section>
+
+    <section class="dashboard-grid" aria-label="Archived-input backtest">
       <article class="chart-panel chart-wide">
         <span class="chart-label">Historical backtest status</span>
         <div id="historical-backtest-status" class="backtest-status"></div>
@@ -48,12 +55,25 @@
         <span class="chart-label">Archived-input misses</span>
         <div id="archived-backtest-worst" class="leverage-chart"></div>
       </article>
+    </section>
+
+    <section class="text-panel" style="border-top: 3px solid var(--line); padding-top: 24px; margin-top: 32px;">
+      <p class="kicker">Current diagnostic</p>
+      <h2>Warning system only.</h2>
+      <p>This section compares the live model against historical Senate results. It is a rough check for problems, not a proper assessment of model accuracy. Use the archived-input backtest above to judge the model.</p>
+    </section>
+
+    <section class="dashboard-grid" aria-label="Current diagnostic">
+      <article class="chart-panel chart-wide">
+        <span class="chart-label">Current diagnostic probability buckets</span>
+        <div id="calibration-buckets" class="calibration-table"></div>
+      </article>
       <article class="chart-panel chart-wide">
         <span class="chart-label">Margin error by race type</span>
         <div id="calibration-breakdowns" class="calibration-table"></div>
       </article>
       <article class="chart-panel">
-        <span class="chart-label">Model error</span>
+        <span class="chart-label">Current diagnostic model error</span>
         <dl class="race-stats">
           <div><dt>Historical sample</dt><dd id="calibration-sample">--</dd></div>
           <div><dt>Mean Brier score</dt><dd id="calibration-brier">--</dd></div>
@@ -61,7 +81,7 @@
         </dl>
       </article>
       <article class="chart-panel">
-        <span class="chart-label">Largest margin misses</span>
+        <span class="chart-label">Current diagnostic largest misses</span>
         <div id="calibration-worst" class="leverage-chart"></div>
       </article>
     </section>
