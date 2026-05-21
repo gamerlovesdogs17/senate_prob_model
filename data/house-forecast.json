@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-21T02:47:29.098Z",
+  "generatedAt": "2026-05-21T03:02:07.252Z",
   "modelDate": "2026-05-20",
   "runDate": "May 20, 2026",
   "updateTime": "around 6:20 AM Central",
@@ -40,95 +40,88 @@
     "redistrictingTreatment": "Current district-by-district ratings and margins are used directly; no separate redistricting bonus is added on top of the seat ratings."
   },
   "sourceStatus": {
-    "checkedAt": "2026-05-21T02:47:19.976Z",
-    "cookHouseRatings": {
-      "ok": false,
-      "status": 403,
-      "ms": 175,
-      "bytes": 5554,
-      "url": "https://www.cookpolitical.com/ratings/house-race-ratings"
-    },
+    "checkedAt": "2026-05-21T03:02:02.710Z",
     "realClearPollingHousePolls": {
       "ok": false,
       "status": 403,
-      "ms": 192,
+      "ms": 223,
       "bytes": 1278,
       "url": "https://www.realclearpolling.com/latest-polls/house"
-    },
-    "raceToTheWhHouseForecast": {
-      "ok": true,
-      "status": 200,
-      "ms": 275,
-      "bytes": 125066,
-      "url": "https://www.racetothewh.com/house-3"
-    },
-    "raceToTheWhGenericBallot": {
-      "ok": true,
-      "status": 200,
-      "ms": 274,
-      "bytes": 225068,
-      "url": "https://www.racetothewh.com/polls/genericballot"
     },
     "realClearPoliticsGenericBallot": {
       "ok": false,
       "status": 403,
-      "ms": 275,
+      "ms": 281,
       "bytes": 781,
       "url": "https://www.realclearpolitics.com/epolls/other/2026_generic_congressional_vote-8670.html"
     },
-    "votehubGenericBallot": {
+    "twoSeventyToWinHouseMapData": {
+      "ok": true,
+      "status": 200,
+      "ms": 292,
+      "bytes": 7046720,
+      "url": "https://www.270towin.com/2026-house-election/inside-elections-2026-house-ratings"
+    },
+    "raceToTheWhGenericBallot": {
+      "ok": true,
+      "status": 200,
+      "ms": 309,
+      "bytes": 225068,
+      "url": "https://www.racetothewh.com/polls/genericballot"
+    },
+    "pollfinityAverages": {
       "ok": false,
-      "status": 403,
-      "ms": 446,
-      "bytes": 5438,
-      "url": "https://polls.votehub.us/polls/generic-ballot"
+      "status": 404,
+      "ms": 332,
+      "bytes": 0,
+      "url": "https://pollfinity.com/api/averages"
+    },
+    "raceToTheWhHouseForecast": {
+      "ok": true,
+      "status": 200,
+      "ms": 375,
+      "bytes": 125066,
+      "url": "https://www.racetothewh.com/house-3"
     },
     "ddhqGenericBallot": {
       "ok": false,
       "status": 404,
-      "ms": 456,
+      "ms": 385,
       "bytes": 350,
       "url": "https://static.dwcdn.net/data/9Jctg.json"
     },
     "twoSeventyToWinHousePolls": {
       "ok": true,
       "status": 200,
-      "ms": 697,
-      "bytes": 7046467,
+      "ms": 508,
+      "bytes": 7046429,
       "url": "https://www.270towin.com/2026-house-election/polls/"
     },
-    "pollfinityAverages": {
+    "cookHouseRatings": {
       "ok": false,
-      "status": 404,
-      "ms": 822,
-      "bytes": 0,
-      "url": "https://pollfinity.com/api/averages"
+      "status": 403,
+      "ms": 564,
+      "bytes": 5554,
+      "url": "https://www.cookpolitical.com/ratings/house-race-ratings"
+    },
+    "votehubGenericBallot": {
+      "ok": false,
+      "status": 403,
+      "ms": 896,
+      "bytes": 5438,
+      "url": "https://polls.votehub.us/polls/generic-ballot"
     },
     "insideElections270ToWinRatings": {
       "ok": true,
       "status": 200,
-      "ms": 977,
+      "ms": 941,
       "bytes": 485900,
       "url": "https://www.270towin.com/2026-house-election/table/inside-elections-2026-house-ratings"
-    },
-    "censusDistrictBoundaries": {
-      "ok": true,
-      "status": 200,
-      "ms": 1251,
-      "bytes": 1036604,
-      "url": "https://www.census.gov/geographies/mapping-files/2025/geo/carto-boundary-file.html"
-    },
-    "twoSeventyToWinHouseMapData": {
-      "ok": true,
-      "status": 200,
-      "ms": 3234,
-      "bytes": 7046758,
-      "url": "https://www.270towin.com/2026-house-election/inside-elections-2026-house-ratings"
     },
     "usPollingDataGenericBallot": {
       "ok": true,
       "status": 200,
-      "ms": 3548,
+      "ms": 933,
       "bytes": 107521,
       "url": "https://uspollingdata.com/polls/generic-ballot/"
     },
@@ -137,10 +130,17 @@
       "status": "local",
       "ms": 0
     },
+    "censusDistrictBoundaries": {
+      "ok": true,
+      "status": 200,
+      "ms": 1158,
+      "bytes": 1043499,
+      "url": "https://www.census.gov/geographies/mapping-files/2025/geo/carto-boundary-file.html"
+    },
     "openFecHouseCandidateSummary": {
       "ok": true,
       "status": 200,
-      "ms": 6887,
+      "ms": 2236,
       "bytes": 1547691,
       "url": "https://www.fec.gov/files/bulk-downloads/2026/candidate_summary_2026.csv",
       "rows": 4040,
@@ -219,15 +219,15 @@
     },
     {
       "rating": "Toss-up",
-      "count": 6
+      "count": 2
     },
     {
       "rating": "Tilt R",
-      "count": 12
+      "count": 6
     },
     {
       "rating": "Lean R",
-      "count": 11
+      "count": 21
     },
     {
       "rating": "Likely R",
@@ -251,8 +251,8 @@
     },
     {
       "date": "2026-05-20",
-      "dem": 0.8692666666666666,
-      "rep": 0.13073333333333334
+      "dem": 0.8668666666666667,
+      "rep": 0.13313333333333333
     }
   ],
   "seatHistory": [
@@ -272,125 +272,124 @@
       "rep": 207
     }
   ],
-  "demControlProbability": 0.8692666666666666,
-  "repControlProbability": 0.13073333333333334,
+  "demControlProbability": 0.8668666666666667,
+  "repControlProbability": 0.13313333333333333,
   "medianSeats": 228,
   "seatCounts": {
-    "190": 1,
-    "192": 1,
+    "189": 1,
     "193": 1,
-    "194": 2,
+    "194": 3,
     "195": 3,
-    "196": 5,
-    "197": 7,
-    "198": 6,
-    "199": 15,
-    "200": 12,
-    "201": 24,
-    "202": 47,
-    "203": 43,
-    "204": 48,
-    "205": 73,
-    "206": 78,
+    "196": 2,
+    "197": 8,
+    "198": 3,
+    "199": 10,
+    "200": 15,
+    "201": 20,
+    "202": 25,
+    "203": 42,
+    "204": 53,
+    "205": 59,
+    "206": 81,
     "207": 116,
-    "208": 147,
-    "209": 175,
-    "210": 197,
-    "211": 213,
-    "212": 252,
-    "213": 355,
-    "214": 432,
-    "215": 493,
-    "216": 560,
-    "217": 616,
-    "218": 740,
-    "219": 775,
-    "220": 861,
-    "221": 947,
-    "222": 981,
-    "223": 1021,
-    "224": 1136,
-    "225": 1091,
-    "226": 1187,
-    "227": 1181,
-    "228": 1265,
-    "229": 1316,
-    "230": 1145,
-    "231": 1191,
-    "232": 1133,
-    "233": 1135,
-    "234": 1024,
-    "235": 941,
-    "236": 892,
-    "237": 799,
-    "238": 722,
-    "239": 610,
-    "240": 619,
-    "241": 494,
-    "242": 439,
-    "243": 361,
-    "244": 290,
-    "245": 269,
-    "246": 241,
-    "247": 215,
-    "248": 152,
-    "249": 135,
-    "250": 102,
-    "251": 101,
-    "252": 95,
-    "253": 75,
-    "254": 50,
-    "255": 48,
+    "208": 132,
+    "209": 156,
+    "210": 177,
+    "211": 245,
+    "212": 286,
+    "213": 359,
+    "214": 412,
+    "215": 501,
+    "216": 611,
+    "217": 673,
+    "218": 729,
+    "219": 847,
+    "220": 857,
+    "221": 1011,
+    "222": 1054,
+    "223": 1138,
+    "224": 1190,
+    "225": 1170,
+    "226": 1182,
+    "227": 1295,
+    "228": 1333,
+    "229": 1274,
+    "230": 1189,
+    "231": 1180,
+    "232": 1099,
+    "233": 1127,
+    "234": 966,
+    "235": 891,
+    "236": 821,
+    "237": 763,
+    "238": 648,
+    "239": 617,
+    "240": 540,
+    "241": 476,
+    "242": 373,
+    "243": 327,
+    "244": 282,
+    "245": 248,
+    "246": 204,
+    "247": 164,
+    "248": 160,
+    "249": 105,
+    "250": 110,
+    "251": 94,
+    "252": 88,
+    "253": 71,
+    "254": 40,
+    "255": 54,
     "256": 48,
-    "257": 42,
-    "258": 22,
+    "257": 34,
+    "258": 23,
     "259": 30,
-    "260": 19,
-    "261": 17,
-    "262": 12,
-    "263": 14,
-    "264": 14,
-    "265": 10,
-    "266": 14,
-    "267": 5,
-    "268": 6,
-    "269": 8,
-    "270": 6,
-    "271": 5,
+    "260": 21,
+    "261": 10,
+    "262": 15,
+    "263": 13,
+    "264": 11,
+    "265": 12,
+    "266": 15,
+    "267": 4,
+    "268": 8,
+    "269": 7,
+    "270": 7,
+    "271": 4,
     "272": 2,
     "273": 3,
-    "274": 2,
-    "275": 1,
-    "276": 4,
-    "277": 2,
-    "279": 4,
-    "280": 1,
-    "284": 4,
+    "275": 3,
+    "276": 3,
+    "277": 3,
+    "279": 3,
+    "280": 2,
+    "284": 3,
+    "285": 1,
     "289": 1,
-    "290": 1,
+    "291": 1,
     "292": 1,
     "302": 1
   },
   "controlPaths": {
     "dem": {
-      "controlSimulations": 26078,
+      "controlSimulations": 26006,
       "tossupWins": 13.1,
       "tiltRWins": 0,
-      "leanRWins": 3.2,
-      "vulnerableDHolds": 5.9,
+      "leanRWins": 2.9,
+      "vulnerableDHolds": 5.6,
       "tiltDWins": 0,
       "leanDWins": 0,
       "vulnerableRHolds": 0
     },
     "rep": {
-      "controlSimulations": 3922,
-      "tossupWins": 10.7,
+      "controlSimulations": 3994,
+      "tossupWins": 10.8,
       "tiltRWins": 0,
       "leanRWins": 0,
       "vulnerableDHolds": 0,
       "tiltDWins": 0,
-      "leanDWins": 4.5,
-      "vulnerableRHolds": 26.9
+      "leanDWins": 3.5,
+      "vulnerableRHolds": 28
     }
   },
   "districts": [
@@ -881,12 +880,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely R",
       "insideRating": null,
-      "margin": -3.05,
-      "demProbability": 0.3704,
-      "repProbability": 0.6296,
+      "margin": -3.93,
+      "demProbability": 0.3159,
+      "repProbability": 0.6841,
       "winnerParty": "R",
-      "winnerProbability": 0.6296,
-      "error": 8.5,
+      "winnerProbability": 0.6841,
+      "error": 7.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -895,7 +894,7 @@
         "congressionalBaseline": 0,
         "districtFundamentalMargin": -12,
         "contextualBaseline": -12,
-        "ratingBaseline": -7,
+        "ratingBaseline": -8,
         "openPenalty": 0,
         "incumbencyAdjustment": -0.45,
         "challengerStrength": "none",
@@ -924,8 +923,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.3704,
-          "rep": 0.6296
+          "dem": 0.3159,
+          "rep": 0.6841
         }
       ]
     },
@@ -1004,7 +1003,7 @@
       "label": "Darren Soto",
       "incumbent": "Darren Soto",
       "open": false,
-      "rating": "Tilt R",
+      "rating": "Lean R",
       "sourceRating": "Likely R",
       "ratingSource": "270toWin / Inside Elections",
       "seatParty": "D",
@@ -1017,12 +1016,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely R",
       "insideRating": null,
-      "margin": -2.52,
-      "demProbability": 0.3931,
-      "repProbability": 0.6069,
+      "margin": -3.4,
+      "demProbability": 0.3425,
+      "repProbability": 0.6575,
       "winnerParty": "R",
-      "winnerProbability": 0.6069,
-      "error": 8.5,
+      "winnerProbability": 0.6575,
+      "error": 7.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -1031,7 +1030,7 @@
         "congressionalBaseline": 0,
         "districtFundamentalMargin": -18,
         "contextualBaseline": -16,
-        "ratingBaseline": -7,
+        "ratingBaseline": -8,
         "openPenalty": 0,
         "incumbencyAdjustment": 0.45,
         "challengerStrength": "none",
@@ -1060,8 +1059,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.3931,
-          "rep": 0.6069
+          "dem": 0.3425,
+          "rep": 0.6575
         }
       ]
     },
@@ -1221,12 +1220,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely R",
       "insideRating": null,
-      "margin": -3.44,
-      "demProbability": 0.3552,
-      "repProbability": 0.6448,
+      "margin": -4.32,
+      "demProbability": 0.2997,
+      "repProbability": 0.7003,
       "winnerParty": "R",
-      "winnerProbability": 0.6448,
-      "error": 8.5,
+      "winnerProbability": 0.7003,
+      "error": 7.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -1235,7 +1234,7 @@
         "congressionalBaseline": 0,
         "districtFundamentalMargin": -15,
         "contextualBaseline": -15,
-        "ratingBaseline": -7,
+        "ratingBaseline": -8,
         "openPenalty": 0,
         "incumbencyAdjustment": -0.45,
         "challengerStrength": "none",
@@ -1264,8 +1263,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.3552,
-          "rep": 0.6448
+          "dem": 0.2997,
+          "rep": 0.7003
         }
       ]
     },
@@ -1289,12 +1288,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely R",
       "insideRating": null,
-      "margin": -3.2,
-      "demProbability": 0.361,
-      "repProbability": 0.639,
+      "margin": -4.08,
+      "demProbability": 0.3085,
+      "repProbability": 0.6915,
       "winnerParty": "R",
-      "winnerProbability": 0.639,
-      "error": 8.5,
+      "winnerProbability": 0.6915,
+      "error": 7.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -1303,7 +1302,7 @@
         "congressionalBaseline": 0,
         "districtFundamentalMargin": -13,
         "contextualBaseline": -13,
-        "ratingBaseline": -7,
+        "ratingBaseline": -8,
         "openPenalty": 0,
         "incumbencyAdjustment": -0.45,
         "challengerStrength": "none",
@@ -1332,8 +1331,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.361,
-          "rep": 0.639
+          "dem": 0.3085,
+          "rep": 0.6915
         }
       ]
     },
@@ -1357,12 +1356,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Lean R",
       "insideRating": null,
-      "margin": 0.37,
-      "demProbability": 0.5169,
-      "repProbability": 0.4831,
-      "winnerParty": "D",
-      "winnerProbability": 0.5169,
-      "error": 7.4,
+      "margin": -0.69,
+      "demProbability": 0.4617,
+      "repProbability": 0.5383,
+      "winnerParty": "R",
+      "winnerProbability": 0.5383,
+      "error": 6.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -1371,7 +1370,7 @@
         "congressionalBaseline": 0,
         "districtFundamentalMargin": -11,
         "contextualBaseline": -11,
-        "ratingBaseline": -4.3,
+        "ratingBaseline": -5.5,
         "openPenalty": 0,
         "incumbencyAdjustment": 0.45,
         "challengerStrength": "none",
@@ -1400,8 +1399,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.5169,
-          "rep": 0.4831
+          "dem": 0.4617,
+          "rep": 0.5383
         }
       ]
     },
@@ -1480,7 +1479,7 @@
       "label": "Vern Buchanan / open",
       "incumbent": "Vern Buchanan",
       "open": true,
-      "rating": "Tilt R",
+      "rating": "Lean R",
       "sourceRating": "Likely R",
       "ratingSource": "270toWin / Inside Elections",
       "seatParty": "R",
@@ -1493,12 +1492,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely R",
       "insideRating": null,
-      "margin": -2.24,
-      "demProbability": 0.4045,
-      "repProbability": 0.5955,
+      "margin": -3.12,
+      "demProbability": 0.3504,
+      "repProbability": 0.6496,
       "winnerParty": "R",
-      "winnerProbability": 0.5955,
-      "error": 8.5,
+      "winnerProbability": 0.6496,
+      "error": 7.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -1507,7 +1506,7 @@
         "congressionalBaseline": 0,
         "districtFundamentalMargin": -14,
         "contextualBaseline": -14,
-        "ratingBaseline": -7,
+        "ratingBaseline": -8,
         "openPenalty": 0.45,
         "incumbencyAdjustment": 0,
         "challengerStrength": "none",
@@ -1536,8 +1535,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.4045,
-          "rep": 0.5955
+          "dem": 0.3504,
+          "rep": 0.6496
         }
       ]
     },
@@ -1888,7 +1887,7 @@
       "label": "Lois Frankel",
       "incumbent": "Lois Frankel",
       "open": false,
-      "rating": "Toss-up",
+      "rating": "Tilt R",
       "sourceRating": "Lean R",
       "ratingSource": "270toWin / Inside Elections",
       "seatParty": "D",
@@ -1901,12 +1900,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Lean R",
       "insideRating": null,
-      "margin": 0.02,
-      "demProbability": 0.4995,
-      "repProbability": 0.5005,
+      "margin": -1.03,
+      "demProbability": 0.4424,
+      "repProbability": 0.5576,
       "winnerParty": "R",
-      "winnerProbability": 0.5005,
-      "error": 7.4,
+      "winnerProbability": 0.5576,
+      "error": 6.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -1915,7 +1914,7 @@
         "congressionalBaseline": 0,
         "districtFundamentalMargin": -10,
         "contextualBaseline": -10,
-        "ratingBaseline": -4.3,
+        "ratingBaseline": -5.5,
         "openPenalty": 0,
         "incumbencyAdjustment": 0.45,
         "challengerStrength": "none",
@@ -1944,8 +1943,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.4995,
-          "rep": 0.5005
+          "dem": 0.4424,
+          "rep": 0.5576
         }
       ]
     },
@@ -2241,12 +2240,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely R",
       "insideRating": null,
-      "margin": -3.31,
-      "demProbability": 0.3638,
-      "repProbability": 0.6362,
+      "margin": -4.19,
+      "demProbability": 0.3095,
+      "repProbability": 0.6905,
       "winnerParty": "R",
-      "winnerProbability": 0.6362,
-      "error": 8.5,
+      "winnerProbability": 0.6905,
+      "error": 7.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -2255,7 +2254,7 @@
         "congressionalBaseline": 0,
         "districtFundamentalMargin": -15,
         "contextualBaseline": -15,
-        "ratingBaseline": -7,
+        "ratingBaseline": -8,
         "openPenalty": 0,
         "incumbencyAdjustment": -0.45,
         "challengerStrength": "none",
@@ -2284,8 +2283,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.3638,
-          "rep": 0.6362
+          "dem": 0.3095,
+          "rep": 0.6905
         }
       ]
     },
@@ -4757,12 +4756,12 @@
       "repCandidate": "Barb Regnitz",
       "baselineRating": "Likely D",
       "insideRating": null,
-      "margin": 11.25,
-      "demProbability": 0.8883,
-      "repProbability": 0.1117,
+      "margin": 12.13,
+      "demProbability": 0.9284,
+      "repProbability": 0.0716,
       "winnerParty": "D",
-      "winnerProbability": 0.8883,
-      "error": 8.5,
+      "winnerProbability": 0.9284,
+      "error": 7.5,
       "competitive": false,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -4771,7 +4770,7 @@
         "congressionalBaseline": 8.5,
         "districtFundamentalMargin": 3.99,
         "contextualBaseline": 3.99,
-        "ratingBaseline": 7,
+        "ratingBaseline": 8,
         "openPenalty": 0,
         "incumbencyAdjustment": 0.45,
         "challengerStrength": "none",
@@ -4800,8 +4799,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.8883,
-          "rep": 0.1117
+          "dem": 0.9284,
+          "rep": 0.0716
         }
       ]
     },
@@ -5228,7 +5227,7 @@
       "congressionalMargin": -38.5,
       "fundamentalMargin": -37.4,
       "rawMarginNote": "Raw 270toWin district margin fields are stored for context only; the model does not assume they are signed Democratic margins.",
-      "kalshiPrice": 95,
+      "kalshiPrice": 96,
       "demCandidate": "Mary Allen",
       "repCandidate": "Mark Messmer",
       "baselineRating": "Safe R",
@@ -5424,7 +5423,7 @@
       "label": "Ashley Hinson / open",
       "incumbent": "Ashley Hinson",
       "open": true,
-      "rating": "Tilt R",
+      "rating": "Lean R",
       "sourceRating": "Likely R",
       "ratingSource": "270toWin / Inside Elections",
       "seatParty": "R",
@@ -5437,12 +5436,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely R",
       "insideRating": null,
-      "margin": -2.24,
-      "demProbability": 0.4047,
-      "repProbability": 0.5953,
+      "margin": -3.12,
+      "demProbability": 0.353,
+      "repProbability": 0.647,
       "winnerParty": "R",
-      "winnerProbability": 0.5953,
-      "error": 8.5,
+      "winnerProbability": 0.647,
+      "error": 7.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -5451,7 +5450,7 @@
         "congressionalBaseline": -15.6,
         "districtFundamentalMargin": -12.52,
         "contextualBaseline": -12.52,
-        "ratingBaseline": -7,
+        "ratingBaseline": -8,
         "openPenalty": 0.45,
         "incumbencyAdjustment": 0,
         "challengerStrength": "none",
@@ -5480,8 +5479,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.4047,
-          "rep": 0.5953
+          "dem": 0.353,
+          "rep": 0.647
         }
       ]
     },
@@ -5777,12 +5776,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely D",
       "insideRating": null,
-      "margin": 11.78,
-      "demProbability": 0.8995,
-      "repProbability": 0.1005,
+      "margin": 12.66,
+      "demProbability": 0.9355,
+      "repProbability": 0.0645,
       "winnerParty": "D",
-      "winnerProbability": 0.8995,
-      "error": 8.5,
+      "winnerProbability": 0.9355,
+      "error": 7.5,
       "competitive": false,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -5791,7 +5790,7 @@
         "congressionalBaseline": 10.8,
         "districtFundamentalMargin": 7.12,
         "contextualBaseline": 7.12,
-        "ratingBaseline": 7,
+        "ratingBaseline": 8,
         "openPenalty": 0,
         "incumbencyAdjustment": 0.45,
         "challengerStrength": "none",
@@ -5820,8 +5819,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.8995,
-          "rep": 0.1005
+          "dem": 0.9355,
+          "rep": 0.0645
         }
       ]
     },
@@ -6240,7 +6239,7 @@
       "label": "Andy Barr / open",
       "incumbent": "Andy Barr",
       "open": true,
-      "rating": "Tilt R",
+      "rating": "Lean R",
       "sourceRating": "Likely R",
       "ratingSource": "270toWin / Inside Elections",
       "seatParty": "R",
@@ -6253,12 +6252,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely R",
       "insideRating": null,
-      "margin": -2.54,
-      "demProbability": 0.3941,
-      "repProbability": 0.6059,
+      "margin": -3.42,
+      "demProbability": 0.3417,
+      "repProbability": 0.6583,
       "winnerParty": "R",
-      "winnerProbability": 0.6059,
-      "error": 8.5,
+      "winnerProbability": 0.6583,
+      "error": 7.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -6267,7 +6266,7 @@
         "congressionalBaseline": -26.8,
         "districtFundamentalMargin": -20.31,
         "contextualBaseline": -16,
-        "ratingBaseline": -7,
+        "ratingBaseline": -8,
         "openPenalty": 0.45,
         "incumbencyAdjustment": 0,
         "challengerStrength": "none",
@@ -6296,8 +6295,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.3941,
-          "rep": 0.6059
+          "dem": 0.3417,
+          "rep": 0.6583
         }
       ]
     },
@@ -6797,12 +6796,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely R",
       "insideRating": null,
-      "margin": -1.64,
-      "demProbability": 0.4277,
-      "repProbability": 0.5723,
+      "margin": -2.52,
+      "demProbability": 0.3776,
+      "repProbability": 0.6224,
       "winnerParty": "R",
-      "winnerProbability": 0.5723,
-      "error": 8.5,
+      "winnerProbability": 0.6224,
+      "error": 7.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -6811,7 +6810,7 @@
         "congressionalBaseline": 0.7,
         "districtFundamentalMargin": -4.91,
         "contextualBaseline": -4.91,
-        "ratingBaseline": -7,
+        "ratingBaseline": -8,
         "openPenalty": 0.45,
         "incumbencyAdjustment": 0,
         "challengerStrength": "none",
@@ -6840,8 +6839,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.4277,
-          "rep": 0.5723
+          "dem": 0.3776,
+          "rep": 0.6224
         }
       ]
     },
@@ -8157,12 +8156,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely D",
       "insideRating": null,
-      "margin": 11.71,
-      "demProbability": 0.9009,
-      "repProbability": 0.0991,
+      "margin": 12.59,
+      "demProbability": 0.9376,
+      "repProbability": 0.0624,
       "winnerParty": "D",
-      "winnerProbability": 0.9009,
-      "error": 8.5,
+      "winnerProbability": 0.9376,
+      "error": 7.5,
       "competitive": false,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -8171,7 +8170,7 @@
         "congressionalBaseline": 9.9,
         "districtFundamentalMargin": 8.75,
         "contextualBaseline": 8.75,
-        "ratingBaseline": 7,
+        "ratingBaseline": 8,
         "openPenalty": 0,
         "incumbencyAdjustment": 0.45,
         "challengerStrength": "none",
@@ -8200,8 +8199,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.9009,
-          "rep": 0.0991
+          "dem": 0.9376,
+          "rep": 0.0624
         }
       ]
     },
@@ -8212,7 +8211,7 @@
       "label": "Bill Huizenga",
       "incumbent": "Bill Huizenga",
       "open": false,
-      "rating": "Toss-up",
+      "rating": "Tilt R",
       "sourceRating": "Lean R",
       "ratingSource": "270toWin / Inside Elections",
       "seatParty": "R",
@@ -8225,12 +8224,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Lean R",
       "insideRating": null,
-      "margin": -0.48,
-      "demProbability": 0.4765,
-      "repProbability": 0.5235,
+      "margin": -1.54,
+      "demProbability": 0.415,
+      "repProbability": 0.585,
       "winnerParty": "R",
-      "winnerProbability": 0.5235,
-      "error": 7.4,
+      "winnerProbability": 0.585,
+      "error": 6.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -8239,7 +8238,7 @@
         "congressionalBaseline": -11.7,
         "districtFundamentalMargin": -8.4,
         "contextualBaseline": -8.4,
-        "ratingBaseline": -4.3,
+        "ratingBaseline": -5.5,
         "openPenalty": 0,
         "incumbencyAdjustment": -0.45,
         "challengerStrength": "none",
@@ -8268,8 +8267,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.4765,
-          "rep": 0.5235
+          "dem": 0.415,
+          "rep": 0.585
         }
       ]
     },
@@ -8497,12 +8496,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Lean D",
       "insideRating": null,
-      "margin": 9.09,
-      "demProbability": 0.8658,
-      "repProbability": 0.1342,
+      "margin": 9.97,
+      "demProbability": 0.9117,
+      "repProbability": 0.0883,
       "winnerParty": "D",
-      "winnerProbability": 0.8658,
-      "error": 7.4,
+      "winnerProbability": 0.9117,
+      "error": 6.5,
       "competitive": false,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -8511,7 +8510,7 @@
         "congressionalBaseline": 6.6,
         "districtFundamentalMargin": 1.87,
         "contextualBaseline": 1.87,
-        "ratingBaseline": 4.5,
+        "ratingBaseline": 5.5,
         "openPenalty": 0,
         "incumbencyAdjustment": 0.45,
         "challengerStrength": "none",
@@ -8540,8 +8539,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.8658,
-          "rep": 0.1342
+          "dem": 0.9117,
+          "rep": 0.0883
         }
       ]
     },
@@ -8905,12 +8904,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely R",
       "insideRating": null,
-      "margin": -3.55,
-      "demProbability": 0.348,
-      "repProbability": 0.652,
+      "margin": -4.43,
+      "demProbability": 0.2966,
+      "repProbability": 0.7034,
       "winnerParty": "R",
-      "winnerProbability": 0.652,
-      "error": 8.5,
+      "winnerProbability": 0.7034,
+      "error": 7.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -8919,7 +8918,7 @@
         "congressionalBaseline": -17.1,
         "districtFundamentalMargin": -14.3,
         "contextualBaseline": -14.3,
-        "ratingBaseline": -7,
+        "ratingBaseline": -8,
         "openPenalty": 0,
         "incumbencyAdjustment": -0.45,
         "challengerStrength": "none",
@@ -8948,8 +8947,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.348,
-          "rep": 0.652
+          "dem": 0.2966,
+          "rep": 0.7034
         }
       ]
     },
@@ -8973,12 +8972,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely D",
       "insideRating": null,
-      "margin": 10.74,
-      "demProbability": 0.884,
-      "repProbability": 0.116,
+      "margin": 11.62,
+      "demProbability": 0.9235,
+      "repProbability": 0.0765,
       "winnerParty": "D",
-      "winnerProbability": 0.884,
-      "error": 8.5,
+      "winnerProbability": 0.9235,
+      "error": 7.5,
       "competitive": false,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -8987,7 +8986,7 @@
         "congressionalBaseline": 13.5,
         "districtFundamentalMargin": 9.27,
         "contextualBaseline": 9.27,
-        "ratingBaseline": 7,
+        "ratingBaseline": 8,
         "openPenalty": -0.45,
         "incumbencyAdjustment": 0,
         "challengerStrength": "none",
@@ -9016,8 +9015,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.884,
-          "rep": 0.116
+          "dem": 0.9235,
+          "rep": 0.0765
         }
       ]
     },
@@ -10265,12 +10264,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely R",
       "insideRating": null,
-      "margin": -2.02,
-      "demProbability": 0.414,
-      "repProbability": 0.586,
+      "margin": -2.9,
+      "demProbability": 0.366,
+      "repProbability": 0.634,
       "winnerParty": "R",
-      "winnerProbability": 0.586,
-      "error": 8.5,
+      "winnerProbability": 0.634,
+      "error": 7.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -10279,7 +10278,7 @@
         "congressionalBaseline": -7.7,
         "districtFundamentalMargin": -9.79,
         "contextualBaseline": -9.79,
-        "ratingBaseline": -7,
+        "ratingBaseline": -8,
         "openPenalty": 0.45,
         "incumbencyAdjustment": 0,
         "challengerStrength": "none",
@@ -10308,8 +10307,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.414,
-          "rep": 0.586
+          "dem": 0.366,
+          "rep": 0.634
         }
       ]
     },
@@ -10469,12 +10468,12 @@
       "repCandidate": "Brinker Harding",
       "baselineRating": "Lean D",
       "insideRating": null,
-      "margin": 8.03,
-      "demProbability": 0.8407,
-      "repProbability": 0.1593,
+      "margin": 8.91,
+      "demProbability": 0.8911,
+      "repProbability": 0.1089,
       "winnerParty": "D",
-      "winnerProbability": 0.8407,
-      "error": 7.4,
+      "winnerProbability": 0.8911,
+      "error": 6.5,
       "competitive": false,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -10483,7 +10482,7 @@
         "congressionalBaseline": -1.9,
         "districtFundamentalMargin": 1.67,
         "contextualBaseline": 1.67,
-        "ratingBaseline": 4.5,
+        "ratingBaseline": 5.5,
         "openPenalty": -0.45,
         "incumbencyAdjustment": 0,
         "challengerStrength": "none",
@@ -10512,8 +10511,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.8407,
-          "rep": 0.1593
+          "dem": 0.8911,
+          "rep": 0.1089
         }
       ]
     },
@@ -10605,12 +10604,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely D",
       "insideRating": null,
-      "margin": 11.33,
-      "demProbability": 0.8916,
-      "repProbability": 0.1084,
+      "margin": 12.21,
+      "demProbability": 0.9298,
+      "repProbability": 0.0702,
       "winnerParty": "D",
-      "winnerProbability": 0.8916,
-      "error": 8.5,
+      "winnerProbability": 0.9298,
+      "error": 7.5,
       "competitive": false,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -10619,7 +10618,7 @@
         "congressionalBaseline": 7.5,
         "districtFundamentalMargin": 4.64,
         "contextualBaseline": 4.64,
-        "ratingBaseline": 7,
+        "ratingBaseline": 8,
         "openPenalty": 0,
         "incumbencyAdjustment": 0.45,
         "challengerStrength": "none",
@@ -10648,8 +10647,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.8916,
-          "rep": 0.1084
+          "dem": 0.9298,
+          "rep": 0.0702
         }
       ]
     },
@@ -10741,12 +10740,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Lean D",
       "insideRating": null,
-      "margin": 8.82,
-      "demProbability": 0.8633,
-      "repProbability": 0.1367,
+      "margin": 9.7,
+      "demProbability": 0.9088,
+      "repProbability": 0.0912,
       "winnerParty": "D",
-      "winnerProbability": 0.8633,
-      "error": 7.4,
+      "winnerProbability": 0.9088,
+      "error": 6.5,
       "competitive": false,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -10755,7 +10754,7 @@
         "congressionalBaseline": 2.7,
         "districtFundamentalMargin": 0.83,
         "contextualBaseline": 0.83,
-        "ratingBaseline": 4.5,
+        "ratingBaseline": 5.5,
         "openPenalty": 0,
         "incumbencyAdjustment": 0.45,
         "challengerStrength": "none",
@@ -10784,8 +10783,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.8633,
-          "rep": 0.1367
+          "dem": 0.9088,
+          "rep": 0.0912
         }
       ]
     },
@@ -10809,12 +10808,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely D",
       "insideRating": null,
-      "margin": 11.39,
-      "demProbability": 0.8927,
-      "repProbability": 0.1073,
+      "margin": 12.27,
+      "demProbability": 0.9321,
+      "repProbability": 0.0679,
       "winnerParty": "D",
-      "winnerProbability": 0.8927,
-      "error": 8.5,
+      "winnerProbability": 0.9321,
+      "error": 7.5,
       "competitive": false,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -10823,7 +10822,7 @@
         "congressionalBaseline": 8.1,
         "districtFundamentalMargin": 5.19,
         "contextualBaseline": 5.19,
-        "ratingBaseline": 7,
+        "ratingBaseline": 8,
         "openPenalty": 0,
         "incumbencyAdjustment": 0.45,
         "challengerStrength": "none",
@@ -10852,8 +10851,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.8927,
-          "rep": 0.1073
+          "dem": 0.9321,
+          "rep": 0.0679
         }
       ]
     },
@@ -10877,12 +10876,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Lean D",
       "insideRating": null,
-      "margin": 8.26,
-      "demProbability": 0.8427,
-      "repProbability": 0.1573,
+      "margin": 9.14,
+      "demProbability": 0.8923,
+      "repProbability": 0.1077,
       "winnerParty": "D",
-      "winnerProbability": 0.8427,
-      "error": 7.4,
+      "winnerProbability": 0.8923,
+      "error": 6.5,
       "competitive": false,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -10891,7 +10890,7 @@
         "congressionalBaseline": 8.1,
         "districtFundamentalMargin": 4.75,
         "contextualBaseline": 4.75,
-        "ratingBaseline": 4.5,
+        "ratingBaseline": 5.5,
         "openPenalty": -0.45,
         "incumbencyAdjustment": 0,
         "challengerStrength": "none",
@@ -10920,8 +10919,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.8427,
-          "rep": 0.1573
+          "dem": 0.8923,
+          "rep": 0.1077
         }
       ]
     },
@@ -10945,12 +10944,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely D",
       "insideRating": null,
-      "margin": 11.38,
-      "demProbability": 0.8946,
-      "repProbability": 0.1054,
+      "margin": 12.26,
+      "demProbability": 0.9325,
+      "repProbability": 0.0675,
       "winnerParty": "D",
-      "winnerProbability": 0.8946,
-      "error": 8.5,
+      "winnerProbability": 0.9325,
+      "error": 7.5,
       "competitive": false,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -10959,7 +10958,7 @@
         "congressionalBaseline": 6,
         "districtFundamentalMargin": 4.68,
         "contextualBaseline": 4.68,
-        "ratingBaseline": 7,
+        "ratingBaseline": 8,
         "openPenalty": 0,
         "incumbencyAdjustment": 0.45,
         "challengerStrength": "none",
@@ -10988,8 +10987,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.8946,
-          "rep": 0.1054
+          "dem": 0.9325,
+          "rep": 0.0675
         }
       ]
     },
@@ -11557,12 +11556,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Lean D",
       "insideRating": null,
-      "margin": 9.03,
-      "demProbability": 0.8684,
-      "repProbability": 0.1316,
+      "margin": 9.91,
+      "demProbability": 0.9139,
+      "repProbability": 0.0861,
       "winnerParty": "D",
-      "winnerProbability": 0.8684,
-      "error": 7.4,
+      "winnerProbability": 0.9139,
+      "error": 6.5,
       "competitive": false,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -11571,7 +11570,7 @@
         "congressionalBaseline": 4.9,
         "districtFundamentalMargin": 1.6,
         "contextualBaseline": 1.6,
-        "ratingBaseline": 4.5,
+        "ratingBaseline": 5.5,
         "openPenalty": 0,
         "incumbencyAdjustment": 0.45,
         "challengerStrength": "none",
@@ -11600,8 +11599,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.8684,
-          "rep": 0.1316
+          "dem": 0.9139,
+          "rep": 0.0861
         }
       ]
     },
@@ -11897,12 +11896,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Lean D",
       "insideRating": null,
-      "margin": 8.94,
-      "demProbability": 0.863,
-      "repProbability": 0.137,
+      "margin": 9.82,
+      "demProbability": 0.9088,
+      "repProbability": 0.0912,
       "winnerParty": "D",
-      "winnerProbability": 0.863,
-      "error": 7.4,
+      "winnerProbability": 0.9088,
+      "error": 6.5,
       "competitive": false,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -11911,7 +11910,7 @@
         "congressionalBaseline": 4.2,
         "districtFundamentalMargin": 0.85,
         "contextualBaseline": 0.85,
-        "ratingBaseline": 4.5,
+        "ratingBaseline": 5.5,
         "openPenalty": 0,
         "incumbencyAdjustment": 0.45,
         "challengerStrength": "none",
@@ -11940,8 +11939,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.863,
-          "rep": 0.137
+          "dem": 0.9088,
+          "rep": 0.0912
         }
       ]
     },
@@ -12033,12 +12032,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely R",
       "insideRating": null,
-      "margin": -3.1,
-      "demProbability": 0.3692,
-      "repProbability": 0.6308,
+      "margin": -3.98,
+      "demProbability": 0.317,
+      "repProbability": 0.683,
       "winnerParty": "R",
-      "winnerProbability": 0.6308,
-      "error": 8.5,
+      "winnerProbability": 0.683,
+      "error": 7.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -12047,7 +12046,7 @@
         "congressionalBaseline": -10.4,
         "districtFundamentalMargin": -10.18,
         "contextualBaseline": -10.18,
-        "ratingBaseline": -7,
+        "ratingBaseline": -8,
         "openPenalty": 0,
         "incumbencyAdjustment": -0.45,
         "challengerStrength": "none",
@@ -12076,8 +12075,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.3692,
-          "rep": 0.6308
+          "dem": 0.317,
+          "rep": 0.683
         }
       ]
     },
@@ -12169,12 +12168,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Lean D",
       "insideRating": null,
-      "margin": 8.9,
-      "demProbability": 0.8641,
-      "repProbability": 0.1359,
+      "margin": 9.78,
+      "demProbability": 0.9106,
+      "repProbability": 0.0894,
       "winnerParty": "D",
-      "winnerProbability": 0.8641,
-      "error": 7.4,
+      "winnerProbability": 0.9106,
+      "error": 6.5,
       "competitive": false,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -12183,7 +12182,7 @@
         "congressionalBaseline": 3.6,
         "districtFundamentalMargin": -0.75,
         "contextualBaseline": 0.75,
-        "ratingBaseline": 4.5,
+        "ratingBaseline": 5.5,
         "openPenalty": 0,
         "incumbencyAdjustment": 0.45,
         "challengerStrength": "none",
@@ -12212,8 +12211,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.8641,
-          "rep": 0.1359
+          "dem": 0.9106,
+          "rep": 0.0894
         }
       ]
     },
@@ -12237,12 +12236,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Lean D",
       "insideRating": null,
-      "margin": 9.18,
-      "demProbability": 0.869,
-      "repProbability": 0.131,
+      "margin": 10.06,
+      "demProbability": 0.9141,
+      "repProbability": 0.0859,
       "winnerParty": "D",
-      "winnerProbability": 0.869,
-      "error": 7.4,
+      "winnerProbability": 0.9141,
+      "error": 6.5,
       "competitive": false,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -12251,7 +12250,7 @@
         "congressionalBaseline": 2.3,
         "districtFundamentalMargin": 1.75,
         "contextualBaseline": 1.75,
-        "ratingBaseline": 4.5,
+        "ratingBaseline": 5.5,
         "openPenalty": 0,
         "incumbencyAdjustment": 0.45,
         "challengerStrength": "none",
@@ -12280,8 +12279,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.869,
-          "rep": 0.131
+          "dem": 0.9141,
+          "rep": 0.0859
         }
       ]
     },
@@ -13257,12 +13256,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Lean D",
       "insideRating": null,
-      "margin": 9.03,
-      "demProbability": 0.868,
-      "repProbability": 0.132,
+      "margin": 9.91,
+      "demProbability": 0.9133,
+      "repProbability": 0.0867,
       "winnerParty": "D",
-      "winnerProbability": 0.868,
-      "error": 7.4,
+      "winnerProbability": 0.9133,
+      "error": 6.5,
       "competitive": false,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -13271,7 +13270,7 @@
         "congressionalBaseline": 2.2,
         "districtFundamentalMargin": 1.98,
         "contextualBaseline": 1.98,
-        "ratingBaseline": 4.5,
+        "ratingBaseline": 5.5,
         "openPenalty": 0,
         "incumbencyAdjustment": 0.45,
         "challengerStrength": "none",
@@ -13300,8 +13299,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.868,
-          "rep": 0.132
+          "dem": 0.9133,
+          "rep": 0.0867
         }
       ]
     },
@@ -13801,12 +13800,12 @@
       "repCandidate": "Laurie Buckhout",
       "baselineRating": "Lean R",
       "insideRating": null,
-      "margin": 0.2,
-      "demProbability": 0.5101,
-      "repProbability": 0.4899,
-      "winnerParty": "D",
-      "winnerProbability": 0.5101,
-      "error": 7.4,
+      "margin": -0.85,
+      "demProbability": 0.4522,
+      "repProbability": 0.5478,
+      "winnerParty": "R",
+      "winnerProbability": 0.5478,
+      "error": 6.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -13815,7 +13814,7 @@
         "congressionalBaseline": 0,
         "districtFundamentalMargin": -11.6,
         "contextualBaseline": -11.6,
-        "ratingBaseline": -4.3,
+        "ratingBaseline": -5.5,
         "openPenalty": 0,
         "incumbencyAdjustment": 0.45,
         "challengerStrength": "none",
@@ -13844,8 +13843,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.5101,
-          "rep": 0.4899
+          "dem": 0.4522,
+          "rep": 0.5478
         }
       ]
     },
@@ -14468,7 +14467,7 @@
       "label": "Chuck Edwards",
       "incumbent": "Chuck Edwards",
       "open": false,
-      "rating": "Tilt R",
+      "rating": "Lean R",
       "sourceRating": "Likely R",
       "ratingSource": "270toWin / Inside Elections",
       "seatParty": "R",
@@ -14481,12 +14480,12 @@
       "repCandidate": "Chuck Edwards",
       "baselineRating": "Likely R",
       "insideRating": null,
-      "margin": -2.98,
-      "demProbability": 0.3748,
-      "repProbability": 0.6252,
+      "margin": -3.86,
+      "demProbability": 0.3225,
+      "repProbability": 0.6775,
       "winnerParty": "R",
-      "winnerProbability": 0.6252,
-      "error": 8.5,
+      "winnerProbability": 0.6775,
+      "error": 7.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -14495,7 +14494,7 @@
         "congressionalBaseline": -13.5,
         "districtFundamentalMargin": -11.3,
         "contextualBaseline": -11.3,
-        "ratingBaseline": -7,
+        "ratingBaseline": -8,
         "openPenalty": 0,
         "incumbencyAdjustment": -0.45,
         "challengerStrength": "none",
@@ -14524,8 +14523,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.3748,
-          "rep": 0.6252
+          "dem": 0.3225,
+          "rep": 0.6775
         }
       ]
     },
@@ -14812,12 +14811,12 @@
       "repCandidate": "Eric Conroy",
       "baselineRating": "Lean D",
       "insideRating": null,
-      "margin": 9.02,
-      "demProbability": 0.8687,
-      "repProbability": 0.1313,
+      "margin": 9.9,
+      "demProbability": 0.9136,
+      "repProbability": 0.0864,
       "winnerParty": "D",
-      "winnerProbability": 0.8687,
-      "error": 7.4,
+      "winnerProbability": 0.9136,
+      "error": 6.5,
       "competitive": false,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -14826,7 +14825,7 @@
         "congressionalBaseline": 0,
         "districtFundamentalMargin": -2.5,
         "contextualBaseline": 2.5,
-        "ratingBaseline": 4.5,
+        "ratingBaseline": 5.5,
         "openPenalty": 0,
         "incumbencyAdjustment": 0.45,
         "challengerStrength": "none",
@@ -14855,8 +14854,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.8687,
-          "rep": 0.1313
+          "dem": 0.9136,
+          "rep": 0.0864
         }
       ]
     },
@@ -15220,12 +15219,12 @@
       "repCandidate": "Max Miller",
       "baselineRating": "Likely R",
       "insideRating": null,
-      "margin": -3.11,
-      "demProbability": 0.3663,
-      "repProbability": 0.6337,
+      "margin": -3.99,
+      "demProbability": 0.3147,
+      "repProbability": 0.6853,
       "winnerParty": "R",
-      "winnerProbability": 0.6337,
-      "error": 8.5,
+      "winnerProbability": 0.6853,
+      "error": 7.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -15234,7 +15233,7 @@
         "congressionalBaseline": 0,
         "districtFundamentalMargin": -11,
         "contextualBaseline": -11,
-        "ratingBaseline": -7,
+        "ratingBaseline": -8,
         "openPenalty": 0,
         "incumbencyAdjustment": -0.45,
         "challengerStrength": "none",
@@ -15263,8 +15262,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.3663,
-          "rep": 0.6337
+          "dem": 0.3147,
+          "rep": 0.6853
         }
       ]
     },
@@ -15628,12 +15627,12 @@
       "repCandidate": "Carey Coleman",
       "baselineRating": "Likely D",
       "insideRating": null,
-      "margin": 11.39,
-      "demProbability": 0.8966,
-      "repProbability": 0.1034,
+      "margin": 12.27,
+      "demProbability": 0.9352,
+      "repProbability": 0.0648,
       "winnerParty": "D",
-      "winnerProbability": 0.8966,
-      "error": 8.5,
+      "winnerProbability": 0.9352,
+      "error": 7.5,
       "competitive": false,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -15642,7 +15641,7 @@
         "congressionalBaseline": 0,
         "districtFundamentalMargin": 3.2,
         "contextualBaseline": 3.2,
-        "ratingBaseline": 7,
+        "ratingBaseline": 8,
         "openPenalty": 0,
         "incumbencyAdjustment": 0.45,
         "challengerStrength": "none",
@@ -15671,8 +15670,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.8966,
-          "rep": 0.1034
+          "dem": 0.9352,
+          "rep": 0.0648
         }
       ]
     },
@@ -16444,12 +16443,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely D",
       "insideRating": null,
-      "margin": 11.56,
-      "demProbability": 0.8978,
-      "repProbability": 0.1022,
+      "margin": 12.44,
+      "demProbability": 0.9351,
+      "repProbability": 0.0649,
       "winnerParty": "D",
-      "winnerProbability": 0.8978,
-      "error": 8.5,
+      "winnerProbability": 0.9351,
+      "error": 7.5,
       "competitive": false,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -16458,7 +16457,7 @@
         "congressionalBaseline": 2.7,
         "districtFundamentalMargin": 5.95,
         "contextualBaseline": 5.95,
-        "ratingBaseline": 7,
+        "ratingBaseline": 8,
         "openPenalty": 0,
         "incumbencyAdjustment": 0.45,
         "challengerStrength": "none",
@@ -16487,8 +16486,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.8978,
-          "rep": 0.1022
+          "dem": 0.9351,
+          "rep": 0.0649
         }
       ]
     },
@@ -16567,7 +16566,7 @@
       "label": "Brian Fitzpatrick",
       "incumbent": "Brian Fitzpatrick",
       "open": false,
-      "rating": "Toss-up",
+      "rating": "Tilt R",
       "sourceRating": "Lean R",
       "ratingSource": "270toWin / Inside Elections",
       "seatParty": "R",
@@ -16580,12 +16579,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Lean R",
       "insideRating": null,
-      "margin": -0.38,
-      "demProbability": 0.481,
-      "repProbability": 0.519,
+      "margin": -1.43,
+      "demProbability": 0.4242,
+      "repProbability": 0.5758,
       "winnerParty": "R",
-      "winnerProbability": 0.519,
-      "error": 7.4,
+      "winnerProbability": 0.5758,
+      "error": 6.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -16594,7 +16593,7 @@
         "congressionalBaseline": -12.8,
         "districtFundamentalMargin": -5.6,
         "contextualBaseline": -5.6,
-        "ratingBaseline": -4.3,
+        "ratingBaseline": -5.5,
         "openPenalty": 0,
         "incumbencyAdjustment": -0.45,
         "challengerStrength": "none",
@@ -16623,8 +16622,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.481,
-          "rep": 0.519
+          "dem": 0.4242,
+          "rep": 0.5758
         }
       ]
     },
@@ -17187,7 +17186,7 @@
       "congressionalMargin": -1.3,
       "fundamentalMargin": -3.45,
       "rawMarginNote": "Raw 270toWin district margin fields are stored for context only; the model does not assume they are signed Democratic margins.",
-      "kalshiPrice": 74,
+      "kalshiPrice": 73,
       "demCandidate": "Democrat",
       "repCandidate": "Republican",
       "baselineRating": "Toss-up",
@@ -17668,12 +17667,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely D",
       "insideRating": null,
-      "margin": 11.65,
-      "demProbability": 0.8986,
-      "repProbability": 0.1014,
+      "margin": 12.53,
+      "demProbability": 0.9373,
+      "repProbability": 0.0627,
       "winnerParty": "D",
-      "winnerProbability": 0.8986,
-      "error": 8.5,
+      "winnerProbability": 0.9373,
+      "error": 7.5,
       "competitive": false,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -17682,7 +17681,7 @@
         "congressionalBaseline": 7.8,
         "districtFundamentalMargin": 6.54,
         "contextualBaseline": 6.54,
-        "ratingBaseline": 7,
+        "ratingBaseline": 8,
         "openPenalty": 0,
         "incumbencyAdjustment": 0.45,
         "challengerStrength": "none",
@@ -17711,8 +17710,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.8986,
-          "rep": 0.1014
+          "dem": 0.9373,
+          "rep": 0.0627
         }
       ]
     },
@@ -19971,12 +19970,12 @@
       "repCandidate": "Monica De La Cruz",
       "baselineRating": "Likely R",
       "insideRating": null,
-      "margin": -3.41,
-      "demProbability": 0.3593,
-      "repProbability": 0.6407,
+      "margin": -4.29,
+      "demProbability": 0.3044,
+      "repProbability": 0.6956,
       "winnerParty": "R",
-      "winnerProbability": 0.6407,
-      "error": 8.5,
+      "winnerProbability": 0.6956,
+      "error": 7.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -19985,7 +19984,7 @@
         "congressionalBaseline": 0,
         "districtFundamentalMargin": -17.8,
         "contextualBaseline": -16,
-        "ratingBaseline": -7,
+        "ratingBaseline": -8,
         "openPenalty": 0,
         "incumbencyAdjustment": -0.45,
         "challengerStrength": "none",
@@ -20014,8 +20013,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.3593,
-          "rep": 0.6407
+          "dem": 0.3044,
+          "rep": 0.6956
         }
       ]
     },
@@ -20502,7 +20501,7 @@
       "label": "OPEN",
       "incumbent": "OPEN",
       "open": false,
-      "rating": "Tilt R",
+      "rating": "Lean R",
       "sourceRating": "Likely R",
       "ratingSource": "270toWin / Inside Elections",
       "seatParty": "N",
@@ -20515,12 +20514,12 @@
       "repCandidate": "Brandon Herrera",
       "baselineRating": "Likely R",
       "insideRating": null,
-      "margin": -2.87,
-      "demProbability": 0.3736,
-      "repProbability": 0.6264,
+      "margin": -3.75,
+      "demProbability": 0.322,
+      "repProbability": 0.678,
       "winnerParty": "R",
-      "winnerProbability": 0.6264,
-      "error": 8.5,
+      "winnerProbability": 0.678,
+      "error": 7.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -20529,7 +20528,7 @@
         "congressionalBaseline": 0,
         "districtFundamentalMargin": -14.7,
         "contextualBaseline": -14.7,
-        "ratingBaseline": -7,
+        "ratingBaseline": -8,
         "openPenalty": 0,
         "incumbencyAdjustment": 0,
         "challengerStrength": "none",
@@ -20558,8 +20557,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.3736,
-          "rep": 0.6264
+          "dem": 0.322,
+          "rep": 0.678
         }
       ]
     },
@@ -20855,12 +20854,12 @@
       "repCandidate": "Tano Tijerina",
       "baselineRating": "Lean D",
       "insideRating": null,
-      "margin": 9.53,
-      "demProbability": 0.8784,
-      "repProbability": 0.1216,
+      "margin": 10.41,
+      "demProbability": 0.9213,
+      "repProbability": 0.0787,
       "winnerParty": "D",
-      "winnerProbability": 0.8784,
-      "error": 7.4,
+      "winnerProbability": 0.9213,
+      "error": 6.5,
       "competitive": false,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -20869,7 +20868,7 @@
         "congressionalBaseline": 0,
         "districtFundamentalMargin": -10.3,
         "contextualBaseline": 10.3,
-        "ratingBaseline": 4.5,
+        "ratingBaseline": 5.5,
         "openPenalty": 0,
         "incumbencyAdjustment": 0.45,
         "challengerStrength": "none",
@@ -20898,8 +20897,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.8784,
-          "rep": 0.1216
+          "dem": 0.9213,
+          "rep": 0.0787
         }
       ]
     },
@@ -21318,7 +21317,7 @@
       "label": "Greg Casar / open",
       "incumbent": "Greg Casar",
       "open": true,
-      "rating": "Tilt R",
+      "rating": "Lean R",
       "sourceRating": "Likely R",
       "ratingSource": "270toWin / Inside Elections",
       "seatParty": "D",
@@ -21331,12 +21330,12 @@
       "repCandidate": "TBD - Runoff",
       "baselineRating": "Likely R",
       "insideRating": null,
-      "margin": -2.17,
-      "demProbability": 0.4017,
-      "repProbability": 0.5983,
+      "margin": -3.05,
+      "demProbability": 0.3519,
+      "repProbability": 0.6481,
       "winnerParty": "R",
-      "winnerProbability": 0.5983,
-      "error": 8.5,
+      "winnerProbability": 0.6481,
+      "error": 7.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -21345,7 +21344,7 @@
         "congressionalBaseline": 0,
         "districtFundamentalMargin": -10.4,
         "contextualBaseline": -10.4,
-        "ratingBaseline": -7,
+        "ratingBaseline": -8,
         "openPenalty": 0.45,
         "incumbencyAdjustment": 0,
         "challengerStrength": "none",
@@ -21374,8 +21373,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.4017,
-          "rep": 0.5983
+          "dem": 0.3519,
+          "rep": 0.6481
         }
       ]
     },
@@ -21921,7 +21920,7 @@
       "label": "Rob Wittman",
       "incumbent": "Rob Wittman",
       "open": false,
-      "rating": "Toss-up",
+      "rating": "Tilt R",
       "sourceRating": "Lean R",
       "ratingSource": "270toWin / Inside Elections",
       "seatParty": "R",
@@ -21934,12 +21933,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Lean R",
       "insideRating": null,
-      "margin": -0.5,
-      "demProbability": 0.4731,
-      "repProbability": 0.5269,
+      "margin": -1.56,
+      "demProbability": 0.4163,
+      "repProbability": 0.5837,
       "winnerParty": "R",
-      "winnerProbability": 0.5269,
-      "error": 7.4,
+      "winnerProbability": 0.5837,
+      "error": 6.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -21948,7 +21947,7 @@
         "congressionalBaseline": -12.8,
         "districtFundamentalMargin": -8.46,
         "contextualBaseline": -8.46,
-        "ratingBaseline": -4.3,
+        "ratingBaseline": -5.5,
         "openPenalty": 0,
         "incumbencyAdjustment": -0.45,
         "challengerStrength": "none",
@@ -21977,8 +21976,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.4731,
-          "rep": 0.5269
+          "dem": 0.4163,
+          "rep": 0.5837
         }
       ]
     },
@@ -22206,12 +22205,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely R",
       "insideRating": null,
-      "margin": -3.15,
-      "demProbability": 0.3638,
-      "repProbability": 0.6362,
+      "margin": -4.03,
+      "demProbability": 0.3115,
+      "repProbability": 0.6885,
       "winnerParty": "R",
-      "winnerProbability": 0.6362,
-      "error": 8.5,
+      "winnerProbability": 0.6885,
+      "error": 7.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -22220,7 +22219,7 @@
         "congressionalBaseline": -15,
         "districtFundamentalMargin": -13.46,
         "contextualBaseline": -13.46,
-        "ratingBaseline": -7,
+        "ratingBaseline": -8,
         "openPenalty": 0,
         "incumbencyAdjustment": -0.45,
         "challengerStrength": "none",
@@ -22249,8 +22248,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.3638,
-          "rep": 0.6362
+          "dem": 0.3115,
+          "rep": 0.6885
         }
       ]
     },
@@ -22342,12 +22341,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely D",
       "insideRating": null,
-      "margin": 11.34,
-      "demProbability": 0.8947,
-      "repProbability": 0.1053,
+      "margin": 12.22,
+      "demProbability": 0.9304,
+      "repProbability": 0.0696,
       "winnerParty": "D",
-      "winnerProbability": 0.8947,
-      "error": 8.5,
+      "winnerProbability": 0.9304,
+      "error": 7.5,
       "competitive": false,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -22356,7 +22355,7 @@
         "congressionalBaseline": 2.6,
         "districtFundamentalMargin": 2.71,
         "contextualBaseline": 2.71,
-        "ratingBaseline": 7,
+        "ratingBaseline": 8,
         "openPenalty": 0,
         "incumbencyAdjustment": 0.45,
         "challengerStrength": "none",
@@ -22385,8 +22384,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.8947,
-          "rep": 0.1053
+          "dem": 0.9304,
+          "rep": 0.0696
         }
       ]
     },
@@ -23485,7 +23484,7 @@
       "label": "Bryan Steil",
       "incumbent": "Bryan Steil",
       "open": false,
-      "rating": "Tilt R",
+      "rating": "Lean R",
       "sourceRating": "Likely R",
       "ratingSource": "270toWin / Inside Elections",
       "seatParty": "R",
@@ -23498,12 +23497,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely R",
       "insideRating": null,
-      "margin": -2.92,
-      "demProbability": 0.3691,
-      "repProbability": 0.6309,
+      "margin": -3.8,
+      "demProbability": 0.3181,
+      "repProbability": 0.6819,
       "winnerParty": "R",
-      "winnerProbability": 0.6309,
-      "error": 8.5,
+      "winnerProbability": 0.6819,
+      "error": 7.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -23512,7 +23511,7 @@
         "congressionalBaseline": -10.2,
         "districtFundamentalMargin": -7.06,
         "contextualBaseline": -7.06,
-        "ratingBaseline": -7,
+        "ratingBaseline": -8,
         "openPenalty": 0,
         "incumbencyAdjustment": -0.45,
         "challengerStrength": "none",
@@ -23541,8 +23540,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.3691,
-          "rep": 0.6309
+          "dem": 0.3181,
+          "rep": 0.6819
         }
       ]
     },
@@ -24088,7 +24087,7 @@
       "label": "Nick Begich",
       "incumbent": "Nick Begich",
       "open": false,
-      "rating": "Tilt R",
+      "rating": "Lean R",
       "sourceRating": "Likely R",
       "ratingSource": "270toWin / Inside Elections",
       "seatParty": "R",
@@ -24101,12 +24100,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely R",
       "insideRating": null,
-      "margin": -2.82,
-      "demProbability": 0.3767,
-      "repProbability": 0.6233,
+      "margin": -3.7,
+      "demProbability": 0.3258,
+      "repProbability": 0.6742,
       "winnerParty": "R",
-      "winnerProbability": 0.6233,
-      "error": 8.5,
+      "winnerProbability": 0.6742,
+      "error": 7.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -24115,7 +24114,7 @@
         "congressionalBaseline": -2.4,
         "districtFundamentalMargin": -8.29,
         "contextualBaseline": -8.29,
-        "ratingBaseline": -7,
+        "ratingBaseline": -8,
         "openPenalty": 0,
         "incumbencyAdjustment": -0.45,
         "challengerStrength": "none",
@@ -24135,8 +24134,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.3767,
-          "rep": 0.6233
+          "dem": 0.3258,
+          "rep": 0.6742
         }
       ]
     },
@@ -24976,12 +24975,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely R",
       "insideRating": null,
-      "margin": -3.16,
-      "demProbability": 0.3638,
-      "repProbability": 0.6362,
+      "margin": -4.04,
+      "demProbability": 0.3118,
+      "repProbability": 0.6882,
       "winnerParty": "R",
-      "winnerProbability": 0.6362,
-      "error": 8.5,
+      "winnerProbability": 0.6882,
+      "error": 7.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -24990,7 +24989,7 @@
         "congressionalBaseline": -9,
         "districtFundamentalMargin": -12.25,
         "contextualBaseline": -12.25,
-        "ratingBaseline": -7,
+        "ratingBaseline": -8,
         "openPenalty": 0,
         "incumbencyAdjustment": -0.45,
         "challengerStrength": "none",
@@ -25019,8 +25018,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.3638,
-          "rep": 0.6362
+          "dem": 0.3118,
+          "rep": 0.6882
         }
       ]
     },
@@ -25860,12 +25859,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely D",
       "insideRating": null,
-      "margin": 10.97,
-      "demProbability": 0.8829,
-      "repProbability": 0.1171,
+      "margin": 11.85,
+      "demProbability": 0.9239,
+      "repProbability": 0.0761,
       "winnerParty": "D",
-      "winnerProbability": 0.8829,
-      "error": 8.5,
+      "winnerProbability": 0.9239,
+      "error": 7.5,
       "competitive": false,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -25874,7 +25873,7 @@
         "congressionalBaseline": 0,
         "districtFundamentalMargin": 8.3,
         "contextualBaseline": 8.3,
-        "ratingBaseline": 7,
+        "ratingBaseline": 8,
         "openPenalty": -0.45,
         "incumbencyAdjustment": 0,
         "challengerStrength": "none",
@@ -25903,8 +25902,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.8829,
-          "rep": 0.1171
+          "dem": 0.9239,
+          "rep": 0.0761
         }
       ]
     },
@@ -26336,12 +26335,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Lean D",
       "insideRating": null,
-      "margin": 8.84,
-      "demProbability": 0.859,
-      "repProbability": 0.141,
+      "margin": 9.72,
+      "demProbability": 0.905,
+      "repProbability": 0.095,
       "winnerParty": "D",
-      "winnerProbability": 0.859,
-      "error": 7.4,
+      "winnerProbability": 0.905,
+      "error": 6.5,
       "competitive": false,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -26350,7 +26349,7 @@
         "congressionalBaseline": 0,
         "districtFundamentalMargin": 0.4,
         "contextualBaseline": 0.4,
-        "ratingBaseline": 4.5,
+        "ratingBaseline": 5.5,
         "openPenalty": 0,
         "incumbencyAdjustment": 0.45,
         "challengerStrength": "none",
@@ -26379,8 +26378,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.859,
-          "rep": 0.141
+          "dem": 0.905,
+          "rep": 0.095
         }
       ]
     },
@@ -26880,12 +26879,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely D",
       "insideRating": null,
-      "margin": 11.46,
-      "demProbability": 0.896,
-      "repProbability": 0.104,
+      "margin": 12.34,
+      "demProbability": 0.9347,
+      "repProbability": 0.0653,
       "winnerParty": "D",
-      "winnerProbability": 0.896,
-      "error": 8.5,
+      "winnerProbability": 0.9347,
+      "error": 7.5,
       "competitive": false,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -26894,7 +26893,7 @@
         "congressionalBaseline": 0,
         "districtFundamentalMargin": 6,
         "contextualBaseline": 6,
-        "ratingBaseline": 7,
+        "ratingBaseline": 8,
         "openPenalty": 0,
         "incumbencyAdjustment": 0.45,
         "challengerStrength": "none",
@@ -26923,8 +26922,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.896,
-          "rep": 0.104
+          "dem": 0.9347,
+          "rep": 0.0653
         }
       ]
     },
@@ -28512,12 +28511,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Lean D",
       "insideRating": null,
-      "margin": 9.1,
-      "demProbability": 0.8707,
-      "repProbability": 0.1293,
+      "margin": 9.98,
+      "demProbability": 0.9139,
+      "repProbability": 0.0861,
       "winnerParty": "D",
-      "winnerProbability": 0.8707,
-      "error": 7.4,
+      "winnerProbability": 0.9139,
+      "error": 6.5,
       "competitive": false,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -28526,7 +28525,7 @@
         "congressionalBaseline": 0,
         "districtFundamentalMargin": 3.9,
         "contextualBaseline": 3.9,
-        "ratingBaseline": 4.5,
+        "ratingBaseline": 5.5,
         "openPenalty": 0,
         "incumbencyAdjustment": 0.45,
         "challengerStrength": "none",
@@ -28555,8 +28554,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.8707,
-          "rep": 0.1293
+          "dem": 0.9139,
+          "rep": 0.0861
         }
       ]
     },
@@ -28716,12 +28715,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Lean D",
       "insideRating": null,
-      "margin": 8.18,
-      "demProbability": 0.8459,
-      "repProbability": 0.1541,
+      "margin": 9.06,
+      "demProbability": 0.8942,
+      "repProbability": 0.1058,
       "winnerParty": "D",
-      "winnerProbability": 0.8459,
-      "error": 7.4,
+      "winnerProbability": 0.8942,
+      "error": 6.5,
       "competitive": false,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -28730,7 +28729,7 @@
         "congressionalBaseline": 0,
         "districtFundamentalMargin": 3.4,
         "contextualBaseline": 3.4,
-        "ratingBaseline": 4.5,
+        "ratingBaseline": 5.5,
         "openPenalty": -0.45,
         "incumbencyAdjustment": 0,
         "challengerStrength": "none",
@@ -28759,8 +28758,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.8459,
-          "rep": 0.1541
+          "dem": 0.8942,
+          "rep": 0.1058
         }
       ]
     },
@@ -29179,7 +29178,7 @@
       "label": "Jeff Hurd",
       "incumbent": "Jeff Hurd",
       "open": false,
-      "rating": "Tilt R",
+      "rating": "Lean R",
       "sourceRating": "Likely R",
       "ratingSource": "270toWin / Inside Elections",
       "seatParty": "R",
@@ -29192,12 +29191,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely R",
       "insideRating": null,
-      "margin": -2.82,
-      "demProbability": 0.3772,
-      "repProbability": 0.6228,
+      "margin": -3.7,
+      "demProbability": 0.3231,
+      "repProbability": 0.6769,
       "winnerParty": "R",
-      "winnerProbability": 0.6228,
-      "error": 8.5,
+      "winnerProbability": 0.6769,
+      "error": 7.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -29206,7 +29205,7 @@
         "congressionalBaseline": -5,
         "districtFundamentalMargin": -7.58,
         "contextualBaseline": -7.58,
-        "ratingBaseline": -7,
+        "ratingBaseline": -8,
         "openPenalty": 0,
         "incumbencyAdjustment": -0.45,
         "challengerStrength": "none",
@@ -29235,8 +29234,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.3772,
-          "rep": 0.6228
+          "dem": 0.3231,
+          "rep": 0.6769
         }
       ]
     },
@@ -29328,12 +29327,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely R",
       "insideRating": null,
-      "margin": -3,
-      "demProbability": 0.3709,
-      "repProbability": 0.6291,
+      "margin": -3.88,
+      "demProbability": 0.3181,
+      "repProbability": 0.6819,
       "winnerParty": "R",
-      "winnerProbability": 0.6291,
-      "error": 8.5,
+      "winnerProbability": 0.6819,
+      "error": 7.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -29342,7 +29341,7 @@
         "congressionalBaseline": -13.8,
         "districtFundamentalMargin": -11.21,
         "contextualBaseline": -11.21,
-        "ratingBaseline": -7,
+        "ratingBaseline": -8,
         "openPenalty": 0,
         "incumbencyAdjustment": -0.45,
         "challengerStrength": "none",
@@ -29371,8 +29370,8 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.3709,
-          "rep": 0.6291
+          "dem": 0.3181,
+          "rep": 0.6819
         }
       ]
     },
@@ -29872,12 +29871,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely D",
       "insideRating": null,
-      "margin": 11.52,
-      "demProbability": 0.8937,
-      "repProbability": 0.1063,
+      "margin": 12.4,
+      "demProbability": 0.9322,
+      "repProbability": 0.0678,
       "winnerParty": "D",
-      "winnerProbability": 0.8937,
-      "error": 8.5,
+      "winnerProbability": 0.9322,
+      "error": 7.5,
       "competitive": false,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -29886,7 +29885,7 @@
         "congressionalBaseline": 6.8,
         "districtFundamentalMargin": 6.14,
         "contextualBaseline": 6.14,
-        "ratingBaseline": 7,
+        "ratingBaseline": 8,
         "openPenalty": 0,
         "incumbencyAdjustment": 0.45,
         "challengerStrength": "none",
@@ -29915,151 +29914,13 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.8937,
-          "rep": 0.1063
+          "dem": 0.9322,
+          "rep": 0.0678
         }
       ]
     }
   ],
   "decisiveDistricts": [
-    {
-      "id": "FL-22",
-      "state": "FL",
-      "district": "22",
-      "label": "Lois Frankel",
-      "incumbent": "Lois Frankel",
-      "open": false,
-      "rating": "Toss-up",
-      "sourceRating": "Lean R",
-      "ratingSource": "270toWin / Inside Elections",
-      "seatParty": "D",
-      "presidentialMargin": -10,
-      "congressionalMargin": 0,
-      "fundamentalMargin": -10,
-      "rawMarginNote": "Raw 270toWin district margin fields are stored for context only; the model does not assume they are signed Democratic margins.",
-      "kalshiPrice": 56,
-      "demCandidate": "Democrat",
-      "repCandidate": "Republican",
-      "baselineRating": "Lean R",
-      "insideRating": null,
-      "margin": 0.02,
-      "demProbability": 0.4995,
-      "repProbability": 0.5005,
-      "winnerParty": "R",
-      "winnerProbability": 0.5005,
-      "error": 7.4,
-      "competitive": true,
-      "sourceInputs": {
-        "genericBallotShift": 3.35,
-        "nationalFinanceShift": 0.02,
-        "presidentialBaseline": -10,
-        "congressionalBaseline": 0,
-        "districtFundamentalMargin": -10,
-        "contextualBaseline": -10,
-        "ratingBaseline": -4.3,
-        "openPenalty": 0,
-        "incumbencyAdjustment": 0.45,
-        "challengerStrength": "none",
-        "finance": {
-          "demReceipts": 0,
-          "repReceipts": 6009837.05,
-          "demCash": 0,
-          "repCash": 3800111.46,
-          "demDebts": 0,
-          "repDebts": 0,
-          "candidates": 14,
-          "financeSignal": -1.4
-        }
-      },
-      "sourceBlend": "270toWin / Inside Elections",
-      "history": [
-        {
-          "date": "2026-05-18",
-          "dem": 0.5404,
-          "rep": 0.4596
-        },
-        {
-          "date": "2026-05-19",
-          "dem": 0.564,
-          "rep": 0.436
-        },
-        {
-          "date": "2026-05-20",
-          "dem": 0.4995,
-          "rep": 0.5005
-        }
-      ],
-      "leverage": 0.999
-    },
-    {
-      "id": "NC-01",
-      "state": "NC",
-      "district": "1",
-      "label": "Don Davis",
-      "incumbent": "Don Davis",
-      "open": false,
-      "rating": "Toss-up",
-      "sourceRating": "Lean R",
-      "ratingSource": "270toWin / Inside Elections",
-      "seatParty": "D",
-      "presidentialMargin": -11.6,
-      "congressionalMargin": 0,
-      "fundamentalMargin": -11.6,
-      "rawMarginNote": "Raw 270toWin district margin fields are stored for context only; the model does not assume they are signed Democratic margins.",
-      "kalshiPrice": 56,
-      "demCandidate": "Don Davis",
-      "repCandidate": "Laurie Buckhout",
-      "baselineRating": "Lean R",
-      "insideRating": null,
-      "margin": 0.2,
-      "demProbability": 0.5101,
-      "repProbability": 0.4899,
-      "winnerParty": "D",
-      "winnerProbability": 0.5101,
-      "error": 7.4,
-      "competitive": true,
-      "sourceInputs": {
-        "genericBallotShift": 3.35,
-        "nationalFinanceShift": 0.02,
-        "presidentialBaseline": -11.6,
-        "congressionalBaseline": 0,
-        "districtFundamentalMargin": -11.6,
-        "contextualBaseline": -11.6,
-        "ratingBaseline": -4.3,
-        "openPenalty": 0,
-        "incumbencyAdjustment": 0.45,
-        "challengerStrength": "none",
-        "finance": {
-          "demReceipts": 3232085.69,
-          "repReceipts": 7199598.629999999,
-          "demCash": 2880070.92,
-          "repCash": 1540469.3800000001,
-          "demDebts": 0,
-          "repDebts": 0,
-          "candidates": 8,
-          "financeSignal": -0.081
-        }
-      },
-      "sourceBlend": "270toWin / Inside Elections",
-      "history": [
-        {
-          "date": "2026-05-18",
-          "dem": 0.5508,
-          "rep": 0.4492
-        },
-        {
-          "date": "2026-05-19",
-          "dem": 0.5541,
-          "rep": 0.4459
-        },
-        {
-          "date": "2026-05-20",
-          "dem": 0.5101,
-          "rep": 0.4899
-        }
-      ],
-      "leverage": 0.9798
-    },
     {
       "id": "FL-14",
       "state": "FL",
@@ -30080,12 +29941,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Lean R",
       "insideRating": null,
-      "margin": 0.37,
-      "demProbability": 0.5169,
-      "repProbability": 0.4831,
-      "winnerParty": "D",
-      "winnerProbability": 0.5169,
-      "error": 7.4,
+      "margin": -0.69,
+      "demProbability": 0.4617,
+      "repProbability": 0.5383,
+      "winnerParty": "R",
+      "winnerProbability": 0.5383,
+      "error": 6.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -30094,7 +29955,7 @@
         "congressionalBaseline": 0,
         "districtFundamentalMargin": -11,
         "contextualBaseline": -11,
-        "ratingBaseline": -4.3,
+        "ratingBaseline": -5.5,
         "openPenalty": 0,
         "incumbencyAdjustment": 0.45,
         "challengerStrength": "none",
@@ -30123,11 +29984,149 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.5169,
-          "rep": 0.4831
+          "dem": 0.4617,
+          "rep": 0.5383
         }
       ],
-      "leverage": 0.9662
+      "leverage": 0.9234
+    },
+    {
+      "id": "NC-01",
+      "state": "NC",
+      "district": "1",
+      "label": "Don Davis",
+      "incumbent": "Don Davis",
+      "open": false,
+      "rating": "Toss-up",
+      "sourceRating": "Lean R",
+      "ratingSource": "270toWin / Inside Elections",
+      "seatParty": "D",
+      "presidentialMargin": -11.6,
+      "congressionalMargin": 0,
+      "fundamentalMargin": -11.6,
+      "rawMarginNote": "Raw 270toWin district margin fields are stored for context only; the model does not assume they are signed Democratic margins.",
+      "kalshiPrice": 56,
+      "demCandidate": "Don Davis",
+      "repCandidate": "Laurie Buckhout",
+      "baselineRating": "Lean R",
+      "insideRating": null,
+      "margin": -0.85,
+      "demProbability": 0.4522,
+      "repProbability": 0.5478,
+      "winnerParty": "R",
+      "winnerProbability": 0.5478,
+      "error": 6.5,
+      "competitive": true,
+      "sourceInputs": {
+        "genericBallotShift": 3.35,
+        "nationalFinanceShift": 0.02,
+        "presidentialBaseline": -11.6,
+        "congressionalBaseline": 0,
+        "districtFundamentalMargin": -11.6,
+        "contextualBaseline": -11.6,
+        "ratingBaseline": -5.5,
+        "openPenalty": 0,
+        "incumbencyAdjustment": 0.45,
+        "challengerStrength": "none",
+        "finance": {
+          "demReceipts": 3232085.69,
+          "repReceipts": 7199598.629999999,
+          "demCash": 2880070.92,
+          "repCash": 1540469.3800000001,
+          "demDebts": 0,
+          "repDebts": 0,
+          "candidates": 8,
+          "financeSignal": -0.081
+        }
+      },
+      "sourceBlend": "270toWin / Inside Elections",
+      "history": [
+        {
+          "date": "2026-05-18",
+          "dem": 0.5508,
+          "rep": 0.4492
+        },
+        {
+          "date": "2026-05-19",
+          "dem": 0.5541,
+          "rep": 0.4459
+        },
+        {
+          "date": "2026-05-20",
+          "dem": 0.4522,
+          "rep": 0.5478
+        }
+      ],
+      "leverage": 0.9044
+    },
+    {
+      "id": "FL-22",
+      "state": "FL",
+      "district": "22",
+      "label": "Lois Frankel",
+      "incumbent": "Lois Frankel",
+      "open": false,
+      "rating": "Tilt R",
+      "sourceRating": "Lean R",
+      "ratingSource": "270toWin / Inside Elections",
+      "seatParty": "D",
+      "presidentialMargin": -10,
+      "congressionalMargin": 0,
+      "fundamentalMargin": -10,
+      "rawMarginNote": "Raw 270toWin district margin fields are stored for context only; the model does not assume they are signed Democratic margins.",
+      "kalshiPrice": 56,
+      "demCandidate": "Democrat",
+      "repCandidate": "Republican",
+      "baselineRating": "Lean R",
+      "insideRating": null,
+      "margin": -1.03,
+      "demProbability": 0.4424,
+      "repProbability": 0.5576,
+      "winnerParty": "R",
+      "winnerProbability": 0.5576,
+      "error": 6.5,
+      "competitive": true,
+      "sourceInputs": {
+        "genericBallotShift": 3.35,
+        "nationalFinanceShift": 0.02,
+        "presidentialBaseline": -10,
+        "congressionalBaseline": 0,
+        "districtFundamentalMargin": -10,
+        "contextualBaseline": -10,
+        "ratingBaseline": -5.5,
+        "openPenalty": 0,
+        "incumbencyAdjustment": 0.45,
+        "challengerStrength": "none",
+        "finance": {
+          "demReceipts": 0,
+          "repReceipts": 6009837.05,
+          "demCash": 0,
+          "repCash": 3800111.46,
+          "demDebts": 0,
+          "repDebts": 0,
+          "candidates": 14,
+          "financeSignal": -1.4
+        }
+      },
+      "sourceBlend": "270toWin / Inside Elections",
+      "history": [
+        {
+          "date": "2026-05-18",
+          "dem": 0.5404,
+          "rep": 0.4596
+        },
+        {
+          "date": "2026-05-19",
+          "dem": 0.564,
+          "rep": 0.436
+        },
+        {
+          "date": "2026-05-20",
+          "dem": 0.4424,
+          "rep": 0.5576
+        }
+      ],
+      "leverage": 0.8848
     },
     {
       "id": "PA-01",
@@ -30136,7 +30135,7 @@
       "label": "Brian Fitzpatrick",
       "incumbent": "Brian Fitzpatrick",
       "open": false,
-      "rating": "Toss-up",
+      "rating": "Tilt R",
       "sourceRating": "Lean R",
       "ratingSource": "270toWin / Inside Elections",
       "seatParty": "R",
@@ -30149,12 +30148,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Lean R",
       "insideRating": null,
-      "margin": -0.38,
-      "demProbability": 0.481,
-      "repProbability": 0.519,
+      "margin": -1.43,
+      "demProbability": 0.4242,
+      "repProbability": 0.5758,
       "winnerParty": "R",
-      "winnerProbability": 0.519,
-      "error": 7.4,
+      "winnerProbability": 0.5758,
+      "error": 6.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -30163,7 +30162,7 @@
         "congressionalBaseline": -12.8,
         "districtFundamentalMargin": -5.6,
         "contextualBaseline": -5.6,
-        "ratingBaseline": -4.3,
+        "ratingBaseline": -5.5,
         "openPenalty": 0,
         "incumbencyAdjustment": -0.45,
         "challengerStrength": "none",
@@ -30192,80 +30191,11 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.481,
-          "rep": 0.519
+          "dem": 0.4242,
+          "rep": 0.5758
         }
       ],
-      "leverage": 0.962
-    },
-    {
-      "id": "MI-04",
-      "state": "MI",
-      "district": "4",
-      "label": "Bill Huizenga",
-      "incumbent": "Bill Huizenga",
-      "open": false,
-      "rating": "Toss-up",
-      "sourceRating": "Lean R",
-      "ratingSource": "270toWin / Inside Elections",
-      "seatParty": "R",
-      "presidentialMargin": -5.7,
-      "congressionalMargin": -11.7,
-      "fundamentalMargin": -8.4,
-      "rawMarginNote": "Raw 270toWin district margin fields are stored for context only; the model does not assume they are signed Democratic margins.",
-      "kalshiPrice": 64,
-      "demCandidate": "Democrat",
-      "repCandidate": "Republican",
-      "baselineRating": "Lean R",
-      "insideRating": null,
-      "margin": -0.48,
-      "demProbability": 0.4765,
-      "repProbability": 0.5235,
-      "winnerParty": "R",
-      "winnerProbability": 0.5235,
-      "error": 7.4,
-      "competitive": true,
-      "sourceInputs": {
-        "genericBallotShift": 3.35,
-        "nationalFinanceShift": 0.02,
-        "presidentialBaseline": -5.7,
-        "congressionalBaseline": -11.7,
-        "districtFundamentalMargin": -8.4,
-        "contextualBaseline": -8.4,
-        "ratingBaseline": -4.3,
-        "openPenalty": 0,
-        "incumbencyAdjustment": -0.45,
-        "challengerStrength": "none",
-        "finance": {
-          "demReceipts": 2024833.96,
-          "repReceipts": 2997558.28,
-          "demCash": 1182359.01,
-          "repCash": 1897505.73,
-          "demDebts": 0,
-          "repDebts": 0,
-          "candidates": 5,
-          "financeSignal": -0.126
-        }
-      },
-      "sourceBlend": "270toWin / Inside Elections",
-      "history": [
-        {
-          "date": "2026-05-18",
-          "dem": 0.5207,
-          "rep": 0.4793
-        },
-        {
-          "date": "2026-05-19",
-          "dem": 0.5249,
-          "rep": 0.4751
-        },
-        {
-          "date": "2026-05-20",
-          "dem": 0.4765,
-          "rep": 0.5235
-        }
-      ],
-      "leverage": 0.953
+      "leverage": 0.8484
     },
     {
       "id": "VA-01",
@@ -30274,7 +30204,7 @@
       "label": "Rob Wittman",
       "incumbent": "Rob Wittman",
       "open": false,
-      "rating": "Toss-up",
+      "rating": "Tilt R",
       "sourceRating": "Lean R",
       "ratingSource": "270toWin / Inside Elections",
       "seatParty": "R",
@@ -30287,12 +30217,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Lean R",
       "insideRating": null,
-      "margin": -0.5,
-      "demProbability": 0.4731,
-      "repProbability": 0.5269,
+      "margin": -1.56,
+      "demProbability": 0.4163,
+      "repProbability": 0.5837,
       "winnerParty": "R",
-      "winnerProbability": 0.5269,
-      "error": 7.4,
+      "winnerProbability": 0.5837,
+      "error": 6.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -30301,7 +30231,7 @@
         "congressionalBaseline": -12.8,
         "districtFundamentalMargin": -8.46,
         "contextualBaseline": -8.46,
-        "ratingBaseline": -4.3,
+        "ratingBaseline": -5.5,
         "openPenalty": 0,
         "incumbencyAdjustment": -0.45,
         "challengerStrength": "none",
@@ -30330,11 +30260,80 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.4731,
-          "rep": 0.5269
+          "dem": 0.4163,
+          "rep": 0.5837
         }
       ],
-      "leverage": 0.9462
+      "leverage": 0.8326
+    },
+    {
+      "id": "MI-04",
+      "state": "MI",
+      "district": "4",
+      "label": "Bill Huizenga",
+      "incumbent": "Bill Huizenga",
+      "open": false,
+      "rating": "Tilt R",
+      "sourceRating": "Lean R",
+      "ratingSource": "270toWin / Inside Elections",
+      "seatParty": "R",
+      "presidentialMargin": -5.7,
+      "congressionalMargin": -11.7,
+      "fundamentalMargin": -8.4,
+      "rawMarginNote": "Raw 270toWin district margin fields are stored for context only; the model does not assume they are signed Democratic margins.",
+      "kalshiPrice": 64,
+      "demCandidate": "Democrat",
+      "repCandidate": "Republican",
+      "baselineRating": "Lean R",
+      "insideRating": null,
+      "margin": -1.54,
+      "demProbability": 0.415,
+      "repProbability": 0.585,
+      "winnerParty": "R",
+      "winnerProbability": 0.585,
+      "error": 6.5,
+      "competitive": true,
+      "sourceInputs": {
+        "genericBallotShift": 3.35,
+        "nationalFinanceShift": 0.02,
+        "presidentialBaseline": -5.7,
+        "congressionalBaseline": -11.7,
+        "districtFundamentalMargin": -8.4,
+        "contextualBaseline": -8.4,
+        "ratingBaseline": -5.5,
+        "openPenalty": 0,
+        "incumbencyAdjustment": -0.45,
+        "challengerStrength": "none",
+        "finance": {
+          "demReceipts": 2024833.96,
+          "repReceipts": 2997558.28,
+          "demCash": 1182359.01,
+          "repCash": 1897505.73,
+          "demDebts": 0,
+          "repDebts": 0,
+          "candidates": 5,
+          "financeSignal": -0.126
+        }
+      },
+      "sourceBlend": "270toWin / Inside Elections",
+      "history": [
+        {
+          "date": "2026-05-18",
+          "dem": 0.5207,
+          "rep": 0.4793
+        },
+        {
+          "date": "2026-05-19",
+          "dem": 0.5249,
+          "rep": 0.4751
+        },
+        {
+          "date": "2026-05-20",
+          "dem": 0.415,
+          "rep": 0.585
+        }
+      ],
+      "leverage": 0.83
     },
     {
       "id": "ME-02",
@@ -30356,12 +30355,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely R",
       "insideRating": null,
-      "margin": -1.64,
-      "demProbability": 0.4277,
-      "repProbability": 0.5723,
+      "margin": -2.52,
+      "demProbability": 0.3776,
+      "repProbability": 0.6224,
       "winnerParty": "R",
-      "winnerProbability": 0.5723,
-      "error": 8.5,
+      "winnerProbability": 0.6224,
+      "error": 7.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -30370,7 +30369,7 @@
         "congressionalBaseline": 0.7,
         "districtFundamentalMargin": -4.91,
         "contextualBaseline": -4.91,
-        "ratingBaseline": -7,
+        "ratingBaseline": -8,
         "openPenalty": 0.45,
         "incumbencyAdjustment": 0,
         "challengerStrength": "none",
@@ -30399,11 +30398,149 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.4277,
-          "rep": 0.5723
+          "dem": 0.3776,
+          "rep": 0.6224
         }
       ],
-      "leverage": 0.8554
+      "leverage": 0.7552
+    },
+    {
+      "id": "IA-03",
+      "state": "IA",
+      "district": "3",
+      "label": "Zach Nunn",
+      "incumbent": "Zach Nunn",
+      "open": false,
+      "rating": "Lean D",
+      "sourceRating": "Toss-up",
+      "ratingSource": "270toWin / Inside Elections",
+      "seatParty": "R",
+      "presidentialMargin": -4.4,
+      "congressionalMargin": -3.8,
+      "fundamentalMargin": -4.13,
+      "rawMarginNote": "Raw 270toWin district margin fields are stored for context only; the model does not assume they are signed Democratic margins.",
+      "kalshiPrice": 63,
+      "demCandidate": "Democrat",
+      "repCandidate": "Republican",
+      "baselineRating": "Toss-up",
+      "insideRating": null,
+      "margin": 3.62,
+      "demProbability": 0.6326,
+      "repProbability": 0.3674,
+      "winnerParty": "D",
+      "winnerProbability": 0.6326,
+      "error": 9.8,
+      "competitive": true,
+      "sourceInputs": {
+        "genericBallotShift": 3.35,
+        "nationalFinanceShift": 0.02,
+        "presidentialBaseline": -4.4,
+        "congressionalBaseline": -3.8,
+        "districtFundamentalMargin": -4.13,
+        "contextualBaseline": -4.13,
+        "ratingBaseline": 0,
+        "openPenalty": 0,
+        "incumbencyAdjustment": -0.45,
+        "challengerStrength": "none",
+        "finance": {
+          "demReceipts": 3688456.14,
+          "repReceipts": 3882730.23,
+          "demCash": 2285557.15,
+          "repCash": 3040133.67,
+          "demDebts": 0,
+          "repDebts": 0,
+          "candidates": 6,
+          "financeSignal": -0.048
+        }
+      },
+      "sourceBlend": "270toWin / Inside Elections",
+      "history": [
+        {
+          "date": "2026-05-18",
+          "dem": 0.6644,
+          "rep": 0.3356
+        },
+        {
+          "date": "2026-05-19",
+          "dem": 0.6688,
+          "rep": 0.3312
+        },
+        {
+          "date": "2026-05-20",
+          "dem": 0.6326,
+          "rep": 0.3674
+        }
+      ],
+      "leverage": 0.7347999999999999
+    },
+    {
+      "id": "WI-03",
+      "state": "WI",
+      "district": "3",
+      "label": "Derrick Van Orden",
+      "incumbent": "Derrick Van Orden",
+      "open": false,
+      "rating": "Lean D",
+      "sourceRating": "Toss-up",
+      "ratingSource": "270toWin / Inside Elections",
+      "seatParty": "R",
+      "presidentialMargin": -7.4,
+      "congressionalMargin": -2.7,
+      "fundamentalMargin": -5.29,
+      "rawMarginNote": "Raw 270toWin district margin fields are stored for context only; the model does not assume they are signed Democratic margins.",
+      "kalshiPrice": 68,
+      "demCandidate": "Democrat",
+      "repCandidate": "Republican",
+      "baselineRating": "Toss-up",
+      "insideRating": null,
+      "margin": 3.56,
+      "demProbability": 0.6329,
+      "repProbability": 0.3671,
+      "winnerParty": "D",
+      "winnerProbability": 0.6329,
+      "error": 9.8,
+      "competitive": true,
+      "sourceInputs": {
+        "genericBallotShift": 3.35,
+        "nationalFinanceShift": 0.02,
+        "presidentialBaseline": -7.4,
+        "congressionalBaseline": -2.7,
+        "districtFundamentalMargin": -5.29,
+        "contextualBaseline": -5.29,
+        "ratingBaseline": 0,
+        "openPenalty": 0,
+        "incumbencyAdjustment": -0.45,
+        "challengerStrength": "none",
+        "finance": {
+          "demReceipts": 7089288.08,
+          "repReceipts": 5677514.78,
+          "demCash": 4528200.25,
+          "repCash": 3808823.62,
+          "demDebts": 0,
+          "repDebts": 0,
+          "candidates": 9,
+          "financeSignal": 0.059
+        }
+      },
+      "sourceBlend": "270toWin / Inside Elections",
+      "history": [
+        {
+          "date": "2026-05-18",
+          "dem": 0.6626,
+          "rep": 0.3374
+        },
+        {
+          "date": "2026-05-19",
+          "dem": 0.6691,
+          "rep": 0.3309
+        },
+        {
+          "date": "2026-05-20",
+          "dem": 0.6329,
+          "rep": 0.3671
+        }
+      ],
+      "leverage": 0.7342
     },
     {
       "id": "MT-01",
@@ -30425,12 +30562,12 @@
       "repCandidate": "Republican",
       "baselineRating": "Likely R",
       "insideRating": null,
-      "margin": -2.02,
-      "demProbability": 0.414,
-      "repProbability": 0.586,
+      "margin": -2.9,
+      "demProbability": 0.366,
+      "repProbability": 0.634,
       "winnerParty": "R",
-      "winnerProbability": 0.586,
-      "error": 8.5,
+      "winnerProbability": 0.634,
+      "error": 7.5,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
@@ -30439,7 +30576,7 @@
         "congressionalBaseline": -7.7,
         "districtFundamentalMargin": -9.79,
         "contextualBaseline": -9.79,
-        "ratingBaseline": -7,
+        "ratingBaseline": -8,
         "openPenalty": 0.45,
         "incumbencyAdjustment": 0,
         "challengerStrength": "none",
@@ -30468,554 +30605,425 @@
         },
         {
           "date": "2026-05-20",
-          "dem": 0.414,
-          "rep": 0.586
+          "dem": 0.366,
+          "rep": 0.634
         }
       ],
-      "leverage": 0.828
+      "leverage": 0.732
     },
     {
-      "id": "IA-02",
+      "id": "IA-01",
       "state": "IA",
-      "district": "2",
-      "label": "Ashley Hinson / open",
-      "incumbent": "Ashley Hinson",
-      "open": true,
-      "rating": "Tilt R",
-      "sourceRating": "Likely R",
-      "ratingSource": "270toWin / Inside Elections",
-      "seatParty": "R",
-      "presidentialMargin": -10,
-      "congressionalMargin": -15.6,
-      "fundamentalMargin": -12.52,
-      "rawMarginNote": "Raw 270toWin district margin fields are stored for context only; the model does not assume they are signed Democratic margins.",
-      "kalshiPrice": 52,
-      "demCandidate": "Democrat",
-      "repCandidate": "Republican",
-      "baselineRating": "Likely R",
-      "insideRating": null,
-      "margin": -2.24,
-      "demProbability": 0.4047,
-      "repProbability": 0.5953,
-      "winnerParty": "R",
-      "winnerProbability": 0.5953,
-      "error": 8.5,
-      "competitive": true,
-      "sourceInputs": {
-        "genericBallotShift": 3.35,
-        "nationalFinanceShift": 0.02,
-        "presidentialBaseline": -10,
-        "congressionalBaseline": -15.6,
-        "districtFundamentalMargin": -12.52,
-        "contextualBaseline": -12.52,
-        "ratingBaseline": -7,
-        "openPenalty": 0.45,
-        "incumbencyAdjustment": 0,
-        "challengerStrength": "none",
-        "finance": {
-          "demReceipts": 1432122.6400000001,
-          "repReceipts": 1694045.98,
-          "demCash": 631540.1900000001,
-          "repCash": 1140177.71,
-          "demDebts": 0,
-          "repDebts": 0,
-          "candidates": 11,
-          "financeSignal": -0.101
-        }
-      },
-      "sourceBlend": "270toWin / Inside Elections",
-      "history": [
-        {
-          "date": "2026-05-18",
-          "dem": 0.327,
-          "rep": 0.673
-        },
-        {
-          "date": "2026-05-19",
-          "dem": 0.3396,
-          "rep": 0.6604
-        },
-        {
-          "date": "2026-05-20",
-          "dem": 0.4047,
-          "rep": 0.5953
-        }
-      ],
-      "leverage": 0.8094
-    },
-    {
-      "id": "FL-16",
-      "state": "FL",
-      "district": "16",
-      "label": "Vern Buchanan / open",
-      "incumbent": "Vern Buchanan",
-      "open": true,
-      "rating": "Tilt R",
-      "sourceRating": "Likely R",
-      "ratingSource": "270toWin / Inside Elections",
-      "seatParty": "R",
-      "presidentialMargin": -14,
-      "congressionalMargin": 0,
-      "fundamentalMargin": -14,
-      "rawMarginNote": "Raw 270toWin district margin fields are stored for context only; the model does not assume they are signed Democratic margins.",
-      "kalshiPrice": 78,
-      "demCandidate": "Democrat",
-      "repCandidate": "Republican",
-      "baselineRating": "Likely R",
-      "insideRating": null,
-      "margin": -2.24,
-      "demProbability": 0.4045,
-      "repProbability": 0.5955,
-      "winnerParty": "R",
-      "winnerProbability": 0.5955,
-      "error": 8.5,
-      "competitive": true,
-      "sourceInputs": {
-        "genericBallotShift": 3.35,
-        "nationalFinanceShift": 0.02,
-        "presidentialBaseline": -14,
-        "congressionalBaseline": 0,
-        "districtFundamentalMargin": -14,
-        "contextualBaseline": -14,
-        "ratingBaseline": -7,
-        "openPenalty": 0.45,
-        "incumbencyAdjustment": 0,
-        "challengerStrength": "none",
-        "finance": {
-          "demReceipts": 131906.34,
-          "repReceipts": 39163.75,
-          "demCash": 135531.62,
-          "repCash": 32412.980000000003,
-          "demDebts": 0,
-          "repDebts": 0,
-          "candidates": 9,
-          "financeSignal": 0.392
-        }
-      },
-      "sourceBlend": "270toWin / Inside Elections",
-      "history": [
-        {
-          "date": "2026-05-18",
-          "dem": 0.3356,
-          "rep": 0.6644
-        },
-        {
-          "date": "2026-05-19",
-          "dem": 0.3335,
-          "rep": 0.6665
-        },
-        {
-          "date": "2026-05-20",
-          "dem": 0.4045,
-          "rep": 0.5955
-        }
-      ],
-      "leverage": 0.809
-    },
-    {
-      "id": "TX-35",
-      "state": "TX",
-      "district": "35",
-      "label": "Greg Casar / open",
-      "incumbent": "Greg Casar",
-      "open": true,
-      "rating": "Tilt R",
-      "sourceRating": "Likely R",
-      "ratingSource": "270toWin / Inside Elections",
-      "seatParty": "D",
-      "presidentialMargin": -10.4,
-      "congressionalMargin": 0,
-      "fundamentalMargin": -10.4,
-      "rawMarginNote": "Raw 270toWin district margin fields are stored for context only; the model does not assume they are signed Democratic margins.",
-      "kalshiPrice": 51,
-      "demCandidate": "TBD - Runoff",
-      "repCandidate": "TBD - Runoff",
-      "baselineRating": "Likely R",
-      "insideRating": null,
-      "margin": -2.17,
-      "demProbability": 0.4017,
-      "repProbability": 0.5983,
-      "winnerParty": "R",
-      "winnerProbability": 0.5983,
-      "error": 8.5,
-      "competitive": true,
-      "sourceInputs": {
-        "genericBallotShift": 3.35,
-        "nationalFinanceShift": 0.02,
-        "presidentialBaseline": -10.4,
-        "congressionalBaseline": 0,
-        "districtFundamentalMargin": -10.4,
-        "contextualBaseline": -10.4,
-        "ratingBaseline": -7,
-        "openPenalty": 0.45,
-        "incumbencyAdjustment": 0,
-        "challengerStrength": "none",
-        "finance": {
-          "demReceipts": 546914.59,
-          "repReceipts": 2338232.64,
-          "demCash": 62643.1,
-          "repCash": 255626.21999999997,
-          "demDebts": 0,
-          "repDebts": 0,
-          "candidates": 14,
-          "financeSignal": -0.426
-        }
-      },
-      "sourceBlend": "270toWin / Inside Elections",
-      "history": [
-        {
-          "date": "2026-05-18",
-          "dem": 0.3343,
-          "rep": 0.6657
-        },
-        {
-          "date": "2026-05-19",
-          "dem": 0.3455,
-          "rep": 0.6545
-        },
-        {
-          "date": "2026-05-20",
-          "dem": 0.4017,
-          "rep": 0.5983
-        }
-      ],
-      "leverage": 0.8034
-    },
-    {
-      "id": "KY-06",
-      "state": "KY",
-      "district": "6",
-      "label": "Andy Barr / open",
-      "incumbent": "Andy Barr",
-      "open": true,
-      "rating": "Tilt R",
-      "sourceRating": "Likely R",
-      "ratingSource": "270toWin / Inside Elections",
-      "seatParty": "R",
-      "presidentialMargin": -15,
-      "congressionalMargin": -26.8,
-      "fundamentalMargin": -20.31,
-      "rawMarginNote": "Raw 270toWin district margin fields are stored for context only; the model does not assume they are signed Democratic margins.",
-      "kalshiPrice": 75,
-      "demCandidate": "Democrat",
-      "repCandidate": "Republican",
-      "baselineRating": "Likely R",
-      "insideRating": null,
-      "margin": -2.54,
-      "demProbability": 0.3941,
-      "repProbability": 0.6059,
-      "winnerParty": "R",
-      "winnerProbability": 0.6059,
-      "error": 8.5,
-      "competitive": true,
-      "sourceInputs": {
-        "genericBallotShift": 3.35,
-        "nationalFinanceShift": 0.02,
-        "presidentialBaseline": -15,
-        "congressionalBaseline": -26.8,
-        "districtFundamentalMargin": -20.31,
-        "contextualBaseline": -16,
-        "ratingBaseline": -7,
-        "openPenalty": 0.45,
-        "incumbencyAdjustment": 0,
-        "challengerStrength": "none",
-        "finance": {
-          "demReceipts": 1998367.13,
-          "repReceipts": 7718311.84,
-          "demCash": 443327.49,
-          "repCash": 719957.62,
-          "demDebts": 0,
-          "repDebts": 0,
-          "candidates": 14,
-          "financeSignal": -0.357
-        }
-      },
-      "sourceBlend": "270toWin / Inside Elections",
-      "history": [
-        {
-          "date": "2026-05-18",
-          "dem": 0.3173,
-          "rep": 0.6827
-        },
-        {
-          "date": "2026-05-19",
-          "dem": 0.3272,
-          "rep": 0.6728
-        },
-        {
-          "date": "2026-05-20",
-          "dem": 0.3941,
-          "rep": 0.6059
-        }
-      ],
-      "leverage": 0.7882
-    },
-    {
-      "id": "FL-09",
-      "state": "FL",
-      "district": "9",
-      "label": "Darren Soto",
-      "incumbent": "Darren Soto",
+      "district": "1",
+      "label": "Mariannette Miller-Meeks",
+      "incumbent": "Mariannette Miller-Meeks",
       "open": false,
-      "rating": "Tilt R",
-      "sourceRating": "Likely R",
+      "rating": "Lean D",
+      "sourceRating": "Toss-up",
       "ratingSource": "270toWin / Inside Elections",
-      "seatParty": "D",
-      "presidentialMargin": -18,
-      "congressionalMargin": 0,
-      "fundamentalMargin": -18,
+      "seatParty": "R",
+      "presidentialMargin": -8.5,
+      "congressionalMargin": -0.2,
+      "fundamentalMargin": -4.77,
+      "rawMarginNote": "Raw 270toWin district margin fields are stored for context only; the model does not assume they are signed Democratic margins.",
+      "kalshiPrice": 69,
+      "demCandidate": "Democrat",
+      "repCandidate": "Republican",
+      "baselineRating": "Toss-up",
+      "insideRating": null,
+      "margin": 3.58,
+      "demProbability": 0.6352,
+      "repProbability": 0.3648,
+      "winnerParty": "D",
+      "winnerProbability": 0.6352,
+      "error": 9.8,
+      "competitive": true,
+      "sourceInputs": {
+        "genericBallotShift": 3.35,
+        "nationalFinanceShift": 0.02,
+        "presidentialBaseline": -8.5,
+        "congressionalBaseline": -0.2,
+        "districtFundamentalMargin": -4.77,
+        "contextualBaseline": -4.77,
+        "ratingBaseline": 0,
+        "openPenalty": 0,
+        "incumbencyAdjustment": -0.45,
+        "challengerStrength": "none",
+        "finance": {
+          "demReceipts": 5819549.6899999995,
+          "repReceipts": 5802436.62,
+          "demCash": 4010471.3,
+          "repCash": 4328509.27,
+          "demDebts": 0,
+          "repDebts": 0,
+          "candidates": 8,
+          "financeSignal": -0.01
+        }
+      },
+      "sourceBlend": "270toWin / Inside Elections",
+      "history": [
+        {
+          "date": "2026-05-18",
+          "dem": 0.6669,
+          "rep": 0.3331
+        },
+        {
+          "date": "2026-05-19",
+          "dem": 0.6707,
+          "rep": 0.3293
+        },
+        {
+          "date": "2026-05-20",
+          "dem": 0.6352,
+          "rep": 0.3648
+        }
+      ],
+      "leverage": 0.7296
+    },
+    {
+      "id": "PA-08",
+      "state": "PA",
+      "district": "8",
+      "label": "Rob Bresnahan",
+      "incumbent": "Rob Bresnahan",
+      "open": false,
+      "rating": "Lean D",
+      "sourceRating": "Toss-up",
+      "ratingSource": "270toWin / Inside Elections",
+      "seatParty": "R",
+      "presidentialMargin": -8.5,
+      "congressionalMargin": -1.6,
+      "fundamentalMargin": -5.4,
       "rawMarginNote": "Raw 270toWin district margin fields are stored for context only; the model does not assume they are signed Democratic margins.",
       "kalshiPrice": 61,
       "demCandidate": "Democrat",
       "repCandidate": "Republican",
-      "baselineRating": "Likely R",
+      "baselineRating": "Toss-up",
       "insideRating": null,
-      "margin": -2.52,
-      "demProbability": 0.3931,
-      "repProbability": 0.6069,
-      "winnerParty": "R",
-      "winnerProbability": 0.6069,
-      "error": 8.5,
+      "margin": 3.52,
+      "demProbability": 0.637,
+      "repProbability": 0.363,
+      "winnerParty": "D",
+      "winnerProbability": 0.637,
+      "error": 9.8,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
         "nationalFinanceShift": 0.02,
-        "presidentialBaseline": -18,
-        "congressionalBaseline": 0,
-        "districtFundamentalMargin": -18,
-        "contextualBaseline": -16,
-        "ratingBaseline": -7,
+        "presidentialBaseline": -8.5,
+        "congressionalBaseline": -1.6,
+        "districtFundamentalMargin": -5.4,
+        "contextualBaseline": -5.4,
+        "ratingBaseline": 0,
         "openPenalty": 0,
-        "incumbencyAdjustment": 0.45,
+        "incumbencyAdjustment": -0.45,
         "challengerStrength": "none",
         "finance": {
-          "demReceipts": 1241415.11,
-          "repReceipts": 2473735.31,
-          "demCash": 832605.6,
-          "repCash": 2192814.3899999997,
+          "demReceipts": 3102420.42,
+          "repReceipts": 4519622.57,
+          "demCash": 2250177.32,
+          "repCash": 2273292.49,
           "demDebts": 0,
           "repDebts": 0,
-          "candidates": 8,
-          "financeSignal": -0.244
+          "candidates": 3,
+          "financeSignal": -0.063
         }
       },
       "sourceBlend": "270toWin / Inside Elections",
       "history": [
         {
           "date": "2026-05-18",
-          "dem": 0.315,
-          "rep": 0.685
+          "dem": 0.667,
+          "rep": 0.333
         },
         {
           "date": "2026-05-19",
-          "dem": 0.3246,
-          "rep": 0.6754
+          "dem": 0.6753,
+          "rep": 0.3247
         },
         {
           "date": "2026-05-20",
-          "dem": 0.3931,
-          "rep": 0.6069
+          "dem": 0.637,
+          "rep": 0.363
         }
       ],
-      "leverage": 0.7862
+      "leverage": 0.726
     },
     {
-      "id": "CO-03",
-      "state": "CO",
-      "district": "3",
-      "label": "Jeff Hurd",
-      "incumbent": "Jeff Hurd",
+      "id": "PA-10",
+      "state": "PA",
+      "district": "10",
+      "label": "Scott Perry",
+      "incumbent": "Scott Perry",
       "open": false,
-      "rating": "Tilt R",
-      "sourceRating": "Likely R",
+      "rating": "Lean D",
+      "sourceRating": "Toss-up",
       "ratingSource": "270toWin / Inside Elections",
       "seatParty": "R",
-      "presidentialMargin": -9.7,
-      "congressionalMargin": -5,
-      "fundamentalMargin": -7.58,
+      "presidentialMargin": -5.2,
+      "congressionalMargin": -1.3,
+      "fundamentalMargin": -3.45,
       "rawMarginNote": "Raw 270toWin district margin fields are stored for context only; the model does not assume they are signed Democratic margins.",
-      "kalshiPrice": 68,
+      "kalshiPrice": 73,
       "demCandidate": "Democrat",
       "repCandidate": "Republican",
-      "baselineRating": "Likely R",
+      "baselineRating": "Toss-up",
       "insideRating": null,
-      "margin": -2.82,
-      "demProbability": 0.3772,
-      "repProbability": 0.6228,
-      "winnerParty": "R",
-      "winnerProbability": 0.6228,
-      "error": 8.5,
+      "margin": 3.69,
+      "demProbability": 0.6372,
+      "repProbability": 0.3628,
+      "winnerParty": "D",
+      "winnerProbability": 0.6372,
+      "error": 9.8,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
         "nationalFinanceShift": 0.02,
-        "presidentialBaseline": -9.7,
-        "congressionalBaseline": -5,
-        "districtFundamentalMargin": -7.58,
-        "contextualBaseline": -7.58,
-        "ratingBaseline": -7,
+        "presidentialBaseline": -5.2,
+        "congressionalBaseline": -1.3,
+        "districtFundamentalMargin": -3.45,
+        "contextualBaseline": -3.45,
+        "ratingBaseline": 0,
         "openPenalty": 0,
         "incumbencyAdjustment": -0.45,
         "challengerStrength": "none",
         "finance": {
-          "demReceipts": 1553048.52,
-          "repReceipts": 3252813.51,
-          "demCash": 928288.52,
-          "repCash": 2078818.17,
+          "demReceipts": 4830025.680000001,
+          "repReceipts": 4431542.71,
+          "demCash": 3359890.3299999996,
+          "repCash": 2345280.98,
           "demDebts": 0,
           "repDebts": 0,
-          "candidates": 9,
-          "financeSignal": -0.226
+          "candidates": 11,
+          "financeSignal": 0.061
         }
       },
       "sourceBlend": "270toWin / Inside Elections",
       "history": [
         {
           "date": "2026-05-18",
-          "dem": 0.3015,
-          "rep": 0.6985
+          "dem": 0.6703,
+          "rep": 0.3297
         },
         {
           "date": "2026-05-19",
-          "dem": 0.3134,
-          "rep": 0.6866
+          "dem": 0.6751,
+          "rep": 0.3249
         },
         {
           "date": "2026-05-20",
-          "dem": 0.3772,
-          "rep": 0.6228
+          "dem": 0.6372,
+          "rep": 0.3628
         }
       ],
-      "leverage": 0.7544
+      "leverage": 0.7256
     },
     {
-      "id": "AK-AL",
-      "state": "AK",
-      "district": "AL",
-      "label": "Nick Begich",
-      "incumbent": "Nick Begich",
+      "id": "PA-07",
+      "state": "PA",
+      "district": "7",
+      "label": "Ryan Mackenzie",
+      "incumbent": "Ryan Mackenzie",
       "open": false,
-      "rating": "Tilt R",
-      "sourceRating": "Likely R",
+      "rating": "Lean D",
+      "sourceRating": "Toss-up",
       "ratingSource": "270toWin / Inside Elections",
       "seatParty": "R",
-      "presidentialMargin": -13.1,
-      "congressionalMargin": -2.4,
-      "fundamentalMargin": -8.29,
+      "presidentialMargin": -3.2,
+      "congressionalMargin": -1,
+      "fundamentalMargin": -2.21,
       "rawMarginNote": "Raw 270toWin district margin fields are stored for context only; the model does not assume they are signed Democratic margins.",
-      "kalshiPrice": 82,
+      "kalshiPrice": 74,
       "demCandidate": "Democrat",
       "repCandidate": "Republican",
-      "baselineRating": "Likely R",
+      "baselineRating": "Toss-up",
       "insideRating": null,
-      "margin": -2.82,
-      "demProbability": 0.3767,
-      "repProbability": 0.6233,
-      "winnerParty": "R",
-      "winnerProbability": 0.6233,
-      "error": 8.5,
+      "margin": 3.74,
+      "demProbability": 0.6388,
+      "repProbability": 0.3612,
+      "winnerParty": "D",
+      "winnerProbability": 0.6388,
+      "error": 9.8,
       "competitive": true,
       "sourceInputs": {
         "genericBallotShift": 3.35,
         "nationalFinanceShift": 0.02,
-        "presidentialBaseline": -13.1,
-        "congressionalBaseline": -2.4,
-        "districtFundamentalMargin": -8.29,
-        "contextualBaseline": -8.29,
-        "ratingBaseline": -7,
-        "openPenalty": 0,
-        "incumbencyAdjustment": -0.45,
-        "challengerStrength": "none",
-        "finance": null
-      },
-      "sourceBlend": "270toWin / Inside Elections",
-      "history": [
-        {
-          "date": "2026-05-18",
-          "dem": 0.3019,
-          "rep": 0.6981
-        },
-        {
-          "date": "2026-05-19",
-          "dem": 0.3047,
-          "rep": 0.6953
-        },
-        {
-          "date": "2026-05-20",
-          "dem": 0.3767,
-          "rep": 0.6233
-        }
-      ],
-      "leverage": 0.7534
-    },
-    {
-      "id": "NC-11",
-      "state": "NC",
-      "district": "11",
-      "label": "Chuck Edwards",
-      "incumbent": "Chuck Edwards",
-      "open": false,
-      "rating": "Tilt R",
-      "sourceRating": "Likely R",
-      "ratingSource": "270toWin / Inside Elections",
-      "seatParty": "R",
-      "presidentialMargin": -9.5,
-      "congressionalMargin": -13.5,
-      "fundamentalMargin": -11.3,
-      "rawMarginNote": "Raw 270toWin district margin fields are stored for context only; the model does not assume they are signed Democratic margins.",
-      "kalshiPrice": 59,
-      "demCandidate": "Jamie Ager",
-      "repCandidate": "Chuck Edwards",
-      "baselineRating": "Likely R",
-      "insideRating": null,
-      "margin": -2.98,
-      "demProbability": 0.3748,
-      "repProbability": 0.6252,
-      "winnerParty": "R",
-      "winnerProbability": 0.6252,
-      "error": 8.5,
-      "competitive": true,
-      "sourceInputs": {
-        "genericBallotShift": 3.35,
-        "nationalFinanceShift": 0.02,
-        "presidentialBaseline": -9.5,
-        "congressionalBaseline": -13.5,
-        "districtFundamentalMargin": -11.3,
-        "contextualBaseline": -11.3,
-        "ratingBaseline": -7,
+        "presidentialBaseline": -3.2,
+        "congressionalBaseline": -1,
+        "districtFundamentalMargin": -2.21,
+        "contextualBaseline": -2.21,
+        "ratingBaseline": 0,
         "openPenalty": 0,
         "incumbencyAdjustment": -0.45,
         "challengerStrength": "none",
         "finance": {
-          "demReceipts": 2264310.6900000004,
-          "repReceipts": 852287.96,
-          "demCash": 1119082.2700000003,
-          "repCash": 488721.1,
+          "demReceipts": 4186373.68,
+          "repReceipts": 3726348.43,
+          "demCash": 981633.4299999999,
+          "repCash": 2594247.39,
+          "demDebts": 0,
+          "repDebts": 0,
+          "candidates": 10,
+          "financeSignal": -0.077
+        }
+      },
+      "sourceBlend": "270toWin / Inside Elections",
+      "history": [
+        {
+          "date": "2026-05-18",
+          "dem": 0.6716,
+          "rep": 0.3284
+        },
+        {
+          "date": "2026-05-19",
+          "dem": 0.6734,
+          "rep": 0.3266
+        },
+        {
+          "date": "2026-05-20",
+          "dem": 0.6388,
+          "rep": 0.3612
+        }
+      ],
+      "leverage": 0.7223999999999999
+    },
+    {
+      "id": "NJ-07",
+      "state": "NJ",
+      "district": "7",
+      "label": "Tom Kean",
+      "incumbent": "Tom Kean",
+      "open": false,
+      "rating": "Lean D",
+      "sourceRating": "Toss-up",
+      "ratingSource": "270toWin / Inside Elections",
+      "seatParty": "R",
+      "presidentialMargin": -1.2,
+      "congressionalMargin": -5.4,
+      "fundamentalMargin": -3.09,
+      "rawMarginNote": "Raw 270toWin district margin fields are stored for context only; the model does not assume they are signed Democratic margins.",
+      "kalshiPrice": 80,
+      "demCandidate": "Democrat",
+      "repCandidate": "Republican",
+      "baselineRating": "Toss-up",
+      "insideRating": null,
+      "margin": 3.74,
+      "demProbability": 0.6406,
+      "repProbability": 0.3594,
+      "winnerParty": "D",
+      "winnerProbability": 0.6406,
+      "error": 9.8,
+      "competitive": true,
+      "sourceInputs": {
+        "genericBallotShift": 3.35,
+        "nationalFinanceShift": 0.02,
+        "presidentialBaseline": -1.2,
+        "congressionalBaseline": -5.4,
+        "districtFundamentalMargin": -3.09,
+        "contextualBaseline": -3.09,
+        "ratingBaseline": 0,
+        "openPenalty": 0,
+        "incumbencyAdjustment": -0.45,
+        "challengerStrength": "none",
+        "finance": {
+          "demReceipts": 8648363.299999999,
+          "repReceipts": 4374664.97,
+          "demCash": 4905114.73,
+          "repCash": 3356545.04,
           "demDebts": 0,
           "repDebts": 0,
           "candidates": 13,
-          "financeSignal": 0.27
+          "financeSignal": 0.159
         }
       },
       "sourceBlend": "270toWin / Inside Elections",
       "history": [
         {
           "date": "2026-05-18",
-          "dem": 0.2915,
-          "rep": 0.7085
+          "dem": 0.6702,
+          "rep": 0.3298
         },
         {
           "date": "2026-05-19",
-          "dem": 0.295,
-          "rep": 0.705
+          "dem": 0.6731,
+          "rep": 0.3269
         },
         {
           "date": "2026-05-20",
-          "dem": 0.3748,
-          "rep": 0.6252
+          "dem": 0.6406,
+          "rep": 0.3594
         }
       ],
-      "leverage": 0.7496
+      "leverage": 0.7188000000000001
+    },
+    {
+      "id": "VA-02",
+      "state": "VA",
+      "district": "2",
+      "label": "Jen Kiggans",
+      "incumbent": "Jen Kiggans",
+      "open": false,
+      "rating": "Lean D",
+      "sourceRating": "Toss-up",
+      "ratingSource": "270toWin / Inside Elections",
+      "seatParty": "R",
+      "presidentialMargin": -0.3,
+      "congressionalMargin": -3.8,
+      "fundamentalMargin": -1.88,
+      "rawMarginNote": "Raw 270toWin district margin fields are stored for context only; the model does not assume they are signed Democratic margins.",
+      "kalshiPrice": 80,
+      "demCandidate": "Democrat",
+      "repCandidate": "Republican",
+      "baselineRating": "Toss-up",
+      "insideRating": null,
+      "margin": 3.78,
+      "demProbability": 0.6408,
+      "repProbability": 0.3592,
+      "winnerParty": "D",
+      "winnerProbability": 0.6408,
+      "error": 9.8,
+      "competitive": true,
+      "sourceInputs": {
+        "genericBallotShift": 3.35,
+        "nationalFinanceShift": 0.02,
+        "presidentialBaseline": -0.3,
+        "congressionalBaseline": -3.8,
+        "districtFundamentalMargin": -1.88,
+        "contextualBaseline": -1.88,
+        "ratingBaseline": 0,
+        "openPenalty": 0,
+        "incumbencyAdjustment": -0.45,
+        "challengerStrength": "none",
+        "finance": {
+          "demReceipts": 4211096.23,
+          "repReceipts": 4746033.32,
+          "demCash": 2634250.43,
+          "repCash": 3030910.83,
+          "demDebts": 0,
+          "repDebts": 0,
+          "candidates": 12,
+          "financeSignal": -0.038
+        }
+      },
+      "sourceBlend": "270toWin / Inside Elections",
+      "history": [
+        {
+          "date": "2026-05-18",
+          "dem": 0.6698,
+          "rep": 0.3302
+        },
+        {
+          "date": "2026-05-19",
+          "dem": 0.6808,
+          "rep": 0.3192
+        },
+        {
+          "date": "2026-05-20",
+          "dem": 0.6408,
+          "rep": 0.3592
+        }
+      ],
+      "leverage": 0.7183999999999999
     }
   ]
 }
