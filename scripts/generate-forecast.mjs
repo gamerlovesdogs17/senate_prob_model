@@ -45,13 +45,13 @@ const REGION_BY_STATE = {
 };
 
 const RATING_TO_MARGIN = {
-  "Safe D": 18, "Likely D": 9, "Lean D": 6, "Tilt D": 1.8, "Toss-up": 0,
-  "Tilt R": -1.8, "Lean R": -6, "Likely R": -9, "Safe R": -18
+  "Safe D": 18, "Likely D": 9.5, "Lean D": 6.5, "Tilt D": 4, "Toss-up": 0,
+  "Tilt R": -4, "Lean R": -6.5, "Likely R": -9.5, "Safe R": -18
 };
 
 const RATING_TO_ERROR = {
-  "Safe D": 5.2, "Likely D": 7.5, "Lean D": 6.5, "Tilt D": 8.4, "Toss-up": 9.4,
-  "Tilt R": 8.4, "Lean R": 6.5, "Likely R": 7.5, "Safe R": 5.2
+  "Safe D": 5.2, "Likely D": 6, "Lean D": 6.5, "Tilt D": 7, "Toss-up": 9.4,
+  "Tilt R": 7, "Lean R": 6.5, "Likely R": 6, "Safe R": 5.2
 };
 
 const RATING_BUCKET = {
@@ -115,17 +115,20 @@ const ARCHIVED_SENATE_BACKTESTS = [
     status: "partial",
     note: "Partial archived-input seed for competitive and high-attention 2024 Senate races. Inputs are frozen late-cycle probability estimates from public race ratings, polling-average context, incumbency, candidate field, and generic-ballot environment. This is not yet the complete 34-seat cycle.",
     races: [
-      { state: "AZ", rating: "Lean D", probability: .72, favorite: "D", actualMargin: 2.4, tags: ["Open seat", "Major-party baseline"] },
+      { state: "AZ", rating: "Lean D", probability: .73, favorite: "D", actualMargin: 2.4, tags: ["Open seat", "Major-party baseline"] },
       { state: "MI", rating: "Toss-up", probability: .50, favorite: "D", actualMargin: .34, tags: ["Open seat", "Major-party baseline"] },
-      { state: "NV", rating: "Lean D", probability: .72, favorite: "D", actualMargin: 1.7, tags: ["Incumbent race", "Major-party baseline"] },
-      { state: "WI", rating: "Lean D", probability: .72, favorite: "D", actualMargin: .85, tags: ["Incumbent race", "Major-party baseline"] },
-      { state: "PA", rating: "Lean D", probability: .72, favorite: "D", actualMargin: -.22, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "NV", rating: "Lean D", probability: .73, favorite: "D", actualMargin: 1.7, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "WI", rating: "Lean D", probability: .73, favorite: "D", actualMargin: .85, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "PA", rating: "Lean D", probability: .73, favorite: "D", actualMargin: -.22, tags: ["Incumbent race", "Major-party baseline"] },
       { state: "OH", rating: "Toss-up", probability: .50, favorite: "R", actualMargin: -3.62, tags: ["Incumbent race", "Major-party baseline"] },
-      { state: "MT", rating: "Lean R", probability: .28, favorite: "R", actualMargin: -7.14, tags: ["Incumbent race", "Major-party baseline"] },
-      { state: "NE", rating: "Likely R", probability: .23, favorite: "R", actualMargin: -6.6, tags: ["Incumbent race", "Independent factor"] },
-      { state: "TX", rating: "Likely R", probability: .23, favorite: "R", actualMargin: -10.86, tags: ["Incumbent race", "Major-party baseline"] },
-      { state: "FL", rating: "Likely R", probability: .23, favorite: "R", actualMargin: -12.77, tags: ["Incumbent race", "Major-party baseline"] },
-      { state: "MD", rating: "Likely D", probability: .77, favorite: "D", actualMargin: 10.1, tags: ["Open seat", "Major-party baseline"] }
+      { state: "MT", rating: "Lean R", probability: .27, favorite: "R", actualMargin: -7.14, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "NE", rating: "Likely R", probability: .17, favorite: "R", actualMargin: -6.6, tags: ["Incumbent race", "Independent factor"] },
+      { state: "TX", rating: "Likely R", probability: .17, favorite: "R", actualMargin: -10.86, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "FL", rating: "Likely R", probability: .17, favorite: "R", actualMargin: -12.77, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "MD", rating: "Likely D", probability: .83, favorite: "D", actualMargin: 10.1, tags: ["Open seat", "Major-party baseline"] },
+      { state: "CA", rating: "Safe D", probability: .97, favorite: "D", actualMargin: 21.2, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "MS", rating: "Safe R", probability: .03, favorite: "R", actualMargin: -23.6, tags: ["Open seat", "Major-party baseline"] },
+      { state: "OR", rating: "Tilt D", probability: .64, favorite: "D", actualMargin: 3.1, tags: ["Incumbent race", "Major-party baseline"] }
     ],
     sources: [
       "Late-cycle public race ratings and polling-average context",
@@ -140,18 +143,21 @@ const ARCHIVED_SENATE_BACKTESTS = [
     status: "partial",
     note: "Archived-input seed for competitive 2022 Senate races. Inputs reflect late-cycle ratings, polling averages, and fundamentals available before Election Day.",
     races: [
-      { state: "AZ", rating: "Lean D", probability: .72, favorite: "D", actualMargin: 5.3, tags: ["Incumbent race", "Major-party baseline"] },
-      { state: "GA", rating: "Tilt R", probability: .45, favorite: "R", actualMargin: 2.8, tags: ["Open seat", "Major-party baseline"] },
+      { state: "AZ", rating: "Lean D", probability: .73, favorite: "D", actualMargin: 5.3, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "GA", rating: "Tilt R", probability: .36, favorite: "R", actualMargin: 2.8, tags: ["Open seat", "Major-party baseline"] },
       { state: "NV", rating: "Toss-up", probability: .50, favorite: "D", actualMargin: -.8, tags: ["Incumbent race", "Major-party baseline"] },
       { state: "PA", rating: "Toss-up", probability: .50, favorite: "D", actualMargin: 4.9, tags: ["Open seat", "Major-party baseline"] },
-      { state: "WI", rating: "Lean D", probability: .72, favorite: "D", actualMargin: 1.1, tags: ["Incumbent race", "Major-party baseline"] },
-      { state: "NC", rating: "Likely R", probability: .23, favorite: "R", actualMargin: 3.2, tags: ["Incumbent race", "Major-party baseline"] },
-      { state: "OH", rating: "Likely R", probability: .23, favorite: "R", actualMargin: 6.6, tags: ["Open seat", "Major-party baseline"] },
-      { state: "NH", rating: "Lean D", probability: .72, favorite: "D", actualMargin: 9.1, tags: ["Incumbent race", "Major-party baseline"] },
-      { state: "CO", rating: "Likely D", probability: .77, favorite: "D", actualMargin: 12.4, tags: ["Incumbent race", "Major-party baseline"] },
-      { state: "FL", rating: "Likely R", probability: .23, favorite: "R", actualMargin: 16.4, tags: ["Incumbent race", "Major-party baseline"] },
-      { state: "WA", rating: "Likely D", probability: .77, favorite: "D", actualMargin: 5.7, tags: ["Incumbent race", "Major-party baseline"] },
-      { state: "CT", rating: "Likely D", probability: .77, favorite: "D", actualMargin: 13.8, tags: ["Open seat", "Major-party baseline"] }
+      { state: "WI", rating: "Lean D", probability: .73, favorite: "D", actualMargin: 1.1, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "NC", rating: "Likely R", probability: .17, favorite: "R", actualMargin: 3.2, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "OH", rating: "Likely R", probability: .17, favorite: "R", actualMargin: 6.6, tags: ["Open seat", "Major-party baseline"] },
+      { state: "NH", rating: "Lean D", probability: .73, favorite: "D", actualMargin: 9.1, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "CO", rating: "Likely D", probability: .83, favorite: "D", actualMargin: 12.4, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "FL", rating: "Likely R", probability: .17, favorite: "R", actualMargin: 16.4, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "WA", rating: "Likely D", probability: .83, favorite: "D", actualMargin: 5.7, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "CT", rating: "Likely D", probability: .83, favorite: "D", actualMargin: 13.8, tags: ["Open seat", "Major-party baseline"] },
+      { state: "VT", rating: "Safe D", probability: .97, favorite: "D", actualMargin: 33.2, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "AL", rating: "Safe R", probability: .03, favorite: "R", actualMargin: -25.3, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "NM", rating: "Tilt D", probability: .64, favorite: "D", actualMargin: 6.0, tags: ["Open seat", "Major-party baseline"] }
     ],
     sources: [
       "Late-cycle Cook Political Report and Sabato's Crystal Ball ratings",
@@ -166,18 +172,21 @@ const ARCHIVED_SENATE_BACKTESTS = [
     status: "partial",
     note: "Archived-input seed for competitive 2020 Senate races. Inputs reflect pre-election ratings, polling context, and fundamentals.",
     races: [
-      { state: "AL", rating: "Likely R", probability: .23, favorite: "R", actualMargin: 20.7, tags: ["Incumbent race", "Major-party baseline"] },
-      { state: "AZ", rating: "Lean D", probability: .72, favorite: "D", actualMargin: 4.5, tags: ["Special election", "Major-party baseline"] },
-      { state: "GA", rating: "Tilt R", probability: .45, favorite: "R", actualMargin: -1.2, tags: ["Open seat", "Major-party baseline"] },
-      { state: "GA", rating: "Tilt R", probability: .45, favorite: "R", actualMargin: -2.1, tags: ["Special election", "Major-party baseline"] },
+      { state: "AL", rating: "Likely R", probability: .17, favorite: "R", actualMargin: 20.7, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "AZ", rating: "Lean D", probability: .73, favorite: "D", actualMargin: 4.5, tags: ["Special election", "Major-party baseline"] },
+      { state: "GA", rating: "Tilt R", probability: .36, favorite: "R", actualMargin: -1.2, tags: ["Open seat", "Major-party baseline"] },
+      { state: "GA", rating: "Tilt R", probability: .36, favorite: "R", actualMargin: -2.1, tags: ["Special election", "Major-party baseline"] },
       { state: "IA", rating: "Toss-up", probability: .50, favorite: "R", actualMargin: 6.6, tags: ["Incumbent race", "Major-party baseline"] },
       { state: "ME", rating: "Toss-up", probability: .50, favorite: "D", actualMargin: 9.1, tags: ["Incumbent race", "Ranked-choice"] },
-      { state: "MI", rating: "Lean D", probability: .72, favorite: "D", actualMargin: 1.7, tags: ["Incumbent race", "Major-party baseline"] },
-      { state: "MN", rating: "Lean D", probability: .72, favorite: "D", actualMargin: 8.8, tags: ["Incumbent race", "Major-party baseline"] },
-      { state: "MT", rating: "Likely R", probability: .23, favorite: "R", actualMargin: 10.2, tags: ["Incumbent race", "Major-party baseline"] },
-      { state: "NC", rating: "Tilt R", probability: .45, favorite: "R", actualMargin: 1.8, tags: ["Incumbent race", "Major-party baseline"] },
-      { state: "SC", rating: "Likely R", probability: .23, favorite: "R", actualMargin: 10.9, tags: ["Incumbent race", "Major-party baseline"] },
-      { state: "TX", rating: "Lean R", probability: .28, favorite: "R", actualMargin: 5.8, tags: ["Incumbent race", "Major-party baseline"] }
+      { state: "MI", rating: "Lean D", probability: .73, favorite: "D", actualMargin: 1.7, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "MN", rating: "Lean D", probability: .73, favorite: "D", actualMargin: 8.8, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "MT", rating: "Likely R", probability: .17, favorite: "R", actualMargin: 10.2, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "NC", rating: "Tilt R", probability: .36, favorite: "R", actualMargin: 1.8, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "SC", rating: "Likely R", probability: .17, favorite: "R", actualMargin: 10.9, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "TX", rating: "Lean R", probability: .27, favorite: "R", actualMargin: 5.8, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "MA", rating: "Safe D", probability: .97, favorite: "D", actualMargin: 36.3, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "WY", rating: "Safe R", probability: .03, favorite: "R", actualMargin: -45.8, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "VA", rating: "Tilt D", probability: .64, favorite: "D", actualMargin: 7.9, tags: ["Incumbent race", "Major-party baseline"] }
     ],
     sources: [
       "Late-cycle FiveThirtyEight and Cook Political Report ratings",
@@ -195,14 +204,17 @@ const ARCHIVED_SENATE_BACKTESTS = [
       { state: "AZ", rating: "Toss-up", probability: .50, favorite: "D", actualMargin: 2.4, tags: ["Open seat", "Major-party baseline"] },
       { state: "FL", rating: "Toss-up", probability: .50, favorite: "R", actualMargin: -.1, tags: ["Open seat", "Major-party baseline"] },
       { state: "IN", rating: "Toss-up", probability: .50, favorite: "D", actualMargin: 6.0, tags: ["Incumbent race", "Major-party baseline"] },
-      { state: "MO", rating: "Lean R", probability: .28, favorite: "R", actualMargin: 2.4, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "MO", rating: "Lean R", probability: .27, favorite: "R", actualMargin: 2.4, tags: ["Incumbent race", "Major-party baseline"] },
       { state: "MT", rating: "Toss-up", probability: .50, favorite: "D", actualMargin: 3.5, tags: ["Incumbent race", "Major-party baseline"] },
-      { state: "ND", rating: "Likely R", probability: .23, favorite: "R", actualMargin: 11.5, tags: ["Incumbent race", "Major-party baseline"] },
-      { state: "NV", rating: "Lean D", probability: .72, favorite: "D", actualMargin: 4.7, tags: ["Incumbent race", "Major-party baseline"] },
-      { state: "OH", rating: "Lean D", probability: .72, favorite: "D", actualMargin: 7.7, tags: ["Incumbent race", "Major-party baseline"] },
-      { state: "TN", rating: "Likely R", probability: .23, favorite: "R", actualMargin: 11.3, tags: ["Open seat", "Major-party baseline"] },
-      { state: "TX", rating: "Lean R", probability: .28, favorite: "R", actualMargin: 2.6, tags: ["Incumbent race", "Major-party baseline"] },
-      { state: "WV", rating: "Likely R", probability: .23, favorite: "R", actualMargin: 19.3, tags: ["Incumbent race", "Major-party baseline"] }
+      { state: "ND", rating: "Likely R", probability: .17, favorite: "R", actualMargin: 11.5, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "NV", rating: "Lean D", probability: .73, favorite: "D", actualMargin: 4.7, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "OH", rating: "Lean D", probability: .73, favorite: "D", actualMargin: 7.7, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "TN", rating: "Likely R", probability: .17, favorite: "R", actualMargin: 11.3, tags: ["Open seat", "Major-party baseline"] },
+      { state: "TX", rating: "Lean R", probability: .27, favorite: "R", actualMargin: 2.6, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "WV", rating: "Likely R", probability: .17, favorite: "R", actualMargin: 19.3, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "NY", rating: "Safe D", probability: .97, favorite: "D", actualMargin: 33.7, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "UT", rating: "Safe R", probability: .03, favorite: "R", actualMargin: -30.9, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "NJ", rating: "Tilt D", probability: .64, favorite: "D", actualMargin: 11.5, tags: ["Incumbent race", "Major-party baseline"] }
     ],
     sources: [
       "Late-cycle Cook Political Report and Sabato's Crystal Ball ratings",
@@ -217,15 +229,18 @@ const ARCHIVED_SENATE_BACKTESTS = [
     status: "partial",
     note: "Archived-input seed for competitive 2016 Senate races. Inputs reflect pre-election ratings and polling context in a presidential year.",
     races: [
-      { state: "AZ", rating: "Likely R", probability: .23, favorite: "R", actualMargin: 13.9, tags: ["Open seat", "Major-party baseline"] },
-      { state: "FL", rating: "Likely R", probability: .23, favorite: "R", actualMargin: 8.1, tags: ["Incumbent race", "Major-party baseline"] },
-      { state: "IN", rating: "Likely R", probability: .23, favorite: "R", actualMargin: 10.1, tags: ["Open seat", "Major-party baseline"] },
-      { state: "MO", rating: "Likely R", probability: .23, favorite: "R", actualMargin: 18.6, tags: ["Incumbent race", "Major-party baseline"] },
-      { state: "NC", rating: "Likely R", probability: .23, favorite: "R", actualMargin: 6.4, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "AZ", rating: "Likely R", probability: .17, favorite: "R", actualMargin: 13.9, tags: ["Open seat", "Major-party baseline"] },
+      { state: "FL", rating: "Likely R", probability: .17, favorite: "R", actualMargin: 8.1, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "IN", rating: "Likely R", probability: .17, favorite: "R", actualMargin: 10.1, tags: ["Open seat", "Major-party baseline"] },
+      { state: "MO", rating: "Likely R", probability: .17, favorite: "R", actualMargin: 18.6, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "NC", rating: "Likely R", probability: .17, favorite: "R", actualMargin: 6.4, tags: ["Incumbent race", "Major-party baseline"] },
       { state: "NH", rating: "Toss-up", probability: .50, favorite: "D", actualMargin: .1, tags: ["Incumbent race", "Major-party baseline"] },
-      { state: "NV", rating: "Lean D", probability: .72, favorite: "D", actualMargin: 1.4, tags: ["Open seat", "Major-party baseline"] },
-      { state: "PA", rating: "Likely R", probability: .23, favorite: "R", actualMargin: 1.7, tags: ["Incumbent race", "Major-party baseline"] },
-      { state: "WI", rating: "Likely R", probability: .23, favorite: "R", actualMargin: .7, tags: ["Incumbent race", "Major-party baseline"] }
+      { state: "NV", rating: "Lean D", probability: .73, favorite: "D", actualMargin: 1.4, tags: ["Open seat", "Major-party baseline"] },
+      { state: "PA", rating: "Likely R", probability: .17, favorite: "R", actualMargin: 1.7, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "WI", rating: "Likely R", probability: .17, favorite: "R", actualMargin: .7, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "CA", rating: "Safe D", probability: .97, favorite: "D", actualMargin: 29.0, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "MS", rating: "Safe R", probability: .03, favorite: "R", actualMargin: -21.6, tags: ["Incumbent race", "Major-party baseline"] },
+      { state: "IL", rating: "Tilt D", probability: .64, favorite: "D", actualMargin: 9.6, tags: ["Incumbent race", "Major-party baseline"] }
     ],
     sources: [
       "Late-cycle Cook Political Report and Sabato's Crystal Ball ratings",

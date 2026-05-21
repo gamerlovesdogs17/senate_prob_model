@@ -23,25 +23,25 @@ const SETTINGS = {
 
 const RATING_TO_MARGIN = {
   "Safe D": 21,
-  "Likely D": 8,
-  "Lean D": 5.5,
-  "Tilt D": 1.5,
+  "Likely D": 9.5,
+  "Lean D": 6,
+  "Tilt D": 4,
   "Toss-up": 0,
-  "Tilt R": -1.5,
-  "Lean R": -5.5,
-  "Likely R": -8,
+  "Tilt R": -4,
+  "Lean R": -6,
+  "Likely R": -9.5,
   "Safe R": -21
 };
 
 const RATING_TO_ERROR = {
   "Safe D": 5.1,
-  "Likely D": 7.5,
+  "Likely D": 6,
   "Lean D": 6.5,
-  "Tilt D": 8.6,
+  "Tilt D": 7,
   "Toss-up": 9.8,
-  "Tilt R": 8.6,
+  "Tilt R": 7,
   "Lean R": 6.5,
-  "Likely R": 7.5,
+  "Likely R": 6,
   "Safe R": 5.1
 };
 
