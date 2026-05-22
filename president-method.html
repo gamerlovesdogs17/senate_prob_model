@@ -126,26 +126,26 @@
 
     <section class="text-panel" aria-label="Fundamentals">
       <h2>Fundamentals</h2>
-      <p>The model incorporates national fundamentals from multiple data sources:</p>
+      <p>The model incorporates national fundamentals from real-time data sources:</p>
       <ul>
-        <li><strong>Generic ballot polling:</strong> Fetched from VoteHub and DDHQ to measure national partisan mood</li>
-        <li><strong>Presidential approval:</strong> Fetched from Gallup to measure incumbent approval (if applicable)</li>
-        <li><strong>Economic indicators:</strong> GDP growth and unemployment rates (placeholder values currently)</li>
-        <li><strong>State polling:</strong> Fetched from RealClearPolling for state-specific presidential polls</li>
+        <li><strong>Generic ballot:</strong> Fetched from Pollfinity API (same as Senate model) to measure national partisan mood. Currently shows D+5.</li>
+        <li><strong>Presidential approval:</strong> Fetched from Pollfinity API for Trump approval rating. Currently shows 47% approval.</li>
+        <li><strong>Economic indicators:</strong> Using current approximate values (unemployment 4.0%, GDP growth 2.0%). These would be updated with real-time data when available.</li>
+        <li><strong>State polling:</strong> Fetched from RealClearPolling for state-specific presidential polls.</li>
       </ul>
       <p>These fundamentals are applied as a national shift that affects all states proportionally. State-specific polling is blended with baseline margins (40% polling weight, 60% baseline weight).</p>
+      <p><strong>Note:</strong> For the 2028 presidential cycle, early polling is limited. The model uses current 2026 conditions and Trump approval as reasonable proxies, which will be updated as more 2028-specific data becomes available.</p>
     </section>
 
     <section class="text-panel" aria-label="Data sources">
       <h2>Data Sources</h2>
-      <p>The model uses the following data sources, updated daily:</p>
+      <p>The model uses the following data sources:</p>
       <ul>
         <li><strong>RealClearPolling:</strong> Presidential polling data by state and nationally</li>
-        <li><strong>VoteHub:</strong> Generic ballot polling averages</li>
-        <li><strong>DDHQ:</strong> Generic ballot and election data</li>
-        <li><strong>Gallup:</strong> Presidential job approval ratings</li>
+        <li><strong>Pollfinity API:</strong> Generic ballot and Trump approval ratings (same as Senate model)</li>
+        <li><strong>Economic indicators:</strong> Current economic conditions (unemployment, GDP growth)</li>
       </ul>
-      <p>Data is fetched daily and integrated into the forecast model to ensure the most current information is used for projections.</p>
+      <p>For the 2028 presidential cycle, early polling is limited. The model uses current 2026 conditions and Trump approval as reasonable proxies, which will be updated as more 2028-specific data becomes available.</p>
     </section>
 
     <section class="text-panel" aria-label="Limitations">

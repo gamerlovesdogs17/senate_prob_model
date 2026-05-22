@@ -142,9 +142,18 @@
     </section>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
   <script src="assets/wiki.js"></script>
   <script>
     let forecastData = null;
+    let mapColorMode = "probability";
+    let usStates = null;
+
+    const PRESIDENTIAL_MAP_COLOR_MODES = {
+      probability: "Win probability",
+      margin: "Projected margin"
+    };
 
     async function loadForecast() {
       const demCandidate = document.getElementById('dem-candidate').value;
@@ -155,9 +164,11 @@
         forecastData = await response.json();
         
         displayNationalProbability();
-        displayECMap();
-        displayEVDistribution();
-        displayTippingStates();
+        renderStateMap();
+        renderHistogram();
+        renderLeverageChart();
+        renderMapColorControls();
+        renderLegend();
         displayStateProbabilities();
         displayHistoricalBacktest();
       } catch (error) {
@@ -191,7 +202,75 @@
       repBar.style.width = `${repProb * 100}%`;
     }
 
-    function displayECMap() {
+    async function renderStateMap() {
+      const container = document.getElementById("president-map");
+      if (!container || !forecastData) return;
+      if (!window.d3 || !window.topojson) {
+        renderFallbackMap();
+        return;
+      }
+      try {
+        const us = await d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json");
+        const features = topojson.feature(us, us.objects.states).features;
+        const width = 960;
+        const height = 610;
+        const projection = d3.geoAlbersUsa().fitSize([width, height], { type: "FeatureCollection", features });
+        const path = d3.geoPath(projection);
+        container.innerHTML = "";
+        const svg = d3.select(container).append("svg").attr("viewBox", `0 0 ${width} ${height}`).attr("role", "img").attr("aria-label", "United States map of 2028 presidential race probabilities");
+        svg.selectAll("path")
+          .data(features)
+          .join("path")
+          .attr("class", "state-shape")
+          .attr("d", path)
+          .attr("fill", (feature) => {
+            const state = FIPS_TO_STATE[String(feature.id).padStart(2, "0")];
+            const stateData = forecastData.states[state];
+            return stateData ? stateColor(stateData) : "#ccc";
+          })
+          .attr("opacity", (feature) => {
+            const state = FIPS_TO_STATE[String(feature.id).padStart(2, "0")];
+            const stateData = forecastData.states[state];
+            return stateData ? clamp(.58 + stateData.demProbability * .42, .74, 1) : null;
+          })
+          .attr("tabindex", (feature) => forecastData.states[FIPS_TO_STATE[String(feature.id).padStart(2, "0")]] ? 0 : -1)
+          .on("mouseenter focus", (event, feature) => updateHoverCard(forecastData.states[FIPS_TO_STATE[String(feature.id).padStart(2, "0")]]))
+          .on("mouseout", () => {
+            document.getElementById('map-hover-card').style.display = 'none';
+          })
+          .append("title")
+          .text((feature) => {
+            const state = FIPS_TO_STATE[String(feature.id).padStart(2, "0")];
+            const stateData = forecastData.states[state];
+            return stateData ? `${STATE_NAMES[state]}: ${(stateData.demProbability * 100).toFixed(1)}% Dem, ${stateData.ev} EV` : STATE_NAMES[state];
+          });
+      } catch (error) {
+        console.error("Error rendering map:", error);
+        renderFallbackMap();
+      }
+    }
+
+    function stateColor(stateData) {
+      if (mapColorMode === "probability") {
+        const prob = stateData.demProbability;
+        if (prob > 0.75) return "#0066cc";
+        if (prob > 0.5) return "#6699cc";
+        if (prob > 0.25) return "#cc9966";
+        return "#cc0000";
+      } else {
+        const margin = stateData.demMargin;
+        if (margin > 10) return "#0066cc";
+        if (margin > 5) return "#6699cc";
+        if (margin > 0) return "#99ccff";
+        if (margin > -5) return "#ffcc99";
+        if (margin > -10) return "#cc9966";
+        return "#cc0000";
+      }
+    }
+
+    function renderFallbackMap() {
+      const container = document.getElementById("president-map");
+      if (!container || !forecastData) return;
       const states = Object.entries(forecastData.states);
       let html = '<div style="display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; max-width: 800px; margin: 0 auto;">';
       
@@ -201,55 +280,68 @@
         const stateData = forecastData.states[state];
         if (!stateData) continue;
         
-        const prob = stateData.demProbability;
-        let color;
-        if (prob > 0.75) {
-          color = '#0066cc';
-        } else if (prob > 0.5) {
-          color = '#6699cc';
-        } else if (prob > 0.25) {
-          color = '#cc9966';
-        } else {
-          color = '#cc0000';
-        }
+        const color = stateColor(stateData);
         
         html += `
-          <div style="background-color: ${color}; color: white; padding: 8px 4px; text-align: center; font-size: 12px; font-weight: bold; border-radius: 2px;" title="${state}: ${stateData.ev} EV, ${(prob * 100).toFixed(1)}% Dem">
+          <div style="background-color: ${color}; color: white; padding: 8px 4px; text-align: center; font-size: 12px; font-weight: bold; border-radius: 2px;" title="${state}: ${stateData.ev} EV, ${(stateData.demProbability * 100).toFixed(1)}% Dem">
             ${state}<br><span style="font-size: 10px;">${stateData.ev}</span>
           </div>
         `;
       }
       
       html += '</div>';
-      html += '<div style="margin-top: 20px; display: flex; justify-content: center; gap: 20px; font-size: 12px;">';
-      html += '<div><span style="display: inline-block; width: 15px; height: 15px; background-color: #0066cc; margin-right: 5px;"></span>Strong D (>75%)</div>';
-      html += '<div><span style="display: inline-block; width: 15px; height: 15px; background-color: #6699cc; margin-right: 5px;"></span>Lean D (50-75%)</div>';
-      html += '<div><span style="display: inline-block; width: 15px; height: 15px; background-color: #cc9966; margin-right: 5px;"></span>Lean R (25-50%)</div>';
-      html += '<div><span style="display: inline-block; width: 15px; height: 15px; background-color: #cc0000; margin-right: 5px;"></span>Strong R (<25%)</div>';
-      html += '</div>';
-      
-      document.getElementById('president-map').innerHTML = html;
+      container.innerHTML = html;
     }
 
-    function displayEVDistribution() {
+    function updateHoverCard(stateData) {
+      const hoverCard = document.getElementById('map-hover-card');
+      if (!stateData) {
+        hoverCard.style.display = 'none';
+        return;
+      }
+      hoverCard.innerHTML = `
+        <strong>${STATE_NAMES[Object.keys(forecastData.states).find(k => forecastData.states[k] === stateData)]}</strong><br>
+        EV: ${stateData.ev}<br>
+        Dem win: ${(stateData.demProbability * 100).toFixed(1)}%<br>
+        Margin: ${stateData.demMargin.toFixed(1)}
+      `;
+      hoverCard.style.display = 'block';
+    }
+
+    function renderHistogram() {
+      const container = document.getElementById("ev-histogram");
+      if (!container || !forecastData) return;
       const distribution = forecastData.electoralCollege.distribution;
-      const sortedDist = Object.entries(distribution)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 10);
+      const counts = {};
       
-      let html = '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th>Dem EV</th><th>Rep EV</th><th>Simulations</th></tr></thead><tbody>';
-      
-      for (const [key, count] of sortedDist) {
-        const [demEV, repEV] = key.split('-');
-        const percentage = ((count / 100000) * 100).toFixed(1);
-        html += `<tr><td>${demEV}</td><td>${repEV}</td><td>${count} (${percentage}%)</td></tr>`;
+      for (const [key, count] of Object.entries(distribution)) {
+        const [demEV] = key.split('-');
+        counts[demEV] = (counts[demEV] || 0) + count;
       }
       
-      html += '</tbody></table>';
-      document.getElementById('ev-histogram').innerHTML = html;
+      const evs = Object.keys(counts).map(Number).sort((a, b) => a - b);
+      if (!evs.length) return;
+      
+      const minEV = Math.min(...evs);
+      const maxEV = Math.max(...evs);
+      const maxCount = Math.max(...Object.values(counts));
+      const sims = 100000;
+      const binCount = Math.min(maxEV - minEV + 1, 50);
+      
+      container.style.gridTemplateColumns = `repeat(${binCount}, minmax(0, 1fr))`;
+      container.innerHTML = Array.from({ length: binCount }, (_, i) => {
+        const ev = minEV + i;
+        const value = counts[ev] || 0;
+        const share = sims ? value / sims : 0;
+        const height = maxCount ? clamp((value / maxCount), .02, 1) : .02;
+        return `<button class="seat-bin" type="button" data-tip="${ev} Democratic EV<br>${(share * 100).toFixed(1)}% of simulations"><i style="--bar-scale:${height}"></i><span>${ev}</span></button>`;
+      }).join("");
     }
 
-    function displayTippingStates() {
+    function renderLeverageChart() {
+      const container = document.getElementById("leverage-chart");
+      if (!container || !forecastData) return;
+      
       const states = Object.entries(forecastData.states)
         .map(([state, data]) => ({
           state,
@@ -277,7 +369,44 @@
       }
       
       html += '</tbody></table>';
-      document.getElementById('leverage-chart').innerHTML = html;
+      container.innerHTML = html;
+    }
+
+    function renderMapColorControls() {
+      const container = document.getElementById("map-color-controls");
+      if (!container) return;
+      container.innerHTML = Object.entries(PRESIDENTIAL_MAP_COLOR_MODES).map(([mode, label]) => (
+        `<button type="button" class="${mode === mapColorMode ? "active" : ""}" data-map-color="${mode}">${label}</button>`
+      )).join("");
+      container.querySelectorAll("button").forEach((button) => {
+        button.addEventListener("click", () => {
+          mapColorMode = button.dataset.mapColor || "probability";
+          renderMapColorControls();
+          renderStateMap();
+        });
+      });
+    }
+
+    function renderLegend() {
+      const legend = document.getElementById("map-legend");
+      if (!legend) return;
+      if (mapColorMode === "probability") {
+        legend.innerHTML = `
+          <span><i style="background-color:#0066cc"></i>Strong D (>75%)</span>
+          <span><i style="background-color:#6699cc"></i>Lean D (50-75%)</span>
+          <span><i style="background-color:#cc9966"></i>Lean R (25-50%)</span>
+          <span><i style="background-color:#cc0000"></i>Strong R (<25%)</span>
+        `;
+      } else {
+        legend.innerHTML = `
+          <span><i style="background-color:#0066cc"></i>D+10+</span>
+          <span><i style="background-color:#6699cc"></i>D+5 to D+10</span>
+          <span><i style="background-color:#99ccff"></i>D+0 to D+5</span>
+          <span><i style="background-color:#ffcc99"></i>R+0 to R+5</span>
+          <span><i style="background-color:#cc9966"></i>R+5 to R+10</span>
+          <span><i style="background-color:#cc0000"></i>R+10+</span>
+        `;
+      }
     }
 
     function displayStateProbabilities() {
