@@ -1,6 +1,8 @@
 import { readFileSync, writeFileSync } from "node:fs";
 
-const FORECAST_URL = new URL("../data/president-forecast.json", import.meta.url);
+const demCandidateId = process.argv[2] || "newsom";
+const repCandidateId = process.argv[3] || "vance";
+const FORECAST_URL = new URL(`../data/president-forecast-${demCandidateId}-${repCandidateId}.json`, import.meta.url);
 
 const SETTINGS = {
   simulations: 100000,
