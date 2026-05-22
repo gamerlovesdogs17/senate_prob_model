@@ -79,18 +79,19 @@ const PRESIDENTIAL_BASELINES = {
 
 const PRESIDENTIAL_CANDIDATES = {
   democratic: [
-    { id: "kamala", name: "Kamala Harris", homeState: "CA", ideology: "moderate", favorability: 45, electability: 0.7 },
-    { id: "gavin", name: "Gavin Newsom", homeState: "CA", ideology: "progressive", favorability: 40, electability: 0.6 },
-    { id: "whitmer", name: "Gretchen Whitmer", homeState: "MI", ideology: "moderate", favorability: 42, electability: 0.65 },
     { id: "newsom", name: "Gavin Newsom", homeState: "CA", ideology: "progressive", favorability: 40, electability: 0.6 },
-    { id: "shapiro", name: "Josh Shapiro", homeState: "PA", ideology: "moderate", favorability: 41, electability: 0.62 }
+    { id: "beshear", name: "Andy Beshear", homeState: "KY", ideology: "moderate", favorability: 43, electability: 0.58 },
+    { id: "shapiro", name: "Josh Shapiro", homeState: "PA", ideology: "moderate", favorability: 41, electability: 0.62 },
+    { id: "buttigieg", name: "Pete Buttigieg", homeState: "IN", ideology: "moderate", favorability: 44, electability: 0.6 },
+    { id: "whitmer", name: "Gretchen Whitmer", homeState: "MI", ideology: "moderate", favorability: 42, electability: 0.65 },
+    { id: "aoc", name: "Alexandria Ocasio-Cortez", homeState: "NY", ideology: "progressive", favorability: 38, electability: 0.5 }
   ],
   republican: [
-    { id: "trump", name: "Donald Trump", homeState: "FL", ideology: "conservative", favorability: 42, electability: 0.65 },
+    { id: "vance", name: "JD Vance", homeState: "OH", ideology: "conservative", favorability: 37, electability: 0.55 },
+    { id: "rubio", name: "Marco Rubio", homeState: "FL", ideology: "conservative", favorability: 40, electability: 0.58 },
     { id: "desantis", name: "Ron DeSantis", homeState: "FL", ideology: "conservative", favorability: 38, electability: 0.6 },
     { id: "haley", name: "Nikki Haley", homeState: "SC", ideology: "moderate", favorability: 40, electability: 0.55 },
-    { id: "ramaswamy", name: "Vivek Ramaswamy", homeState: "OH", ideology: "conservative", favorability: 35, electability: 0.5 },
-    { id: "scott", name: "Tim Scott", homeState: "SC", ideology: "conservative", favorability: 39, electability: 0.58 }
+    { id: "cruz", name: "Ted Cruz", homeState: "TX", ideology: "conservative", favorability: 36, electability: 0.52 }
   ]
 };
 

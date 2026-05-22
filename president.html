@@ -24,69 +24,101 @@
   </header>
 
   <main>
-    <section class="text-panel image-panel compact-page-head" aria-labelledby="pres-title">
+    <section class="hero-grid" aria-labelledby="page-title">
+      <div class="hero-main">
+        <p class="kicker">President</p>
+        <h1 id="page-title">2028 Presidential forecast.</h1>
+        <p class="lede">Monte Carlo simulation with candidate-specific modifiers.</p>
+        <div class="hero-actions">
+          <a class="button-link" href="president-method.html">Method</a>
+          <a class="button-link" href="articles.html">Articles</a>
+        </div>
+      </div>
+      <aside class="odds-panel" aria-label="Win probability">
+        <span class="panel-label">National win probability</span>
+        <div>
+          <div id="odds-phrase" class="big-odds">--</div>
+          <p id="winner-headline">Calculating</p>
+        </div>
+        <div class="control-bar" aria-hidden="true">
+          <span id="dem-win-bar"></span>
+          <span id="rep-win-bar"></span>
+        </div>
+        <dl>
+          <div><dt>Democratic win</dt><dd id="dem-win">--</dd></div>
+          <div><dt>Republican win</dt><dd id="rep-win">--</dd></div>
+          <div><dt>Median EV outcome</dt><dd id="median-ev">--</dd></div>
+          <div><dt>Tipping point</dt><dd id="tipping-point-display">--</dd></div>
+          <div><dt>Run</dt><dd id="run-date">--</dd></div>
+        </dl>
+      </aside>
+    </section>
+
+    <section class="map-panel" aria-labelledby="map-title">
       <div class="section-head">
         <div>
-          <p class="kicker">2028 President</p>
-          <h1 id="pres-title">Presidential forecast.</h1>
-          <p class="lede">Monte Carlo simulation with candidate-specific modifiers.</p>
+          <p class="kicker">Electoral College</p>
+          <h2 id="map-title">The 2028 battleground.</h2>
         </div>
+        <p><span id="sim-count">--</span> simulations. <span id="battleground-count">--</span> battleground states.</p>
+      </div>
+      <div class="map-wrap">
+        <div>
+          <div id="president-map"></div>
+          <div id="map-color-controls" class="map-color-controls" aria-label="Map color mode"></div>
+          <div id="map-legend" class="map-legend" aria-label="Race rating legend"></div>
+          <p class="map-note">Map shows Democratic win probability by state.</p>
+        </div>
+        <aside id="map-hover-card" class="hover-card"></aside>
       </div>
     </section>
 
-    <section class="dashboard-grid" aria-label="Candidate selection">
+    <section class="dashboard-grid" aria-label="Forecast charts">
       <article class="chart-panel">
-        <span class="chart-label">Candidate Matchup</span>
-        <div class="candidate-selector">
-          <div>
-            <label for="dem-candidate">Democratic Candidate:</label>
-            <select id="dem-candidate">
-              <option value="kamala">Kamala Harris (CA)</option>
-              <option value="gavin">Gavin Newsom (CA)</option>
-              <option value="whitmer">Gretchen Whitmer (MI)</option>
-              <option value="shapiro">Josh Shapiro (PA)</option>
-            </select>
-          </div>
-          <div>
-            <label for="rep-candidate">Republican Candidate:</label>
-            <select id="rep-candidate">
-              <option value="trump">Donald Trump (FL)</option>
-              <option value="desantis">Ron DeSantis (FL)</option>
-              <option value="haley">Nikki Haley (SC)</option>
-              <option value="ramaswamy">Vivek Ramaswamy (OH)</option>
-              <option value="scott">Tim Scott (SC)</option>
-            </select>
-          </div>
-          <button id="update-forecast">Update Forecast</button>
-        </div>
+        <span class="chart-label">Electoral vote distribution</span>
+        <div id="ev-histogram" class="seat-histogram"></div>
+      </article>
+      <article class="chart-panel">
+        <span class="chart-label">Tipping point states by simulated election-deciding power</span>
+        <div id="leverage-chart" class="leverage-chart"></div>
+      </article>
+      <article class="chart-panel chart-wide">
+        <span class="chart-label">National win probability over time</span>
+        <div id="win-history-chart" class="history-chart"></div>
+      </article>
+      <article class="chart-panel chart-wide">
+        <span class="chart-label">Expected electoral votes over time</span>
+        <div id="ev-history-chart" class="history-chart"></div>
       </article>
     </section>
 
-    <section class="dashboard-grid" aria-label="National forecast">
-      <article class="chart-panel">
-        <span class="chart-label">National Win Probability</span>
-        <div id="national-probability">
-          <p>Loading forecast...</p>
+    <section class="text-panel" aria-label="Candidate selection">
+      <p class="kicker">Candidate Matchup</p>
+      <h2>Select candidates to see matchup forecast.</h2>
+      <div class="candidate-selector">
+        <div>
+          <label for="dem-candidate">Democratic Candidate:</label>
+          <select id="dem-candidate">
+            <option value="newsom">Gavin Newsom (CA)</option>
+            <option value="beshear">Andy Beshear (KY)</option>
+            <option value="shapiro">Josh Shapiro (PA)</option>
+            <option value="buttigieg">Pete Buttigieg (IN)</option>
+            <option value="whitmer">Gretchen Whitmer (MI)</option>
+            <option value="aoc">Alexandria Ocasio-Cortez (NY)</option>
+          </select>
         </div>
-      </article>
-      <article class="chart-panel">
-        <span class="chart-label">Electoral College</span>
-        <div id="electoral-college">
-          <p>Loading forecast...</p>
+        <div>
+          <label for="rep-candidate">Republican Candidate:</label>
+          <select id="rep-candidate">
+            <option value="vance">JD Vance (OH)</option>
+            <option value="rubio">Marco Rubio (FL)</option>
+            <option value="desantis">Ron DeSantis (FL)</option>
+            <option value="haley">Nikki Haley (SC)</option>
+            <option value="cruz">Ted Cruz (TX)</option>
+          </select>
         </div>
-      </article>
-      <article class="chart-panel">
-        <span class="chart-label">Tipping Point State</span>
-        <div id="tipping-point">
-          <p>Loading forecast...</p>
-        </div>
-      </article>
-      <article class="chart-panel">
-        <span class="chart-label">Popular Vote Estimate</span>
-        <div id="popular-vote">
-          <p>Loading forecast...</p>
-        </div>
-      </article>
+        <button id="update-forecast">Update Forecast</button>
+      </div>
     </section>
 
     <section class="dashboard-grid" aria-label="State probabilities">
@@ -108,85 +140,69 @@
     </section>
   </main>
 
+  <script src="assets/d3.v7.min.js"></script>
+  <script src="assets/us-states-10m.json"></script>
   <script>
+    let forecastData = null;
+    let usStates = null;
+
     async function loadForecast() {
       const demCandidate = document.getElementById('dem-candidate').value;
       const repCandidate = document.getElementById('rep-candidate').value;
       
       try {
         const response = await fetch(`data/president-forecast.json?dem=${demCandidate}&rep=${repCandidate}`);
-        const data = await response.json();
+        forecastData = await response.json();
         
-        displayNationalProbability(data);
-        displayElectoralCollege(data);
-        displayTippingPoint(data);
-        displayPopularVote(data);
-        displayStateProbabilities(data);
-        displayHistoricalBacktest(data);
+        displayNationalProbability();
+        displayElectoralCollege();
+        displayTippingPoint();
+        displayStateProbabilities();
+        displayHistoricalBacktest();
+        
+        if (usStates) {
+          drawMap();
+          drawEVHistogram();
+          drawLeverageChart();
+        }
       } catch (error) {
         console.error('Error loading forecast:', error);
-        document.getElementById('national-probability').innerHTML = '<p>Error loading forecast data.</p>';
+        document.getElementById('odds-phrase').textContent = 'Error';
       }
     }
 
-    function displayNationalProbability(data) {
-      const demProb = (data.national.demWinProbability * 100).toFixed(1);
-      const repProb = (data.national.repWinProbability * 100).toFixed(1);
-      document.getElementById('national-probability').innerHTML = `
-        <div class="probability-display">
-          <div class="dem-prob">
-            <strong>${data.demCandidateName}</strong>: ${demProb}%
-          </div>
-          <div class="rep-prob">
-            <strong>${data.repCandidateName}</strong>: ${repProb}%
-          </div>
-        </div>
-      `;
+    function displayNationalProbability() {
+      const demProb = forecastData.national.demWinProbability;
+      const repProb = forecastData.national.repWinProbability;
+      
+      document.getElementById('odds-phrase').textContent = `${(demProb * 100).toFixed(1)}%`;
+      document.getElementById('winner-headline').textContent = demProb > 0.5 ? 
+        `${forecastData.demCandidateName} favored` : 
+        `${forecastData.repCandidateName} favored`;
+      
+      document.getElementById('dem-win').textContent = `${(demProb * 100).toFixed(1)}%`;
+      document.getElementById('rep-win').textContent = `${(repProb * 100).toFixed(1)}%`;
+      document.getElementById('median-ev').textContent = `${forecastData.electoralCollege.demExpectedEV}-${forecastData.electoralCollege.repExpectedEV}`;
+      document.getElementById('tipping-point-display').textContent = forecastData.tippingPoint.state;
+      document.getElementById('run-date').textContent = forecastData.date;
+      document.getElementById('sim-count').textContent = '100,000';
+      
+      const demBar = document.getElementById('dem-win-bar');
+      const repBar = document.getElementById('rep-win-bar');
+      demBar.style.width = `${demProb * 100}%`;
+      repBar.style.width = `${repProb * 100}%`;
     }
 
-    function displayElectoralCollege(data) {
-      document.getElementById('electoral-college').innerHTML = `
-        <div class="ev-display">
-          <div class="dem-ev">
-            <strong>${data.demCandidateName}</strong>: ${data.electoralCollege.demExpectedEV} EV
-          </div>
-          <div class="rep-ev">
-            <strong>${data.repCandidateName}</strong>: ${data.electoralCollege.repExpectedEV} EV
-          </div>
-          <div class="ev-note">(270 to win)</div>
-        </div>
-      `;
+    function displayElectoralCollege() {
+      // This is handled in the map and histogram
     }
 
-    function displayTippingPoint(data) {
-      const stateName = data.tippingPoint.state;
-      const prob = (data.tippingPoint.demProbability * 100).toFixed(1);
-      document.getElementById('tipping-point').innerHTML = `
-        <div class="tipping-point">
-          <strong>${stateName}</strong> (${data.tippingPoint.ev} EV)
-          <br>
-          Dem win probability: ${prob}%
-        </div>
-      `;
+    function displayTippingPoint() {
+      // This is handled in the leverage chart
     }
 
-    function displayPopularVote(data) {
-      const demVote = data.national.demPopularVote.toFixed(1);
-      const repVote = data.national.repPopularVote.toFixed(1);
-      document.getElementById('popular-vote').innerHTML = `
-        <div class="popular-vote">
-          <div class="dem-vote">
-            <strong>${data.demCandidateName}</strong>: ${demVote}%
-          </div>
-          <div class="rep-vote">
-            <strong>${data.repCandidateName}</strong>: ${repVote}%
-          </div>
-        </div>
-      `;
-    }
-
-    function displayStateProbabilities(data) {
-      const states = Object.entries(data.states).sort((a, b) => b[1].ev - a[1].ev);
+    function displayStateProbabilities() {
+      const states = Object.entries(forecastData.states).sort((a, b) => b[1].ev - a[1].ev);
       let html = '<table class="state-table"><thead><tr><th>State</th><th>EV</th><th>Dem Win %</th><th>Margin</th></tr></thead><tbody>';
       
       for (const [state, stateData] of states) {
@@ -205,10 +221,14 @@
       
       html += '</tbody></table>';
       document.getElementById('state-probabilities').innerHTML = html;
+      
+      // Count battleground states
+      const battlegroundCount = Object.values(forecastData.states).filter(s => s.demProbability > 0.25 && s.demProbability < 0.75).length;
+      document.getElementById('battleground-count').textContent = battlegroundCount;
     }
 
-    function displayHistoricalBacktest(data) {
-      const backtest = data.historicalBacktest;
+    function displayHistoricalBacktest() {
+      const backtest = forecastData.historicalBacktest;
       const brier = backtest.meanBrier.toFixed(4);
       const accuracy = (backtest.accuracy * 100).toFixed(1);
       
@@ -232,6 +252,194 @@
         </div>
       `;
     }
+
+    function drawMap() {
+      const width = 960;
+      const height = 600;
+      
+      const svg = d3.select('#president-map')
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height);
+      
+      const projection = d3.geoAlbersUsa()
+        .scale(1280)
+        .translate([width / 2, height / 2]);
+      
+      const path = d3.geoPath().projection(projection);
+      
+      const colorScale = d3.scaleSequential()
+        .domain([0, 1])
+        .interpolator(d3.interpolateRdBu);
+      
+      svg.selectAll('path')
+        .data(usStates.features)
+        .enter()
+        .append('path')
+        .attr('d', path)
+        .attr('fill', d => {
+          const stateCode = getStateCode(d.properties.name);
+          const stateData = forecastData.states[stateCode];
+          return stateData ? colorScale(stateData.demProbability) : '#ccc';
+        })
+        .attr('stroke', '#fff')
+        .attr('stroke-width', 0.5)
+        .on('mouseover', function(event, d) {
+          const stateCode = getStateCode(d.properties.name);
+          const stateData = forecastData.states[stateCode];
+          if (stateData) {
+            const hoverCard = document.getElementById('map-hover-card');
+            hoverCard.innerHTML = `
+              <strong>${d.properties.name}</strong><br>
+              EV: ${stateData.ev}<br>
+              Dem win: ${(stateData.demProbability * 100).toFixed(1)}%<br>
+              Margin: ${stateData.demMargin.toFixed(1)}
+            `;
+            hoverCard.style.display = 'block';
+            hoverCard.style.left = (event.pageX + 10) + 'px';
+            hoverCard.style.top = (event.pageY + 10) + 'px';
+          }
+        })
+        .on('mouseout', () => {
+          document.getElementById('map-hover-card').style.display = 'none';
+        });
+    }
+
+    function drawEVHistogram() {
+      const distribution = forecastData.electoralCollege.distribution;
+      const data = Object.entries(distribution).map(([key, count]) => {
+        const [demEV, repEV] = key.split('-').map(Number);
+        return { demEV, count };
+      });
+      
+      const margin = {top: 20, right: 30, bottom: 40, left: 40};
+      const width = 600 - margin.left - margin.right;
+      const height = 300 - margin.top - margin.bottom;
+      
+      const svg = d3.select('#ev-histogram')
+        .append('svg')
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+        .append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+      
+      const x = d3.scaleLinear()
+        .domain([200, 400])
+        .range([0, width]);
+      
+      const y = d3.scaleLinear()
+        .domain([0, d3.max(data, d => d.count)])
+        .range([height, 0]);
+      
+      svg.append('g')
+        .attr('transform', `translate(0,${height})`)
+        .call(d3.axisBottom(x));
+      
+      svg.append('g')
+        .call(d3.axisLeft(y));
+      
+      svg.selectAll('rect')
+        .data(data)
+        .enter()
+        .append('rect')
+        .attr('x', d => x(d.demEV))
+        .attr('y', d => y(d.count))
+        .attr('width', 8)
+        .attr('height', d => height - y(d.count))
+        .attr('fill', '#1a1a1a');
+      
+      svg.append('line')
+        .attr('x1', x(270))
+        .attr('x2', x(270))
+        .attr('y1', 0)
+        .attr('y2', height)
+        .attr('stroke', 'red')
+        .attr('stroke-dasharray', '5,5');
+    }
+
+    function drawLeverageChart() {
+      const states = Object.entries(forecastData.states)
+        .map(([state, data]) => ({
+          state,
+          ev: data.ev,
+          prob: data.demProbability,
+          tippingPower: Math.min(data.demProbability, 1 - data.demProbability) * data.ev
+        }))
+        .filter(s => s.tippingPower > 0.5)
+        .sort((a, b) => b.tippingPower - a.tippingPower)
+        .slice(0, 10);
+      
+      const margin = {top: 20, right: 30, bottom: 60, left: 60};
+      const width = 600 - margin.left - margin.right;
+      const height = 300 - margin.top - margin.bottom;
+      
+      const svg = d3.select('#leverage-chart')
+        .append('svg')
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+        .append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+      
+      const x = d3.scaleBand()
+        .domain(states.map(s => s.state))
+        .range([0, width])
+        .padding(0.3);
+      
+      const y = d3.scaleLinear()
+        .domain([0, d3.max(states, s => s.tippingPower)])
+        .range([height, 0]);
+      
+      svg.append('g')
+        .attr('transform', `translate(0,${height})`)
+        .call(d3.axisBottom(x))
+        .selectAll('text')
+        .attr('transform', 'rotate(-45)')
+        .style('text-anchor', 'end');
+      
+      svg.append('g')
+        .call(d3.axisLeft(y));
+      
+      svg.selectAll('rect')
+        .data(states)
+        .enter()
+        .append('rect')
+        .attr('x', d => x(d.state))
+        .attr('y', d => y(d.tippingPower))
+        .attr('width', x.bandwidth())
+        .attr('height', d => height - y(d.tippingPower))
+        .attr('fill', d => d.prob > 0.5 ? '#0066cc' : '#cc0000');
+    }
+
+    function getStateCode(stateName) {
+      const stateMap = {
+        'Alabama': 'AL', 'Alaska': 'AK', 'Arizona': 'AZ', 'Arkansas': 'AR',
+        'California': 'CA', 'Colorado': 'CO', 'Connecticut': 'CT', 'Delaware': 'DE',
+        'Florida': 'FL', 'Georgia': 'GA', 'Hawaii': 'HI', 'Idaho': 'ID',
+        'Illinois': 'IL', 'Indiana': 'IN', 'Iowa': 'IA', 'Kansas': 'KS',
+        'Kentucky': 'KY', 'Louisiana': 'LA', 'Maine': 'ME', 'Maryland': 'MD',
+        'Massachusetts': 'MA', 'Michigan': 'MI', 'Minnesota': 'MN', 'Mississippi': 'MS',
+        'Missouri': 'MO', 'Montana': 'MT', 'Nebraska': 'NE', 'Nevada': 'NV',
+        'New Hampshire': 'NH', 'New Jersey': 'NJ', 'New Mexico': 'NM', 'New York': 'NY',
+        'North Carolina': 'NC', 'North Dakota': 'ND', 'Ohio': 'OH', 'Oklahoma': 'OK',
+        'Oregon': 'OR', 'Pennsylvania': 'PA', 'Rhode Island': 'RI', 'South Carolina': 'SC',
+        'South Dakota': 'SD', 'Tennessee': 'TN', 'Texas': 'TX', 'Utah': 'UT',
+        'Vermont': 'VT', 'Virginia': 'VA', 'Washington': 'WA', 'West Virginia': 'WV',
+        'Wisconsin': 'WI', 'Wyoming': 'WY'
+      };
+      return stateMap[stateName] || stateName;
+    }
+
+    // Load US states geojson
+    fetch('assets/us-states-10m.json')
+      .then(response => response.json())
+      .then(data => {
+        usStates = data;
+        if (forecastData) {
+          drawMap();
+          drawEVHistogram();
+          drawLeverageChart();
+        }
+      });
 
     // Load forecast on page load
     document.addEventListener('DOMContentLoaded', loadForecast);
@@ -270,17 +478,6 @@
     .candidate-selector button:hover {
       background-color: #333;
     }
-    .probability-display, .ev-display, .popular-vote {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-    .dem-prob, .dem-ev, .dem-vote {
-      color: #0066cc;
-    }
-    .rep-prob, .rep-ev, .rep-vote {
-      color: #cc0000;
-    }
     .state-table {
       width: 100%;
       border-collapse: collapse;
@@ -307,6 +504,16 @@
     }
     .bucket {
       font-size: 0.9rem;
+    }
+    .hover-card {
+      position: absolute;
+      background: white;
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      display: none;
+      z-index: 1000;
     }
   </style>
 </body>
