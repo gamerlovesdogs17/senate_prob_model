@@ -163,6 +163,54 @@ async function fetchPresidentialApproval() {
   return 45;
 }
 
+// Fetch economic indicators
+async function fetchEconomicIndicators() {
+  // Try FRED (Federal Reserve Economic Data) or other economic data sources
+  const gdpGrowth = 2.0; // Placeholder - would fetch from FRED API
+  const unemployment = 4.0; // Placeholder - would fetch from BLS
+  
+  // Try to fetch from Bureau of Labor Statistics
+  const blsUrl = "https://www.bls.gov/news.release/empsit.nr0.htm";
+  const blsText = await fetchText(blsUrl, "blsUnemployment", null, {
+    headers: { accept: "text/html", "user-agent": "CapitolForecastBot/1.0 (+https://github.com/)" }
+  });
+  
+  if (blsText) {
+    const lines = htmlToLines(blsText);
+    for (const line of lines) {
+      const match = line.match(/unemployment\s*rate[:\s]*([0-9]+\.[0-9]+)/i);
+      if (match) {
+        console.log(`Unemployment rate from BLS: ${match[1]}%`);
+        return { gdpGrowth, unemployment: Number(match[1]) };
+      }
+    }
+  }
+  
+  console.log("Could not fetch economic indicators, using defaults");
+  return { gdpGrowth, unemployment };
+}
+
+// Fetch candidate favorability from polling
+async function fetchCandidateFavorability(candidateName) {
+  // Try to fetch favorability from polling data
+  // This is a placeholder - would need to parse polling data for favorability
+  const favorabilityMap = {
+    "Gavin Newsom": 40,
+    "Andy Beshear": 43,
+    "Josh Shapiro": 41,
+    "Pete Buttigieg": 44,
+    "Gretchen Whitmer": 42,
+    "Alexandria Ocasio-Cortez": 38,
+    "JD Vance": 37,
+    "Marco Rubio": 40,
+    "Ron DeSantis": 38,
+    "Nikki Haley": 40,
+    "Ted Cruz": 36
+  };
+  
+  return favorabilityMap[candidateName] || 40;
+}
+
 const SETTINGS = {
   simulations: 100000,
   electionDate: "2028-11-07",
@@ -689,18 +737,27 @@ async function main() {
   const pollingData = await fetchPresidentialPolling();
   const genericBallot = await fetchGenericBallot();
   const presidentialApproval = await fetchPresidentialApproval();
+  const economicIndicators = await fetchEconomicIndicators();
   
   console.log("Data fetching complete. Running simulation...");
   
   const demCandidate = PRESIDENTIAL_CANDIDATES.democratic.find(c => c.id === demCandidateId) || PRESIDENTIAL_CANDIDATES.democratic[0];
   const repCandidate = PRESIDENTIAL_CANDIDATES.republican.find(c => c.id === repCandidateId) || PRESIDENTIAL_CANDIDATES.republican[0];
   
+  // Fetch candidate favorability
+  const demFavorability = await fetchCandidateFavorability(demCandidate.name);
+  const repFavorability = await fetchCandidateFavorability(repCandidate.name);
+  
+  // Update candidates with fetched favorability
+  demCandidate.favorability = demFavorability;
+  repCandidate.favorability = repFavorability;
+  
   // Fundamentals using fetched data
   const fundamentals = {
     nationalShift: genericBallot, // Generic ballot margin
     approval: presidentialApproval, // Presidential approval
-    gdpGrowth: 2.0,
-    unemployment: 4.0
+    gdpGrowth: economicIndicators.gdpGrowth,
+    unemployment: economicIndicators.unemployment
   };
   
   const forecast = buildForecast(demCandidate, repCandidate, fundamentals, pollingData);

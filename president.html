@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>2028 President | Capitol Forecast</title>
+  <title>President | Capitol Forecast</title>
   <meta name="description" content="2028 presidential forecast page for Capitol Forecast.">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <meta name="theme-color" content="#fffdf8">
@@ -17,6 +17,8 @@
     </a>
     <nav class="site-nav" aria-label="Primary navigation">
       <a href="index.html">Home</a>
+      <a href="senate.html">Senate</a>
+      <a href="house.html">House</a>
       <a class="active" href="president.html">2028 Pres</a>
       <a href="president-method.html">Method</a>
       <a href="articles.html">Articles</a>
@@ -54,9 +56,47 @@
       </aside>
     </section>
 
-    <section class="text-panel" aria-label="Candidate selection">
+    <section class="map-panel" aria-labelledby="map-title">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Electoral College</p>
+          <h2 id="map-title">The 2028 battleground.</h2>
+        </div>
+        <p><span id="sim-count">--</span> simulations. <span id="battleground-count">--</span> battleground states (25-75% win probability).</p>
+      </div>
+      <div class="map-wrap">
+        <div>
+          <div id="president-map"></div>
+          <div id="map-color-controls" class="map-color-controls" aria-label="Map color mode"></div>
+          <div id="map-legend" class="map-legend" aria-label="Race rating legend"></div>
+          <p class="map-note">Map shows Democratic win probability by state.</p>
+        </div>
+        <aside id="map-hover-card" class="hover-card"></aside>
+      </div>
+    </section>
+
+    <section class="dashboard-grid" aria-label="Forecast charts">
+      <article class="chart-panel">
+        <span class="chart-label">Electoral vote distribution</span>
+        <div id="ev-histogram" class="seat-histogram"></div>
+      </article>
+      <article class="chart-panel">
+        <span class="chart-label">Most decisive states by simulated election-deciding power</span>
+        <div id="leverage-chart" class="leverage-chart"></div>
+      </article>
+      <article class="chart-panel chart-wide">
+        <span class="chart-label">National win probability over time</span>
+        <div id="win-history-chart" class="history-chart"></div>
+      </article>
+      <article class="chart-panel chart-wide">
+        <span class="chart-label">Expected electoral votes over time</span>
+        <div id="ev-history-chart" class="history-chart"></div>
+      </article>
+    </section>
+
+    <section class="text-panel" aria-labelledby="candidate-title">
       <p class="kicker">Candidate Matchup</p>
-      <h2>Select candidates to see matchup forecast.</h2>
+      <h2 id="candidate-title">Select candidates to see matchup forecast.</h2>
       <div class="candidate-selector">
         <div>
           <label for="dem-candidate">Democratic Candidate:</label>
@@ -83,30 +123,6 @@
       </div>
     </section>
 
-    <section class="dashboard-grid" aria-label="Electoral College Map">
-      <article class="chart-panel full-width">
-        <span class="chart-label">Electoral College Map</span>
-        <div id="ec-map" style="text-align: center; padding: 20px;">
-          <p>Loading map...</p>
-        </div>
-      </article>
-    </section>
-
-    <section class="dashboard-grid" aria-label="EV Distribution">
-      <article class="chart-panel">
-        <span class="chart-label">Electoral Vote Distribution</span>
-        <div id="ev-distribution" style="padding: 20px;">
-          <p>Loading distribution...</p>
-        </div>
-      </article>
-      <article class="chart-panel">
-        <span class="chart-label">Tipping Point States</span>
-        <div id="tipping-states" style="padding: 20px;">
-          <p>Loading tipping points...</p>
-        </div>
-      </article>
-    </section>
-
     <section class="dashboard-grid" aria-label="State probabilities">
       <article class="chart-panel full-width">
         <span class="chart-label">State-by-State Probabilities</span>
@@ -126,7 +142,10 @@
     </section>
   </main>
 
+  <script src="assets/wiki.js"></script>
   <script>
+    let forecastData = null;
+
     async function loadForecast() {
       const demCandidate = document.getElementById('dem-candidate').value;
       const repCandidate = document.getElementById('rep-candidate').value;
@@ -136,6 +155,9 @@
         forecastData = await response.json();
         
         displayNationalProbability();
+        displayECMap();
+        displayEVDistribution();
+        displayTippingStates();
         displayStateProbabilities();
         displayHistoricalBacktest();
       } catch (error) {
@@ -158,15 +180,15 @@
       document.getElementById('median-ev').textContent = `${forecastData.electoralCollege.demExpectedEV}-${forecastData.electoralCollege.repExpectedEV}`;
       document.getElementById('tipping-point-display').textContent = forecastData.tippingPoint.state;
       document.getElementById('run-date').textContent = forecastData.date;
+      document.getElementById('sim-count').textContent = '100,000';
+      
+      const battlegroundCount = Object.values(forecastData.states).filter(s => s.demProbability > 0.25 && s.demProbability < 0.75).length;
+      document.getElementById('battleground-count').textContent = battlegroundCount;
       
       const demBar = document.getElementById('dem-win-bar');
       const repBar = document.getElementById('rep-win-bar');
       demBar.style.width = `${demProb * 100}%`;
       repBar.style.width = `${repProb * 100}%`;
-      
-      displayECMap();
-      displayEVDistribution();
-      displayTippingStates();
     }
 
     function displayECMap() {
@@ -206,7 +228,7 @@
       html += '<div><span style="display: inline-block; width: 15px; height: 15px; background-color: #cc0000; margin-right: 5px;"></span>Strong R (<25%)</div>';
       html += '</div>';
       
-      document.getElementById('ec-map').innerHTML = html;
+      document.getElementById('president-map').innerHTML = html;
     }
 
     function displayEVDistribution() {
@@ -224,7 +246,7 @@
       }
       
       html += '</tbody></table>';
-      document.getElementById('ev-distribution').innerHTML = html;
+      document.getElementById('ev-histogram').innerHTML = html;
     }
 
     function displayTippingStates() {
@@ -255,7 +277,7 @@
       }
       
       html += '</tbody></table>';
-      document.getElementById('tipping-states').innerHTML = html;
+      document.getElementById('leverage-chart').innerHTML = html;
     }
 
     function displayStateProbabilities() {
