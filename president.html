@@ -29,29 +29,285 @@
         <div>
           <p class="kicker">2028 President</p>
           <h1 id="pres-title">Presidential forecast.</h1>
-          <p class="lede">No public probability yet.</p>
+          <p class="lede">Monte Carlo simulation with candidate-specific modifiers.</p>
         </div>
       </div>
     </section>
 
-    <section class="dashboard-grid" aria-label="Presidential forecast status">
+    <section class="dashboard-grid" aria-label="Candidate selection">
       <article class="chart-panel">
-        <span class="chart-label">Inputs</span>
-        <dl class="method-list">
-          <div><dt>States</dt><dd>Recent presidential results, elasticity, demographic trend, and turnout.</dd></div>
-          <div><dt>National mood</dt><dd>Generic ballot, approval, economic data, and candidate favorability.</dd></div>
-          <div><dt>Electoral College</dt><dd>State simulations, tipping points, and paths to 270.</dd></div>
-        </dl>
+        <span class="chart-label">Candidate Matchup</span>
+        <div class="candidate-selector">
+          <div>
+            <label for="dem-candidate">Democratic Candidate:</label>
+            <select id="dem-candidate">
+              <option value="kamala">Kamala Harris (CA)</option>
+              <option value="gavin">Gavin Newsom (CA)</option>
+              <option value="whitmer">Gretchen Whitmer (MI)</option>
+              <option value="shapiro">Josh Shapiro (PA)</option>
+            </select>
+          </div>
+          <div>
+            <label for="rep-candidate">Republican Candidate:</label>
+            <select id="rep-candidate">
+              <option value="trump">Donald Trump (FL)</option>
+              <option value="desantis">Ron DeSantis (FL)</option>
+              <option value="haley">Nikki Haley (SC)</option>
+              <option value="ramaswamy">Vivek Ramaswamy (OH)</option>
+              <option value="scott">Tim Scott (SC)</option>
+            </select>
+          </div>
+          <button id="update-forecast">Update Forecast</button>
+        </div>
+      </article>
+    </section>
+
+    <section class="dashboard-grid" aria-label="National forecast">
+      <article class="chart-panel">
+        <span class="chart-label">National Win Probability</span>
+        <div id="national-probability">
+          <p>Loading forecast...</p>
+        </div>
       </article>
       <article class="chart-panel">
-        <span class="chart-label">Status</span>
-        <dl class="method-list">
-          <div><dt>Probability</dt><dd>Offline</dd></div>
-          <div><dt>Map</dt><dd>Offline</dd></div>
-          <div><dt>State pages</dt><dd>Offline</dd></div>
-        </dl>
+        <span class="chart-label">Electoral College</span>
+        <div id="electoral-college">
+          <p>Loading forecast...</p>
+        </div>
+      </article>
+      <article class="chart-panel">
+        <span class="chart-label">Tipping Point State</span>
+        <div id="tipping-point">
+          <p>Loading forecast...</p>
+        </div>
+      </article>
+      <article class="chart-panel">
+        <span class="chart-label">Popular Vote Estimate</span>
+        <div id="popular-vote">
+          <p>Loading forecast...</p>
+        </div>
+      </article>
+    </section>
+
+    <section class="dashboard-grid" aria-label="State probabilities">
+      <article class="chart-panel full-width">
+        <span class="chart-label">State-by-State Probabilities</span>
+        <div id="state-probabilities">
+          <p>Loading forecast...</p>
+        </div>
+      </article>
+    </section>
+
+    <section class="dashboard-grid" aria-label="Historical backtest">
+      <article class="chart-panel">
+        <span class="chart-label">Historical Backtest</span>
+        <div id="historical-backtest">
+          <p>Loading forecast...</p>
+        </div>
       </article>
     </section>
   </main>
+
+  <script>
+    async function loadForecast() {
+      const demCandidate = document.getElementById('dem-candidate').value;
+      const repCandidate = document.getElementById('rep-candidate').value;
+      
+      try {
+        const response = await fetch(`data/president-forecast.json?dem=${demCandidate}&rep=${repCandidate}`);
+        const data = await response.json();
+        
+        displayNationalProbability(data);
+        displayElectoralCollege(data);
+        displayTippingPoint(data);
+        displayPopularVote(data);
+        displayStateProbabilities(data);
+        displayHistoricalBacktest(data);
+      } catch (error) {
+        console.error('Error loading forecast:', error);
+        document.getElementById('national-probability').innerHTML = '<p>Error loading forecast data.</p>';
+      }
+    }
+
+    function displayNationalProbability(data) {
+      const demProb = (data.national.demWinProbability * 100).toFixed(1);
+      const repProb = (data.national.repWinProbability * 100).toFixed(1);
+      document.getElementById('national-probability').innerHTML = `
+        <div class="probability-display">
+          <div class="dem-prob">
+            <strong>${data.demCandidateName}</strong>: ${demProb}%
+          </div>
+          <div class="rep-prob">
+            <strong>${data.repCandidateName}</strong>: ${repProb}%
+          </div>
+        </div>
+      `;
+    }
+
+    function displayElectoralCollege(data) {
+      document.getElementById('electoral-college').innerHTML = `
+        <div class="ev-display">
+          <div class="dem-ev">
+            <strong>${data.demCandidateName}</strong>: ${data.electoralCollege.demExpectedEV} EV
+          </div>
+          <div class="rep-ev">
+            <strong>${data.repCandidateName}</strong>: ${data.electoralCollege.repExpectedEV} EV
+          </div>
+          <div class="ev-note">(270 to win)</div>
+        </div>
+      `;
+    }
+
+    function displayTippingPoint(data) {
+      const stateName = data.tippingPoint.state;
+      const prob = (data.tippingPoint.demProbability * 100).toFixed(1);
+      document.getElementById('tipping-point').innerHTML = `
+        <div class="tipping-point">
+          <strong>${stateName}</strong> (${data.tippingPoint.ev} EV)
+          <br>
+          Dem win probability: ${prob}%
+        </div>
+      `;
+    }
+
+    function displayPopularVote(data) {
+      const demVote = data.national.demPopularVote.toFixed(1);
+      const repVote = data.national.repPopularVote.toFixed(1);
+      document.getElementById('popular-vote').innerHTML = `
+        <div class="popular-vote">
+          <div class="dem-vote">
+            <strong>${data.demCandidateName}</strong>: ${demVote}%
+          </div>
+          <div class="rep-vote">
+            <strong>${data.repCandidateName}</strong>: ${repVote}%
+          </div>
+        </div>
+      `;
+    }
+
+    function displayStateProbabilities(data) {
+      const states = Object.entries(data.states).sort((a, b) => b[1].ev - a[1].ev);
+      let html = '<table class="state-table"><thead><tr><th>State</th><th>EV</th><th>Dem Win %</th><th>Margin</th></tr></thead><tbody>';
+      
+      for (const [state, stateData] of states) {
+        const prob = (stateData.demProbability * 100).toFixed(1);
+        const margin = stateData.demMargin.toFixed(1);
+        const marginClass = stateData.demMargin >= 0 ? 'dem-margin' : 'rep-margin';
+        html += `
+          <tr>
+            <td>${state}</td>
+            <td>${stateData.ev}</td>
+            <td>${prob}%</td>
+            <td class="${marginClass}">${margin > 0 ? '+' : ''}${margin}</td>
+          </tr>
+        `;
+      }
+      
+      html += '</tbody></table>';
+      document.getElementById('state-probabilities').innerHTML = html;
+    }
+
+    function displayHistoricalBacktest(data) {
+      const backtest = data.historicalBacktest;
+      const brier = backtest.meanBrier.toFixed(4);
+      const accuracy = (backtest.accuracy * 100).toFixed(1);
+      
+      let bucketsHtml = '<div class="buckets">';
+      for (const bucket of backtest.buckets) {
+        const actualRate = (bucket.actualWinRate * 100).toFixed(1);
+        bucketsHtml += `
+          <div class="bucket">
+            <strong>${bucket.label}</strong>: Expected ${bucket.expectedWinRate}, Actual ${actualRate}% (n=${bucket.sample})
+          </div>
+        `;
+      }
+      bucketsHtml += '</div>';
+      
+      document.getElementById('historical-backtest').innerHTML = `
+        <div class="backtest">
+          <div><strong>Cycles:</strong> ${backtest.cycles.join(', ')}</div>
+          <div><strong>Mean Brier Score:</strong> ${brier}</div>
+          <div><strong>Accuracy:</strong> ${accuracy}%</div>
+          ${bucketsHtml}
+        </div>
+      `;
+    }
+
+    // Load forecast on page load
+    document.addEventListener('DOMContentLoaded', loadForecast);
+    
+    // Update forecast when button is clicked
+    document.getElementById('update-forecast').addEventListener('click', loadForecast);
+  </script>
+
+  <style>
+    .candidate-selector {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .candidate-selector > div {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .candidate-selector label {
+      font-weight: bold;
+    }
+    .candidate-selector select {
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+    .candidate-selector button {
+      padding: 0.75rem;
+      font-size: 1rem;
+      background-color: #1a1a1a;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 0.5rem;
+    }
+    .candidate-selector button:hover {
+      background-color: #333;
+    }
+    .probability-display, .ev-display, .popular-vote {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .dem-prob, .dem-ev, .dem-vote {
+      color: #0066cc;
+    }
+    .rep-prob, .rep-ev, .rep-vote {
+      color: #cc0000;
+    }
+    .state-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .state-table th, .state-table td {
+      padding: 0.5rem;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    .state-table th {
+      background-color: #f5f5f5;
+    }
+    .dem-margin {
+      color: #0066cc;
+    }
+    .rep-margin {
+      color: #cc0000;
+    }
+    .buckets {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .bucket {
+      font-size: 0.9rem;
+    }
+  </style>
 </body>
 </html>

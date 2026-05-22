@@ -27,26 +27,124 @@
     <section class="text-panel image-panel compact-page-head">
       <p class="kicker">2028 President</p>
       <h1>Method.</h1>
-      <p class="lede">No public presidential probability yet.</p>
+      <p class="lede">Monte Carlo simulation with candidate-specific modifiers and correlated polling error.</p>
     </section>
 
-    <section class="dashboard-grid" aria-label="Presidential method">
+    <section class="dashboard-grid" aria-label="Model overview">
       <article class="chart-panel">
-        <span class="chart-label">Inputs</span>
+        <span class="chart-label">Model Overview</span>
         <dl class="method-list">
-          <div><dt>States</dt><dd>Recent presidential results, elasticity, demographic trend, and turnout.</dd></div>
-          <div><dt>National mood</dt><dd>Generic ballot, approval, economic data, and candidate favorability.</dd></div>
-          <div><dt>Electoral College</dt><dd>State simulations, tipping points, and paths to 270.</dd></div>
+          <div><dt>Simulations</dt><dd>100,000 Monte Carlo trials per forecast</dd></div>
+          <div><dt>States</dt><dd>50 states + District of Columbia (538 total electoral votes)</dd></div>
+          <div><dt>Win threshold</dt><dd>270 electoral votes</dd></div>
+          <div><dt>Error correlation</dt><dd>0.6 between states (national polling error affects all states)</dd></div>
         </dl>
       </article>
       <article class="chart-panel">
-        <span class="chart-label">Status</span>
+        <span class="chart-label">Key Features</span>
         <dl class="method-list">
-          <div><dt>Probability</dt><dd>Offline</dd></div>
-          <div><dt>Electoral vote distribution</dt><dd>Offline</dd></div>
-          <div><dt>State map</dt><dd>Offline</dd></div>
+          <div><dt>Candidate modifiers</dt><dd>Home-state, regional, ideological, favorability, and electability adjustments</dd></div>
+          <div><dt>Correlated error</dt><dd>National polling error correlated across states</dd></div>
+          <div><dt>Tipping point</dt><dd>State most likely to decide the election</dd></div>
+          <div><dt>Popular vote</dt><dd>Weighted by state population</dd></div>
         </dl>
       </article>
+    </section>
+
+    <section class="text-panel" aria-label="Candidate modifiers">
+      <h2>Candidate Modifiers</h2>
+      <p>The model adjusts state margins based on candidate characteristics:</p>
+      <ul>
+        <li><strong>Home-state modifier:</strong> +4 margin boost in candidate's home state</li>
+        <li><strong>Regional modifier:</strong> +1.5 margin boost in states in candidate's region (Northeast, South, Midwest, West, Plains)</li>
+        <li><strong>Ideological modifier:</strong> Adjusts based on state partisan lean vs candidate ideology (progressive/moderate/conservative)</li>
+        <li><strong>Favorability modifier:</strong> Scales state margins by candidate favorability relative to baseline</li>
+        <li><strong>Electability modifier:</strong> Adjusts error terms based on candidate electability score</li>
+      </ul>
+    </section>
+
+    <section class="text-panel" aria-label="State baselines">
+      <h2>State Baselines</h2>
+      <p>Each state has a baseline margin based on 2024 presidential results:</p>
+      <ul>
+        <li>Partisan baseline: 2024 Democratic margin (positive = Dem advantage, negative = Rep advantage)</li>
+        <li>Electoral votes: State's EV count</li>
+        <li>Region: Geographic region for regional modifier calculations</li>
+        <li>Population: State population for popular vote weighting</li>
+      </ul>
+    </section>
+
+    <section class="text-panel" aria-label="Correlated error">
+      <h2>Correlated Polling Error</h2>
+      <p>The model generates correlated polling error across states:</p>
+      <ul>
+        <li>National error: Drawn from normal distribution (SD = 3.5 points)</li>
+        <li>State-specific error: Drawn from normal distribution (SD = 4.0 points)</li>
+        <li>Correlation: 0.6 (60% of state error comes from national component)</li>
+        <li>This accounts for systematic polling bias that affects all states similarly</li>
+      </ul>
+    </section>
+
+    <section class="text-panel" aria-label="Monte Carlo simulation">
+      <h2>Monte Carlo Simulation</h2>
+      <p>For each of 100,000 simulations:</p>
+      <ol>
+        <li>Generate correlated polling error for all states</li>
+        <li>Calculate final margin for each state (baseline + modifiers + error)</li>
+        <li>Determine state winner based on margin</li>
+        <li>Sum electoral votes for each candidate</li>
+        <li>Track state wins, EV distribution, and popular vote</li>
+      </ol>
+      <p>Final probabilities are calculated as the proportion of simulations each candidate wins.</p>
+    </section>
+
+    <section class="text-panel" aria-label="Tipping point">
+      <h2>Tipping Point State</h2>
+      <p>The tipping point state is the state most likely to decide the election:</p>
+      <ul>
+        <li>Calculated as the state with the highest "tipping power"</li>
+        <li>Tipping power = min(Dem wins, Rep wins) × state EV</li>
+        <li>States that are close to 50% probability with high EV have highest tipping power</li>
+      </ul>
+    </section>
+
+    <section class="text-panel" aria-label="Historical backtesting">
+      <h2>Historical Backtesting</h2>
+      <p>The model is validated against historical presidential elections:</p>
+      <ul>
+        <li>2020: Biden vs Trump (306-232 EV)</li>
+        <li>2016: Clinton vs Trump (227-304 EV)</li>
+        <li>Additional cycles (2012, 2008, 2004) can be added</li>
+      </ul>
+      <p>Backtest metrics include:</p>
+      <ul>
+        <li>Mean Brier score (lower is better)</li>
+        <li>Overall accuracy</li>
+        <li>Calibration by probability bucket (50-60%, 60-70%, etc.)</li>
+      </ul>
+    </section>
+
+    <section class="text-panel" aria-label="Fundamentals">
+      <h2>Fundamentals</h2>
+      <p>The model incorporates national fundamentals (placeholder values currently):</p>
+      <ul>
+        <li>Generic ballot polling average</li>
+        <li>Presidential approval rating</li>
+        <li>Economic indicators (GDP growth, unemployment)</li>
+        <li>Incumbency advantage/disadvantage</li>
+      </ul>
+      <p>These fundamentals are applied as a national shift that affects all states proportionally.</p>
+    </section>
+
+    <section class="text-panel" aria-label="Limitations">
+      <h2>Limitations</h2>
+      <ul>
+        <li>Candidate favorability and electability scores are placeholder values</li>
+        <li>Fundamentals are not yet connected to live data sources</li>
+        <li>Polling averages are not yet integrated</li>
+        <li>Historical backtest is limited to 2020 and 2016</li>
+        <li>Model assumes static candidate characteristics (no campaign effects)</li>
+      </ul>
     </section>
   </main>
 </body>
