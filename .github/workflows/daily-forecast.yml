@@ -24,6 +24,7 @@ jobs:
         run: |
           node scripts/generate-forecast.mjs
           node scripts/generate-house-forecast.mjs
+          node scripts/generate-president-forecast.mjs newsom vance
 
       - name: Commit forecast data
         uses: stefanzweifel/git-auto-commit-action@v5

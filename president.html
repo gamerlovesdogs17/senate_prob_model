@@ -83,6 +83,30 @@
       </div>
     </section>
 
+    <section class="dashboard-grid" aria-label="Electoral College Map">
+      <article class="chart-panel full-width">
+        <span class="chart-label">Electoral College Map</span>
+        <div id="ec-map" style="text-align: center; padding: 20px;">
+          <p>Loading map...</p>
+        </div>
+      </article>
+    </section>
+
+    <section class="dashboard-grid" aria-label="EV Distribution">
+      <article class="chart-panel">
+        <span class="chart-label">Electoral Vote Distribution</span>
+        <div id="ev-distribution" style="padding: 20px;">
+          <p>Loading distribution...</p>
+        </div>
+      </article>
+      <article class="chart-panel">
+        <span class="chart-label">Tipping Point States</span>
+        <div id="tipping-states" style="padding: 20px;">
+          <p>Loading tipping points...</p>
+        </div>
+      </article>
+    </section>
+
     <section class="dashboard-grid" aria-label="State probabilities">
       <article class="chart-panel full-width">
         <span class="chart-label">State-by-State Probabilities</span>
@@ -139,6 +163,99 @@
       const repBar = document.getElementById('rep-win-bar');
       demBar.style.width = `${demProb * 100}%`;
       repBar.style.width = `${repProb * 100}%`;
+      
+      displayECMap();
+      displayEVDistribution();
+      displayTippingStates();
+    }
+
+    function displayECMap() {
+      const states = Object.entries(forecastData.states);
+      let html = '<div style="display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; max-width: 800px; margin: 0 auto;">';
+      
+      const stateOrder = ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY','DC'];
+      
+      for (const state of stateOrder) {
+        const stateData = forecastData.states[state];
+        if (!stateData) continue;
+        
+        const prob = stateData.demProbability;
+        let color;
+        if (prob > 0.75) {
+          color = '#0066cc';
+        } else if (prob > 0.5) {
+          color = '#6699cc';
+        } else if (prob > 0.25) {
+          color = '#cc9966';
+        } else {
+          color = '#cc0000';
+        }
+        
+        html += `
+          <div style="background-color: ${color}; color: white; padding: 8px 4px; text-align: center; font-size: 12px; font-weight: bold; border-radius: 2px;" title="${state}: ${stateData.ev} EV, ${(prob * 100).toFixed(1)}% Dem">
+            ${state}<br><span style="font-size: 10px;">${stateData.ev}</span>
+          </div>
+        `;
+      }
+      
+      html += '</div>';
+      html += '<div style="margin-top: 20px; display: flex; justify-content: center; gap: 20px; font-size: 12px;">';
+      html += '<div><span style="display: inline-block; width: 15px; height: 15px; background-color: #0066cc; margin-right: 5px;"></span>Strong D (>75%)</div>';
+      html += '<div><span style="display: inline-block; width: 15px; height: 15px; background-color: #6699cc; margin-right: 5px;"></span>Lean D (50-75%)</div>';
+      html += '<div><span style="display: inline-block; width: 15px; height: 15px; background-color: #cc9966; margin-right: 5px;"></span>Lean R (25-50%)</div>';
+      html += '<div><span style="display: inline-block; width: 15px; height: 15px; background-color: #cc0000; margin-right: 5px;"></span>Strong R (<25%)</div>';
+      html += '</div>';
+      
+      document.getElementById('ec-map').innerHTML = html;
+    }
+
+    function displayEVDistribution() {
+      const distribution = forecastData.electoralCollege.distribution;
+      const sortedDist = Object.entries(distribution)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10);
+      
+      let html = '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th>Dem EV</th><th>Rep EV</th><th>Simulations</th></tr></thead><tbody>';
+      
+      for (const [key, count] of sortedDist) {
+        const [demEV, repEV] = key.split('-');
+        const percentage = ((count / 100000) * 100).toFixed(1);
+        html += `<tr><td>${demEV}</td><td>${repEV}</td><td>${count} (${percentage}%)</td></tr>`;
+      }
+      
+      html += '</tbody></table>';
+      document.getElementById('ev-distribution').innerHTML = html;
+    }
+
+    function displayTippingStates() {
+      const states = Object.entries(forecastData.states)
+        .map(([state, data]) => ({
+          state,
+          ev: data.ev,
+          prob: data.demProbability,
+          tippingPower: Math.min(data.demProbability, 1 - data.demProbability) * data.ev
+        }))
+        .filter(s => s.tippingPower > 0.5)
+        .sort((a, b) => b.tippingPower - a.tippingPower)
+        .slice(0, 10);
+      
+      let html = '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th>State</th><th>EV</th><th>Dem Win %</th><th>Tipping Power</th></tr></thead><tbody>';
+      
+      for (const s of states) {
+        const prob = (s.prob * 100).toFixed(1);
+        const marginClass = s.prob > 0.5 ? 'dem-margin' : 'rep-margin';
+        html += `
+          <tr>
+            <td>${s.state}</td>
+            <td>${s.ev}</td>
+            <td class="${marginClass}">${prob}%</td>
+            <td>${s.tippingPower.toFixed(2)}</td>
+          </tr>
+        `;
+      }
+      
+      html += '</tbody></table>';
+      document.getElementById('tipping-states').innerHTML = html;
     }
 
     function displayStateProbabilities() {

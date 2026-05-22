@@ -4,6 +4,165 @@ const demCandidateId = process.argv[2] || "newsom";
 const repCandidateId = process.argv[3] || "vance";
 const FORECAST_URL = new URL(`../data/president-forecast-${demCandidateId}-${repCandidateId}.json`, import.meta.url);
 
+// Helper function to fetch text from URL
+async function fetchText(url, cacheKey, status = null, options = {}) {
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) return null;
+    return await response.text();
+  } catch (error) {
+    console.error(`Error fetching ${url}:`, error.message);
+    return null;
+  }
+}
+
+// Helper function to convert HTML to lines
+function htmlToLines(html) {
+  return html.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+}
+
+// Helper function to extract state from title
+function stateFromTitle(title) {
+  const stateMatch = title.match(/\b(AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY|DC)\b/);
+  return stateMatch ? stateMatch[1] : null;
+}
+
+// Helper function to parse RCP spread
+function parseRcpSpread(spread) {
+  const clean = String(spread || "").replace(/\*\*/g, "").trim();
+  if (/^tie$/i.test(clean)) return { candidate: "Tie", margin: 0 };
+  const match = clean.match(/^(.+?)\s+\+([0-9]+(?:\.[0-9]+)?)$/);
+  if (!match) return null;
+  return { candidate: match[1].trim(), margin: Number(match[2]) };
+}
+
+// Helper function to extract poll date from lines
+function pollDateFromLines(lines, index) {
+  const datePattern = /(\w+)\s+(\d+),?\s*(\d{4})?/;
+  for (let offset = 0; offset <= 14; offset += 1) {
+    const match = lines[index + offset]?.match(datePattern);
+    if (match) {
+      const year = match[3] || "2026";
+      const parsed = new Date(`${match[1]} ${match[2]}, ${year} 12:00:00`);
+      if (!Number.isNaN(parsed.getTime())) return parsed.toISOString().slice(0, 10);
+    }
+  }
+  return "2026-05-21";
+}
+
+// Fetch presidential polling data from RealClearPolling
+async function fetchPresidentialPolling() {
+  const url = "https://www.realclearpolling.com/latest-polls/president-general";
+  const text = await fetchText(url, "realClearPollingPresident", null, {
+    headers: { accept: "text/html", "user-agent": "CapitolForecastBot/1.0 (+https://github.com/)" }
+  });
+  
+  if (!text) return { byState: {}, polls: 0, usablePolls: 0 };
+  
+  const byState = {};
+  const lines = htmlToLines(text);
+  let polls = 0;
+  let usablePolls = 0;
+  
+  for (let index = 0; index < lines.length; index += 1) {
+    const title = lines[index];
+    if (!/^2028\b/i.test(title) || !/president|general/i.test(title)) continue;
+    polls += 1;
+    if (/primary|runoff/i.test(title)) continue;
+    
+    const state = stateFromTitle(title) || "National";
+    const spreadIndex = lines.findIndex((line, candidateIndex) => candidateIndex > index && candidateIndex < index + 14 && line === "Spread");
+    
+    if (spreadIndex === -1 || !lines[spreadIndex + 1]) continue;
+    const parsed = parseRcpSpread(lines[spreadIndex + 1]);
+    if (!parsed) continue;
+    
+    const date = pollDateFromLines(lines, index);
+    const pollster = lines[index + 2] && lines[index + 1] === "Poll" ? lines[index + 2].replace(/\*\*/g, "") : "RealClearPolling";
+    const margin = parsed.margin === 0 ? 0 : (parsed.candidate.toLowerCase().includes("dem") || parsed.candidate.toLowerCase().includes("biden") || parsed.candidate.toLowerCase().includes("harris") ? parsed.margin : -parsed.margin);
+    
+    byState[state] ||= [];
+    byState[state].push({
+      days: 0,
+      margin,
+      source: "RealClearPolling",
+      pollster,
+      endDate: date,
+      title,
+      spread: lines[spreadIndex + 1],
+      weight: 0.95
+    });
+    usablePolls += 1;
+  }
+  
+  console.log(`Fetched ${usablePolls} usable presidential polls from ${polls} total polls`);
+  return { byState, polls, usablePolls };
+}
+
+// Fetch generic ballot data
+async function fetchGenericBallot() {
+  // Try VoteHub first
+  const voteHubUrl = "https://votehub.net/generic-ballot";
+  const voteHubText = await fetchText(voteHubUrl, "voteHubGenericBallot", null, {
+    headers: { accept: "text/html", "user-agent": "CapitolForecastBot/1.0 (+https://github.com/)" }
+  });
+  
+  if (voteHubText) {
+    // Parse generic ballot from VoteHub
+    const lines = htmlToLines(voteHubText);
+    for (const line of lines) {
+      const match = line.match(/([+-]?[0-9]+(?:\.[0-9]+)?)\s*(?:D|R|Dem|Rep)/i);
+      if (match) {
+        console.log(`Generic ballot from VoteHub: ${match[1]}`);
+        return Number(match[1]);
+      }
+    }
+  }
+  
+  // Fallback to DDHQ
+  const ddhqUrl = "https://ddhq.com/politics/2028-generic-ballot";
+  const ddhqText = await fetchText(ddhqUrl, "ddhqGenericBallot", null, {
+    headers: { accept: "text/html", "user-agent": "CapitolForecastBot/1.0 (+https://github.com/)" }
+  });
+  
+  if (ddhqText) {
+    const lines = htmlToLines(ddhqText);
+    for (const line of lines) {
+      const match = line.match(/([+-]?[0-9]+(?:\.[0-9]+)?)\s*(?:D|R|Dem|Rep)/i);
+      if (match) {
+        console.log(`Generic ballot from DDHQ: ${match[1]}`);
+        return Number(match[1]);
+      }
+    }
+  }
+  
+  console.log("Could not fetch generic ballot data, using default 0");
+  return 0;
+}
+
+// Fetch presidential approval
+async function fetchPresidentialApproval() {
+  // Try Gallup or other approval tracking sites
+  const gallupUrl = "https://news.gallup.com/poll/239146/presidential-job-approval-center.aspx";
+  const gallupText = await fetchText(gallupUrl, "gallupApproval", null, {
+    headers: { accept: "text/html", "user-agent": "CapitolForecastBot/1.0 (+https://github.com/)" }
+  });
+  
+  if (gallupText) {
+    const lines = htmlToLines(gallupText);
+    for (const line of lines) {
+      const match = line.match(/([0-9]+)%?\s*(?:approve|approval)/i);
+      if (match) {
+        console.log(`Presidential approval from Gallup: ${match[1]}%`);
+        return Number(match[1]);
+      }
+    }
+  }
+  
+  console.log("Could not fetch presidential approval, using default 45%");
+  return 45;
+}
+
 const SETTINGS = {
   simulations: 100000,
   electionDate: "2028-11-07",
@@ -257,17 +416,46 @@ function calculateCandidateModifiers(state, demCandidate, repCandidate) {
   return modifier;
 }
 
-function calculateStateMargin(state, demCandidate, repCandidate, fundamentals) {
+function calculateStateMargin(state, demCandidate, repCandidate, fundamentals, pollingData = null) {
   const baseline = PRESIDENTIAL_BASELINES[state];
   const modifiers = calculateCandidateModifiers(state, demCandidate, repCandidate);
   
   // Apply fundamentals (generic ballot, approval, economy)
   const fundamentalsAdjustment = fundamentals.nationalShift || 0;
   
+  // Apply polling data if available
+  let pollingAdjustment = 0;
+  if (pollingData && pollingData.byState && pollingData.byState[state]) {
+    const statePolls = pollingData.byState[state];
+    if (statePolls.length > 0) {
+      // Weight polls by recency (more recent = higher weight)
+      const weightedMargin = statePolls.reduce((sum, poll) => {
+        const weight = poll.weight || 0.95;
+        return sum + (poll.margin * weight);
+      }, 0) / statePolls.length;
+      
+      // Blend polling with baseline (polling gets 40% weight, baseline gets 60%)
+      const baselineMargin = baseline.demMargin;
+      pollingAdjustment = (weightedMargin - baselineMargin) * 0.4;
+    }
+  } else if (pollingData && pollingData.byState && pollingData.byState["National"]) {
+    // Use national polling if state-specific not available
+    const nationalPolls = pollingData.byState["National"];
+    if (nationalPolls.length > 0) {
+      const weightedMargin = nationalPolls.reduce((sum, poll) => {
+        const weight = poll.weight || 0.95;
+        return sum + (poll.margin * weight);
+      }, 0) / nationalPolls.length;
+      
+      const baselineMargin = baseline.demMargin;
+      pollingAdjustment = (weightedMargin - baselineMargin) * 0.3;
+    }
+  }
+  
   // State elasticity (how much state moves with national)
   const elasticity = 1.0;
   
-  return baseline.demMargin + modifiers + (fundamentalsAdjustment * elasticity);
+  return baseline.demMargin + modifiers + (fundamentalsAdjustment * elasticity) + pollingAdjustment;
 }
 
 function generateCorrelatedError(stateCount, correlation) {
@@ -303,7 +491,7 @@ function calculateTippingPoint(stateWins) {
   return tippingPoint;
 }
 
-function runPresidentialSimulation(demCandidate, repCandidate, fundamentals) {
+function runPresidentialSimulation(demCandidate, repCandidate, fundamentals, pollingData = null) {
   const results = {
     demWins: 0,
     repWins: 0,
@@ -324,7 +512,7 @@ function runPresidentialSimulation(demCandidate, repCandidate, fundamentals) {
     let simRepPopular = 0;
     
     for (const state of states) {
-      const baseMargin = calculateStateMargin(state, demCandidate, repCandidate, fundamentals);
+      const baseMargin = calculateStateMargin(state, demCandidate, repCandidate, fundamentals, pollingData);
       const totalError = correlatedError[state];
       const finalMargin = baseMargin + totalError;
       const stateEV = PRESIDENTIAL_BASELINES[state].ev;
@@ -369,8 +557,8 @@ function runPresidentialSimulation(demCandidate, repCandidate, fundamentals) {
   return results;
 }
 
-function buildForecast(demCandidate, repCandidate, fundamentals) {
-  const simulation = runPresidentialSimulation(demCandidate, repCandidate, fundamentals);
+function buildForecast(demCandidate, repCandidate, fundamentals, pollingData = null) {
+  const simulation = runPresidentialSimulation(demCandidate, repCandidate, fundamentals, pollingData);
   
   // Calculate state probabilities
   const stateProbabilities = {};
@@ -494,26 +682,31 @@ function calculateHistoricalBacktest() {
   };
 }
 
-function main() {
-  // Default candidates (can be overridden via command line args)
-  const demCandidateId = process.argv[2] || "kamala";
-  const repCandidateId = process.argv[3] || "trump";
+async function main() {
+  console.log("Fetching data sources...");
+  
+  // Fetch real data
+  const pollingData = await fetchPresidentialPolling();
+  const genericBallot = await fetchGenericBallot();
+  const presidentialApproval = await fetchPresidentialApproval();
+  
+  console.log("Data fetching complete. Running simulation...");
   
   const demCandidate = PRESIDENTIAL_CANDIDATES.democratic.find(c => c.id === demCandidateId) || PRESIDENTIAL_CANDIDATES.democratic[0];
   const repCandidate = PRESIDENTIAL_CANDIDATES.republican.find(c => c.id === repCandidateId) || PRESIDENTIAL_CANDIDATES.republican[0];
   
-  // Fundamentals (placeholder values - would come from data sources)
+  // Fundamentals using fetched data
   const fundamentals = {
-    nationalShift: 0, // Generic ballot margin
-    approval: 45, // Presidential approval
+    nationalShift: genericBallot, // Generic ballot margin
+    approval: presidentialApproval, // Presidential approval
     gdpGrowth: 2.0,
     unemployment: 4.0
   };
   
-  const forecast = buildForecast(demCandidate, repCandidate, fundamentals);
+  const forecast = buildForecast(demCandidate, repCandidate, fundamentals, pollingData);
   
   writeFileSync(FORECAST_URL, JSON.stringify(forecast, null, 2));
   console.log(`Wrote presidential forecast for ${demCandidate.name} vs ${repCandidate.name}`);
 }
 
-main();
+main().catch(console.error);

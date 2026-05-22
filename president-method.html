@@ -126,24 +126,37 @@
 
     <section class="text-panel" aria-label="Fundamentals">
       <h2>Fundamentals</h2>
-      <p>The model incorporates national fundamentals (placeholder values currently):</p>
+      <p>The model incorporates national fundamentals from multiple data sources:</p>
       <ul>
-        <li>Generic ballot polling average</li>
-        <li>Presidential approval rating</li>
-        <li>Economic indicators (GDP growth, unemployment)</li>
-        <li>Incumbency advantage/disadvantage</li>
+        <li><strong>Generic ballot polling:</strong> Fetched from VoteHub and DDHQ to measure national partisan mood</li>
+        <li><strong>Presidential approval:</strong> Fetched from Gallup to measure incumbent approval (if applicable)</li>
+        <li><strong>Economic indicators:</strong> GDP growth and unemployment rates (placeholder values currently)</li>
+        <li><strong>State polling:</strong> Fetched from RealClearPolling for state-specific presidential polls</li>
       </ul>
-      <p>These fundamentals are applied as a national shift that affects all states proportionally.</p>
+      <p>These fundamentals are applied as a national shift that affects all states proportionally. State-specific polling is blended with baseline margins (40% polling weight, 60% baseline weight).</p>
+    </section>
+
+    <section class="text-panel" aria-label="Data sources">
+      <h2>Data Sources</h2>
+      <p>The model uses the following data sources, updated daily:</p>
+      <ul>
+        <li><strong>RealClearPolling:</strong> Presidential polling data by state and nationally</li>
+        <li><strong>VoteHub:</strong> Generic ballot polling averages</li>
+        <li><strong>DDHQ:</strong> Generic ballot and election data</li>
+        <li><strong>Gallup:</strong> Presidential job approval ratings</li>
+      </ul>
+      <p>Data is fetched daily and integrated into the forecast model to ensure the most current information is used for projections.</p>
     </section>
 
     <section class="text-panel" aria-label="Limitations">
       <h2>Limitations</h2>
       <ul>
         <li>Candidate favorability and electability scores are placeholder values</li>
-        <li>Fundamentals are not yet connected to live data sources</li>
-        <li>Polling averages are not yet integrated</li>
+        <li>Economic indicators (GDP growth, unemployment) use placeholder values</li>
+        <li>Polling data may be limited for 2028 presidential race (early in cycle)</li>
         <li>Historical backtest is limited to 2020 and 2016</li>
         <li>Model assumes static candidate characteristics (no campaign effects)</li>
+        <li>Data sources may have rate limits or availability issues</li>
       </ul>
     </section>
   </main>
