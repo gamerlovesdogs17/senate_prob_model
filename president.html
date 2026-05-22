@@ -60,7 +60,7 @@
           <p class="kicker">Electoral College</p>
           <h2 id="map-title">The 2028 battleground.</h2>
         </div>
-        <p><span id="sim-count">--</span> simulations. <span id="battleground-count">--</span> battleground states.</p>
+        <p><span id="sim-count">--</span> simulations. <span id="battleground-count">--</span> battleground states (25-75% win probability).</p>
       </div>
       <div class="map-wrap">
         <div>
@@ -121,15 +121,6 @@
       </div>
     </section>
 
-    <section class="dashboard-grid" aria-label="State probabilities">
-      <article class="chart-panel full-width">
-        <span class="chart-label">State-by-State Probabilities</span>
-        <div id="state-probabilities">
-          <p>Loading forecast...</p>
-        </div>
-      </article>
-    </section>
-
     <section class="dashboard-grid" aria-label="Historical backtest">
       <article class="chart-panel">
         <span class="chart-label">Historical Backtest</span>
@@ -140,8 +131,8 @@
     </section>
   </main>
 
-  <script src="assets/d3.v7.min.js"></script>
-  <script src="assets/us-states-10m.json"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
   <script>
     let forecastData = null;
     let usStates = null;
@@ -151,13 +142,12 @@
       const repCandidate = document.getElementById('rep-candidate').value;
       
       try {
-        const response = await fetch(`data/president-forecast.json?dem=${demCandidate}&rep=${repCandidate}`);
+        const response = await fetch(`data/president-forecast-${demCandidate}-${repCandidate}.json`);
         forecastData = await response.json();
         
         displayNationalProbability();
         displayElectoralCollege();
         displayTippingPoint();
-        displayStateProbabilities();
         displayHistoricalBacktest();
         
         if (usStates) {
@@ -187,6 +177,10 @@
       document.getElementById('run-date').textContent = forecastData.date;
       document.getElementById('sim-count').textContent = '100,000';
       
+      // Count battleground states
+      const battlegroundCount = Object.values(forecastData.states).filter(s => s.demProbability > 0.25 && s.demProbability < 0.75).length;
+      document.getElementById('battleground-count').textContent = battlegroundCount;
+      
       const demBar = document.getElementById('dem-win-bar');
       const repBar = document.getElementById('rep-win-bar');
       demBar.style.width = `${demProb * 100}%`;
@@ -199,32 +193,6 @@
 
     function displayTippingPoint() {
       // This is handled in the leverage chart
-    }
-
-    function displayStateProbabilities() {
-      const states = Object.entries(forecastData.states).sort((a, b) => b[1].ev - a[1].ev);
-      let html = '<table class="state-table"><thead><tr><th>State</th><th>EV</th><th>Dem Win %</th><th>Margin</th></tr></thead><tbody>';
-      
-      for (const [state, stateData] of states) {
-        const prob = (stateData.demProbability * 100).toFixed(1);
-        const margin = stateData.demMargin.toFixed(1);
-        const marginClass = stateData.demMargin >= 0 ? 'dem-margin' : 'rep-margin';
-        html += `
-          <tr>
-            <td>${state}</td>
-            <td>${stateData.ev}</td>
-            <td>${prob}%</td>
-            <td class="${marginClass}">${margin > 0 ? '+' : ''}${margin}</td>
-          </tr>
-        `;
-      }
-      
-      html += '</tbody></table>';
-      document.getElementById('state-probabilities').innerHTML = html;
-      
-      // Count battleground states
-      const battlegroundCount = Object.values(forecastData.states).filter(s => s.demProbability > 0.25 && s.demProbability < 0.75).length;
-      document.getElementById('battleground-count').textContent = battlegroundCount;
     }
 
     function displayHistoricalBacktest() {
@@ -430,10 +398,9 @@
     }
 
     // Load US states geojson
-    fetch('assets/us-states-10m.json')
-      .then(response => response.json())
+    d3.json('https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json')
       .then(data => {
-        usStates = data;
+        usStates = topojson.feature(data, data.objects.states);
         if (forecastData) {
           drawMap();
           drawEVHistogram();
