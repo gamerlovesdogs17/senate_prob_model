@@ -4,6 +4,16 @@ const demCandidateId = process.argv[2] || "newsom";
 const repCandidateId = process.argv[3] || "vance";
 const FORECAST_URL = new URL(`../data/president-forecast-${demCandidateId}-${repCandidateId}.json`, import.meta.url);
 
+function decodeHtml(value) {
+  return String(value || "")
+    .replace(/&amp;/g, "&")
+    .replace(/&#x27;|&#39;/g, "'")
+    .replace(/&quot;/g, "\"")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
+}
+
 // Helper function to fetch text from URL
 async function fetchText(url, cacheKey, status = null, options = {}) {
   try {
@@ -99,9 +109,12 @@ async function fetchPresidentialPolling() {
   return { byState, polls, usablePolls };
 }
 
-// Fetch generic ballot data using same approach as Senate model
+// Fetch generic ballot data using multiple sources (blended like Senate model)
 async function fetchGenericBallot() {
-  // Try Pollfinity API first (same as Senate model)
+  const margins = [];
+  const weights = [];
+  
+  // Try Pollfinity API (same as Senate model)
   const pollfinityUrl = "https://pollfinity.com/averages.json";
   const pollfinityText = await fetchText(pollfinityUrl, "pollfinityAverages", null, {
     headers: { accept: "application/json" },
@@ -118,8 +131,9 @@ async function fetchGenericBallot() {
       const genericBallotMargin = Number.isFinite(margin) ? margin : Number.isFinite(dem) && Number.isFinite(rep) ? dem - rep : null;
       
       if (Number.isFinite(genericBallotMargin)) {
+        margins.push(genericBallotMargin);
+        weights.push(1.0); // Pollfinity gets weight 1.0
         console.log(`Generic ballot from Pollfinity: ${genericBallotMargin}`);
-        return genericBallotMargin;
       }
     } catch (error) {
       console.log("Pollfinity parse error:", error.message);
@@ -137,19 +151,102 @@ async function fetchGenericBallot() {
       const data = JSON.parse(voteHubText);
       const polls = Array.isArray(data) ? data : Array.isArray(data.polls) ? data.polls : [];
       if (polls.length > 0) {
-        const latestPoll = polls[0];
-        const dem = Number(latestPoll.democrat ?? latestPoll.dem ?? latestPoll.democratic);
-        const rep = Number(latestPoll.republican ?? latestPoll.rep ?? latestPoll.gop);
-        const margin = dem - rep;
-        
-        if (Number.isFinite(margin)) {
-          console.log(`Generic ballot from VoteHub: ${margin}`);
-          return margin;
+        // Calculate weighted average from VoteHub polls
+        let weightSum = 0;
+        let weightedMargin = 0;
+        for (const poll of polls) {
+          const dem = Number(poll.democrat ?? poll.dem ?? poll.democratic);
+          const rep = Number(poll.republican ?? poll.rep ?? poll.gop);
+          const margin = dem - rep;
+          if (Number.isFinite(margin)) {
+            const weight = 1.0; // Could add more sophisticated weighting
+            weightedMargin += margin * weight;
+            weightSum += weight;
+          }
+        }
+        if (weightSum > 0) {
+          const avgMargin = weightedMargin / weightSum;
+          margins.push(avgMargin);
+          weights.push(1.0); // VoteHub gets weight 1.0
+          console.log(`Generic ballot from VoteHub: ${avgMargin.toFixed(1)} (from ${polls.length} polls)`);
         }
       }
     } catch (error) {
       console.log("VoteHub parse error:", error.message);
     }
+  }
+  
+  // Try DDHQ
+  const ddhqUrl = "https://polls.decisiondeskhq.com/averages/generic-ballot/national/lv-rv-adults";
+  const ddhqText = await fetchText(ddhqUrl, "ddhqGenericBallot", null, { timeoutMs: 15000 });
+  
+  if (ddhqText) {
+    try {
+      if (!/Vercel Security Checkpoint/i.test(ddhqText)) {
+        const flat = decodeHtml(ddhqText).replace(/\s+/g, " ");
+        const dem = Number(flat.match(/Democrat\s+([0-9]+(?:\.[0-9]+)?)%/i)?.[1]);
+        const rep = Number(flat.match(/Republican\s+([0-9]+(?:\.[0-9]+)?)%/i)?.[1]);
+        const margin = dem - rep;
+        
+        if (Number.isFinite(margin)) {
+          margins.push(margin);
+          weights.push(0.9); // DDHQ gets weight 0.9
+          console.log(`Generic ballot from DDHQ: ${margin}`);
+        }
+      }
+    } catch (error) {
+      console.log("DDHQ parse error:", error.message);
+    }
+  }
+  
+  // Try USPollingData
+  const usPollingUrl = "https://uspollingdata.com/polls/generic-ballot/";
+  const usPollingText = await fetchText(usPollingUrl, "usPollingDataGenericBallot", null, { timeoutMs: 15000 });
+  
+  if (usPollingText) {
+    try {
+      const flat = decodeHtml(usPollingText).replace(/\s+/g, " ");
+      const match = flat.match(/Democrats lead Republicans \+?([0-9]+(?:\.[0-9]+)?) points \(([0-9]+(?:\.[0-9]+)?)% vs ([0-9]+(?:\.[0-9]+)?)%\)/i)
+        || flat.match(/Democrats lead D\+([0-9]+(?:\.[0-9]+)).*?Democrats\s+([0-9]+(?:\.[0-9]+)?)%.*?Republicans\s+([0-9]+(?:\.[0-9]+)?)%/i);
+      const margin = match ? Number(match[1]) : null;
+      
+      if (Number.isFinite(margin)) {
+        margins.push(margin);
+        weights.push(0.8); // USPollingData gets weight 0.8
+        console.log(`Generic ballot from USPollingData: ${margin}`);
+      }
+    } catch (error) {
+      console.log("USPollingData parse error:", error.message);
+    }
+  }
+  
+  // Try Race to the WH
+  const raceToTheWhUrl = "https://www.racetothewh.com/polls/genericballot";
+  const raceToTheWhText = await fetchText(raceToTheWhUrl, "raceToTheWhGenericBallot", null, { timeoutMs: 12000 });
+  
+  if (raceToTheWhText) {
+    try {
+      const flat = decodeHtml(raceToTheWhText).replace(/\s+/g, " ");
+      const match = flat.match(/D\+([0-9]+(?:\.[0-9]+)?)\s*%/i)
+        || flat.match(/Democrats?\s*\+?([0-9]+(?:\.[0-9]+)?)\s*%/i);
+      const margin = match ? Number(match[1]) : null;
+      
+      if (Number.isFinite(margin) && Math.abs(margin) < 20) {
+        margins.push(margin);
+        weights.push(0.7); // Race to the WH gets weight 0.7
+        console.log(`Generic ballot from Race to the WH: ${margin}`);
+      }
+    } catch (error) {
+      console.log("Race to the WH parse error:", error.message);
+    }
+  }
+  
+  // Blend the margins using weights (like Senate model blends generic ballot)
+  if (margins.length > 0) {
+    const totalWeight = weights.reduce((a, b) => a + b, 0);
+    const weightedAvg = margins.reduce((sum, margin, i) => sum + margin * weights[i], 0) / totalWeight;
+    console.log(`Blended generic ballot from ${margins.length} sources: ${weightedAvg.toFixed(2)}`);
+    return weightedAvg;
   }
   
   // Use Senate model's blended value as fallback (5.15)
@@ -226,6 +323,47 @@ async function fetchPresidentialApproval() {
     }
   }
   
+  // Try DDHQ for Trump approval
+  const ddhqApprovalUrl = "https://polls.decisiondeskhq.com/averages/trump-approval/national";
+  const ddhqApprovalText = await fetchText(ddhqApprovalUrl, "ddhqApproval", null, { timeoutMs: 15000 });
+  
+  if (ddhqApprovalText) {
+    try {
+      if (!/Vercel Security Checkpoint/i.test(ddhqApprovalText)) {
+        const flat = decodeHtml(ddhqApprovalText).replace(/\s+/g, " ");
+        const approve = Number(flat.match(/Approve\s+([0-9]+(?:\.[0-9]+)?)%/i)?.[1]);
+        
+        if (Number.isFinite(approve)) {
+          approvals.push(approve);
+          weights.push(0.9); // DDHQ gets weight 0.9
+          console.log(`Trump approval from DDHQ: ${approve}%`);
+        }
+      }
+    } catch (error) {
+      console.log("DDHQ approval parse error:", error.message);
+    }
+  }
+  
+  // Try USPollingData for Trump approval
+  const usPollingApprovalUrl = "https://uspollingdata.com/polls/presidential-approval/";
+  const usPollingApprovalText = await fetchText(usPollingApprovalUrl, "usPollingDataApproval", null, { timeoutMs: 15000 });
+  
+  if (usPollingApprovalText) {
+    try {
+      const flat = decodeHtml(usPollingApprovalText).replace(/\s+/g, " ");
+      const match = flat.match(/([3-5][0-9](?:\.[0-9]+)?)%?\s*(?:approve|approval)/i);
+      const approve = match ? Number(match[1]) : null;
+      
+      if (Number.isFinite(approve) && approve >= 30 && approve <= 60) {
+        approvals.push(approve);
+        weights.push(0.8); // USPollingData gets weight 0.8
+        console.log(`Trump approval from USPollingData: ${approve}%`);
+      }
+    } catch (error) {
+      console.log("USPollingData approval parse error:", error.message);
+    }
+  }
+  
   // Try Silver Bulletin
   const silverUrl = "https://thesilverbullet.substack.com/p/biden-approval-rating";
   const silverText = await fetchText(silverUrl, "silverBulletinApproval", null, {
@@ -241,7 +379,7 @@ async function fetchPresidentialApproval() {
           const value = Number(match[1]);
           if (value >= 30 && value <= 60) { // Sanity check for approval
             approvals.push(value);
-            weights.push(0.8); // Silver Bulletin gets slightly lower weight
+            weights.push(0.7); // Silver Bulletin gets weight 0.7
             console.log(`Trump approval from Silver Bulletin: ${value}%`);
             break;
           }
@@ -267,7 +405,7 @@ async function fetchPresidentialApproval() {
           const value = Number(match[1]);
           if (value >= 30 && value <= 60) { // Sanity check for approval
             approvals.push(value);
-            weights.push(0.9); // Gallup gets high weight
+            weights.push(0.95); // Gallup gets high weight
             console.log(`Trump approval from Gallup: ${value}%`);
             break;
           }
@@ -275,6 +413,28 @@ async function fetchPresidentialApproval() {
       }
     } catch (error) {
       console.log("Gallup parse error:", error.message);
+    }
+  }
+  
+  // Try RealClearPolling for Trump approval
+  const rcpApprovalUrl = "https://www.realclearpolling.com/latest-polls/presidential-approval";
+  const rcpApprovalText = await fetchText(rcpApprovalUrl, "rcpApproval", null, {
+    headers: { accept: "text/html", "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" }
+  });
+  
+  if (rcpApprovalText) {
+    try {
+      const flat = decodeHtml(rcpApprovalText).replace(/\s+/g, " ");
+      const match = flat.match(/([3-5][0-9](?:\.[0-9]+)?)%?\s*(?:approve|approval)/i);
+      const approve = match ? Number(match[1]) : null;
+      
+      if (Number.isFinite(approve) && approve >= 30 && approve <= 60) {
+        approvals.push(approve);
+        weights.push(0.85); // RealClearPolling gets weight 0.85
+        console.log(`Trump approval from RealClearPolling: ${approve}%`);
+      }
+    } catch (error) {
+      console.log("RealClearPolling approval parse error:", error.message);
     }
   }
   
