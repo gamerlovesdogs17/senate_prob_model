@@ -15,6 +15,10 @@ function decodeHtml(value) {
     .replace(/&gt;/g, ">");
 }
 
+function stripHtml(value) {
+  return decodeHtml(String(value || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim());
+}
+
 function readSenateForecast() {
   try {
     return JSON.parse(readFileSync(SENATE_FORECAST_URL, "utf8"));
@@ -120,12 +124,22 @@ async function fetchPresidentialPolling() {
     headers: { accept: "text/html", "user-agent": "CapitolForecastBot/1.0 (+https://github.com/)" }
   });
   
-  if (!text) return { byState: {}, polls: 0, usablePolls: 0 };
-  
   const byState = {};
-  const lines = htmlToLines(text);
   let polls = 0;
   let usablePolls = 0;
+
+  if (!text) {
+    const psiPolls = await fetchPublicSentimentInstitutePolling();
+    for (const poll of psiPolls) {
+      byState.National ||= [];
+      byState.National.push(poll);
+      polls += 1;
+      usablePolls += 1;
+    }
+    return { byState, polls, usablePolls, sources: psiPolls.length ? ["Public Sentiment Institute"] : [] };
+  }
+  
+  const lines = htmlToLines(text);
   
   for (let index = 0; index < lines.length; index += 1) {
     const title = lines[index];
@@ -158,8 +172,53 @@ async function fetchPresidentialPolling() {
     usablePolls += 1;
   }
   
+  const psiPolls = await fetchPublicSentimentInstitutePolling();
+  for (const poll of psiPolls) {
+    byState.National ||= [];
+    byState.National.push(poll);
+    polls += 1;
+    usablePolls += 1;
+  }
+
   console.log(`Fetched ${usablePolls} usable presidential polls from ${polls} total polls`);
-  return { byState, polls, usablePolls };
+  return { byState, polls, usablePolls, sources: psiPolls.length ? ["RealClearPolling", "Public Sentiment Institute"] : ["RealClearPolling"] };
+}
+
+async function fetchPublicSentimentInstitutePolling() {
+  if (!(demCandidateId === "newsom" && repCandidateId === "vance")) return [];
+  const url = "https://www.publicsentimentinstitute.com/polling/2028polling";
+  const text = await fetchText(url, "publicSentimentInstitute2028", null, {
+    headers: { accept: "text/html", "user-agent": "CapitolForecastBot/1.0 (+https://github.com/)" }
+  });
+  if (!text) return [];
+
+  const rows = [...text.matchAll(/<tr>([\s\S]*?)<\/tr>/g)].map(match => match[1]);
+  const matchupPolls = [];
+  for (const row of rows) {
+    if (!/p28-rep-col/.test(row) || !/p28-dem-col/.test(row)) continue;
+    const pollster = stripHtml(row.match(/<span>([^<]+)<\/span>/)?.[1] || "Public Sentiment Institute");
+    const cells = [...row.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/g)].map(cell => stripHtml(cell[1]));
+    const date = cells.find(cell => /^\d{4}-\d{2}-\d{2}$/.test(cell)) || "2026-02-28";
+    const sampleCell = cells.find(cell => /[\d,]+/.test(cell) && !/^\d{4}-/.test(cell)) || "";
+    const sample = Number(String(sampleCell).replace(/[^0-9]/g, "")) || 1000;
+    const rep = Number(row.match(/p28-rep-col">([0-9.]+)/)?.[1]);
+    const dem = Number(row.match(/p28-dem-col">([0-9.]+)/)?.[1]);
+    const explicitWeight = Number(row.match(/×([0-9.]+)/)?.[1]) || 1;
+    if (!Number.isFinite(rep) || !Number.isFinite(dem)) continue;
+    const sampleWeight = clamp(Math.sqrt(sample / 1000), 0.6, 1.9);
+    matchupPolls.push({
+      state: "National",
+      pollster,
+      date,
+      endDate: date,
+      margin: dem - rep,
+      weight: clamp(explicitWeight * sampleWeight, 0.45, 3.8),
+      source: "Public Sentiment Institute",
+      title: "2028 national matchup polling: Newsom vs. Vance"
+    });
+  }
+  if (matchupPolls.length) console.log(`Public Sentiment Institute national matchup polls: ${matchupPolls.length}`);
+  return matchupPolls;
 }
 
 // Fetch generic ballot data using multiple sources (blended like Senate model)
@@ -548,25 +607,95 @@ async function fetchConsumerSentiment() {
   return { value: 75, source: "fallback neutral", date: null };
 }
 
-// Fetch candidate favorability from polling
+const STORED_FAVORABILITY = {
+  "Gavin Newsom": 40,
+  "Andy Beshear": 43,
+  "Josh Shapiro": 41,
+  "Pete Buttigieg": 44,
+  "Gretchen Whitmer": 42,
+  "Alexandria Ocasio-Cortez": 38,
+  "JD Vance": 37,
+  "Marco Rubio": 40,
+  "Ron DeSantis": 38,
+  "Nikki Haley": 40,
+  "Ted Cruz": 36
+};
+
+const BALLOTLINE_FAVORABILITY_SLUGS = {
+  "Gavin Newsom": "newsom",
+  "Alexandria Ocasio-Cortez": "aoc",
+  "JD Vance": "vance"
+};
+
+function parseBallotlineFavorability(text) {
+  const greenCard = text.match(/border-color:\s*#00AB5A[\s\S]*?<span>(\d+)<span[\s\S]*?>(?:<!--\[-->)?\.?(\d+)[\s\S]*?Favorable/i);
+  if (greenCard) {
+    const value = Number(`${greenCard[1]}.${greenCard[2]}`);
+    if (Number.isFinite(value) && value > 0 && value < 100) return value;
+  }
+
+  const tableMatch = stripHtml(text).match(/Latest Polls[\s\S]*?([0-9.]+)%\s+([0-9.]+)%\s+(Favorable|Unfavorable)/i);
+  if (tableMatch) {
+    const first = Number(tableMatch[1]);
+    const second = Number(tableMatch[2]);
+    const favorableFirst = /DATES\s+SAMPLE\s+POLLSTER\s+Favorable\s+Unfavorable/i.test(stripHtml(text));
+    const value = favorableFirst ? first : second;
+    if (Number.isFinite(value)) return value;
+  }
+  return null;
+}
+
+async function fetchBallotlineFavorability(candidateName) {
+  const slug = BALLOTLINE_FAVORABILITY_SLUGS[candidateName];
+  if (!slug) return null;
+  const url = `https://ballotline.com/polls/${slug}-favorability`;
+  const text = await fetchText(url, "ballotlineFavorability", null, {
+    headers: { accept: "text/html", "user-agent": "CapitolForecastBot/1.0 (+https://github.com/)" }
+  });
+  if (!text) return null;
+  const favorable = parseBallotlineFavorability(text);
+  if (!Number.isFinite(favorable)) return null;
+  return { favorable, source: "Ballotline favorability average", url };
+}
+
+async function fetchUSPollingDataFavorability(candidateName) {
+  const url = "https://uspollingdata.com/polls/favorability-tracker/";
+  const text = await fetchText(url, "usPollingDataFavorability", null, {
+    headers: { accept: "text/html", "user-agent": "CapitolForecastBot/1.0 (+https://github.com/)" }
+  });
+  if (!text) return null;
+  const plain = stripHtml(text);
+  const escaped = candidateName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = plain.match(new RegExp(`${escaped}[^0-9]{0,80}([0-9]+(?:\\.[0-9]+)?)%\\s+([0-9]+(?:\\.[0-9]+)?)%`, "i"));
+  if (!match) return null;
+  const favorable = Number(match[1]);
+  if (!Number.isFinite(favorable)) return null;
+  return { favorable, source: "USPollingData favorability tracker", url };
+}
+
 async function fetchCandidateFavorability(candidateName) {
-  // Try to fetch favorability from polling data
-  // This is a placeholder - would need to parse polling data for favorability
-  const favorabilityMap = {
-    "Gavin Newsom": 40,
-    "Andy Beshear": 43,
-    "Josh Shapiro": 41,
-    "Pete Buttigieg": 44,
-    "Gretchen Whitmer": 42,
-    "Alexandria Ocasio-Cortez": 38,
-    "JD Vance": 37,
-    "Marco Rubio": 40,
-    "Ron DeSantis": 38,
-    "Nikki Haley": 40,
-    "Ted Cruz": 36
+  const liveSources = [
+    await fetchBallotlineFavorability(candidateName),
+    await fetchUSPollingDataFavorability(candidateName)
+  ].filter(Boolean);
+
+  if (liveSources.length) {
+    const favorable = liveSources.reduce((sum, source) => sum + source.favorable, 0) / liveSources.length;
+    console.log(`Favorability for ${candidateName}: ${favorable.toFixed(1)}% (${liveSources.map(source => source.source).join(", ")})`);
+    return {
+      value: favorable,
+      live: true,
+      sources: liveSources
+    };
+  }
+
+  const fallback = STORED_FAVORABILITY[candidateName] || 40;
+  console.log(`Favorability for ${candidateName}: ${fallback.toFixed(1)}% (stored fallback)`);
+  return {
+    value: fallback,
+    live: false,
+    sources: [{ source: "Stored fallback estimate", favorable: fallback }]
   };
-  
-  return favorabilityMap[candidateName] || 40;
 }
 
 const SETTINGS = {
@@ -1222,8 +1351,8 @@ async function main() {
   const repFavorability = await fetchCandidateFavorability(repCandidate.name);
   
   // Update candidates with fetched favorability
-  demCandidate.favorability = demFavorability;
-  repCandidate.favorability = repFavorability;
+  demCandidate.favorability = demFavorability.value;
+  repCandidate.favorability = repFavorability.value;
   
   // Fundamentals using fetched data
   const fundamentals = {
@@ -1256,7 +1385,12 @@ async function main() {
     consumerSentiment: economicIndicators.consumerSentiment,
     polling: {
       presidentialPolls: pollingData?.polls || 0,
-      usablePresidentialPolls: pollingData?.usablePolls || 0
+      usablePresidentialPolls: pollingData?.usablePolls || 0,
+      sources: pollingData?.sources || []
+    },
+    candidateFavorability: {
+      [demCandidate.id]: demFavorability,
+      [repCandidate.id]: repFavorability
     },
     currentCycleSignals: {
       source: "2026 Senate state forecast margins, lightly blended where available",

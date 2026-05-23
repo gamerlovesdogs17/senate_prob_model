@@ -57,7 +57,7 @@
         <li><strong>Home-state:</strong> direct home-state lift, with a separate swing-state fit table for candidates with obvious regional strengths.</li>
         <li><strong>State fit:</strong> bounded adjustments for traits such as Appalachia, Sun Belt, Midwest, suburbs, rural states, Hispanic-heavy states, and independent-leaning states.</li>
         <li><strong>Ideology:</strong> small penalties or bonuses in states where the candidate profile is a poor or strong fit.</li>
-        <li><strong>Favorability and electability:</strong> modest national candidate terms; they are capped so they cannot swamp state fundamentals.</li>
+        <li><strong>Favorability and electability:</strong> live national favorability averages when reachable, with stored fallback estimates for candidates without consistent public averages.</li>
       </ul>
     </section>
 
@@ -130,7 +130,7 @@
         <li><strong>Presidential approval:</strong> blended from the Senate forecast cache and live approval pages when reachable.</li>
         <li><strong>Consumer sentiment:</strong> FRED UMCSENT, weighted more heavily than raw GDP because voter mood often diverges from topline growth.</li>
         <li><strong>Economic indicators:</strong> unemployment and GDP are secondary terms.</li>
-        <li><strong>State polling:</strong> included when reachable and parseable, with lower weight this early in the cycle.</li>
+        <li><strong>State and matchup polling:</strong> included when reachable and parseable, with lower weight this early in the cycle.</li>
       </ul>
       <p>National conditions pass through state elasticity, so a one-point national move does not affect Wyoming, Texas, Wisconsin, and Vermont the same way.</p>
     </section>
@@ -142,7 +142,8 @@
         <li><strong>Shared 2026 polling blend:</strong> generic ballot from the Senate forecast's stored source blend.</li>
         <li><strong>Approval:</strong> Senate Pollfinity cache plus live approval pages when reachable.</li>
         <li><strong>Consumer sentiment:</strong> FRED UMCSENT.</li>
-        <li><strong>Presidential polling:</strong> RealClearPolling pages when reachable and parseable.</li>
+        <li><strong>Presidential polling:</strong> RealClearPolling and Public Sentiment Institute pages when reachable and parseable.</li>
+        <li><strong>Candidate favorability:</strong> Ballotline and USPollingData pages where they publish a candidate average.</li>
         <li><strong>Current-cycle state signal:</strong> 2026 Senate state forecast margins, lightly weighted.</li>
       </ul>
     </section>
@@ -150,7 +151,7 @@
     <section class="text-panel" aria-label="Limitations">
       <h2>Limitations</h2>
       <ul>
-        <li>Candidate favorability still uses stored estimates until consistent live favorability feeds are available.</li>
+        <li>Some candidates still fall back to stored favorability estimates when no consistent public national average is reachable.</li>
         <li>2028 head-to-head and state polling is sparse this early.</li>
         <li>Candidate traits are intentionally bounded; they do not model campaign quality, running mates, scandals, or turnout operations.</li>
         <li>Historical presidential backtest currently covers 2020 and 2016.</li>
