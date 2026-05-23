@@ -1717,6 +1717,40 @@ button.race-board-row {
   font-size: 1.05rem;
 }
 
+.article-image {
+  margin: 18px 0;
+  max-width: 760px;
+}
+
+.article-image img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--ink);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--paper-2) 80%, white);
+}
+
+.article-image figcaption {
+  margin-top: 7px;
+  color: var(--muted);
+  font: 800 .78rem/1.35 "Segoe UI", Arial, sans-serif;
+}
+
+.article-image-small {
+  max-width: 360px;
+}
+
+.article-image-medium {
+  max-width: 620px;
+}
+
+.article-image-large,
+.article-image-full {
+  max-width: 100%;
+}
+
 .article-embeds {
   display: grid;
   gap: 12px;
@@ -1801,6 +1835,10 @@ button.race-board-row {
 .article-embed-small .history-axis,
 .article-embed-small .history-date {
   font-size: 11px;
+}
+
+.article-average-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .source-card a {
@@ -2193,6 +2231,10 @@ button.race-board-row {
 
   .home-radar-row i {
     display: none;
+  }
+
+  .article-average-grid {
+    grid-template-columns: 1fr;
   }
 
   .big-odds strong {

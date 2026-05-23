@@ -19,6 +19,9 @@ Copy this object, paste it at the top of the array after the opening [, then add
     { "type": "embed", "embed": { "type": "state-preview", "state": "OH", "size": "small", "mode": "rating" } },
     { "type": "embed", "embed": { "type": "house-district-preview", "district": "WI-03", "size": "small" } },
     { "type": "embed", "embed": { "type": "house-district-history", "district": "WI-03", "title": "Wisconsin 3 probability history", "size": "small" } },
+    { "type": "embed", "embed": { "type": "president-average", "title": "2028 matchup average", "size": "small" } },
+    { "type": "embed", "embed": { "type": "president-state-preview", "state": "PA", "dem": "beshear", "rep": "vance", "size": "small", "mode": "rating" } },
+    { "type": "image", "url": "https://example.com/image.jpg", "alt": "Short description of the image", "caption": "Optional caption.", "size": "medium" },
     { "type": "paragraph", "text": "Third paragraph." }
   ]
 }
@@ -43,6 +46,17 @@ Rules:
   - "house-district", "house-race", and "district-preview": aliases for "house-district-preview".
   - "house-district-history": a House district probability history. Requires "district": "WI-03" or another district id.
   - "house-closest": closest House districts by simulated leverage. Optional "limit": 10.
+  - "president-average": average Democratic and Republican win probability across all saved 2028 matchups.
+  - "president-win-history": national 2028 win probability for a matchup. Optional "dem": "beshear" and "rep": "vance".
+  - "president-ev-history": expected Electoral College votes for a matchup. Optional "dem": "beshear" and "rep": "vance".
+  - "president-state-preview": a narrow presidential state preview card. Requires "state": "PA". Optional "dem": "beshear", "rep": "vance", and "mode": "rating", "margin", or "probability".
+  - "president-state-history": a state's presidential probability history. Requires "state": "PA". Optional "dem": "beshear" and "rep": "vance".
+  - "president-decisive": most decisive presidential states for a matchup. Optional "dem": "beshear", "rep": "vance", and "limit": 10.
+  - "president-matchup-strength": strongest saved 2028 matchups. Optional "limit": 4.
+- Image blocks:
+  - Use { "type": "image", "url": "https://example.com/image.jpg", "alt": "Short image description", "caption": "Optional caption.", "size": "medium" }.
+  - Image "size" can be "small", "medium", "large", or "full".
+  - Image URLs can be https links or local files under assets/.
 - The optional "title" field overrides the chart heading shown in the article.
 - The optional "size" field can be "small", "medium", or "large". Use "small" for most article embeds.
 - State-preview embeds can also use "mode": "rating", "margin", or "probability". If omitted, they follow that visitor's current map color mode.

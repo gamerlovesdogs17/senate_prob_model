@@ -1675,9 +1675,10 @@ function renderArticleBody(article) {
   container.innerHTML = blocks.map((block, index) => {
     if (typeof block === "string") return `<p>${escapeHtml(block)}</p>`;
     if (block.type === "paragraph") return `<p>${escapeHtml(block.text || "")}</p>`;
+    if (block.type === "image") return articleImageMarkup(block);
     if (block.type === "embed") {
       const embed = block.embed || block;
-      const previewTypes = ["state-card", "state-preview", "map-preview", "map-state", "house-district", "house-district-preview", "house-race", "district-preview"];
+      const previewTypes = ["state-card", "state-preview", "map-preview", "map-state", "house-district", "house-district-preview", "house-race", "district-preview", "president-state-preview", "president-state", "president-map-preview"];
       const previewClass = previewTypes.includes(embed.type) ? " article-embed-state-preview" : "";
       return `
         <section class="article-embed chart-panel article-embed-${escapeHtml(embed.size || "small")}${previewClass}" data-block-index="${index}">
@@ -1697,6 +1698,26 @@ function renderArticleBody(article) {
   });
 }
 
+function safeArticleImageUrl(value) {
+  const url = String(value || "").trim();
+  if (!url) return "";
+  if (/^(https?:)?\/\//i.test(url) || /^assets\//i.test(url) || /^data\/article-images\//i.test(url)) return url;
+  return "";
+}
+
+function articleImageMarkup(block) {
+  const url = safeArticleImageUrl(block.url || block.src);
+  if (!url) return "";
+  const size = ["small", "medium", "large", "full"].includes(block.size) ? block.size : "medium";
+  const caption = block.caption ? `<figcaption>${escapeHtml(block.caption)}</figcaption>` : "";
+  return `
+    <figure class="article-image article-image-${escapeHtml(size)}">
+      <img src="${escapeHtml(url)}" alt="${escapeHtml(block.alt || block.caption || "")}" loading="lazy">
+      ${caption}
+    </figure>
+  `;
+}
+
 function legacyArticleBlocks(article) {
   const body = (article.body || []).map((text) => ({ type: "paragraph", text }));
   const embeds = (article.embeds || []).map((embed) => ({ type: "embed", embed }));
@@ -1712,9 +1733,170 @@ function embedTitle(embed) {
   if (embed.type === "house-district-history") return `${embed.district} probability history`;
   if (["house-district", "house-district-preview", "house-race", "district-preview"].includes(embed.type)) return `${embed.district} forecast preview`;
   if (embed.type === "house-closest") return "Closest House districts";
+  if (embed.type === "president-win-history") return "Presidential win probability";
+  if (embed.type === "president-ev-history") return "Expected electoral votes";
+  if (["president-state-preview", "president-state", "president-map-preview"].includes(embed.type)) return `${embed.state} presidential preview`;
+  if (embed.type === "president-state-history") return `${embed.state} presidential probability`;
+  if (embed.type === "president-decisive") return "Most decisive presidential states";
+  if (embed.type === "president-matchup-strength") return "Candidate and matchup strength";
+  if (embed.type === "president-average") return "2028 matchup average";
   if (embed.type === "seat-distribution") return "Seat distribution";
   if (embed.type === "leverage") return "Most decisive races";
   return "Forecast chart";
+}
+
+function presidentForecastForEmbed(embed = {}) {
+  if (!presidentForecasts?.length) return null;
+  const dem = String(embed.dem || embed.demCandidate || "newsom").toLowerCase();
+  const rep = String(embed.rep || embed.repCandidate || "vance").toLowerCase();
+  return presidentForecasts.find((item) => item.demCandidate === dem && item.repCandidate === rep) || presidentForecasts[0] || null;
+}
+
+function presidentHistoryPoints(model, mode) {
+  const history = Array.isArray(model.history) ? model.history : [];
+  if (history.length) {
+    return history.map((point) => ({
+      date: point.date,
+      dem: mode === "ev" ? point.demExpectedEV : point.demWinProbability,
+      rep: mode === "ev" ? point.repExpectedEV : point.repWinProbability
+    })).filter((point) => Number.isFinite(point.dem));
+  }
+  return [{
+    date: model.date || model.modelDate,
+    dem: mode === "ev" ? model.electoralCollege?.demExpectedEV : model.national?.demWinProbability,
+    rep: mode === "ev" ? model.electoralCollege?.repExpectedEV : model.national?.repWinProbability
+  }];
+}
+
+function presidentStateHistoryPoints(model, state) {
+  const stateHistory = Array.isArray(model.stateHistory?.[state]) ? model.stateHistory[state] : [];
+  if (stateHistory.length) {
+    return stateHistory.map((point) => ({ date: point.date, dem: point.demProbability, rep: 1 - point.demProbability }));
+  }
+  const stateData = model.states?.[state];
+  return [{ date: model.date || model.modelDate, dem: stateData?.demProbability || 0, rep: 1 - (stateData?.demProbability || 0) }];
+}
+
+function presidentRatingForState(stateData, mode = "rating") {
+  const signedValue = mode === "probability" ? (stateData.demProbability - .5) * 100 : stateData.demMargin;
+  const thresholds = mode === "probability"
+    ? { tilt: 2.5, lean: 10, likely: 25, safe: 45 }
+    : { tilt: 1, lean: 3, likely: 7, safe: 12 };
+  return ratingFromSignedValue(signedValue, thresholds);
+}
+
+function presidentStateLeader(model, stateData) {
+  const demLeads = stateData.demProbability >= .5;
+  const probability = demLeads ? stateData.demProbability : 1 - stateData.demProbability;
+  const projectedMargin = Math.abs(stateData.demMargin || 0);
+  return {
+    demLeads,
+    probability,
+    side: demLeads ? "D" : "R",
+    candidate: demLeads ? model.demCandidateName : model.repCandidateName,
+    projectedMargin
+  };
+}
+
+function presidentStateMarkup(model, state, mode = "rating") {
+  const stateData = model.states[state];
+  const leader = presidentStateLeader(model, stateData);
+  const rating = presidentRatingForState(stateData, mode);
+  const demName = model.demCandidateName || "Democrat";
+  const repName = model.repCandidateName || "Republican";
+  const demProb = stateData.demProbability || 0;
+  const repProb = 1 - demProb;
+  return `
+    <span class="race-kicker">${escapeHtml(STATE_NAMES[state] || state)} Presidential</span>
+    <div class="map-card-title">
+      <div class="state-code">${escapeHtml(state)}</div>
+      <span class="rating-pill ${presidentRatingBucketClass(rating)}">${escapeHtml(rating)}</span>
+    </div>
+    <h3>${escapeHtml(leader.candidate)} has a ${oneDecimal(leader.probability)} chance.</h3>
+    <div class="candidate-table" aria-label="${escapeHtml(STATE_NAMES[state] || state)} presidential forecast">
+      <div class="candidate-table-head"><span>Candidate</span><span>Chance</span></div>
+      <div class="candidate-row dem-row">
+        <span>${escapeHtml(demName)} <i class="party-badge dem-badge">D</i></span>
+        <strong>${oneDecimal(demProb)}</strong>
+      </div>
+      <div class="candidate-row rep-row">
+        <span>${escapeHtml(repName)} <i class="party-badge rep-badge">R</i></span>
+        <strong>${oneDecimal(repProb)}</strong>
+      </div>
+      <div class="candidate-margin"><span>Projected margin</span><strong>${leader.side}+${leader.projectedMargin.toFixed(1)} pts</strong></div>
+    </div>
+    <div class="prob-track" aria-label="${escapeHtml(state)} probability split">
+      <span style="width:${demProb * 100}%"></span>
+      <span style="width:${repProb * 100}%"></span>
+    </div>
+    <div class="badge-row">
+      <span>${stateData.ev} EV</span>
+      <span>${escapeHtml(presidentCandidateShortName(model.demCandidateName))} vs ${escapeHtml(presidentCandidateShortName(model.repCandidateName))}</span>
+    </div>
+  `;
+}
+
+function presidentRatingBucketClass(rating) {
+  if (rating === "Toss-up") return "tossup";
+  return String(rating || "Toss-up").toLowerCase().replace(/\s+/g, "-");
+}
+
+function renderPresidentLeverageInto(target, model, limit = 10) {
+  const states = Object.entries(model.states || {})
+    .map(([state, data]) => ({
+      state,
+      data,
+      power: Math.min(data.demProbability, 1 - data.demProbability) * (data.ev || 0)
+    }))
+    .filter((item) => item.power > 0)
+    .sort((a, b) => b.power - a.power)
+    .slice(0, limit);
+  const max = Math.max(...states.map((item) => item.power), .01);
+  target.innerHTML = states.map((item) => {
+    const leader = presidentStateLeader(model, item.data);
+    const width = clamp((item.power / max) * 100, 8, 100);
+    const leaderClass = item.data.demProbability > .55 ? "leads-dem" : item.data.demProbability < .45 ? "leads-rep" : "leads-tossup";
+    return `<button class="leverage-row ${leaderClass}" type="button" data-tip="${escapeHtml(STATE_NAMES[item.state] || item.state)}<br>${escapeHtml(leader.candidate)} ${oneDecimal(leader.probability)}<br>${item.power.toFixed(1)} deciding power"><strong>${escapeHtml(item.state)}</strong><i style="width:${width}%"></i><span>${item.power.toFixed(1)}</span></button>`;
+  }).join("");
+  bindPanelTooltipFor(target, ".leverage-row", (node) => node.dataset.tip);
+}
+
+function renderPresidentMatchupStrengthInto(target, limit = 4) {
+  const summary = presidentSummary();
+  if (!summary) {
+    target.innerHTML = `<p>Presidential forecasts not loaded.</p>`;
+    return;
+  }
+  const maxDem = Math.max(...summary.sortedDem.map((item) => item.national?.demWinProbability || 0), .01);
+  const maxRep = Math.max(...summary.sortedRep.map((item) => item.national?.repWinProbability || 0), .01);
+  const row = (item, side, max) => {
+    const prob = side === "dem" ? item.national.demWinProbability : item.national.repWinProbability;
+    const ev = side === "dem" ? item.electoralCollege.demExpectedEV : item.electoralCollege.repExpectedEV;
+    const name = side === "dem" ? `${presidentCandidateShortName(item.demCandidateName)} over ${presidentCandidateShortName(item.repCandidateName)}` : `${presidentCandidateShortName(item.repCandidateName)} over ${presidentCandidateShortName(item.demCandidateName)}`;
+    return `<button class="matchup-strength-row ${side}" type="button" data-tip="${escapeHtml(name)}<br>${oneDecimal(prob)} win chance<br>${Math.round(ev)} EV"><strong>${escapeHtml(name)}</strong><i style="width:${clamp((prob / max) * 100, 8, 100)}%"></i><span>${oneDecimal(prob)}</span></button>`;
+  };
+  target.innerHTML = `
+    <div class="matchup-strength-grid">
+      <section><h3>Best Democratic matchups</h3>${summary.sortedDem.slice(0, limit).map((item) => row(item, "dem", maxDem)).join("")}</section>
+      <section><h3>Best Republican matchups</h3>${summary.sortedRep.slice(0, limit).map((item) => row(item, "rep", maxRep)).join("")}</section>
+    </div>
+  `;
+  bindPanelTooltipFor(target, "button", (node) => node.dataset.tip);
+}
+
+function renderPresidentAverageInto(target) {
+  const summary = presidentSummary();
+  if (!summary) {
+    target.innerHTML = `<p>Presidential forecasts not loaded.</p>`;
+    return;
+  }
+  target.innerHTML = `
+    <div class="source-status-grid article-average-grid">
+      <div class="source-status-card is-ok"><span>Democratic average</span><h3>${oneDecimal(summary.demWin)}</h3><p>${Math.round(summary.demEv)} expected EV</p></div>
+      <div class="source-status-card is-warn"><span>Republican average</span><h3>${oneDecimal(summary.repWin)}</h3><p>${Math.round(summary.repEv)} expected EV</p></div>
+      <div class="source-status-card"><span>Matchups</span><h3>${summary.count}</h3><p>${escapeHtml(summary.runDate || "")}</p></div>
+    </div>
+  `;
 }
 
 function renderEmbed(target, embed) {
@@ -1832,6 +2014,91 @@ function renderEmbed(target, embed) {
     bindPanelTooltipFor(target, ".leverage-row", (node) => node.dataset.tip);
     return;
   }
+  if (embed.type === "president-win-history") {
+    const model = presidentForecastForEmbed(embed);
+    target.className = "article-embed-target history-chart";
+    if (!model) {
+      target.innerHTML = `<p>Presidential forecast not loaded.</p>`;
+      return;
+    }
+    const points = presidentHistoryPoints(model, "win");
+    renderLineChart(target, points, {
+      label: embed.title || "Presidential win probability",
+      pointHtml: (point) => `${point.date}<br>${presidentCandidateShortName(model.demCandidateName)} ${oneDecimal(point.dem)} / ${presidentCandidateShortName(model.repCandidateName)} ${oneDecimal(point.rep ?? 1 - point.dem)}`,
+      endLabel: (party, value) => `${party === "dem" ? presidentCandidateShortName(model.demCandidateName) : presidentCandidateShortName(model.repCandidateName)} ${oneDecimal(value)}`,
+      hoverLabel: (party, value) => `${party === "dem" ? presidentCandidateShortName(model.demCandidateName) : presidentCandidateShortName(model.repCandidateName)} ${oneDecimal(value)}`,
+      singleNote: "History begins once daily presidential forecast files are saved.",
+      value: (point) => point.dem
+    });
+    return;
+  }
+  if (embed.type === "president-ev-history") {
+    const model = presidentForecastForEmbed(embed);
+    target.className = "article-embed-target history-chart";
+    if (!model) {
+      target.innerHTML = `<p>Presidential forecast not loaded.</p>`;
+      return;
+    }
+    const points = presidentHistoryPoints(model, "ev");
+    renderLineChart(target, points, {
+      label: embed.title || "Expected electoral votes",
+      pointHtml: (point) => `${point.date}<br>${presidentCandidateShortName(model.demCandidateName)} ${Math.round(point.dem)} / ${presidentCandidateShortName(model.repCandidateName)} ${Math.round(point.rep)}`,
+      domain: [160, 380],
+      ticks: [350, 300, 270, 240, 190],
+      midline: 270,
+      band: 12,
+      valueFormat: (value) => String(Math.round(value)),
+      endLabel: (party, value) => `${party === "dem" ? presidentCandidateShortName(model.demCandidateName) : presidentCandidateShortName(model.repCandidateName)} ${Math.round(value)}`,
+      hoverLabel: (party, value) => `${party === "dem" ? presidentCandidateShortName(model.demCandidateName) : presidentCandidateShortName(model.repCandidateName)} ${Math.round(value)}`
+    });
+    return;
+  }
+  if (["president-state-preview", "president-state", "president-map-preview"].includes(embed.type)) {
+    const model = presidentForecastForEmbed(embed);
+    const state = String(embed.state || "").toUpperCase();
+    target.className = "article-embed-target state-preview-embed";
+    target.innerHTML = model?.states?.[state] ? presidentStateMarkup(model, state, embed.mode || embed.colorMode || "rating") : `<p>State not found.</p>`;
+    return;
+  }
+  if (embed.type === "president-state-history") {
+    const model = presidentForecastForEmbed(embed);
+    const state = String(embed.state || "").toUpperCase();
+    target.className = "article-embed-target history-chart";
+    if (!model?.states?.[state]) {
+      target.innerHTML = `<p>State not found.</p>`;
+      return;
+    }
+    const points = presidentStateHistoryPoints(model, state);
+    renderLineChart(target, points, {
+      label: embed.title || `${STATE_NAMES[state] || state} presidential probability`,
+      pointHtml: (point) => `${point.date}<br>${presidentCandidateShortName(model.demCandidateName)} ${oneDecimal(point.dem)} / ${presidentCandidateShortName(model.repCandidateName)} ${oneDecimal(point.rep ?? 1 - point.dem)}`,
+      endLabel: (party, value) => `${party === "dem" ? presidentCandidateShortName(model.demCandidateName) : presidentCandidateShortName(model.repCandidateName)} ${oneDecimal(value)}`,
+      hoverLabel: (party, value) => `${party === "dem" ? presidentCandidateShortName(model.demCandidateName) : presidentCandidateShortName(model.repCandidateName)} ${oneDecimal(value)}`,
+      singleNote: "History begins once daily presidential forecast files are saved.",
+      value: (point) => point.dem
+    });
+    return;
+  }
+  if (embed.type === "president-decisive") {
+    const model = presidentForecastForEmbed(embed);
+    target.className = "article-embed-target leverage-chart";
+    if (!model) {
+      target.innerHTML = `<p>Presidential forecast not loaded.</p>`;
+      return;
+    }
+    renderPresidentLeverageInto(target, model, embed.limit || 10);
+    return;
+  }
+  if (embed.type === "president-matchup-strength") {
+    target.className = "article-embed-target matchup-strength";
+    renderPresidentMatchupStrengthInto(target, embed.limit || 4);
+    return;
+  }
+  if (embed.type === "president-average") {
+    target.className = "article-embed-target matchup-strength";
+    renderPresidentAverageInto(target);
+    return;
+  }
   if (embed.type === "leverage") {
     target.className = "article-embed-target leverage-chart";
     renderLeverageInto(target);
@@ -1902,7 +2169,7 @@ async function init() {
   installInteractionDismiss();
   articles = await loadArticles();
   houseForecast = await loadHouseForecast();
-  if (document.getElementById("home-president-card")) {
+  if (document.getElementById("home-president-card") || document.getElementById("article-page")) {
     presidentForecasts = await loadPresidentForecasts();
   }
   updateHomeHouseSummary();
