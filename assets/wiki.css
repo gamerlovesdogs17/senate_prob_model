@@ -345,6 +345,22 @@ h3 {
   border-top-color: var(--dem);
 }
 
+.forecast-overview-card.control-dem {
+  border-top-color: var(--dem);
+}
+
+.forecast-overview-card.control-rep {
+  border-top-color: var(--rep);
+}
+
+.forecast-overview-card.control-dem b {
+  color: var(--dem);
+}
+
+.forecast-overview-card.control-rep b {
+  color: var(--rep);
+}
+
 .forecast-overview-card span {
   display: block;
   color: var(--muted);
@@ -412,6 +428,10 @@ h3 {
   grid-template-columns: 1fr 1fr;
   gap: 12px;
   margin-top: 12px;
+}
+
+.home-radar-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .home-news-grid {

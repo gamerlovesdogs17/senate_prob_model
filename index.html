@@ -30,7 +30,7 @@
       <div class="hero-main home-hero">
         <p class="kicker">Capitol Forecast</p>
         <h1 id="page-title">American election odds.</h1>
-        <p class="lede">Senate, House, and presidential forecasts.</p>
+        <p class="lede">Senate, House, and 2028 presidential forecasts.</p>
         <div class="hero-actions">
           <a class="button-link" href="senate.html">Senate</a>
           <a class="button-link" href="house.html">House</a>
@@ -44,33 +44,35 @@
         <dl>
           <div><dt>Senate</dt><dd id="home-senate-run">--</dd></div>
           <div><dt>House</dt><dd id="home-house-run">--</dd></div>
+          <div><dt>President</dt><dd id="home-president-run">--</dd></div>
           <div><dt>Senate median</dt><dd id="home-senate-median">--</dd></div>
           <div><dt>House median</dt><dd id="home-house-median">--</dd></div>
+          <div><dt>President avg EV</dt><dd id="home-president-ev">--</dd></div>
         </dl>
       </aside>
     </section>
 
     <section class="forecast-overviews" aria-label="Forecast overviews">
-      <a class="forecast-overview-card active" href="senate.html">
+      <a class="forecast-overview-card active" id="home-senate-card" href="senate.html">
         <span>Live</span>
         <strong>Senate</strong>
         <b id="home-senate-favored">--</b>
         <small><i id="home-senate-dem">--</i> D / <i id="home-senate-rep">--</i> R</small>
         <small id="home-senate-note">--</small>
       </a>
-      <a class="forecast-overview-card" href="house.html">
+      <a class="forecast-overview-card" id="home-house-card" href="house.html">
         <span id="home-house-status">Live</span>
         <strong>House</strong>
         <b id="home-house-favored">--</b>
         <small><i id="home-house-dem">--</i> D / <i id="home-house-rep">--</i> R</small>
         <small id="home-house-note">--</small>
       </a>
-      <a class="forecast-overview-card" href="president.html">
-        <span>Offline</span>
+      <a class="forecast-overview-card" id="home-president-card" href="president.html">
+        <span>Live</span>
         <strong>2028 President</strong>
-        <b>No probability</b>
-        <small>Electoral College forecast</small>
-        <small>Not yet published</small>
+        <b id="home-president-favored">--</b>
+        <small><i id="home-president-dem">--</i> D / <i id="home-president-rep">--</i> R</small>
+        <small id="home-president-note">--</small>
       </a>
     </section>
 
@@ -82,6 +84,10 @@
       <article class="chart-panel">
         <span class="chart-label">House watch</span>
         <div id="home-house-radar" class="home-radar-list"></div>
+      </article>
+      <article class="chart-panel">
+        <span class="chart-label">2028 watch</span>
+        <div id="home-president-radar" class="home-radar-list"></div>
       </article>
     </section>
 

@@ -39,11 +39,15 @@ const MONTANA_CHART_ANNOTATIONS = [
 
 let forecast = null;
 let houseForecast = null;
+let presidentForecasts = null;
 let articles = [];
 let mapColorMode = "rating";
 let houseViewMode = "board";
 let houseColorMode = "rating";
 let selectedHouseDistrictId = null;
+
+const PRESIDENT_DEM_CANDIDATES = ["newsom", "beshear", "shapiro", "buttigieg", "whitmer", "aoc"];
+const PRESIDENT_REP_CANDIDATES = ["vance", "rubio", "desantis", "haley", "cruz"];
 
 const HOUSE_DISTRICT_MAP_URL = "https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/USA_119th_Congressional_Districts_no_territories/FeatureServer/0/query?where=1%3D1&outFields=DISTRICTID,STATE_ABBR,CDFIPS,NAME,PARTY&returnGeometry=true&f=geojson&outSR=4326&resultRecordCount=2000";
 
@@ -332,6 +336,11 @@ function updateSummary() {
   setText("home-senate-run", forecast.runDate || forecast.modelDate || "--");
   setText("home-senate-median", `${forecast.medianSeats} D / ${100 - forecast.medianSeats} R`);
   setText("home-senate-note", `${forecast.races.filter((race) => race.competitive).length} competitive races`);
+  const senateCard = document.getElementById("home-senate-card");
+  if (senateCard) {
+    senateCard.classList.toggle("control-dem", favoredIsDem);
+    senateCard.classList.toggle("control-rep", !favoredIsDem);
+  }
   document.querySelectorAll(".odds-panel").forEach((panel) => {
     panel.classList.toggle("control-dem", favoredIsDem);
     panel.classList.toggle("control-rep", !favoredIsDem);
@@ -358,6 +367,50 @@ function updateHomeHouseSummary() {
   setText("home-house-run", houseForecast.runDate || houseForecast.modelDate || "--");
   setText("home-house-median", `${houseForecast.medianSeats} D / ${435 - houseForecast.medianSeats} R`);
   setText("home-house-note", `${houseForecast.districts?.filter((district) => district.competitive).length ?? "--"} competitive districts`);
+  const houseCard = document.getElementById("home-house-card");
+  if (houseCard) {
+    houseCard.classList.toggle("control-dem", favoredIsDem);
+    houseCard.classList.toggle("control-rep", !favoredIsDem);
+  }
+}
+
+function presidentCandidateShortName(name) {
+  if (!name) return "--";
+  if (String(name).includes("Ocasio-Cortez")) return "AOC";
+  const parts = String(name).trim().split(/\s+/);
+  return parts[parts.length - 1] || name;
+}
+
+function presidentSummary() {
+  if (!presidentForecasts?.length) return null;
+  const count = presidentForecasts.length;
+  const demWin = presidentForecasts.reduce((sum, item) => sum + (item.national?.demWinProbability || 0), 0) / count;
+  const repWin = presidentForecasts.reduce((sum, item) => sum + (item.national?.repWinProbability || 0), 0) / count;
+  const demEv = presidentForecasts.reduce((sum, item) => sum + (item.electoralCollege?.demExpectedEV || 0), 0) / count;
+  const repEv = presidentForecasts.reduce((sum, item) => sum + (item.electoralCollege?.repExpectedEV || 0), 0) / count;
+  const sortedDem = [...presidentForecasts].sort((a, b) => (b.national?.demWinProbability || 0) - (a.national?.demWinProbability || 0));
+  const sortedRep = [...presidentForecasts].sort((a, b) => (b.national?.repWinProbability || 0) - (a.national?.repWinProbability || 0));
+  const runDate = presidentForecasts.map((item) => item.date).filter(Boolean).sort().at(-1);
+  return { count, demWin, repWin, demEv, repEv, sortedDem, sortedRep, runDate };
+}
+
+function updateHomePresidentSummary() {
+  const summary = presidentSummary();
+  if (!summary) return;
+  const favoredIsDem = summary.demWin >= summary.repWin;
+  const favoredSide = favoredIsDem ? "Democrats" : "Republicans";
+  const favoredProbability = Math.max(summary.demWin, summary.repWin);
+  setText("home-president-favored", `${favoredSide} ${pct(favoredProbability)}`);
+  setText("home-president-dem", oneDecimal(summary.demWin));
+  setText("home-president-rep", oneDecimal(summary.repWin));
+  setText("home-president-run", summary.runDate || "--");
+  setText("home-president-ev", `${Math.round(summary.demEv)} D / ${Math.round(summary.repEv)} R`);
+  setText("home-president-note", `${summary.count} tested matchups`);
+  const card = document.getElementById("home-president-card");
+  if (card) {
+    card.classList.toggle("control-dem", favoredIsDem);
+    card.classList.toggle("control-rep", !favoredIsDem);
+  }
 }
 
 function renderHomeRadar() {
@@ -389,6 +442,33 @@ function renderHomeRadar() {
         <span>${escapeHtml(district.label || district.rating)}</span>
         <b>${district.winnerParty === "D" ? "D" : "R"} ${oneDecimal(district.winnerProbability)}</b>
         <i>${oneDecimal(district.leverage || 0)}</i>
+      </a>
+    `).join("");
+  }
+
+  const president = document.getElementById("home-president-radar");
+  const summary = presidentSummary();
+  if (president && summary) {
+    const rows = [
+      ...summary.sortedDem.slice(0, 3).map((item) => ({
+        type: "leads-dem",
+        label: `${presidentCandidateShortName(item.demCandidateName)} over ${presidentCandidateShortName(item.repCandidateName)}`,
+        value: oneDecimal(item.national?.demWinProbability || 0),
+        meta: `${item.electoralCollege?.demExpectedEV || "--"} EV`
+      })),
+      ...summary.sortedRep.slice(0, 3).map((item) => ({
+        type: "leads-rep",
+        label: `${presidentCandidateShortName(item.repCandidateName)} over ${presidentCandidateShortName(item.demCandidateName)}`,
+        value: oneDecimal(item.national?.repWinProbability || 0),
+        meta: `${item.electoralCollege?.repExpectedEV || "--"} EV`
+      }))
+    ];
+    president.innerHTML = rows.map((row) => `
+      <a class="home-radar-row ${row.type}" href="president.html">
+        <strong>2028</strong>
+        <span>${escapeHtml(row.label)}</span>
+        <b>${row.value}</b>
+        <i>${escapeHtml(String(row.meta))}</i>
       </a>
     `).join("");
   }
@@ -1787,6 +1867,25 @@ async function loadHouseForecast() {
   }
 }
 
+async function loadPresidentForecasts() {
+  const files = [];
+  PRESIDENT_DEM_CANDIDATES.forEach((dem) => {
+    PRESIDENT_REP_CANDIDATES.forEach((rep) => {
+      files.push(`data/president-forecast-${dem}-${rep}.json`);
+    });
+  });
+  const results = await Promise.all(files.map(async (file) => {
+    try {
+      const response = await fetch(file, { cache: "no-store" });
+      if (!response.ok) return null;
+      return response.json();
+    } catch {
+      return null;
+    }
+  }));
+  return results.filter(Boolean);
+}
+
 function renderLoadError(error) {
   setText("control-headline", "Forecast data unavailable");
   setText("odds-phrase", "--");
@@ -1803,7 +1902,11 @@ async function init() {
   installInteractionDismiss();
   articles = await loadArticles();
   houseForecast = await loadHouseForecast();
+  if (document.getElementById("home-president-card")) {
+    presidentForecasts = await loadPresidentForecasts();
+  }
   updateHomeHouseSummary();
+  updateHomePresidentSummary();
   renderHousePage();
   try {
     forecast = await loadForecast();
@@ -1811,14 +1914,17 @@ async function init() {
     renderLoadError(error);
     updateHomeHouseSummary();
     renderHousePage();
+    renderHomeRadar();
     renderTopArticle();
     renderHomeArticleList();
     renderArticlesList();
     renderArticlePage();
+    updateHomePresidentSummary();
     return;
   }
   updateSummary();
   updateHomeHouseSummary();
+  updateHomePresidentSummary();
   renderMapColorControls();
   renderStateMap();
   renderLegend();
