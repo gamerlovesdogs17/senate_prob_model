@@ -1751,6 +1751,40 @@ button.race-board-row {
   max-width: 100%;
 }
 
+.article-external-embed {
+  margin: 18px 0;
+  max-width: 760px;
+}
+
+.article-external-embed iframe {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--ink);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--paper-2) 80%, white);
+}
+
+.article-external-embed figcaption {
+  margin-top: 7px;
+  color: var(--muted);
+  font: 800 .78rem/1.35 "Segoe UI", Arial, sans-serif;
+}
+
+.article-external-embed-small {
+  max-width: 420px;
+}
+
+.article-external-embed-medium {
+  max-width: 620px;
+}
+
+.article-external-embed-large,
+.article-external-embed-full {
+  max-width: 100%;
+}
+
 .article-embeds {
   display: grid;
   gap: 12px;

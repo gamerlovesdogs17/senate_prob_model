@@ -1676,6 +1676,7 @@ function renderArticleBody(article) {
     if (typeof block === "string") return `<p>${escapeHtml(block)}</p>`;
     if (block.type === "paragraph") return `<p>${escapeHtml(block.text || "")}</p>`;
     if (block.type === "image") return articleImageMarkup(block);
+    if (block.type === "external-embed") return articleExternalEmbedMarkup(block);
     if (block.type === "embed") {
       const embed = block.embed || block;
       const previewTypes = ["state-card", "state-preview", "map-preview", "map-state", "house-district", "house-district-preview", "house-race", "district-preview", "president-state-preview", "president-state", "president-map-preview"];
@@ -1713,6 +1714,62 @@ function articleImageMarkup(block) {
   return `
     <figure class="article-image article-image-${escapeHtml(size)}">
       <img src="${escapeHtml(url)}" alt="${escapeHtml(block.alt || block.caption || "")}" loading="lazy">
+      ${caption}
+    </figure>
+  `;
+}
+
+function normalizedExternalEmbedUrl(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  try {
+    const url = new URL(raw, window.location.href);
+    const host = url.hostname.replace(/^www\./, "").toLowerCase();
+    if (host === "youtube.com" || host === "m.youtube.com") {
+      const videoId = url.searchParams.get("v");
+      if (videoId && /^[a-zA-Z0-9_-]{6,}$/.test(videoId)) return `https://www.youtube.com/embed/${videoId}`;
+      if (url.pathname.startsWith("/embed/")) return url.href;
+    }
+    if (host === "youtu.be") {
+      const videoId = url.pathname.replace("/", "");
+      if (videoId && /^[a-zA-Z0-9_-]{6,}$/.test(videoId)) return `https://www.youtube.com/embed/${videoId}`;
+    }
+    const allowedHosts = new Set([
+      "youtube.com",
+      "player.vimeo.com",
+      "docs.google.com",
+      "drive.google.com",
+      "datawrapper.dwcdn.net",
+      "flo.uri.sh",
+      "public.flourish.studio",
+      "observablehq.com"
+    ]);
+    if (!allowedHosts.has(host)) return "";
+    if (url.protocol !== "https:") return "";
+    return url.href;
+  } catch {
+    return "";
+  }
+}
+
+function articleExternalEmbedMarkup(block) {
+  const url = normalizedExternalEmbedUrl(block.url || block.src);
+  if (!url) {
+    return `<p class="meta">External embed URL is not supported.</p>`;
+  }
+  const size = ["small", "medium", "large", "full"].includes(block.size) ? block.size : "large";
+  const height = clamp(Number(block.height) || 420, 180, 900);
+  const caption = block.caption ? `<figcaption>${escapeHtml(block.caption)}</figcaption>` : "";
+  return `
+    <figure class="article-external-embed article-external-embed-${escapeHtml(size)}">
+      <iframe
+        src="${escapeHtml(url)}"
+        title="${escapeHtml(block.title || block.alt || "External embed")}"
+        height="${height}"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        allow="fullscreen; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen></iframe>
       ${caption}
     </figure>
   `;

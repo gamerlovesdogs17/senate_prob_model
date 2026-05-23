@@ -22,6 +22,7 @@ Copy this object, paste it at the top of the array after the opening [, then add
     { "type": "embed", "embed": { "type": "president-average", "title": "2028 matchup average", "size": "small" } },
     { "type": "embed", "embed": { "type": "president-state-preview", "state": "PA", "dem": "beshear", "rep": "vance", "size": "small", "mode": "rating" } },
     { "type": "image", "url": "https://example.com/image.jpg", "alt": "Short description of the image", "caption": "Optional caption.", "size": "medium" },
+    { "type": "external-embed", "url": "https://www.youtube.com/watch?v=VIDEO_ID", "title": "Video title", "caption": "Optional caption.", "height": 360, "size": "large" },
     { "type": "paragraph", "text": "Third paragraph." }
   ]
 }
@@ -57,6 +58,13 @@ Rules:
   - Use { "type": "image", "url": "https://example.com/image.jpg", "alt": "Short image description", "caption": "Optional caption.", "size": "medium" }.
   - Image "size" can be "small", "medium", "large", or "full".
   - Image URLs can be https links or local files under assets/.
+- External embed blocks:
+  - Use { "type": "external-embed", "url": "https://www.youtube.com/watch?v=VIDEO_ID", "title": "Video title", "caption": "Optional caption.", "height": 360, "size": "large" }.
+  - Supported iframe sources: YouTube, Vimeo player links, Google Docs/Drive embeds, Datawrapper, Flourish, and Observable.
+  - YouTube watch links and youtu.be links are automatically converted to embed links.
+  - "height" is optional and can be 180-900.
+  - "size" can be "small", "medium", "large", or "full".
+  - Pasted arbitrary HTML is not supported; use the URL only.
 - The optional "title" field overrides the chart heading shown in the article.
 - The optional "size" field can be "small", "medium", or "large". Use "small" for most article embeds.
 - State-preview embeds can also use "mode": "rating", "margin", or "probability". If omitted, they follow that visitor's current map color mode.
