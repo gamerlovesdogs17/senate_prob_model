@@ -796,13 +796,15 @@ dd {
   top: 92px;
 }
 
-#senate-map {
+#senate-map,
+#president-map {
   min-height: 430px;
   width: 100%;
   overflow: hidden;
 }
 
-#senate-map svg {
+#senate-map svg,
+#president-map svg {
   width: 100%;
   height: auto;
   display: block;
@@ -2042,11 +2044,13 @@ button.leverage-row {
     transform: scale(1.15);
   }
 
-  #senate-map {
+  #senate-map,
+  #president-map {
     min-height: 230px;
   }
 
-  #senate-map svg {
+  #senate-map svg,
+  #president-map svg {
     width: 100%;
     max-height: 330px;
   }

@@ -39,19 +39,19 @@
       <aside class="odds-panel" aria-label="Win probability">
         <span class="panel-label">National win probability</span>
         <div>
-          <div id="odds-phrase" class="big-odds">--</div>
-          <p id="winner-headline">Calculating</p>
+          <div id="president-odds-phrase" class="big-odds">--</div>
+          <p id="president-winner-headline">Calculating</p>
         </div>
         <div class="control-bar" aria-hidden="true">
           <span id="dem-win-bar"></span>
           <span id="rep-win-bar"></span>
         </div>
         <dl>
-          <div><dt>Democratic win</dt><dd id="dem-win">--</dd></div>
-          <div><dt>Republican win</dt><dd id="rep-win">--</dd></div>
-          <div><dt>Median EV outcome</dt><dd id="median-ev">--</dd></div>
-          <div><dt>Tipping point</dt><dd id="tipping-point-display">--</dd></div>
-          <div><dt>Run</dt><dd id="run-date">--</dd></div>
+          <div><dt>Democratic win</dt><dd id="president-dem-win">--</dd></div>
+          <div><dt>Republican win</dt><dd id="president-rep-win">--</dd></div>
+          <div><dt>Median EV outcome</dt><dd id="president-median-ev">--</dd></div>
+          <div><dt>Tipping point</dt><dd id="president-tipping-point-display">--</dd></div>
+          <div><dt>Run</dt><dd id="president-run-date">--</dd></div>
         </dl>
       </aside>
     </section>
@@ -62,16 +62,16 @@
           <p class="kicker">Electoral College</p>
           <h2 id="map-title">The 2028 battleground.</h2>
         </div>
-        <p><span id="sim-count">--</span> simulations. <span id="battleground-count">--</span> battleground states (25-75% win probability).</p>
+        <p><span id="president-sim-count">--</span> simulations. <span id="president-battleground-count">--</span> battleground states (25-75% win probability).</p>
       </div>
       <div class="map-wrap">
         <div>
           <div id="president-map"></div>
-          <div id="map-color-controls" class="map-color-controls" aria-label="Map color mode"></div>
-          <div id="map-legend" class="map-legend" aria-label="Race rating legend"></div>
+          <div id="president-map-color-controls" class="map-color-controls" aria-label="Map color mode"></div>
+          <div id="president-map-legend" class="map-legend" aria-label="Race rating legend"></div>
           <p class="map-note">Map shows Democratic win probability by state.</p>
         </div>
-        <aside id="map-hover-card" class="hover-card"></aside>
+        <aside id="president-map-hover-card" class="hover-card"></aside>
       </div>
     </section>
 
@@ -82,7 +82,7 @@
       </article>
       <article class="chart-panel">
         <span class="chart-label">Most decisive states by simulated election-deciding power</span>
-        <div id="leverage-chart" class="leverage-chart"></div>
+        <div id="president-leverage-chart" class="leverage-chart"></div>
       </article>
       <article class="chart-panel chart-wide">
         <span class="chart-label">National win probability over time</span>
@@ -147,7 +147,7 @@
   <script src="assets/wiki.js"></script>
   <script>
     let forecastData = null;
-    let mapColorMode = "probability";
+    let presidentMapColorMode = "probability";
     let usStates = null;
 
     const PRESIDENTIAL_MAP_COLOR_MODES = {
@@ -167,13 +167,14 @@
         renderStateMap();
         renderHistogram();
         renderLeverageChart();
+        renderPresidentHistoryCharts();
         renderMapColorControls();
         renderLegend();
         displayStateProbabilities();
         displayHistoricalBacktest();
       } catch (error) {
         console.error('Error loading forecast:', error);
-        document.getElementById('odds-phrase').textContent = 'Error loading forecast';
+        document.getElementById('president-odds-phrase').textContent = 'Error loading forecast';
       }
     }
 
@@ -181,20 +182,22 @@
       const demProb = forecastData.national.demWinProbability;
       const repProb = forecastData.national.repWinProbability;
       
-      document.getElementById('odds-phrase').textContent = `${(demProb * 100).toFixed(1)}%`;
-      document.getElementById('winner-headline').textContent = demProb > 0.5 ? 
+      const favoredIsDem = demProb >= repProb;
+      const favoredProb = Math.max(demProb, repProb);
+      document.getElementById('president-odds-phrase').innerHTML = `<span>${favoredIsDem ? "Democrats" : "Republicans"} favored</span><strong>${Math.round(favoredProb * 100)}%</strong>`;
+      document.getElementById('president-winner-headline').textContent = demProb > 0.5 ?
         `${forecastData.demCandidateName} favored` : 
         `${forecastData.repCandidateName} favored`;
       
-      document.getElementById('dem-win').textContent = `${(demProb * 100).toFixed(1)}%`;
-      document.getElementById('rep-win').textContent = `${(repProb * 100).toFixed(1)}%`;
-      document.getElementById('median-ev').textContent = `${forecastData.electoralCollege.demExpectedEV}-${forecastData.electoralCollege.repExpectedEV}`;
-      document.getElementById('tipping-point-display').textContent = forecastData.tippingPoint.state;
-      document.getElementById('run-date').textContent = forecastData.date;
-      document.getElementById('sim-count').textContent = '100,000';
+      document.getElementById('president-dem-win').textContent = `${(demProb * 100).toFixed(1)}%`;
+      document.getElementById('president-rep-win').textContent = `${(repProb * 100).toFixed(1)}%`;
+      document.getElementById('president-median-ev').textContent = `${forecastData.electoralCollege.demExpectedEV} D / ${forecastData.electoralCollege.repExpectedEV} R`;
+      document.getElementById('president-tipping-point-display').textContent = forecastData.tippingPoint.state;
+      document.getElementById('president-run-date').textContent = forecastData.date;
+      document.getElementById('president-sim-count').textContent = '100,000';
       
       const battlegroundCount = Object.values(forecastData.states).filter(s => s.demProbability > 0.25 && s.demProbability < 0.75).length;
-      document.getElementById('battleground-count').textContent = battlegroundCount;
+      document.getElementById('president-battleground-count').textContent = battlegroundCount;
       
       const demBar = document.getElementById('dem-win-bar');
       const repBar = document.getElementById('rep-win-bar');
@@ -236,7 +239,7 @@
           .attr("tabindex", (feature) => forecastData.states[FIPS_TO_STATE[String(feature.id).padStart(2, "0")]] ? 0 : -1)
           .on("mouseenter focus", (event, feature) => updateHoverCard(forecastData.states[FIPS_TO_STATE[String(feature.id).padStart(2, "0")]]))
           .on("mouseout", () => {
-            document.getElementById('map-hover-card').style.display = 'none';
+            document.getElementById('president-map-hover-card').style.display = 'none';
           })
           .append("title")
           .text((feature) => {
@@ -251,7 +254,7 @@
     }
 
     function stateColor(stateData) {
-      if (mapColorMode === "probability") {
+      if (presidentMapColorMode === "probability") {
         const prob = stateData.demProbability;
         if (prob > 0.75) return "#0066cc";
         if (prob > 0.5) return "#6699cc";
@@ -294,7 +297,7 @@
     }
 
     function updateHoverCard(stateData) {
-      const hoverCard = document.getElementById('map-hover-card');
+      const hoverCard = document.getElementById('president-map-hover-card');
       if (!stateData) {
         hoverCard.style.display = 'none';
         return;
@@ -326,20 +329,30 @@
       const maxEV = Math.max(...evs);
       const maxCount = Math.max(...Object.values(counts));
       const sims = 100000;
-      const binCount = Math.min(maxEV - minEV + 1, 50);
+      const binCount = Math.min(maxEV - minEV + 1, 42);
+      const binWidth = Math.max(1, Math.ceil((maxEV - minEV + 1) / binCount));
+      const bins = Array.from({ length: Math.ceil((maxEV - minEV + 1) / binWidth) }, (_, index) => {
+        const start = minEV + index * binWidth;
+        const end = Math.min(maxEV, start + binWidth - 1);
+        const value = Object.entries(counts).reduce((sum, [ev, count]) => {
+          const numeric = Number(ev);
+          return numeric >= start && numeric <= end ? sum + count : sum;
+        }, 0);
+        return { start, end, value };
+      });
       
-      container.style.gridTemplateColumns = `repeat(${binCount}, minmax(0, 1fr))`;
-      container.innerHTML = Array.from({ length: binCount }, (_, i) => {
-        const ev = minEV + i;
-        const value = counts[ev] || 0;
+      container.style.gridTemplateColumns = `repeat(${bins.length}, minmax(0, 1fr))`;
+      container.innerHTML = bins.map((bin) => {
+        const value = bin.value;
         const share = sims ? value / sims : 0;
         const height = maxCount ? clamp((value / maxCount), .02, 1) : .02;
-        return `<button class="seat-bin" type="button" data-tip="${ev} Democratic EV<br>${(share * 100).toFixed(1)}% of simulations"><i style="--bar-scale:${height}"></i><span>${ev}</span></button>`;
+        const label = bin.start === bin.end ? `${bin.start}` : `${bin.start}-${bin.end}`;
+        return `<button class="seat-bin" type="button" data-tip="${label} Democratic EV<br>${(share * 100).toFixed(1)}% of simulations"><i style="--bar-scale:${height}"></i><span>${label}</span></button>`;
       }).join("");
     }
 
     function renderLeverageChart() {
-      const container = document.getElementById("leverage-chart");
+      const container = document.getElementById("president-leverage-chart");
       if (!container || !forecastData) return;
       
       const states = Object.entries(forecastData.states)
@@ -353,44 +366,70 @@
         .sort((a, b) => b.tippingPower - a.tippingPower)
         .slice(0, 10);
       
-      let html = '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th>State</th><th>EV</th><th>Dem Win %</th><th>Tipping Power</th></tr></thead><tbody>';
-      
-      for (const s of states) {
-        const prob = (s.prob * 100).toFixed(1);
-        const marginClass = s.prob > 0.5 ? 'dem-margin' : 'rep-margin';
-        html += `
-          <tr>
-            <td>${s.state}</td>
-            <td>${s.ev}</td>
-            <td class="${marginClass}">${prob}%</td>
-            <td>${s.tippingPower.toFixed(2)}</td>
-          </tr>
-        `;
+      const max = Math.max(...states.map((state) => state.tippingPower), .01);
+      container.innerHTML = states.map((s) => {
+        const width = clamp((s.tippingPower / max) * 100, 8, 100);
+        const leaderClass = s.prob > .55 ? "leads-dem" : s.prob < .45 ? "leads-rep" : "leads-tossup";
+        return `<button class="leverage-row ${leaderClass}" type="button"><strong>${s.state}</strong><i style="width:${width}%"></i><span>${s.tippingPower.toFixed(1)}</span></button>`;
+      }).join("");
+    }
+
+    function renderPresidentHistoryCharts() {
+      const winChart = document.getElementById("win-history-chart");
+      const evChart = document.getElementById("ev-history-chart");
+      if (winChart && forecastData) {
+        const point = {
+          date: forecastData.date,
+          dem: forecastData.national.demWinProbability,
+          rep: forecastData.national.repWinProbability
+        };
+        renderLineChart(winChart, [point], {
+          label: "2028 presidential win probability",
+          pointHtml: (item) => `${item.date}<br>D ${(item.dem * 100).toFixed(1)}% / R ${(item.rep * 100).toFixed(1)}%`,
+          singleNote: "History begins once daily presidential forecast files are saved."
+        });
       }
-      
-      html += '</tbody></table>';
-      container.innerHTML = html;
+      if (evChart && forecastData) {
+        const point = {
+          date: forecastData.date,
+          dem: forecastData.electoralCollege.demExpectedEV,
+          rep: forecastData.electoralCollege.repExpectedEV
+        };
+        renderLineChart(evChart, [point], {
+          label: "Expected electoral votes",
+          pointHtml: (item) => `${item.date}<br>D ${Math.round(item.dem)} / R ${Math.round(item.rep)}`,
+          domain: [160, 380],
+          ticks: [350, 300, 270, 240, 190],
+          midline: 270,
+          band: 12,
+          valueFormat: (value) => String(Math.round(value)),
+          endLabel: (party, value) => `${party === "dem" ? "Democrat" : "Republican"} ${Math.round(value)}`,
+          hoverLabel: (party, value) => `${party === "dem" ? "Democrat" : "Republican"} ${Math.round(value)}`,
+          singleNote: "History begins once daily presidential forecast files are saved."
+        });
+      }
     }
 
     function renderMapColorControls() {
-      const container = document.getElementById("map-color-controls");
+      const container = document.getElementById("president-map-color-controls");
       if (!container) return;
       container.innerHTML = Object.entries(PRESIDENTIAL_MAP_COLOR_MODES).map(([mode, label]) => (
-        `<button type="button" class="${mode === mapColorMode ? "active" : ""}" data-map-color="${mode}">${label}</button>`
+        `<button type="button" class="${mode === presidentMapColorMode ? "active" : ""}" data-map-color="${mode}">${label}</button>`
       )).join("");
       container.querySelectorAll("button").forEach((button) => {
         button.addEventListener("click", () => {
-          mapColorMode = button.dataset.mapColor || "probability";
+          presidentMapColorMode = button.dataset.mapColor || "probability";
           renderMapColorControls();
           renderStateMap();
+          renderLegend();
         });
       });
     }
 
     function renderLegend() {
-      const legend = document.getElementById("map-legend");
+      const legend = document.getElementById("president-map-legend");
       if (!legend) return;
-      if (mapColorMode === "probability") {
+      if (presidentMapColorMode === "probability") {
         legend.innerHTML = `
           <span><i style="background-color:#0066cc"></i>Strong D (>75%)</span>
           <span><i style="background-color:#6699cc"></i>Lean D (50-75%)</span>
