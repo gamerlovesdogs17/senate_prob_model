@@ -495,13 +495,38 @@ async function fetchPresidentialApproval() {
 
 // Fetch economic indicators
 async function fetchEconomicIndicators() {
-  // Use current economic conditions as baseline
-  // These would be updated with real-time data when available
   const currentUnemployment = 4.0; // Current approximate unemployment rate
   const currentGDPGrowth = 2.0; // Current approximate GDP growth
+  const consumerSentiment = await fetchConsumerSentiment();
   
-  console.log(`Using economic indicators: unemployment ${currentUnemployment}%, GDP growth ${currentGDPGrowth}%`);
-  return { gdpGrowth: currentGDPGrowth, unemployment: currentUnemployment };
+  console.log(`Using economic indicators: unemployment ${currentUnemployment}%, GDP growth ${currentGDPGrowth}%, consumer sentiment ${consumerSentiment.value}`);
+  return { gdpGrowth: currentGDPGrowth, unemployment: currentUnemployment, consumerSentiment };
+}
+
+async function fetchConsumerSentiment() {
+  const fredUrl = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=UMCSENT";
+  const fredText = await fetchText(fredUrl, "fredUmichSentiment", null, {
+    headers: { accept: "text/csv", "user-agent": "CapitolForecastBot/1.0 (+https://github.com/)" }
+  });
+
+  if (fredText) {
+    try {
+      const rows = fredText.trim().split(/\r?\n/).slice(1).map((line) => {
+        const [date, value] = line.split(",");
+        return { date, value: Number(value) };
+      }).filter((row) => row.date && Number.isFinite(row.value));
+      const latest = rows[rows.length - 1];
+      if (latest) {
+        console.log(`Consumer sentiment from FRED UMCSENT: ${latest.value} (${latest.date})`);
+        return { value: latest.value, source: "FRED UMCSENT", date: latest.date };
+      }
+    } catch (error) {
+      console.log("FRED consumer sentiment parse error:", error.message);
+    }
+  }
+
+  console.log("Could not fetch consumer sentiment, using neutral 75");
+  return { value: 75, source: "fallback neutral", date: null };
 }
 
 // Fetch candidate favorability from polling
@@ -806,8 +831,10 @@ function calculateStateMargin(state, demCandidate, repCandidate, fundamentals, p
   const modifiers = calculateCandidateModifiers(state, demCandidate, repCandidate);
   
   const approvalAdjustment = Number.isFinite(fundamentals.approval) ? (45 - fundamentals.approval) * 0.16 : 0;
-  const economyAdjustment = ((4 - (fundamentals.unemployment ?? 4)) * -0.25) + (((fundamentals.gdpGrowth ?? 2) - 2) * -0.18);
-  const fundamentalsAdjustment = ((fundamentals.nationalShift || 0) * 0.45) + approvalAdjustment + economyAdjustment;
+  const sentiment = Number(fundamentals.consumerSentiment?.value);
+  const sentimentAdjustment = Number.isFinite(sentiment) ? clamp((75 - sentiment) * 0.055, -2.2, 2.2) : 0;
+  const economyAdjustment = ((4 - (fundamentals.unemployment ?? 4)) * -0.12) + (((fundamentals.gdpGrowth ?? 2) - 2) * -0.08);
+  const fundamentalsAdjustment = ((fundamentals.nationalShift || 0) * 0.45) + approvalAdjustment + sentimentAdjustment + economyAdjustment;
   const trendAdjustment = STATE_LONG_TERM_TRENDS[state] || 0;
   
   // Apply polling data if available
@@ -999,6 +1026,7 @@ function buildForecast(demCandidate, repCandidate, fundamentals, pollingData = n
       stateVolatilityStates: Object.keys(STATE_VOLATILITY).length,
       nationalShift: fundamentals.nationalShift,
       approval: fundamentals.approval,
+      consumerSentiment: fundamentals.consumerSentiment,
       gdpGrowth: fundamentals.gdpGrowth,
       unemployment: fundamentals.unemployment
     }
@@ -1102,6 +1130,7 @@ async function main() {
   const fundamentals = {
     nationalShift: genericBallot, // Generic ballot margin
     approval: presidentialApproval, // Presidential approval
+    consumerSentiment: economicIndicators.consumerSentiment,
     gdpGrowth: economicIndicators.gdpGrowth,
     unemployment: economicIndicators.unemployment
   };
@@ -1124,6 +1153,7 @@ async function main() {
       netApproximation: (presidentialApproval * 2) - 100,
       sources: "Senate Pollfinity cache plus live approval pages when reachable"
     },
+    consumerSentiment: economicIndicators.consumerSentiment,
     polling: {
       presidentialPolls: pollingData?.polls || 0,
       usablePresidentialPolls: pollingData?.usablePolls || 0
