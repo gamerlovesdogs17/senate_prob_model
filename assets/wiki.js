@@ -175,6 +175,42 @@ function inputQualityText(race) {
   return `${quality.label} (${quality.score}/100)`;
 }
 
+function houseInputConfidence(district) {
+  if (!district) return { score: 0, label: "Unscored", reasons: [] };
+  let score = 56;
+  const reasons = [];
+  if (district.sourceRating || district.insideRating || district.baselineRating) score += 12;
+  else reasons.push("rating fallback");
+  if (Number.isFinite(district.presidentialMargin)) score += 8;
+  else reasons.push("missing presidential baseline");
+  if (Number.isFinite(district.congressionalMargin)) score += 7;
+  else reasons.push("missing recent House baseline");
+  if (district.open) {
+    score -= 7;
+    reasons.push("open seat");
+  }
+  if (Math.abs(district.margin || 0) < 4) {
+    score -= 5;
+    reasons.push("close district");
+  }
+  if (!district.demCandidate || !district.repCandidate) {
+    score -= 8;
+    reasons.push("candidate field incomplete");
+  }
+  const label = score >= 75 ? "High input confidence" : score >= 55 ? "Medium input confidence" : "Low input confidence";
+  return { score: Math.round(clamp(score, 25, 90)), label, reasons };
+}
+
+function houseMovementText(district) {
+  const history = district?.history || [];
+  if (history.length < 2) return "No prior run";
+  const latest = history.at(-1);
+  const previous = history.at(-2);
+  const change = (latest.dem ?? district.demProbability) - (previous.dem ?? previous.demProbability ?? district.demProbability);
+  if (!Number.isFinite(change) || Math.abs(change) < .0005) return "No change";
+  return `${change > 0 ? "D" : "R"} +${Math.abs(change * 100).toFixed(1)} since last run`;
+}
+
 function signedDriverChange(value) {
   if (!Number.isFinite(value)) return "";
   if (Math.abs(value) < .05) return "0.0";
@@ -471,6 +507,61 @@ function renderHomeRadar() {
         <i>${escapeHtml(String(row.meta))}</i>
       </a>
     `).join("");
+  }
+}
+
+function renderHomeDiagnostics() {
+  const movers = document.getElementById("home-senate-movers");
+  if (movers && forecast) {
+    const rows = [...forecast.races]
+      .filter((race) => Number.isFinite(race.movement?.sinceLastRun))
+      .sort((a, b) => Math.abs(b.movement.sinceLastRun) - Math.abs(a.movement.sinceLastRun))
+      .slice(0, 6);
+    movers.innerHTML = rows.length ? rows.map((race) => `
+      <a class="home-radar-row ${leaderClassForRace(race)}" href="race.html?state=${race.state}">
+        <strong>${escapeHtml(race.state)}</strong>
+        <span>${escapeHtml(race.displayName.replace(" Senate", ""))}</span>
+        <b>${escapeHtml(compactMovementText(race))}</b>
+        <i>${oneDecimal(race.winnerProbability)}</i>
+      </a>
+    `).join("") : `<p class="meta">No prior run yet.</p>`;
+  }
+
+  const confidence = document.getElementById("home-low-confidence");
+  if (confidence && forecast && houseForecast) {
+    const senateRows = forecast.races
+      .filter((race) => race.inputQuality)
+      .map((race) => ({
+        type: "Senate",
+        id: race.state,
+        label: race.displayName.replace(" Senate", ""),
+        score: race.inputQuality.score,
+        href: `race.html?state=${race.state}`,
+        className: leaderClassForRace(race)
+      }));
+    const houseRows = (houseForecast.districts || [])
+      .map((district) => {
+        const quality = houseInputConfidence(district);
+        return {
+          type: "House",
+          id: district.id,
+          label: district.label || district.rating,
+          score: quality.score,
+          href: "house.html",
+          className: houseLeaderClass(district)
+        };
+      });
+    confidence.innerHTML = [...senateRows, ...houseRows]
+      .sort((a, b) => a.score - b.score)
+      .slice(0, 6)
+      .map((row) => `
+        <a class="home-radar-row ${row.className}" href="${escapeHtml(row.href)}">
+          <strong>${escapeHtml(row.id)}</strong>
+          <span>${escapeHtml(row.type)} / ${escapeHtml(row.label)}</span>
+          <b>${row.score}/100</b>
+          <i>input</i>
+        </a>
+      `).join("");
   }
 }
 
@@ -1113,6 +1204,7 @@ function houseDistrictMarkup(district) {
     `generic ${signedPointMargin(inputs.genericBallotShift)}`,
     district.open ? "open seat" : "incumbent seat"
   ].join(" / ");
+  const quality = houseInputConfidence(district);
   return `
     <span class="race-kicker">${escapeHtml(houseDistrictLabel(district))}</span>
     <div class="map-card-title">
@@ -1125,6 +1217,10 @@ function houseDistrictMarkup(district) {
       <div class="candidate-row dem-row"><span>${escapeHtml(district.demCandidate || "Democrat")} <i class="party-badge dem-badge">D</i></span><strong>${oneDecimal(district.demProbability)}</strong></div>
       <div class="candidate-row rep-row"><span>${escapeHtml(district.repCandidate || "Republican")} <i class="party-badge rep-badge">R</i></span><strong>${oneDecimal(district.repProbability)}</strong></div>
       <div class="candidate-margin"><span>Projected margin</span><strong>${signedPointMargin(district.margin)}</strong></div>
+    </div>
+    <div class="badge-row">
+      <span>${escapeHtml(quality.label)}</span>
+      <span>${escapeHtml(houseMovementText(district))}</span>
     </div>
     <p class="meta">${escapeHtml(baselineLine)}</p>
     <p class="meta">${escapeHtml(district.sourceBlend || "Cook")} / rating baseline ${signedPointMargin(inputs.ratingBaseline)} / contextual baseline ${signedPointMargin(inputs.contextualBaseline)}</p>
@@ -2239,6 +2335,7 @@ async function init() {
     updateHomeHouseSummary();
     renderHousePage();
     renderHomeRadar();
+    renderHomeDiagnostics();
     renderTopArticle();
     renderHomeArticleList();
     renderArticlesList();
@@ -2263,6 +2360,7 @@ async function init() {
   renderHousePage();
   renderBattlegroundList();
   renderHomeRadar();
+  renderHomeDiagnostics();
   renderTopArticle();
   renderHomeArticleList();
   renderArticlesList();

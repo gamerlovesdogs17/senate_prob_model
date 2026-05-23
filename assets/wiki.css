@@ -512,6 +512,59 @@ h3 {
   font: 900 .95rem/1.1 "Segoe UI", Arial, sans-serif;
 }
 
+.home-data-links {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.home-data-links a {
+  padding: 11px 2px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  font: 900 .92rem/1 "Segoe UI", Arial, sans-serif;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.home-data-links a:hover,
+.home-data-links a:focus {
+  background: color-mix(in srgb, var(--gold) 12%, transparent);
+  outline: none;
+}
+
+.signal-list {
+  display: grid;
+  gap: 0;
+  margin-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.signal-row {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding: 10px 2px;
+  border-bottom: 1px solid var(--line);
+}
+
+.signal-row strong {
+  font: 950 1.05rem/1 "Segoe UI", Arial, sans-serif;
+}
+
+.signal-row span {
+  color: var(--muted);
+  font: 800 .82rem/1.2 "Segoe UI", Arial, sans-serif;
+}
+
+.signal-row.signal-muted strong {
+  color: var(--gold);
+  font-size: .85rem;
+  text-transform: uppercase;
+}
+
 .odds-panel {
   display: flex;
   flex-direction: column;

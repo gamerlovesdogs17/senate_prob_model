@@ -132,6 +132,17 @@
       </article>
     </section>
 
+    <section class="dashboard-grid" aria-label="Presidential model signals">
+      <article class="chart-panel">
+        <span class="chart-label">Input confidence</span>
+        <div id="president-confidence-panel" class="signal-list"></div>
+      </article>
+      <article class="chart-panel">
+        <span class="chart-label">National inputs</span>
+        <div id="president-input-panel" class="signal-list"></div>
+      </article>
+    </section>
+
     <section class="dashboard-grid" aria-label="Historical backtest">
       <article class="chart-panel">
         <span class="chart-label">Historical Backtest</span>
@@ -188,6 +199,7 @@
         renderMapColorControls();
         renderLegend();
         displayStateProbabilities();
+        renderPresidentSignalPanels();
         displayHistoricalBacktest();
       } catch (error) {
         console.error('Error loading forecast:', error);
@@ -596,6 +608,57 @@
       `;
       document.getElementById('state-probabilities').innerHTML = html;
       bindPanelTooltipFor(document.getElementById('state-probabilities'), ".race-board-row", (node) => node.dataset.tip);
+    }
+
+    function confidenceScoreForPresidentModel() {
+      const summary = forecastData.sourceSummary || {};
+      const inputs = forecastData.modelInputs || {};
+      let score = 42;
+      const reasons = [];
+      if ((summary.polling?.usablePresidentialPolls || 0) > 10) score += 14;
+      else reasons.push("thin matchup polling");
+      if ((summary.genericPolling?.sources || []).length >= 3) score += 10;
+      else reasons.push("thin generic-ballot blend");
+      if (summary.consumerSentiment?.value) score += 8;
+      if (summary.trumpApproval?.approval) score += 8;
+      if ((inputs.senateStateSignalStates || 0) >= 30) score += 8;
+      if ((inputs.migrationStates || 0) >= 50) score += 5;
+      if (summary.candidateFavorability?.[forecastData.demCandidate]?.live && summary.candidateFavorability?.[forecastData.repCandidate]?.live) score += 8;
+      else reasons.push("candidate favorability is partly estimated");
+      if (forecastData.date && /2026/.test(forecastData.date)) {
+        score -= 10;
+        reasons.push("early 2028 cycle");
+      }
+      const finalScore = Math.round(clamp(score, 25, 86));
+      const label = finalScore >= 72 ? "Medium-high input confidence" : finalScore >= 55 ? "Medium input confidence" : "Low input confidence";
+      return { score: finalScore, label, reasons };
+    }
+
+    function renderPresidentSignalPanels() {
+      const confidence = document.getElementById("president-confidence-panel");
+      const inputsPanel = document.getElementById("president-input-panel");
+      if (!forecastData) return;
+      const summary = forecastData.sourceSummary || {};
+      const inputs = forecastData.modelInputs || {};
+      if (confidence) {
+        const score = confidenceScoreForPresidentModel();
+        confidence.innerHTML = `
+          <div class="signal-row"><strong>${score.score}/100</strong><span>${score.label}</span></div>
+          <div class="signal-row"><strong>${summary.polling?.usablePresidentialPolls ?? 0}</strong><span>usable matchup polls</span></div>
+          <div class="signal-row"><strong>${(summary.genericPolling?.sources || []).length}</strong><span>generic-ballot sources</span></div>
+          <div class="signal-row"><strong>${inputs.senateStateSignalStates ?? 0}</strong><span>states with 2026 signal</span></div>
+          ${score.reasons.map((reason) => `<div class="signal-row signal-muted"><strong>Flag</strong><span>${reason}</span></div>`).join("")}
+        `;
+      }
+      if (inputsPanel) {
+        inputsPanel.innerHTML = `
+          <div class="signal-row"><strong>${signedPointMargin(summary.genericPolling?.genericBallotMargin || 0)}</strong><span>generic ballot</span></div>
+          <div class="signal-row"><strong>${Number(summary.trumpApproval?.approval || 0).toFixed(1)}%</strong><span>Trump approval input</span></div>
+          <div class="signal-row"><strong>${Number(summary.consumerSentiment?.value || 0).toFixed(1)}</strong><span>consumer sentiment</span></div>
+          <div class="signal-row"><strong>${inputs.longTermTrendStates ?? 0}</strong><span>long-term trend states</span></div>
+          <div class="signal-row"><strong>${inputs.migrationStates ?? 0}</strong><span>migration states</span></div>
+        `;
+      }
     }
 
     function presidentRating(stateData, mode = presidentMapColorMode) {
