@@ -105,9 +105,9 @@
     </section>
 
     <section class="dashboard-grid" aria-label="Forecast charts">
-      <article class="chart-panel">
-        <span class="chart-label">Electoral vote distribution</span>
-        <div id="ev-histogram" class="seat-histogram"></div>
+      <article class="chart-panel chart-wide">
+        <span class="chart-label">Candidate and matchup strength</span>
+        <div id="president-matchup-strength" class="matchup-strength"></div>
       </article>
       <article class="chart-panel">
         <span class="chart-label">Most decisive states by simulated election-deciding power</span>
@@ -125,7 +125,7 @@
 
     <section class="dashboard-grid" aria-label="State probabilities">
       <article class="chart-panel full-width">
-        <span class="chart-label">State-by-State Probabilities</span>
+        <span class="chart-label">Closest state probabilities</span>
         <div id="state-probabilities" class="president-state-list">
           <p>Loading forecast...</p>
         </div>
@@ -149,6 +149,10 @@
     let forecastData = null;
     let presidentMapColorMode = "rating";
     let usStates = null;
+    let allPresidentMatchups = null;
+
+    const DEM_CANDIDATES = ["newsom", "beshear", "shapiro", "buttigieg", "whitmer", "aoc"];
+    const REP_CANDIDATES = ["vance", "rubio", "desantis", "haley", "cruz"];
 
     const PRESIDENTIAL_MAP_COLOR_MODES = {
       rating: "Rating",
@@ -178,7 +182,7 @@
         
         displayNationalProbability();
         renderStateMap();
-        renderHistogram();
+        renderMatchupStrengthChart();
         renderLeverageChart();
         renderPresidentHistoryCharts();
         renderMapColorControls();
@@ -381,46 +385,102 @@
       hoverCard.style.display = 'block';
     }
 
-    function renderHistogram() {
-      const container = document.getElementById("ev-histogram");
-      if (!container || !forecastData) return;
-      const distribution = forecastData.electoralCollege.distribution;
-      const counts = {};
-      
-      for (const [key, count] of Object.entries(distribution)) {
-        const [demEV] = key.split('-');
-        counts[demEV] = (counts[demEV] || 0) + count;
+    async function loadAllPresidentMatchups() {
+      if (allPresidentMatchups) return allPresidentMatchups;
+      const loads = [];
+      for (const dem of DEM_CANDIDATES) {
+        for (const rep of REP_CANDIDATES) {
+          loads.push(fetch(`data/president-forecast-${dem}-${rep}.json`).then(response => response.ok ? response.json() : null).catch(() => null));
+        }
       }
-      
-      const evs = Object.keys(counts).map(Number).sort((a, b) => a - b);
-      if (!evs.length) return;
-      
-      const minEV = Math.min(...evs);
-      const maxEV = Math.max(...evs);
-      const sims = 100000;
-      const binCount = Math.min(maxEV - minEV + 1, 16);
-      const binWidth = Math.max(1, Math.ceil((maxEV - minEV + 1) / binCount));
-      const bins = Array.from({ length: Math.ceil((maxEV - minEV + 1) / binWidth) }, (_, index) => {
-        const start = minEV + index * binWidth;
-        const end = Math.min(maxEV, start + binWidth - 1);
-        const value = Object.entries(counts).reduce((sum, [ev, count]) => {
-          const numeric = Number(ev);
-          return numeric >= start && numeric <= end ? sum + count : sum;
-        }, 0);
-        return { start, end, value };
-      });
-      const maxBinValue = Math.max(...bins.map((bin) => bin.value), 1);
-      
-      container.style.gridTemplateColumns = `repeat(${bins.length}, minmax(0, 1fr))`;
-      container.innerHTML = bins.map((bin, index) => {
-        const value = bin.value;
-        const share = sims ? value / sims : 0;
-        const height = clamp((value / maxBinValue), .02, 1);
-        const label = bin.start === bin.end ? `${bin.start}` : `${bin.start}-${bin.end}`;
-        const showLabel = index === 0 || index === bins.length - 1 || Math.abs((bin.start + bin.end) / 2 - 270) <= binWidth / 2;
-        return `<button class="seat-bin president-ev-bin" type="button" data-tip="${label} ${candidateSideLabel(true)} EV<br>${(share * 100).toFixed(1)}% of simulations"><i style="--bar-scale:${height}"></i><span>${showLabel ? label : ""}</span></button>`;
-      }).join("");
-      bindPanelTooltipFor(container, ".seat-bin", (node) => node.dataset.tip);
+      allPresidentMatchups = (await Promise.all(loads)).filter(Boolean);
+      return allPresidentMatchups;
+    }
+
+    function candidateShortName(name) {
+      if (!name) return "";
+      if (/Ocasio/i.test(name)) return "AOC";
+      return candidateLastName(name);
+    }
+
+    async function renderMatchupStrengthChart() {
+      const container = document.getElementById("president-matchup-strength");
+      if (!container || !forecastData) return;
+      const matchups = await loadAllPresidentMatchups();
+      if (!matchups.length) {
+        container.innerHTML = "<p>Loading matchups...</p>";
+        return;
+      }
+
+      const demRows = DEM_CANDIDATES.map((id) => {
+        const rows = matchups.filter((item) => item.demCandidate === id);
+        return {
+          id,
+          name: rows[0]?.demCandidateName || id,
+          avgProb: rows.reduce((sum, item) => sum + item.national.demWinProbability, 0) / Math.max(rows.length, 1),
+          avgEv: rows.reduce((sum, item) => sum + item.electoralCollege.demExpectedEV, 0) / Math.max(rows.length, 1)
+        };
+      }).sort((a, b) => b.avgProb - a.avgProb);
+
+      const repRows = REP_CANDIDATES.map((id) => {
+        const rows = matchups.filter((item) => item.repCandidate === id);
+        return {
+          id,
+          name: rows[0]?.repCandidateName || id,
+          avgProb: rows.reduce((sum, item) => sum + item.national.repWinProbability, 0) / Math.max(rows.length, 1),
+          avgEv: rows.reduce((sum, item) => sum + item.electoralCollege.repExpectedEV, 0) / Math.max(rows.length, 1)
+        };
+      }).sort((a, b) => b.avgProb - a.avgProb);
+
+      const matchupRows = matchups.map((item) => ({
+        label: `${candidateShortName(item.demCandidateName)} vs. ${candidateShortName(item.repCandidateName)}`,
+        demName: candidateShortName(item.demCandidateName),
+        repName: candidateShortName(item.repCandidateName),
+        demProb: item.national.demWinProbability,
+        repProb: item.national.repWinProbability,
+        demEv: item.electoralCollege.demExpectedEV,
+        repEv: item.electoralCollege.repExpectedEV
+      }));
+      const bestDemMatchups = [...matchupRows].sort((a, b) => b.demProb - a.demProb).slice(0, 3);
+      const bestRepMatchups = [...matchupRows].sort((a, b) => b.repProb - a.repProb).slice(0, 3);
+
+      const maxDem = Math.max(...demRows.map((row) => row.avgProb), .01);
+      const maxRep = Math.max(...repRows.map((row) => row.avgProb), .01);
+      const rowHtml = (row, side, max) => `
+        <button class="matchup-strength-row ${side}" type="button" data-tip="${row.name}<br>${oneDecimal(row.avgProb)} average win chance<br>${Math.round(row.avgEv)} average EV">
+          <strong>${candidateShortName(row.name)}</strong>
+          <i style="width:${clamp((row.avgProb / max) * 100, 8, 100)}%"></i>
+          <span>${oneDecimal(row.avgProb)}</span>
+        </button>
+      `;
+      const matchupHtml = (row, side) => `
+        <button class="matchup-pair-row ${side}" type="button" data-tip="${row.label}<br>${oneDecimal(side === "dem" ? row.demProb : row.repProb)} win chance<br>${Math.round(side === "dem" ? row.demEv : row.repEv)} EV">
+          <strong>${row.label}</strong>
+          <span>${oneDecimal(side === "dem" ? row.demProb : row.repProb)}</span>
+        </button>
+      `;
+
+      container.innerHTML = `
+        <div class="matchup-strength-grid">
+          <section>
+            <h3>Best Democratic averages</h3>
+            ${demRows.map((row) => rowHtml(row, "dem", maxDem)).join("")}
+          </section>
+          <section>
+            <h3>Best Republican averages</h3>
+            ${repRows.map((row) => rowHtml(row, "rep", maxRep)).join("")}
+          </section>
+          <section>
+            <h3>Best Democratic matchups</h3>
+            ${bestDemMatchups.map((row) => matchupHtml(row, "dem")).join("")}
+          </section>
+          <section>
+            <h3>Best Republican matchups</h3>
+            ${bestRepMatchups.map((row) => matchupHtml(row, "rep")).join("")}
+          </section>
+        </div>
+      `;
+      bindPanelTooltipFor(container, "button", (node) => node.dataset.tip);
     }
 
     function renderLeverageChart() {
@@ -511,7 +571,9 @@
     }
 
     function displayStateProbabilities() {
-      const states = Object.entries(forecastData.states).sort((a, b) => Math.abs(a[1].demProbability - .5) - Math.abs(b[1].demProbability - .5));
+      const states = Object.entries(forecastData.states)
+        .sort((a, b) => Math.abs(a[1].demProbability - .5) - Math.abs(b[1].demProbability - .5))
+        .slice(0, 18);
       const html = `
         <div class="battleground-list president-race-board">
           ${states.map(([state, stateData]) => {
@@ -522,8 +584,7 @@
             return `
               <button class="race-board-row ${leaderClass}" type="button" data-tip="${STATE_NAMES[state]}<br>${leader.fullCandidate} ${oneDecimal(leader.probability)}<br>Projected margin ${leader.side}+${leader.projectedMargin.toFixed(1)}">
                 <strong>${state}</strong>
-                <span>${STATE_NAMES[state]}</span>
-                <span>${stateData.ev} EV</span>
+                <span><b>${STATE_NAMES[state]}</b><small>${stateData.ev} EV</small></span>
                 <span><b class="rating-pill ${presidentRatingBucket(rating)}">${rating}</b></span>
                 <span>${leader.fullCandidate}</span>
                 <span class="${marginClass}">${oneDecimal(leader.probability)}</span>

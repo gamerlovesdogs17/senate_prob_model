@@ -1155,10 +1155,121 @@ dd {
   white-space: normal;
 }
 
+.matchup-strength {
+  margin-top: 14px;
+}
+
+.matchup-strength-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 18px;
+}
+
+.matchup-strength-grid section {
+  min-width: 0;
+}
+
+.matchup-strength-grid h3 {
+  margin: 0 0 9px;
+  color: var(--muted);
+  font: 900 .72rem/1.1 "Segoe UI", Arial, sans-serif;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+
+.matchup-strength-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(72px, .55fr) minmax(0, 1fr) 52px;
+  gap: 8px;
+  align-items: center;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  padding: 7px 0;
+  text-align: left;
+}
+
+.matchup-strength-row i {
+  height: 9px;
+  border-radius: 999px;
+  background: var(--dem);
+}
+
+.matchup-strength-row.rep i {
+  background: var(--rep);
+}
+
+.matchup-strength-row strong,
+.matchup-pair-row strong {
+  min-width: 0;
+  color: var(--ink);
+  font: 850 .86rem/1.15 "Segoe UI", Arial, sans-serif;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.matchup-strength-row span,
+.matchup-pair-row span {
+  color: var(--ink);
+  font: 900 .82rem/1 "Segoe UI", Arial, sans-serif;
+  text-align: right;
+}
+
+.matchup-pair-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 58px;
+  gap: 10px;
+  align-items: center;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-left: 4px solid var(--dem);
+  background: transparent;
+  padding: 7px 0 7px 8px;
+  text-align: left;
+}
+
+.matchup-pair-row.rep {
+  border-left-color: var(--rep);
+}
+
 .president-state-list {
   display: grid;
   margin-top: 12px;
   border-top: 1px solid var(--line);
+}
+
+.president-race-board .race-board-row {
+  grid-template-columns: 44px minmax(132px, 1fr) 82px minmax(96px, .8fr) 66px 72px;
+  gap: 10px;
+  padding: 9px 4px;
+}
+
+.president-race-board .race-board-row > span:first-of-type {
+  display: grid;
+  gap: 2px;
+}
+
+.president-race-board .race-board-row > span:first-of-type b {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.president-race-board .race-board-row > span:first-of-type small {
+  color: var(--muted);
+  font: 800 .68rem/1 "Segoe UI", Arial, sans-serif;
+}
+
+.president-race-board .race-board-row span {
+  font-size: .84rem;
+}
+
+.president-race-board .race-board-row span:nth-of-type(3) {
+  overflow-wrap: anywhere;
 }
 
 .president-state-row {
@@ -2156,6 +2267,10 @@ button.race-board-row {
     height: calc(var(--bar-scale, .02) * 120px);
   }
 
+  .matchup-strength-grid {
+    grid-template-columns: 1fr;
+  }
+
   .president-state-row {
     grid-template-columns: 42px 34px minmax(78px, 1fr) minmax(92px, 1.1fr);
     gap: 7px;
@@ -2185,6 +2300,20 @@ button.race-board-row {
 
   .race-board-row span:last-child {
     text-align: left;
+  }
+
+  .president-race-board .race-board-row {
+    grid-template-columns: 40px minmax(0, 1fr) 78px 58px;
+  }
+
+  .president-race-board .race-board-row span:nth-of-type(2),
+  .president-race-board .race-board-row span:nth-of-type(4) {
+    display: block;
+  }
+
+  .president-race-board .race-board-row span:nth-of-type(3),
+  .president-race-board .race-board-row span:nth-of-type(5) {
+    display: none;
   }
 }
 
@@ -2249,6 +2378,19 @@ button.race-board-row {
   .race-board-row span:nth-of-type(3),
   .race-board-row span:nth-of-type(4),
   .race-board-row span:nth-of-type(5) {
+    display: none;
+  }
+
+  .president-race-board .race-board-row {
+    grid-template-columns: 36px minmax(0, 1fr) 72px;
+  }
+
+  .president-race-board .race-board-row span:nth-of-type(2) {
+    display: block;
+  }
+
+  .president-race-board .race-board-row span:nth-of-type(4),
+  .president-race-board .race-board-row span:nth-of-type(5) {
     display: none;
   }
 
