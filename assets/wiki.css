@@ -1140,6 +1140,48 @@ dd {
   text-align: center;
 }
 
+#ev-histogram {
+  overflow-x: hidden;
+}
+
+#ev-histogram .seat-bin i {
+  height: calc(var(--bar-scale, .02) * 138px);
+}
+
+#ev-histogram .seat-bin span {
+  min-height: 1em;
+  font-size: .66rem;
+  line-height: 1.05;
+  white-space: normal;
+}
+
+.president-state-list {
+  display: grid;
+  margin-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.president-state-row {
+  display: grid;
+  grid-template-columns: 58px 48px minmax(105px, .8fr) minmax(150px, 1.2fr) 78px 110px;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  font: 700 .9rem/1.2 "Segoe UI", Arial, sans-serif;
+}
+
+.president-state-row span {
+  min-width: 0;
+}
+
+.president-state-head {
+  color: var(--muted);
+  font-size: .7rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
 .leverage-row,
 .poll-row {
   display: grid;
@@ -2101,6 +2143,25 @@ button.leverage-row {
     font-size: .58rem;
   }
 
+  #ev-histogram .seat-bin i {
+    height: calc(var(--bar-scale, .02) * 120px);
+  }
+
+  .president-state-row {
+    grid-template-columns: 42px 34px minmax(78px, 1fr) minmax(92px, 1.1fr);
+    gap: 7px;
+    font-size: .76rem;
+  }
+
+  .president-state-row span:nth-child(3),
+  .president-state-row span:nth-child(6) {
+    display: none;
+  }
+
+  .president-state-row span:nth-child(5) {
+    text-align: right;
+  }
+
   .race-board-row {
     grid-template-columns: 42px minmax(0, 1fr) 116px 78px;
     gap: 8px;
@@ -2164,6 +2225,16 @@ button.leverage-row {
 
   .race-board-row {
     grid-template-columns: 38px 1fr;
+  }
+
+  .president-state-row {
+    grid-template-columns: 36px 28px 1fr 74px;
+  }
+
+  .president-state-row span:nth-child(4) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .race-board-row span:nth-of-type(3),

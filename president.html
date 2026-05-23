@@ -36,7 +36,7 @@
           <a class="button-link" href="articles.html">Articles</a>
         </div>
       </div>
-      <aside class="odds-panel" aria-label="Win probability">
+      <aside id="president-odds-panel" class="odds-panel" aria-label="Win probability">
         <span class="panel-label">National win probability</span>
         <div>
           <div id="president-odds-phrase" class="big-odds">--</div>
@@ -47,8 +47,8 @@
           <span id="rep-win-bar"></span>
         </div>
         <dl>
-          <div><dt>Democratic win</dt><dd id="president-dem-win">--</dd></div>
-          <div><dt>Republican win</dt><dd id="president-rep-win">--</dd></div>
+          <div><dt id="president-dem-win-label">Democratic win</dt><dd id="president-dem-win">--</dd></div>
+          <div><dt id="president-rep-win-label">Republican win</dt><dd id="president-rep-win">--</dd></div>
           <div><dt>Median EV outcome</dt><dd id="president-median-ev">--</dd></div>
           <div><dt>Tipping point</dt><dd id="president-tipping-point-display">--</dd></div>
           <div><dt>Run</dt><dd id="president-run-date">--</dd></div>
@@ -69,7 +69,7 @@
           <div id="president-map"></div>
           <div id="president-map-color-controls" class="map-color-controls" aria-label="Map color mode"></div>
           <div id="president-map-legend" class="map-legend" aria-label="Race rating legend"></div>
-          <p class="map-note">Map shows Democratic win probability by state.</p>
+          <p id="president-map-note" class="map-note">State probabilities by matchup.</p>
         </div>
         <aside id="president-map-hover-card" class="hover-card"></aside>
       </div>
@@ -126,7 +126,7 @@
     <section class="dashboard-grid" aria-label="State probabilities">
       <article class="chart-panel full-width">
         <span class="chart-label">State-by-State Probabilities</span>
-        <div id="state-probabilities">
+        <div id="state-probabilities" class="president-state-list">
           <p>Loading forecast...</p>
         </div>
       </article>
@@ -181,20 +181,30 @@
     function displayNationalProbability() {
       const demProb = forecastData.national.demWinProbability;
       const repProb = forecastData.national.repWinProbability;
+      const demName = forecastData.demCandidateName || "Democratic nominee";
+      const repName = forecastData.repCandidateName || "Republican nominee";
+      const demLast = candidateLastName(demName);
+      const repLast = candidateLastName(repName);
       
       const favoredIsDem = demProb >= repProb;
       const favoredProb = Math.max(demProb, repProb);
-      document.getElementById('president-odds-phrase').innerHTML = `<span>${favoredIsDem ? "Democrats" : "Republicans"} favored</span><strong>${Math.round(favoredProb * 100)}%</strong>`;
+      const oddsPanel = document.getElementById("president-odds-panel");
+      oddsPanel?.classList.toggle("control-dem", favoredIsDem);
+      oddsPanel?.classList.toggle("control-rep", !favoredIsDem);
+      document.getElementById('president-odds-phrase').innerHTML = `<span>${favoredIsDem ? demLast : repLast} favored</span><strong>${Math.round(favoredProb * 100)}%</strong>`;
       document.getElementById('president-winner-headline').textContent = demProb > 0.5 ?
-        `${forecastData.demCandidateName} favored` : 
-        `${forecastData.repCandidateName} favored`;
+        `${demName} favored` :
+        `${repName} favored`;
       
+      document.getElementById('president-dem-win-label').textContent = `${demLast} win`;
+      document.getElementById('president-rep-win-label').textContent = `${repLast} win`;
       document.getElementById('president-dem-win').textContent = `${(demProb * 100).toFixed(1)}%`;
       document.getElementById('president-rep-win').textContent = `${(repProb * 100).toFixed(1)}%`;
-      document.getElementById('president-median-ev').textContent = `${forecastData.electoralCollege.demExpectedEV} D / ${forecastData.electoralCollege.repExpectedEV} R`;
+      document.getElementById('president-median-ev').textContent = `${forecastData.electoralCollege.demExpectedEV} ${demLast} / ${forecastData.electoralCollege.repExpectedEV} ${repLast}`;
       document.getElementById('president-tipping-point-display').textContent = forecastData.tippingPoint.state;
       document.getElementById('president-run-date').textContent = forecastData.date;
       document.getElementById('president-sim-count').textContent = '100,000';
+      document.getElementById("president-map-note").textContent = `${demLast} vs. ${repLast}, by state.`;
       
       const battlegroundCount = Object.values(forecastData.states).filter(s => s.demProbability > 0.25 && s.demProbability < 0.75).length;
       document.getElementById('president-battleground-count').textContent = battlegroundCount;
@@ -203,6 +213,31 @@
       const repBar = document.getElementById('rep-win-bar');
       demBar.style.width = `${demProb * 100}%`;
       repBar.style.width = `${repProb * 100}%`;
+    }
+
+    function candidateLastName(name) {
+      const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
+      return parts.length ? parts[parts.length - 1] : "Candidate";
+    }
+
+    function candidateSideLabel(isDem, format = "last") {
+      const name = isDem ? forecastData.demCandidateName : forecastData.repCandidateName;
+      if (format === "full") return name || (isDem ? "Democratic nominee" : "Republican nominee");
+      return candidateLastName(name);
+    }
+
+    function stateLeaderData(stateData) {
+      const demProb = stateData.demProbability;
+      const demLeads = demProb >= .5;
+      const probability = demLeads ? demProb : 1 - demProb;
+      return {
+        demLeads,
+        candidate: candidateSideLabel(demLeads),
+        fullCandidate: candidateSideLabel(demLeads, "full"),
+        probability,
+        projectedMargin: Math.abs(stateData.demMargin),
+        side: demLeads ? "D" : "R"
+      };
     }
 
     async function renderStateMap() {
@@ -245,7 +280,9 @@
           .text((feature) => {
             const state = FIPS_TO_STATE[String(feature.id).padStart(2, "0")];
             const stateData = forecastData.states[state];
-            return stateData ? `${STATE_NAMES[state]}: ${(stateData.demProbability * 100).toFixed(1)}% Dem, ${stateData.ev} EV` : STATE_NAMES[state];
+            if (!stateData) return STATE_NAMES[state];
+            const leader = stateLeaderData(stateData);
+            return `${STATE_NAMES[state]}: ${leader.fullCandidate} ${oneDecimal(leader.probability)}, ${stateData.ev} EV`;
           });
       } catch (error) {
         console.error("Error rendering map:", error);
@@ -285,8 +322,9 @@
         
         const color = stateColor(stateData);
         
+        const leader = stateLeaderData(stateData);
         html += `
-          <div style="background-color: ${color}; color: white; padding: 8px 4px; text-align: center; font-size: 12px; font-weight: bold; border-radius: 2px;" title="${state}: ${stateData.ev} EV, ${(stateData.demProbability * 100).toFixed(1)}% Dem">
+          <div style="background-color: ${color}; color: white; padding: 8px 4px; text-align: center; font-size: 12px; font-weight: bold; border-radius: 2px;" title="${state}: ${stateData.ev} EV, ${leader.fullCandidate} ${oneDecimal(leader.probability)}">
             ${state}<br><span style="font-size: 10px;">${stateData.ev}</span>
           </div>
         `;
@@ -302,11 +340,13 @@
         hoverCard.style.display = 'none';
         return;
       }
+      const stateCode = Object.keys(forecastData.states).find(k => forecastData.states[k] === stateData);
+      const leader = stateLeaderData(stateData);
       hoverCard.innerHTML = `
-        <strong>${STATE_NAMES[Object.keys(forecastData.states).find(k => forecastData.states[k] === stateData)]}</strong><br>
+        <strong>${STATE_NAMES[stateCode]}</strong><br>
         EV: ${stateData.ev}<br>
-        Dem win: ${(stateData.demProbability * 100).toFixed(1)}%<br>
-        Margin: ${stateData.demMargin.toFixed(1)}
+        ${leader.fullCandidate}: ${oneDecimal(leader.probability)}<br>
+        Projected margin: ${leader.side}+${leader.projectedMargin.toFixed(1)}
       `;
       hoverCard.style.display = 'block';
     }
@@ -327,9 +367,8 @@
       
       const minEV = Math.min(...evs);
       const maxEV = Math.max(...evs);
-      const maxCount = Math.max(...Object.values(counts));
       const sims = 100000;
-      const binCount = Math.min(maxEV - minEV + 1, 42);
+      const binCount = Math.min(maxEV - minEV + 1, 24);
       const binWidth = Math.max(1, Math.ceil((maxEV - minEV + 1) / binCount));
       const bins = Array.from({ length: Math.ceil((maxEV - minEV + 1) / binWidth) }, (_, index) => {
         const start = minEV + index * binWidth;
@@ -340,15 +379,18 @@
         }, 0);
         return { start, end, value };
       });
+      const maxBinValue = Math.max(...bins.map((bin) => bin.value), 1);
       
       container.style.gridTemplateColumns = `repeat(${bins.length}, minmax(0, 1fr))`;
-      container.innerHTML = bins.map((bin) => {
+      container.innerHTML = bins.map((bin, index) => {
         const value = bin.value;
         const share = sims ? value / sims : 0;
-        const height = maxCount ? clamp((value / maxCount), .02, 1) : .02;
+        const height = clamp((value / maxBinValue), .02, 1);
         const label = bin.start === bin.end ? `${bin.start}` : `${bin.start}-${bin.end}`;
-        return `<button class="seat-bin" type="button" data-tip="${label} Democratic EV<br>${(share * 100).toFixed(1)}% of simulations"><i style="--bar-scale:${height}"></i><span>${label}</span></button>`;
+        const showLabel = index === 0 || index === bins.length - 1 || Math.abs((bin.start + bin.end) / 2 - 270) <= binWidth || index % 4 === 0;
+        return `<button class="seat-bin president-ev-bin" type="button" data-tip="${label} ${candidateSideLabel(true)} EV<br>${(share * 100).toFixed(1)}% of simulations"><i style="--bar-scale:${height}"></i><span>${showLabel ? label : ""}</span></button>`;
       }).join("");
+      bindPanelTooltipFor(container, ".seat-bin", (node) => node.dataset.tip);
     }
 
     function renderLeverageChart() {
@@ -370,8 +412,11 @@
       container.innerHTML = states.map((s) => {
         const width = clamp((s.tippingPower / max) * 100, 8, 100);
         const leaderClass = s.prob > .55 ? "leads-dem" : s.prob < .45 ? "leads-rep" : "leads-tossup";
-        return `<button class="leverage-row ${leaderClass}" type="button"><strong>${s.state}</strong><i style="width:${width}%"></i><span>${s.tippingPower.toFixed(1)}</span></button>`;
+        const leaderName = s.prob >= .5 ? candidateSideLabel(true) : candidateSideLabel(false);
+        const leaderProb = s.prob >= .5 ? s.prob : 1 - s.prob;
+        return `<button class="leverage-row ${leaderClass}" type="button" data-tip="${STATE_NAMES[s.state]}<br>${leaderName} ${oneDecimal(leaderProb)}<br>${s.tippingPower.toFixed(1)} deciding power"><strong>${s.state}</strong><i style="width:${width}%"></i><span>${s.tippingPower.toFixed(1)}</span></button>`;
       }).join("");
+      bindPanelTooltipFor(container, ".leverage-row", (node) => node.dataset.tip);
     }
 
     function renderPresidentHistoryCharts() {
@@ -385,7 +430,9 @@
         };
         renderLineChart(winChart, [point], {
           label: "2028 presidential win probability",
-          pointHtml: (item) => `${item.date}<br>D ${(item.dem * 100).toFixed(1)}% / R ${(item.rep * 100).toFixed(1)}%`,
+          pointHtml: (item) => `${item.date}<br>${candidateSideLabel(true)} ${(item.dem * 100).toFixed(1)}% / ${candidateSideLabel(false)} ${(item.rep * 100).toFixed(1)}%`,
+          endLabel: (party, value) => `${party === "dem" ? candidateSideLabel(true) : candidateSideLabel(false)} ${(value * 100).toFixed(1)}%`,
+          hoverLabel: (party, value) => `${party === "dem" ? candidateSideLabel(true) : candidateSideLabel(false)} ${(value * 100).toFixed(1)}%`,
           singleNote: "History begins once daily presidential forecast files are saved."
         });
       }
@@ -397,14 +444,14 @@
         };
         renderLineChart(evChart, [point], {
           label: "Expected electoral votes",
-          pointHtml: (item) => `${item.date}<br>D ${Math.round(item.dem)} / R ${Math.round(item.rep)}`,
+          pointHtml: (item) => `${item.date}<br>${candidateSideLabel(true)} ${Math.round(item.dem)} / ${candidateSideLabel(false)} ${Math.round(item.rep)}`,
           domain: [160, 380],
           ticks: [350, 300, 270, 240, 190],
           midline: 270,
           band: 12,
           valueFormat: (value) => String(Math.round(value)),
-          endLabel: (party, value) => `${party === "dem" ? "Democrat" : "Republican"} ${Math.round(value)}`,
-          hoverLabel: (party, value) => `${party === "dem" ? "Democrat" : "Republican"} ${Math.round(value)}`,
+          endLabel: (party, value) => `${party === "dem" ? candidateSideLabel(true) : candidateSideLabel(false)} ${Math.round(value)}`,
+          hoverLabel: (party, value) => `${party === "dem" ? candidateSideLabel(true) : candidateSideLabel(false)} ${Math.round(value)}`,
           singleNote: "History begins once daily presidential forecast files are saved."
         });
       }
@@ -431,43 +478,58 @@
       if (!legend) return;
       if (presidentMapColorMode === "probability") {
         legend.innerHTML = `
-          <span><i style="background-color:#0066cc"></i>Strong D (>75%)</span>
-          <span><i style="background-color:#6699cc"></i>Lean D (50-75%)</span>
-          <span><i style="background-color:#cc9966"></i>Lean R (25-50%)</span>
-          <span><i style="background-color:#cc0000"></i>Strong R (<25%)</span>
+          <span><i style="background-color:#0066cc"></i>${candidateSideLabel(true)} >75%</span>
+          <span><i style="background-color:#6699cc"></i>${candidateSideLabel(true)} 50-75%</span>
+          <span><i style="background-color:#cc9966"></i>${candidateSideLabel(false)} 50-75%</span>
+          <span><i style="background-color:#cc0000"></i>${candidateSideLabel(false)} >75%</span>
         `;
       } else {
         legend.innerHTML = `
-          <span><i style="background-color:#0066cc"></i>D+10+</span>
-          <span><i style="background-color:#6699cc"></i>D+5 to D+10</span>
-          <span><i style="background-color:#99ccff"></i>D+0 to D+5</span>
-          <span><i style="background-color:#ffcc99"></i>R+0 to R+5</span>
-          <span><i style="background-color:#cc9966"></i>R+5 to R+10</span>
-          <span><i style="background-color:#cc0000"></i>R+10+</span>
+          <span><i style="background-color:#0066cc"></i>${candidateSideLabel(true)} +10+</span>
+          <span><i style="background-color:#6699cc"></i>${candidateSideLabel(true)} +5 to +10</span>
+          <span><i style="background-color:#99ccff"></i>${candidateSideLabel(true)} +0 to +5</span>
+          <span><i style="background-color:#ffcc99"></i>${candidateSideLabel(false)} +0 to +5</span>
+          <span><i style="background-color:#cc9966"></i>${candidateSideLabel(false)} +5 to +10</span>
+          <span><i style="background-color:#cc0000"></i>${candidateSideLabel(false)} +10+</span>
         `;
       }
     }
 
     function displayStateProbabilities() {
-      const states = Object.entries(forecastData.states).sort((a, b) => b[1].ev - a[1].ev);
-      let html = '<table class="state-table"><thead><tr><th>State</th><th>EV</th><th>Dem Win %</th><th>Margin</th></tr></thead><tbody>';
-      
-      for (const [state, stateData] of states) {
-        const prob = (stateData.demProbability * 100).toFixed(1);
-        const margin = stateData.demMargin.toFixed(1);
-        const marginClass = stateData.demMargin >= 0 ? 'dem-margin' : 'rep-margin';
-        html += `
-          <tr>
-            <td>${state}</td>
-            <td>${stateData.ev}</td>
-            <td>${prob}%</td>
-            <td class="${marginClass}">${margin > 0 ? '+' : ''}${margin}</td>
-          </tr>
-        `;
-      }
-      
-      html += '</tbody></table>';
+      const states = Object.entries(forecastData.states).sort((a, b) => Math.abs(a[1].demProbability - .5) - Math.abs(b[1].demProbability - .5));
+      const html = `
+        <div class="president-state-row president-state-head">
+          <span>State</span><span>EV</span><span>Rating</span><span>Leader</span><span>Win</span><span>Projected margin</span>
+        </div>
+        ${states.map(([state, stateData]) => {
+          const leader = stateLeaderData(stateData);
+          const rating = presidentRating(stateData);
+          const marginClass = leader.demLeads ? "dem-margin" : "rep-margin";
+          return `
+            <div class="president-state-row">
+              <strong>${state}</strong>
+              <span>${stateData.ev}</span>
+              <span>${rating}</span>
+              <span>${leader.fullCandidate}</span>
+              <span class="${marginClass}">${oneDecimal(leader.probability)}</span>
+              <span class="${marginClass}">${leader.side}+${leader.projectedMargin.toFixed(1)}</span>
+            </div>
+          `;
+        }).join("")}
+      `;
       document.getElementById('state-probabilities').innerHTML = html;
+    }
+
+    function presidentRating(stateData) {
+      const margin = stateData.demMargin;
+      if (margin >= 10) return `${candidateSideLabel(true)} safe`;
+      if (margin >= 5) return `${candidateSideLabel(true)} likely`;
+      if (margin >= 2) return `${candidateSideLabel(true)} lean`;
+      if (margin > 0) return `${candidateSideLabel(true)} tilt`;
+      if (margin > -2) return "Toss-up";
+      if (margin > -5) return `${candidateSideLabel(false)} tilt`;
+      if (margin > -10) return `${candidateSideLabel(false)} lean`;
+      return `${candidateSideLabel(false)} safe`;
     }
 
     function displayHistoricalBacktest() {

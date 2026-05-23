@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 const demCandidateId = process.argv[2] || "newsom";
 const repCandidateId = process.argv[3] || "vance";
 const FORECAST_URL = new URL(`../data/president-forecast-${demCandidateId}-${repCandidateId}.json`, import.meta.url);
+const SENATE_FORECAST_URL = new URL("../data/forecast.json", import.meta.url);
 
 function decodeHtml(value) {
   return String(value || "")
@@ -12,6 +13,39 @@ function decodeHtml(value) {
     .replace(/&nbsp;/g, " ")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">");
+}
+
+function readSenateForecast() {
+  try {
+    return JSON.parse(readFileSync(SENATE_FORECAST_URL, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+function readSenateGenericPolling() {
+  const senate = readSenateForecast();
+  const generic = senate?.sourceSummary?.genericPolling;
+  const margin = Number(generic?.genericBallotMargin);
+  if (!Number.isFinite(margin)) return null;
+  return {
+    margin,
+    dem: Number(generic?.genericBallotDem),
+    rep: Number(generic?.genericBallotRep),
+    sources: Array.isArray(generic?.sources) ? generic.sources.map((source) => source.source).filter(Boolean) : []
+  };
+}
+
+function readSenateApproval() {
+  const senate = readSenateForecast();
+  const pollfinity = senate?.sourceSummary?.pollfinity;
+  const net = Number(pollfinity?.approvalNet);
+  if (!Number.isFinite(net)) return null;
+  return {
+    approve: (net + 100) / 2,
+    net,
+    source: "Senate forecast Pollfinity approval"
+  };
 }
 
 // Helper function to fetch text from URL
@@ -111,6 +145,12 @@ async function fetchPresidentialPolling() {
 
 // Fetch generic ballot data using multiple sources (blended like Senate model)
 async function fetchGenericBallot() {
+  const senateGeneric = readSenateGenericPolling();
+  if (senateGeneric) {
+    console.log(`Generic ballot from Senate forecast blend: ${senateGeneric.margin.toFixed(2)} (${senateGeneric.sources.join(", ") || "stored source blend"})`);
+    return senateGeneric.margin;
+  }
+
   const margins = [];
   const weights = [];
   
@@ -258,6 +298,12 @@ async function fetchGenericBallot() {
 async function fetchPresidentialApproval() {
   const approvals = [];
   const weights = [];
+  const senateApproval = readSenateApproval();
+  if (senateApproval) {
+    approvals.push(senateApproval.approve);
+    weights.push(1.05);
+    console.log(`Trump approval from Senate forecast cache: ${senateApproval.approve.toFixed(1)}% (net: ${senateApproval.net})`);
+  }
   
   // Try Pollfinity API (same as Senate model)
   const pollfinityUrl = "https://pollfinity.com/averages.json";
@@ -364,29 +410,25 @@ async function fetchPresidentialApproval() {
     }
   }
   
-  // Try Silver Bulletin
-  const silverUrl = "https://thesilverbullet.substack.com/p/biden-approval-rating";
-  const silverText = await fetchText(silverUrl, "silverBulletinApproval", null, {
+  // Try Race to the WH approval average
+  const raceToTheWhApprovalUrl = "https://www.racetothewh.com/president/approval";
+  const raceToTheWhApprovalText = await fetchText(raceToTheWhApprovalUrl, "raceToTheWhApproval", null, {
     headers: { accept: "text/html", "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" }
   });
   
-  if (silverText) {
+  if (raceToTheWhApprovalText) {
     try {
-      const lines = htmlToLines(silverText);
-      for (const line of lines) {
-        const match = line.match(/([3-5][0-9](?:\.[0-9]+)?)%?\s*(?:approve|approval)/i);
-        if (match) {
-          const value = Number(match[1]);
-          if (value >= 30 && value <= 60) { // Sanity check for approval
-            approvals.push(value);
-            weights.push(0.7); // Silver Bulletin gets weight 0.7
-            console.log(`Trump approval from Silver Bulletin: ${value}%`);
-            break;
-          }
-        }
+      const flat = decodeHtml(raceToTheWhApprovalText).replace(/\s+/g, " ");
+      const pair = flat.match(/Approve[^0-9]{0,30}([3-5][0-9](?:\.[0-9]+)?)%?.{0,100}?Disapprove[^0-9]{0,30}([3-6][0-9](?:\.[0-9]+)?)%?/i);
+      const loose = flat.match(/Trump[^.]{0,120}?approval[^0-9]{0,30}([3-5][0-9](?:\.[0-9]+)?)%?/i);
+      const approve = pair ? Number(pair[1]) : loose ? Number(loose[1]) : null;
+      if (Number.isFinite(approve) && approve >= 30 && approve <= 60) {
+        approvals.push(approve);
+        weights.push(0.75);
+        console.log(`Trump approval from Race to the WH: ${approve}%`);
       }
     } catch (error) {
-      console.log("Silver Bulletin parse error:", error.message);
+      console.log("Race to the WH approval parse error:", error.message);
     }
   }
   
@@ -417,7 +459,7 @@ async function fetchPresidentialApproval() {
   }
   
   // Try RealClearPolling for Trump approval
-  const rcpApprovalUrl = "https://www.realclearpolling.com/latest-polls/presidential-approval";
+  const rcpApprovalUrl = "https://www.realclearpolling.com/polls/approval/donald-trump/approval-rating";
   const rcpApprovalText = await fetchText(rcpApprovalUrl, "rcpApproval", null, {
     headers: { accept: "text/html", "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" }
   });
@@ -425,8 +467,9 @@ async function fetchPresidentialApproval() {
   if (rcpApprovalText) {
     try {
       const flat = decodeHtml(rcpApprovalText).replace(/\s+/g, " ");
-      const match = flat.match(/([3-5][0-9](?:\.[0-9]+)?)%?\s*(?:approve|approval)/i);
-      const approve = match ? Number(match[1]) : null;
+      const pair = flat.match(/Approve[^0-9]{0,30}([3-5][0-9](?:\.[0-9]+)?)%?.{0,100}?Disapprove[^0-9]{0,30}([3-6][0-9](?:\.[0-9]+)?)%?/i);
+      const loose = flat.match(/([3-5][0-9](?:\.[0-9]+)?)%?\s*(?:approve|approval)/i);
+      const approve = pair ? Number(pair[1]) : loose ? Number(loose[1]) : null;
       
       if (Number.isFinite(approve) && approve >= 30 && approve <= 60) {
         approvals.push(approve);
@@ -1032,6 +1075,28 @@ async function main() {
   };
   
   const forecast = buildForecast(demCandidate, repCandidate, fundamentals, pollingData);
+  const senateGeneric = readSenateGenericPolling();
+  forecast.sourceSummary = {
+    genericPolling: senateGeneric ? {
+      source: "Senate forecast blend",
+      genericBallotMargin: senateGeneric.margin,
+      genericBallotDem: senateGeneric.dem,
+      genericBallotRep: senateGeneric.rep,
+      sources: senateGeneric.sources
+    } : {
+      source: "President generator fallback blend",
+      genericBallotMargin: genericBallot
+    },
+    trumpApproval: {
+      approval: presidentialApproval,
+      netApproximation: (presidentialApproval * 2) - 100,
+      sources: "Senate Pollfinity cache plus live approval pages when reachable"
+    },
+    polling: {
+      presidentialPolls: pollingData?.polls || 0,
+      usablePresidentialPolls: pollingData?.usablePolls || 0
+    }
+  };
   
   writeFileSync(FORECAST_URL, JSON.stringify(forecast, null, 2));
   console.log(`Wrote presidential forecast for ${demCandidate.name} vs ${repCandidate.name}`);
