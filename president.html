@@ -341,11 +341,42 @@
       }
       const stateCode = Object.keys(forecastData.states).find(k => forecastData.states[k] === stateData);
       const leader = stateLeaderData(stateData);
+      const rating = presidentRating(stateData, presidentMapColorMode);
+      const ratingModeLabel = PRESIDENTIAL_MAP_COLOR_MODES[presidentMapColorMode] || "Rating";
+      const demName = candidateSideLabel(true, "full");
+      const repName = candidateSideLabel(false, "full");
+      const demProb = stateData.demProbability;
+      const repProb = 1 - stateData.demProbability;
+      const winnerVerb = leader.demLeads ? demName : repName;
       hoverCard.innerHTML = `
-        <strong>${STATE_NAMES[stateCode]}</strong><br>
-        EV: ${stateData.ev}<br>
-        ${leader.fullCandidate}: ${oneDecimal(leader.probability)}<br>
-        Projected margin: ${leader.side}+${leader.projectedMargin.toFixed(1)}
+        <span class="race-kicker">${STATE_NAMES[stateCode]} Presidential</span>
+        <div class="map-card-title">
+          <div class="state-code">${stateCode}</div>
+          <span class="rating-pill ${presidentRatingBucket(rating)}" title="${ratingModeLabel}">${rating}</span>
+        </div>
+        <h3>${winnerVerb} has a ${oneDecimal(leader.probability)} chance.</h3>
+        <div class="candidate-table" aria-label="${STATE_NAMES[stateCode]} candidate forecast">
+          <div class="candidate-table-head"><span>Candidate</span><span>Chance</span></div>
+          <div class="candidate-row dem-row">
+            <span>${demName} <i class="party-badge dem-badge">D</i></span>
+            <strong>${oneDecimal(demProb)}</strong>
+          </div>
+          <div class="candidate-row rep-row">
+            <span>${repName} <i class="party-badge rep-badge">R</i></span>
+            <strong>${oneDecimal(repProb)}</strong>
+          </div>
+          <div class="candidate-margin"><span>Projected margin</span><strong>${leader.side}+${leader.projectedMargin.toFixed(1)} pts</strong></div>
+        </div>
+        <div class="prob-track" aria-label="${stateCode} probability split">
+          <span style="width:${demProb * 100}%"></span>
+          <span style="width:${repProb * 100}%"></span>
+        </div>
+        <div class="badge-row">
+          <span>${stateData.ev} electoral votes</span>
+          <span>${ratingModeLabel}</span>
+        </div>
+        <p>${STATE_NAMES[stateCode]} currently rates ${rating.toLowerCase()} in this matchup.</p>
+        <p class="meta">Color mode: ${ratingModeLabel} / EV: ${stateData.ev} / Margin: ${leader.side}+${leader.projectedMargin.toFixed(1)}</p>
       `;
       hoverCard.style.display = 'block';
     }
