@@ -528,8 +528,8 @@ async function fetchCandidateFavorability(candidateName) {
 const SETTINGS = {
   simulations: 100000,
   electionDate: "2028-11-07",
-  nationalErrorSD: 3.5,
-  stateErrorSD: 4.0,
+  nationalErrorSD: 4.8,
+  stateErrorSD: 5.2,
   correlation: 0.6,
   runDate: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
 };
@@ -598,6 +598,19 @@ const PRESIDENTIAL_BASELINES = {
   WI: { demMargin: -0.5, ev: 10, region: "Midwest", population: 5893718 },
   WY: { demMargin: -45.5, ev: 3, region: "West", population: 576851 },
   DC: { demMargin: 87.5, ev: 3, region: "South", population: 689545 }
+};
+
+const STATE_LONG_TERM_TRENDS = {
+  AZ: 0.8, CO: 1.2, GA: 1.4, NC: 0.8, TX: 3.6, VA: 0.7,
+  AK: 0.6, KS: 0.4, NE: 0.3, UT: 0.7,
+  FL: -3.4, IA: -2.2, OH: -1.8, ME: -0.6, MT: -0.8, MO: -0.9,
+  WV: -1.8, WI: -0.3, PA: -0.2, MI: -0.2, MN: -0.4, NV: -0.2,
+  NM: -0.3, OR: 0.2, WA: 0.3, IL: -0.2, NY: -0.4, NJ: -0.3
+};
+
+const STATE_VOLATILITY = {
+  AK: 0.5, AZ: 0.35, FL: 0.35, GA: 0.45, ME: 0.45, MI: 0.3, MN: 0.25,
+  NE: 0.4, NV: 0.45, NH: 0.35, NC: 0.35, PA: 0.3, TX: 0.3, WI: 0.35
 };
 
 const PRESIDENTIAL_CANDIDATES = {
@@ -751,6 +764,16 @@ function logistic(margin, error) {
   return 1 / (1 + Math.exp(-margin / Math.max(error, 0.1)));
 }
 
+function stateElasticity(state) {
+  const baseline = PRESIDENTIAL_BASELINES[state];
+  const absMargin = Math.abs(baseline.demMargin);
+  let elasticity = absMargin < 6 ? 1.08 : absMargin < 12 ? 1.0 : absMargin < 22 ? 0.86 : 0.68;
+  if (["AZ", "GA", "NC", "NV", "TX"].includes(state)) elasticity += 0.08;
+  if (["AK", "ME", "NH", "WI", "PA", "MI"].includes(state)) elasticity += 0.04;
+  if (["DC", "WY", "VT", "OK", "MA", "MD"].includes(state)) elasticity -= 0.12;
+  return clamp(elasticity, 0.55, 1.16);
+}
+
 function calculateCandidateModifiers(state, demCandidate, repCandidate) {
   let modifier = 0;
   const baseline = PRESIDENTIAL_BASELINES[state];
@@ -782,8 +805,10 @@ function calculateStateMargin(state, demCandidate, repCandidate, fundamentals, p
   const baseline = PRESIDENTIAL_BASELINES[state];
   const modifiers = calculateCandidateModifiers(state, demCandidate, repCandidate);
   
-  // Apply fundamentals (generic ballot, approval, economy)
-  const fundamentalsAdjustment = fundamentals.nationalShift || 0;
+  const approvalAdjustment = Number.isFinite(fundamentals.approval) ? (45 - fundamentals.approval) * 0.16 : 0;
+  const economyAdjustment = ((4 - (fundamentals.unemployment ?? 4)) * -0.25) + (((fundamentals.gdpGrowth ?? 2) - 2) * -0.18);
+  const fundamentalsAdjustment = ((fundamentals.nationalShift || 0) * 0.45) + approvalAdjustment + economyAdjustment;
+  const trendAdjustment = STATE_LONG_TERM_TRENDS[state] || 0;
   
   // Apply polling data if available
   let pollingAdjustment = 0;
@@ -796,9 +821,9 @@ function calculateStateMargin(state, demCandidate, repCandidate, fundamentals, p
         return sum + (poll.margin * weight);
       }, 0) / statePolls.length;
       
-      // Blend polling with baseline (polling gets 40% weight, baseline gets 60%)
+      // Blend polling with baseline; far-out polls move the race but do not dominate fundamentals.
       const baselineMargin = baseline.demMargin;
-      pollingAdjustment = (weightedMargin - baselineMargin) * 0.4;
+      pollingAdjustment = (weightedMargin - baselineMargin) * 0.25;
     }
   } else if (pollingData && pollingData.byState && pollingData.byState["National"]) {
     // Use national polling if state-specific not available
@@ -810,14 +835,13 @@ function calculateStateMargin(state, demCandidate, repCandidate, fundamentals, p
       }, 0) / nationalPolls.length;
       
       const baselineMargin = baseline.demMargin;
-      pollingAdjustment = (weightedMargin - baselineMargin) * 0.3;
+      pollingAdjustment = (weightedMargin - baselineMargin) * 0.18;
     }
   }
   
-  // State elasticity (how much state moves with national)
-  const elasticity = 1.0;
+  const elasticity = stateElasticity(state);
   
-  return baseline.demMargin + modifiers + (fundamentalsAdjustment * elasticity) + pollingAdjustment;
+  return baseline.demMargin + trendAdjustment + modifiers + (fundamentalsAdjustment * elasticity) + pollingAdjustment;
 }
 
 function generateCorrelatedError(stateCount, correlation) {
@@ -826,7 +850,7 @@ function generateCorrelatedError(stateCount, correlation) {
   const states = Object.keys(PRESIDENTIAL_BASELINES);
   
   for (const state of states) {
-    const stateSpecific = randn() * SETTINGS.stateErrorSD;
+    const stateSpecific = randn() * (SETTINGS.stateErrorSD + (STATE_VOLATILITY[state] || 0));
     stateErrors[state] = correlation * nationalError + Math.sqrt(1 - correlation * correlation) * stateSpecific;
   }
   
@@ -969,7 +993,15 @@ function buildForecast(demCandidate, repCandidate, fundamentals, pollingData = n
       demProbability: stateProbabilities[simulation.tippingPoint]?.demProbability || 0.5
     },
     states: stateProbabilities,
-    historicalBacktest
+    historicalBacktest,
+    modelInputs: {
+      longTermTrendStates: Object.keys(STATE_LONG_TERM_TRENDS).length,
+      stateVolatilityStates: Object.keys(STATE_VOLATILITY).length,
+      nationalShift: fundamentals.nationalShift,
+      approval: fundamentals.approval,
+      gdpGrowth: fundamentals.gdpGrowth,
+      unemployment: fundamentals.unemployment
+    }
   };
 }
 

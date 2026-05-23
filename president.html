@@ -56,6 +56,35 @@
       </aside>
     </section>
 
+    <section class="text-panel matchup-panel" aria-labelledby="candidate-title">
+      <p class="kicker">Candidate Matchup</p>
+      <h2 id="candidate-title">Matchup selector.</h2>
+      <div class="candidate-selector">
+        <label>
+          <span>Democratic candidate</span>
+          <select id="dem-candidate">
+            <option value="newsom">Gavin Newsom (CA)</option>
+            <option value="beshear">Andy Beshear (KY)</option>
+            <option value="shapiro">Josh Shapiro (PA)</option>
+            <option value="buttigieg">Pete Buttigieg (IN)</option>
+            <option value="whitmer">Gretchen Whitmer (MI)</option>
+            <option value="aoc">Alexandria Ocasio-Cortez (NY)</option>
+          </select>
+        </label>
+        <label>
+          <span>Republican candidate</span>
+          <select id="rep-candidate">
+            <option value="vance">JD Vance (OH)</option>
+            <option value="rubio">Marco Rubio (FL)</option>
+            <option value="desantis">Ron DeSantis (FL)</option>
+            <option value="haley">Nikki Haley (SC)</option>
+            <option value="cruz">Ted Cruz (TX)</option>
+          </select>
+        </label>
+        <button id="update-forecast" type="button">Update forecast</button>
+      </div>
+    </section>
+
     <section class="map-panel" aria-labelledby="map-title">
       <div class="section-head">
         <div>
@@ -94,35 +123,6 @@
       </article>
     </section>
 
-    <section class="text-panel" aria-labelledby="candidate-title">
-      <p class="kicker">Candidate Matchup</p>
-      <h2 id="candidate-title">Select candidates to see matchup forecast.</h2>
-      <div class="candidate-selector">
-        <div>
-          <label for="dem-candidate">Democratic Candidate:</label>
-          <select id="dem-candidate">
-            <option value="newsom">Gavin Newsom (CA)</option>
-            <option value="beshear">Andy Beshear (KY)</option>
-            <option value="shapiro">Josh Shapiro (PA)</option>
-            <option value="buttigieg">Pete Buttigieg (IN)</option>
-            <option value="whitmer">Gretchen Whitmer (MI)</option>
-            <option value="aoc">Alexandria Ocasio-Cortez (NY)</option>
-          </select>
-        </div>
-        <div>
-          <label for="rep-candidate">Republican Candidate:</label>
-          <select id="rep-candidate">
-            <option value="vance">JD Vance (OH)</option>
-            <option value="rubio">Marco Rubio (FL)</option>
-            <option value="desantis">Ron DeSantis (FL)</option>
-            <option value="haley">Nikki Haley (SC)</option>
-            <option value="cruz">Ted Cruz (TX)</option>
-          </select>
-        </div>
-        <button id="update-forecast">Update Forecast</button>
-      </div>
-    </section>
-
     <section class="dashboard-grid" aria-label="State probabilities">
       <article class="chart-panel full-width">
         <span class="chart-label">State-by-State Probabilities</span>
@@ -147,12 +147,25 @@
   <script src="assets/wiki.js"></script>
   <script>
     let forecastData = null;
-    let presidentMapColorMode = "probability";
+    let presidentMapColorMode = "rating";
     let usStates = null;
 
     const PRESIDENTIAL_MAP_COLOR_MODES = {
-      probability: "Win probability",
-      margin: "Projected margin"
+      rating: "Rating",
+      margin: "Projected margin",
+      probability: "Win probability"
+    };
+
+    const PRESIDENT_RATING_COLORS = {
+      "Safe D": "var(--safe-d)",
+      "Likely D": "var(--likely-d)",
+      "Lean D": "var(--lean-d)",
+      "Tilt D": "var(--tilt-d)",
+      "Toss-up": "var(--toss)",
+      "Tilt R": "var(--tilt-r)",
+      "Lean R": "var(--lean-r)",
+      "Likely R": "var(--likely-r)",
+      "Safe R": "var(--safe-r)"
     };
 
     async function loadForecast() {
@@ -269,7 +282,7 @@
           .attr("opacity", (feature) => {
             const state = FIPS_TO_STATE[String(feature.id).padStart(2, "0")];
             const stateData = forecastData.states[state];
-            return stateData ? clamp(.58 + stateData.demProbability * .42, .74, 1) : null;
+            return stateData ? 1 : null;
           })
           .attr("tabindex", (feature) => forecastData.states[FIPS_TO_STATE[String(feature.id).padStart(2, "0")]] ? 0 : -1)
           .on("mouseenter focus", (event, feature) => updateHoverCard(forecastData.states[FIPS_TO_STATE[String(feature.id).padStart(2, "0")]]))
@@ -291,21 +304,7 @@
     }
 
     function stateColor(stateData) {
-      if (presidentMapColorMode === "probability") {
-        const prob = stateData.demProbability;
-        if (prob > 0.75) return "#0066cc";
-        if (prob > 0.5) return "#6699cc";
-        if (prob > 0.25) return "#cc9966";
-        return "#cc0000";
-      } else {
-        const margin = stateData.demMargin;
-        if (margin > 10) return "#0066cc";
-        if (margin > 5) return "#6699cc";
-        if (margin > 0) return "#99ccff";
-        if (margin > -5) return "#ffcc99";
-        if (margin > -10) return "#cc9966";
-        return "#cc0000";
-      }
+      return PRESIDENT_RATING_COLORS[presidentRating(stateData, presidentMapColorMode)] || "var(--toss)";
     }
 
     function renderFallbackMap() {
@@ -368,7 +367,7 @@
       const minEV = Math.min(...evs);
       const maxEV = Math.max(...evs);
       const sims = 100000;
-      const binCount = Math.min(maxEV - minEV + 1, 24);
+      const binCount = Math.min(maxEV - minEV + 1, 16);
       const binWidth = Math.max(1, Math.ceil((maxEV - minEV + 1) / binCount));
       const bins = Array.from({ length: Math.ceil((maxEV - minEV + 1) / binWidth) }, (_, index) => {
         const start = minEV + index * binWidth;
@@ -387,7 +386,7 @@
         const share = sims ? value / sims : 0;
         const height = clamp((value / maxBinValue), .02, 1);
         const label = bin.start === bin.end ? `${bin.start}` : `${bin.start}-${bin.end}`;
-        const showLabel = index === 0 || index === bins.length - 1 || Math.abs((bin.start + bin.end) / 2 - 270) <= binWidth || index % 4 === 0;
+        const showLabel = index === 0 || index === bins.length - 1 || Math.abs((bin.start + bin.end) / 2 - 270) <= binWidth / 2;
         return `<button class="seat-bin president-ev-bin" type="button" data-tip="${label} ${candidateSideLabel(true)} EV<br>${(share * 100).toFixed(1)}% of simulations"><i style="--bar-scale:${height}"></i><span>${showLabel ? label : ""}</span></button>`;
       }).join("");
       bindPanelTooltipFor(container, ".seat-bin", (node) => node.dataset.tip);
@@ -476,60 +475,51 @@
     function renderLegend() {
       const legend = document.getElementById("president-map-legend");
       if (!legend) return;
-      if (presidentMapColorMode === "probability") {
-        legend.innerHTML = `
-          <span><i style="background-color:#0066cc"></i>${candidateSideLabel(true)} >75%</span>
-          <span><i style="background-color:#6699cc"></i>${candidateSideLabel(true)} 50-75%</span>
-          <span><i style="background-color:#cc9966"></i>${candidateSideLabel(false)} 50-75%</span>
-          <span><i style="background-color:#cc0000"></i>${candidateSideLabel(false)} >75%</span>
-        `;
-      } else {
-        legend.innerHTML = `
-          <span><i style="background-color:#0066cc"></i>${candidateSideLabel(true)} +10+</span>
-          <span><i style="background-color:#6699cc"></i>${candidateSideLabel(true)} +5 to +10</span>
-          <span><i style="background-color:#99ccff"></i>${candidateSideLabel(true)} +0 to +5</span>
-          <span><i style="background-color:#ffcc99"></i>${candidateSideLabel(false)} +0 to +5</span>
-          <span><i style="background-color:#cc9966"></i>${candidateSideLabel(false)} +5 to +10</span>
-          <span><i style="background-color:#cc0000"></i>${candidateSideLabel(false)} +10+</span>
-        `;
-      }
+      const ratings = ["Safe D", "Likely D", "Lean D", "Tilt D", "Toss-up", "Tilt R", "Lean R", "Likely R", "Safe R"];
+      legend.innerHTML = ratings.map((rating) => `<span><i style="background:${PRESIDENT_RATING_COLORS[rating]}"></i>${rating}</span>`).join("");
     }
 
     function displayStateProbabilities() {
       const states = Object.entries(forecastData.states).sort((a, b) => Math.abs(a[1].demProbability - .5) - Math.abs(b[1].demProbability - .5));
       const html = `
-        <div class="president-state-row president-state-head">
-          <span>State</span><span>EV</span><span>Rating</span><span>Leader</span><span>Win</span><span>Projected margin</span>
+        <div class="battleground-list president-race-board">
+          ${states.map(([state, stateData]) => {
+            const leader = stateLeaderData(stateData);
+            const rating = presidentRating(stateData, "rating");
+            const leaderClass = leader.demLeads ? "leads-dem" : "leads-rep";
+            const marginClass = leader.demLeads ? "dem-margin" : "rep-margin";
+            return `
+              <button class="race-board-row ${leaderClass}" type="button" data-tip="${STATE_NAMES[state]}<br>${leader.fullCandidate} ${oneDecimal(leader.probability)}<br>Projected margin ${leader.side}+${leader.projectedMargin.toFixed(1)}">
+                <strong>${state}</strong>
+                <span>${STATE_NAMES[state]}</span>
+                <span>${stateData.ev} EV</span>
+                <span><b class="rating-pill ${presidentRatingBucket(rating)}">${rating}</b></span>
+                <span>${leader.fullCandidate}</span>
+                <span class="${marginClass}">${oneDecimal(leader.probability)}</span>
+                <span class="${marginClass}">${leader.side}+${leader.projectedMargin.toFixed(1)}</span>
+              </button>
+            `;
+          }).join("")}
         </div>
-        ${states.map(([state, stateData]) => {
-          const leader = stateLeaderData(stateData);
-          const rating = presidentRating(stateData);
-          const marginClass = leader.demLeads ? "dem-margin" : "rep-margin";
-          return `
-            <div class="president-state-row">
-              <strong>${state}</strong>
-              <span>${stateData.ev}</span>
-              <span>${rating}</span>
-              <span>${leader.fullCandidate}</span>
-              <span class="${marginClass}">${oneDecimal(leader.probability)}</span>
-              <span class="${marginClass}">${leader.side}+${leader.projectedMargin.toFixed(1)}</span>
-            </div>
-          `;
-        }).join("")}
       `;
       document.getElementById('state-probabilities').innerHTML = html;
+      bindPanelTooltipFor(document.getElementById('state-probabilities'), ".race-board-row", (node) => node.dataset.tip);
     }
 
-    function presidentRating(stateData) {
-      const margin = stateData.demMargin;
-      if (margin >= 10) return `${candidateSideLabel(true)} safe`;
-      if (margin >= 5) return `${candidateSideLabel(true)} likely`;
-      if (margin >= 2) return `${candidateSideLabel(true)} lean`;
-      if (margin > 0) return `${candidateSideLabel(true)} tilt`;
-      if (margin > -2) return "Toss-up";
-      if (margin > -5) return `${candidateSideLabel(false)} tilt`;
-      if (margin > -10) return `${candidateSideLabel(false)} lean`;
-      return `${candidateSideLabel(false)} safe`;
+    function presidentRating(stateData, mode = presidentMapColorMode) {
+      const signedValue = mode === "probability" ? (stateData.demProbability - .5) * 100 : stateData.demMargin;
+      const abs = Math.abs(signedValue);
+      if (abs < (mode === "probability" ? 2.5 : 1)) return "Toss-up";
+      const side = signedValue > 0 ? "D" : "R";
+      if (abs >= (mode === "probability" ? 45 : 12)) return `Safe ${side}`;
+      if (abs >= (mode === "probability" ? 25 : 7)) return `Likely ${side}`;
+      if (abs >= (mode === "probability" ? 10 : 3)) return `Lean ${side}`;
+      return `Tilt ${side}`;
+    }
+
+    function presidentRatingBucket(rating) {
+      if (rating === "Toss-up") return "tossup";
+      return String(rating || "Toss-up").toLowerCase().replace(/\s+/g, "-");
     }
 
     function displayHistoricalBacktest() {
@@ -566,34 +556,43 @@
   </script>
 
   <style>
-    .candidate-selector {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
+    .matchup-panel {
+      border-top-color: var(--dem);
     }
-    .candidate-selector > div {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
+    .candidate-selector {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: end;
     }
     .candidate-selector label {
-      font-weight: bold;
+      display: grid;
+      gap: 6px;
     }
-    .candidate-selector select {
-      padding: 0.5rem;
-      font-size: 1rem;
+    .candidate-selector label span {
+      color: var(--muted);
+      font: 900 .72rem/1.1 "Segoe UI", Arial, sans-serif;
+      text-transform: uppercase;
+    }
+    .candidate-selector select,
+    .candidate-selector button {
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      background: var(--paper);
+      color: var(--ink);
+      padding: 8px 10px;
+      font: 800 .95rem/1.1 "Segoe UI", Arial, sans-serif;
     }
     .candidate-selector button {
-      padding: 0.75rem;
-      font-size: 1rem;
-      background-color: #1a1a1a;
-      color: white;
-      border: none;
-      cursor: pointer;
-      margin-top: 0.5rem;
+      border-color: var(--ink);
+      background: var(--ink);
+      color: var(--paper);
+      text-transform: uppercase;
+      letter-spacing: 0;
     }
     .candidate-selector button:hover {
-      background-color: #333;
+      background: color-mix(in srgb, var(--ink) 88%, var(--dem));
     }
     .state-table {
       width: 100%;
@@ -621,6 +620,11 @@
     }
     .bucket {
       font-size: 0.9rem;
+    }
+    @media (max-width: 760px) {
+      .candidate-selector {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </body>
