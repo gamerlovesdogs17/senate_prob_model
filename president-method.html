@@ -27,7 +27,7 @@
     <section class="text-panel image-panel compact-page-head">
       <p class="kicker">2028 President</p>
       <h1>Method.</h1>
-      <p class="lede">Monte Carlo simulation with candidate-specific modifiers and correlated polling error.</p>
+      <p class="lede">Early-cycle presidential model notes and data status.</p>
     </section>
 
     <section class="dashboard-grid" aria-label="Model overview">
@@ -43,7 +43,7 @@
       <article class="chart-panel">
         <span class="chart-label">Key Features</span>
         <dl class="method-list">
-          <div><dt>Candidate modifiers</dt><dd>Home-state, regional, ideological, favorability, and electability adjustments</dd></div>
+          <div><dt>Candidate modifiers</dt><dd>Home-state, regional, ideology, favorability, electability, and state-fit adjustments</dd></div>
           <div><dt>Correlated error</dt><dd>National polling error correlated across states</dd></div>
           <div><dt>Tipping point</dt><dd>State most likely to decide the election</dd></div>
           <div><dt>Popular vote</dt><dd>Weighted by state population</dd></div>
@@ -53,24 +53,22 @@
 
     <section class="text-panel" aria-label="Candidate modifiers">
       <h2>Candidate Modifiers</h2>
-      <p>The model adjusts state margins based on candidate characteristics:</p>
       <ul>
-        <li><strong>Home-state modifier:</strong> +4 margin boost in candidate's home state</li>
-        <li><strong>Regional modifier:</strong> +1.5 margin boost in states in candidate's region (Northeast, South, Midwest, West, Plains)</li>
-        <li><strong>Ideological modifier:</strong> Adjusts based on state partisan lean vs candidate ideology (progressive/moderate/conservative)</li>
-        <li><strong>Favorability modifier:</strong> Scales state margins by candidate favorability relative to baseline</li>
-        <li><strong>Electability modifier:</strong> Adjusts error terms based on candidate electability score</li>
+        <li><strong>Home-state:</strong> direct home-state lift, with a separate swing-state fit table for candidates with obvious regional strengths.</li>
+        <li><strong>State fit:</strong> bounded adjustments for traits such as Appalachia, Sun Belt, Midwest, suburbs, rural states, Hispanic-heavy states, and independent-leaning states.</li>
+        <li><strong>Ideology:</strong> small penalties or bonuses in states where the candidate profile is a poor or strong fit.</li>
+        <li><strong>Favorability and electability:</strong> modest national candidate terms; they are capped so they cannot swamp state fundamentals.</li>
       </ul>
     </section>
 
     <section class="text-panel" aria-label="State baselines">
       <h2>State Baselines</h2>
-      <p>Each state has a baseline margin based on 2024 presidential results:</p>
+      <p>Each state starts with a 2024 presidential baseline, then receives long-term trend, elasticity, and current-cycle adjustments.</p>
       <ul>
-        <li>Partisan baseline: 2024 Democratic margin (positive = Dem advantage, negative = Rep advantage)</li>
-        <li>Electoral votes: State's EV count</li>
-        <li>Region: Geographic region for regional modifier calculations</li>
-        <li>Population: State population for popular vote weighting</li>
+        <li>Baseline: 2024 Democratic margin, electoral votes, region, and population.</li>
+        <li>Trend: state movement over the last decade-plus, including states such as Texas and Florida moving differently.</li>
+        <li>Elasticity: close and fast-moving states react more to national conditions than deeply safe states.</li>
+        <li>Current cycle: 2026 Senate state margins are lightly blended where they exist; generic ballot is shared with the Senate model.</li>
       </ul>
     </section>
 
@@ -126,37 +124,37 @@
 
     <section class="text-panel" aria-label="Fundamentals">
       <h2>Fundamentals</h2>
-      <p>The model incorporates national fundamentals from real-time data sources:</p>
+      <p>Current national inputs:</p>
       <ul>
-        <li><strong>Generic ballot:</strong> Fetched from Pollfinity API (same as Senate model) to measure national partisan mood. Currently shows D+5.</li>
-        <li><strong>Presidential approval:</strong> Fetched from Pollfinity API for Trump approval rating. Currently shows 47% approval.</li>
-        <li><strong>Economic indicators:</strong> Using current approximate values (unemployment 4.0%, GDP growth 2.0%). These would be updated with real-time data when available.</li>
-        <li><strong>State polling:</strong> Fetched from RealClearPolling for state-specific presidential polls.</li>
+        <li><strong>Generic ballot:</strong> read from the Senate forecast's stored polling blend.</li>
+        <li><strong>Presidential approval:</strong> blended from the Senate forecast cache and live approval pages when reachable.</li>
+        <li><strong>Consumer sentiment:</strong> FRED UMCSENT, weighted more heavily than raw GDP because voter mood often diverges from topline growth.</li>
+        <li><strong>Economic indicators:</strong> unemployment and GDP are secondary terms.</li>
+        <li><strong>State polling:</strong> included when reachable and parseable, with lower weight this early in the cycle.</li>
       </ul>
-      <p>These fundamentals are applied as a national shift that affects all states proportionally. State-specific polling is blended with baseline margins (40% polling weight, 60% baseline weight).</p>
-      <p><strong>Note:</strong> For the 2028 presidential cycle, early polling is limited. The model uses current 2026 conditions and Trump approval as reasonable proxies, which will be updated as more 2028-specific data becomes available.</p>
+      <p>National conditions pass through state elasticity, so a one-point national move does not affect Wyoming, Texas, Wisconsin, and Vermont the same way.</p>
     </section>
 
     <section class="text-panel" aria-label="Data sources">
       <h2>Data Sources</h2>
-      <p>The model uses the following data sources:</p>
+      <p>Primary source families:</p>
       <ul>
-        <li><strong>RealClearPolling:</strong> Presidential polling data by state and nationally</li>
-        <li><strong>Pollfinity API:</strong> Generic ballot and Trump approval ratings (same as Senate model)</li>
-        <li><strong>Economic indicators:</strong> Current economic conditions (unemployment, GDP growth)</li>
+        <li><strong>Shared 2026 polling blend:</strong> generic ballot from the Senate forecast's stored source blend.</li>
+        <li><strong>Approval:</strong> Senate Pollfinity cache plus live approval pages when reachable.</li>
+        <li><strong>Consumer sentiment:</strong> FRED UMCSENT.</li>
+        <li><strong>Presidential polling:</strong> RealClearPolling pages when reachable and parseable.</li>
+        <li><strong>Current-cycle state signal:</strong> 2026 Senate state forecast margins, lightly weighted.</li>
       </ul>
-      <p>For the 2028 presidential cycle, early polling is limited. The model uses current 2026 conditions and Trump approval as reasonable proxies, which will be updated as more 2028-specific data becomes available.</p>
     </section>
 
     <section class="text-panel" aria-label="Limitations">
       <h2>Limitations</h2>
       <ul>
-        <li>Candidate favorability scores use polling-based estimates (not real-time favorability)</li>
-        <li>GDP growth uses placeholder values (FRED API integration pending)</li>
-        <li>Polling data may be limited for 2028 presidential race (early in cycle)</li>
-        <li>Historical backtest is limited to 2020 and 2016</li>
-        <li>Model assumes static candidate characteristics (no campaign effects)</li>
-        <li>Data sources may have rate limits or availability issues</li>
+        <li>Candidate favorability still uses stored estimates until consistent live favorability feeds are available.</li>
+        <li>2028 head-to-head and state polling is sparse this early.</li>
+        <li>Candidate traits are intentionally bounded; they do not model campaign quality, running mates, scandals, or turnout operations.</li>
+        <li>Historical presidential backtest currently covers 2020 and 2016.</li>
+        <li>Some live polling and approval pages can block automated requests.</li>
       </ul>
     </section>
   </main>

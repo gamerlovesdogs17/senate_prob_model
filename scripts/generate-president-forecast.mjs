@@ -48,6 +48,25 @@ function readSenateApproval() {
   };
 }
 
+function readSenateStateSignals() {
+  const senate = readSenateForecast();
+  const races = Array.isArray(senate?.races) ? senate.races : [];
+  const signals = {};
+  for (const race of races) {
+    const state = String(race?.state || "").toUpperCase();
+    const margin = Number(race?.margin);
+    const probability = Number(race?.demProbability);
+    if (!PRESIDENTIAL_BASELINES[state] || !Number.isFinite(margin)) continue;
+    signals[state] = {
+      margin,
+      probability: Number.isFinite(probability) ? probability : null,
+      inputQuality: race?.inputQuality?.label || null,
+      rating: race?.rating || null
+    };
+  }
+  return signals;
+}
+
 // Helper function to fetch text from URL
 async function fetchText(url, cacheKey, status = null, options = {}) {
   try {
@@ -638,6 +657,52 @@ const STATE_VOLATILITY = {
   NE: 0.4, NV: 0.45, NH: 0.35, NC: 0.35, PA: 0.3, TX: 0.3, WI: 0.35
 };
 
+const STATE_TRAITS = {
+  AL: ["deep_south", "rural", "evangelical"], AK: ["frontier", "independent"], AZ: ["sunbelt", "suburban", "hispanic"], AR: ["south", "rural", "appalachian"],
+  CA: ["west", "coastal", "urban", "college"], CO: ["west", "suburban", "college"], CT: ["northeast", "suburban", "college"], DE: ["northeast", "suburban"],
+  FL: ["sunbelt", "suburban", "hispanic"], GA: ["sunbelt", "suburban", "black_belt"], HI: ["west", "minority"], ID: ["west", "rural"],
+  IL: ["midwest", "urban", "suburban"], IN: ["midwest", "working_class"], IA: ["midwest", "rural"], KS: ["plains", "suburban", "rural"],
+  KY: ["appalachian", "south", "rural", "working_class"], LA: ["deep_south", "black_belt"], ME: ["northeast", "rural", "independent"], MD: ["south", "suburban", "college"],
+  MA: ["northeast", "college", "urban"], MI: ["midwest", "working_class", "suburban"], MN: ["midwest", "college", "suburban"], MS: ["deep_south", "black_belt", "rural"],
+  MO: ["midwest", "rural", "working_class"], MT: ["west", "rural", "frontier"], NE: ["plains", "rural", "suburban"], NV: ["west", "sunbelt", "working_class"],
+  NH: ["northeast", "independent", "suburban"], NJ: ["northeast", "suburban", "college"], NM: ["west", "hispanic"], NY: ["northeast", "urban", "college"],
+  NC: ["sunbelt", "suburban", "black_belt"], ND: ["plains", "rural"], OH: ["midwest", "appalachian", "working_class"], OK: ["plains", "evangelical"],
+  OR: ["west", "coastal", "college"], PA: ["northeast", "working_class", "suburban"], RI: ["northeast", "urban"], SC: ["deep_south", "black_belt", "suburban"],
+  SD: ["plains", "rural"], TN: ["south", "appalachian", "evangelical"], TX: ["sunbelt", "suburban", "hispanic"], UT: ["west", "suburban", "religious"],
+  VT: ["northeast", "rural", "college"], VA: ["south", "suburban", "college"], WA: ["west", "coastal", "college"], WV: ["appalachian", "rural", "working_class"],
+  WI: ["midwest", "working_class", "rural"], WY: ["west", "rural"], DC: ["urban", "college"]
+};
+
+const CANDIDATE_STATE_FIT = {
+  newsom: { west: 0.8, coastal: 0.6, urban: 0.35, college: 0.25, rural: -0.55, evangelical: -0.35, deep_south: -0.35 },
+  beshear: { appalachian: 1.25, south: 0.8, deep_south: 0.25, rural: 0.65, working_class: 0.55, evangelical: 0.25, suburban: 0.2 },
+  shapiro: { northeast: 0.9, suburban: 0.75, college: 0.45, working_class: 0.25, rural: -0.15 },
+  buttigieg: { midwest: 0.8, suburban: 0.55, college: 0.45, urban: 0.25, rural: -0.25, evangelical: -0.2 },
+  whitmer: { midwest: 1.05, working_class: 0.75, suburban: 0.45, rural: 0.15, college: 0.15 },
+  aoc: { urban: 0.95, minority: 0.45, college: 0.35, coastal: 0.25, rural: -0.9, evangelical: -0.65, plains: -0.35 },
+  vance: { appalachian: 1.05, midwest: 0.65, working_class: 0.75, rural: 0.35, suburban: -0.4, college: -0.3 },
+  rubio: { sunbelt: 0.75, hispanic: 0.75, suburban: 0.25, south: 0.25, coastal: 0.15 },
+  desantis: { sunbelt: 0.65, south: 0.55, evangelical: 0.25, suburban: -0.15, college: -0.25 },
+  haley: { suburban: 0.75, college: 0.45, south: 0.35, deep_south: 0.25, rural: -0.15, independent: 0.25 },
+  cruz: { evangelical: 0.75, plains: 0.45, rural: 0.45, hispanic: 0.2, suburban: -0.45, college: -0.3 }
+};
+
+const CANDIDATE_SWING_STATE_EFFECTS = {
+  beshear: { AZ: 0.3, GA: 0.5, NC: 0.55, OH: 0.8, PA: 0.35, MI: 0.35, WI: 0.3, KY: 3.0 },
+  shapiro: { PA: 2.2, MI: 0.25, WI: 0.25, AZ: 0.2, GA: 0.2, NC: 0.15 },
+  whitmer: { MI: 2.2, WI: 0.8, PA: 0.45, OH: 0.35, IA: 0.25, MN: 0.35 },
+  buttigieg: { MI: 0.45, WI: 0.35, PA: 0.25, IN: 1.25, AZ: 0.15 },
+  newsom: { AZ: 0.25, NV: 0.35, CO: 0.25, OR: 0.2, WA: 0.2, FL: -0.25, OH: -0.25 },
+  aoc: { AZ: -0.25, GA: -0.15, NC: -0.3, PA: -0.25, MI: -0.2, WI: -0.25, TX: 0.15, NY: 1.0 },
+  vance: { OH: 2.0, PA: -0.45, MI: -0.3, WI: -0.25, WV: 0.8, KY: 0.45 },
+  rubio: { FL: 2.1, AZ: -0.35, NV: -0.3, TX: -0.25, GA: -0.15 },
+  desantis: { FL: 2.3, GA: -0.25, NC: -0.2, TX: -0.2, AZ: 0.1 },
+  haley: { SC: 1.8, NC: -0.35, GA: -0.35, AZ: -0.3, PA: -0.2, VA: -0.25 },
+  cruz: { TX: 2.0, AZ: 0.15, NV: 0.15, GA: 0.2, NC: 0.15, PA: 0.25 }
+};
+
+const EXPANDED_BATTLEGROUND_STATES = new Set(["AK", "AZ", "FL", "GA", "IA", "ME", "MI", "MN", "NC", "NH", "NV", "OH", "PA", "TX", "VA", "WI"]);
+
 const PRESIDENTIAL_CANDIDATES = {
   democratic: [
     { id: "newsom", name: "Gavin Newsom", homeState: "CA", ideology: "progressive", favorability: 40, electability: 0.6 },
@@ -799,29 +864,57 @@ function stateElasticity(state) {
   return clamp(elasticity, 0.55, 1.16);
 }
 
+function candidateTraitEffect(state, candidate, side) {
+  const traits = STATE_TRAITS[state] || [];
+  const fit = CANDIDATE_STATE_FIT[candidate.id] || {};
+  const swing = CANDIDATE_SWING_STATE_EFFECTS[candidate.id]?.[state] || 0;
+  const rawTraitEffect = traits.reduce((sum, trait) => sum + (fit[trait] || 0), 0);
+  const baseline = PRESIDENTIAL_BASELINES[state];
+  const saturation = Math.abs(baseline.demMargin) > 25 ? 0.55 : Math.abs(baseline.demMargin) > 14 ? 0.75 : 1;
+  const effect = clamp((rawTraitEffect + swing) * saturation, -2.2, 2.6);
+  return side === "D" ? effect : -effect;
+}
+
+function candidateElectabilityEffect(demCandidate, repCandidate) {
+  return clamp(((demCandidate.electability || 0.55) - (repCandidate.electability || 0.55)) * 3.2, -0.9, 0.9);
+}
+
+function currentCycleStateSignal(state, fundamentals) {
+  const senateSignal = fundamentals.senateStateSignals?.[state];
+  if (!senateSignal) return 0;
+  const baseline = PRESIDENTIAL_BASELINES[state];
+  const qualityScale = senateSignal.inputQuality === "High" ? 1 : senateSignal.inputQuality === "Medium" ? 0.72 : 0.45;
+  const directionalGap = senateSignal.margin - baseline.demMargin;
+  return clamp(directionalGap * 0.09 * qualityScale, -1.15, 1.15);
+}
+
 function calculateCandidateModifiers(state, demCandidate, repCandidate) {
   let modifier = 0;
   const baseline = PRESIDENTIAL_BASELINES[state];
   
   // Home-state modifier
-  if (demCandidate.homeState === state) modifier += 4;
-  if (repCandidate.homeState === state) modifier -= 4;
+  if (demCandidate.homeState === state) modifier += 4.5;
+  if (repCandidate.homeState === state) modifier -= 4.5;
   
   // Regional modifier
-  if (demCandidate.homeState && REGION_BY_STATE[demCandidate.homeState] === baseline.region) modifier += 1.5;
-  if (repCandidate.homeState && REGION_BY_STATE[repCandidate.homeState] === baseline.region) modifier -= 1.5;
+  if (demCandidate.homeState && REGION_BY_STATE[demCandidate.homeState] === baseline.region) modifier += 0.9;
+  if (repCandidate.homeState && REGION_BY_STATE[repCandidate.homeState] === baseline.region) modifier -= 0.9;
   
   // Ideological modifier
   const stateLean = baseline.demMargin;
-  if (demCandidate.ideology === "progressive" && stateLean < 0) modifier -= 1;
-  if (demCandidate.ideology === "moderate" && stateLean > 0) modifier += 0.5;
-  if (repCandidate.ideology === "moderate" && stateLean < 0) modifier += 0.5;
-  if (repCandidate.ideology === "conservative" && stateLean > 0) modifier -= 1;
+  const isSwingOrReach = EXPANDED_BATTLEGROUND_STATES.has(state) || Math.abs(stateLean) < 14;
+  if (demCandidate.ideology === "progressive" && stateLean < 0) modifier -= isSwingOrReach ? 0.75 : 0.4;
+  if (demCandidate.ideology === "moderate" && stateLean < 8) modifier += isSwingOrReach ? 0.45 : 0.2;
+  if (repCandidate.ideology === "moderate" && stateLean > -8) modifier -= isSwingOrReach ? 0.45 : 0.2;
+  if (repCandidate.ideology === "conservative" && stateLean > 0) modifier += isSwingOrReach ? 0.55 : 0.25;
   
   // Favorability modifier
   const demFavFactor = (demCandidate.favorability - 45) / 100;
   const repFavFactor = (repCandidate.favorability - 45) / 100;
-  modifier += (demFavFactor - repFavFactor) * Math.abs(stateLean) * 0.3;
+  modifier += clamp((demFavFactor - repFavFactor) * Math.min(Math.abs(stateLean), 18) * 0.24, -0.9, 0.9);
+  modifier += candidateElectabilityEffect(demCandidate, repCandidate);
+  modifier += candidateTraitEffect(state, demCandidate, "D");
+  modifier += candidateTraitEffect(state, repCandidate, "R");
   
   return modifier;
 }
@@ -836,6 +929,7 @@ function calculateStateMargin(state, demCandidate, repCandidate, fundamentals, p
   const economyAdjustment = ((4 - (fundamentals.unemployment ?? 4)) * -0.12) + (((fundamentals.gdpGrowth ?? 2) - 2) * -0.08);
   const fundamentalsAdjustment = ((fundamentals.nationalShift || 0) * 0.45) + approvalAdjustment + sentimentAdjustment + economyAdjustment;
   const trendAdjustment = STATE_LONG_TERM_TRENDS[state] || 0;
+  const currentCycleAdjustment = currentCycleStateSignal(state, fundamentals);
   
   // Apply polling data if available
   let pollingAdjustment = 0;
@@ -843,10 +937,11 @@ function calculateStateMargin(state, demCandidate, repCandidate, fundamentals, p
     const statePolls = pollingData.byState[state];
     if (statePolls.length > 0) {
       // Weight polls by recency (more recent = higher weight)
+      const weightTotal = statePolls.reduce((sum, poll) => sum + (poll.weight || 0.95), 0);
       const weightedMargin = statePolls.reduce((sum, poll) => {
         const weight = poll.weight || 0.95;
         return sum + (poll.margin * weight);
-      }, 0) / statePolls.length;
+      }, 0) / Math.max(weightTotal, 0.1);
       
       // Blend polling with baseline; far-out polls move the race but do not dominate fundamentals.
       const baselineMargin = baseline.demMargin;
@@ -856,10 +951,11 @@ function calculateStateMargin(state, demCandidate, repCandidate, fundamentals, p
     // Use national polling if state-specific not available
     const nationalPolls = pollingData.byState["National"];
     if (nationalPolls.length > 0) {
+      const weightTotal = nationalPolls.reduce((sum, poll) => sum + (poll.weight || 0.95), 0);
       const weightedMargin = nationalPolls.reduce((sum, poll) => {
         const weight = poll.weight || 0.95;
         return sum + (poll.margin * weight);
-      }, 0) / nationalPolls.length;
+      }, 0) / Math.max(weightTotal, 0.1);
       
       const baselineMargin = baseline.demMargin;
       pollingAdjustment = (weightedMargin - baselineMargin) * 0.18;
@@ -868,7 +964,7 @@ function calculateStateMargin(state, demCandidate, repCandidate, fundamentals, p
   
   const elasticity = stateElasticity(state);
   
-  return baseline.demMargin + trendAdjustment + modifiers + (fundamentalsAdjustment * elasticity) + pollingAdjustment;
+  return baseline.demMargin + trendAdjustment + currentCycleAdjustment + modifiers + (fundamentalsAdjustment * elasticity) + pollingAdjustment;
 }
 
 function generateCorrelatedError(stateCount, correlation) {
@@ -1024,6 +1120,9 @@ function buildForecast(demCandidate, repCandidate, fundamentals, pollingData = n
     modelInputs: {
       longTermTrendStates: Object.keys(STATE_LONG_TERM_TRENDS).length,
       stateVolatilityStates: Object.keys(STATE_VOLATILITY).length,
+      candidateTraitModel: true,
+      expandedBattlegroundStates: [...EXPANDED_BATTLEGROUND_STATES],
+      senateStateSignalStates: Object.keys(fundamentals.senateStateSignals || {}).length,
       nationalShift: fundamentals.nationalShift,
       approval: fundamentals.approval,
       consumerSentiment: fundamentals.consumerSentiment,
@@ -1132,7 +1231,8 @@ async function main() {
     approval: presidentialApproval, // Presidential approval
     consumerSentiment: economicIndicators.consumerSentiment,
     gdpGrowth: economicIndicators.gdpGrowth,
-    unemployment: economicIndicators.unemployment
+    unemployment: economicIndicators.unemployment,
+    senateStateSignals: readSenateStateSignals()
   };
   
   const forecast = buildForecast(demCandidate, repCandidate, fundamentals, pollingData);
@@ -1157,6 +1257,10 @@ async function main() {
     polling: {
       presidentialPolls: pollingData?.polls || 0,
       usablePresidentialPolls: pollingData?.usablePolls || 0
+    },
+    currentCycleSignals: {
+      source: "2026 Senate state forecast margins, lightly blended where available",
+      states: Object.keys(fundamentals.senateStateSignals || {}).length
     }
   };
   
