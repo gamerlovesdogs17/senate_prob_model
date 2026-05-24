@@ -1969,6 +1969,7 @@ function embedTitle(embed) {
   if (embed.type === "president-state-history") return `${embed.state} presidential probability`;
   if (embed.type === "president-decisive") return "Most decisive presidential states";
   if (embed.type === "president-matchup-strength") return "Candidate and matchup strength";
+  if (embed.type === "president-candidate-strength") return "Candidate strength";
   if (embed.type === "president-average") return "2028 matchup average";
   if (embed.type === "seat-distribution") return "Seat distribution";
   if (embed.type === "leverage") return "Most decisive races";
@@ -2109,6 +2110,47 @@ function renderPresidentMatchupStrengthInto(target, limit = 4) {
     <div class="matchup-strength-grid">
       <section><h3>Best Democratic matchups</h3>${summary.sortedDem.slice(0, limit).map((item) => row(item, "dem", maxDem)).join("")}</section>
       <section><h3>Best Republican matchups</h3>${summary.sortedRep.slice(0, limit).map((item) => row(item, "rep", maxRep)).join("")}</section>
+    </div>
+  `;
+  bindPanelTooltipFor(target, "button", (node) => node.dataset.tip);
+}
+
+function renderPresidentCandidateStrengthInto(target, limit = 5) {
+  if (!presidentForecasts?.length) {
+    target.innerHTML = `<p>Presidential forecasts not loaded.</p>`;
+    return;
+  }
+  const collect = (side) => {
+    const groups = new Map();
+    presidentForecasts.forEach((item) => {
+      const candidate = side === "dem" ? item.demCandidateName : item.repCandidateName;
+      const probability = side === "dem" ? item.national?.demWinProbability : item.national?.repWinProbability;
+      const ev = side === "dem" ? item.electoralCollege?.demExpectedEV : item.electoralCollege?.repExpectedEV;
+      if (!candidate || !Number.isFinite(probability)) return;
+      if (!groups.has(candidate)) groups.set(candidate, { candidate, side, probabilities: [], evs: [] });
+      groups.get(candidate).probabilities.push(probability);
+      if (Number.isFinite(ev)) groups.get(candidate).evs.push(ev);
+    });
+    return [...groups.values()].map((group) => ({
+      ...group,
+      averageProbability: group.probabilities.reduce((sum, value) => sum + value, 0) / group.probabilities.length,
+      averageEv: group.evs.length ? group.evs.reduce((sum, value) => sum + value, 0) / group.evs.length : null,
+      testedMatchups: group.probabilities.length
+    })).sort((a, b) => b.averageProbability - a.averageProbability).slice(0, limit);
+  };
+  const demCandidates = collect("dem");
+  const repCandidates = collect("rep");
+  const maxDem = Math.max(...demCandidates.map((item) => item.averageProbability), .01);
+  const maxRep = Math.max(...repCandidates.map((item) => item.averageProbability), .01);
+  const row = (item, max) => {
+    const name = presidentCandidateShortName(item.candidate);
+    const evText = item.averageEv === null ? "--" : `${Math.round(item.averageEv)} average EV`;
+    return `<button class="matchup-strength-row ${item.side}" type="button" data-tip="${escapeHtml(item.candidate)}<br>${oneDecimal(item.averageProbability)} average win chance<br>${escapeHtml(evText)}<br>${item.testedMatchups} tested matchups"><strong>${escapeHtml(name)}</strong><i style="width:${clamp((item.averageProbability / max) * 100, 8, 100)}%"></i><span>${oneDecimal(item.averageProbability)}</span></button>`;
+  };
+  target.innerHTML = `
+    <div class="matchup-strength-grid">
+      <section><h3>Best Democratic candidates</h3>${demCandidates.map((item) => row(item, maxDem)).join("")}</section>
+      <section><h3>Best Republican candidates</h3>${repCandidates.map((item) => row(item, maxRep)).join("")}</section>
     </div>
   `;
   bindPanelTooltipFor(target, "button", (node) => node.dataset.tip);
@@ -2331,6 +2373,11 @@ function renderEmbed(target, embed) {
   if (embed.type === "president-matchup-strength") {
     target.className = "article-embed-target matchup-strength";
     renderPresidentMatchupStrengthInto(target, embed.limit || 4);
+    return;
+  }
+  if (embed.type === "president-candidate-strength") {
+    target.className = "article-embed-target matchup-strength";
+    renderPresidentCandidateStrengthInto(target, embed.limit || 5);
     return;
   }
   if (embed.type === "president-average") {
