@@ -37,6 +37,10 @@ const MONTANA_CHART_ANNOTATIONS = [
   { date: "2026-05-19", label: "Bodnar modeled" }
 ];
 
+const PRESIDENT_PRIMARY_MARKERS = [
+  { date: "2028-02-01", label: "Presidential primaries", className: "history-primary-marker", fullOnly: true }
+];
+
 let forecast = null;
 let houseForecast = null;
 let presidentForecasts = null;
@@ -939,6 +943,16 @@ function renderLineChart(chart, points, options) {
   }).filter(Boolean).join("");
   const electionX = hasUsableDates && electionDate && electionDate > latestChartDate && useFullRunway ? width - plot.right : null;
   const currentX = hasUsableDates ? latest.x : null;
+  const eventMarkers = hasUsableDates ? (options.eventMarkers || []).map((marker) => {
+    const markerDate = parseChartDate(marker.date);
+    if (!markerDate || markerDate < firstChartDate || markerDate > axisEndDate) return null;
+    if (marker.fullOnly && !useFullRunway) return null;
+    const x = plot.left + ((markerDate - firstChartDate) / dateSpan) * plotWidth;
+    const textX = clamp(x + (marker.align === "left" ? -9 : 9), plot.left + 10, width - plot.right - 10);
+    const textY = plot.top + 18;
+    const rotation = marker.align === "left" ? -90 : 90;
+    return `<g class="${marker.className || "history-event-marker"}"><path d="M${x} ${plot.top}V${height - plot.bottom}"></path><text x="${textX}" y="${textY}" transform="rotate(${rotation} ${textX} ${textY})">${marker.label}</text></g>`;
+  }).filter(Boolean).join("") : "";
   const showLastDate = !currentX || Math.abs(currentX - coords[0].x) > 78;
   const backgroundBands = hasUsableDates && electionX ? `
     <rect class="history-runway" x="${currentX}" y="${plot.top}" width="${electionX - currentX}" height="${plotHeight}"></rect>
@@ -960,6 +974,7 @@ function renderLineChart(chart, points, options) {
         return `<path class="history-vgrid" d="M${x} ${plot.top}V${height - plot.bottom}"></path>`;
       }).join("")}
       ${currentX ? `<g class="history-current-marker"><path d="M${currentX} ${plot.top}V${height - plot.bottom}"></path></g>` : ""}
+      ${eventMarkers}
       ${electionX ? `<g class="history-election-marker"><path d="M${electionX} ${plot.top}V${height - plot.bottom}"></path><text x="${electionX + 9}" y="${plot.top + 16}" transform="rotate(90 ${electionX + 9} ${plot.top + 16})">${electionDateLabel}</text></g>` : ""}
       <path class="history-band ${demBandClass}" d="${areaPath("dem")}"></path>
       <path class="history-band history-band-rep" d="${areaPath("rep")}"></path>
@@ -2321,6 +2336,7 @@ function renderEmbed(target, embed) {
       singleNote: "History begins once daily presidential forecast files are saved.",
       value: (point) => point.dem,
       electionDate: "2028-11-07",
+      eventMarkers: PRESIDENT_PRIMARY_MARKERS,
       zoomControls: true
     });
     return;
@@ -2344,6 +2360,7 @@ function renderEmbed(target, embed) {
       endLabel: (party, value) => `${party === "dem" ? presidentCandidateShortName(model.demCandidateName) : presidentCandidateShortName(model.repCandidateName)} ${Math.round(value)}`,
       hoverLabel: (party, value) => `${party === "dem" ? presidentCandidateShortName(model.demCandidateName) : presidentCandidateShortName(model.repCandidateName)} ${Math.round(value)}`,
       electionDate: "2028-11-07",
+      eventMarkers: PRESIDENT_PRIMARY_MARKERS,
       zoomControls: true
     });
     return;
@@ -2372,6 +2389,7 @@ function renderEmbed(target, embed) {
       singleNote: "History begins once daily presidential forecast files are saved.",
       value: (point) => point.dem,
       electionDate: "2028-11-07",
+      eventMarkers: PRESIDENT_PRIMARY_MARKERS,
       zoomControls: true
     });
     return;

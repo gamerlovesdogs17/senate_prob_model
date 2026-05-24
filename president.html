@@ -559,6 +559,7 @@
           endLabel: (party, value) => `${party === "dem" ? candidateSideLabel(true) : candidateSideLabel(false)} ${(value * 100).toFixed(1)}%`,
           hoverLabel: (party, value) => `${party === "dem" ? candidateSideLabel(true) : candidateSideLabel(false)} ${(value * 100).toFixed(1)}%`,
           electionDate: "2028-11-07",
+          eventMarkers: PRESIDENT_PRIMARY_MARKERS,
           zoomControls: true,
           singleNote: "History begins once daily presidential forecast files are saved."
         });
@@ -582,6 +583,7 @@
           endLabel: (party, value) => `${party === "dem" ? candidateSideLabel(true) : candidateSideLabel(false)} ${Math.round(value)}`,
           hoverLabel: (party, value) => `${party === "dem" ? candidateSideLabel(true) : candidateSideLabel(false)} ${Math.round(value)}`,
           electionDate: "2028-11-07",
+          eventMarkers: PRESIDENT_PRIMARY_MARKERS,
           zoomControls: true,
           singleNote: "History begins once daily presidential forecast files are saved."
         });
