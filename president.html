@@ -365,8 +365,18 @@
       const repProb = 1 - stateData.demProbability;
       const winnerVerb = leader.demLeads ? demName : repName;
       const demographicPull = stateData.demographicPull;
+      const demographicPullLabel = (() => {
+        const value = demographicPull?.adjustment ?? 0;
+        if (Math.abs(value) < .05) return "Even";
+        return `${value > 0 ? demName : repName} by ${Math.abs(value).toFixed(1)} pts`;
+      })();
+      const demographicChipLabel = (item) => {
+        const value = item.effect || 0;
+        if (Math.abs(value) < .05) return `${item.label || item.group}: even`;
+        return `${item.label || item.group}: ${value > 0 ? demName : repName} +${Math.abs(value).toFixed(1)}`;
+      };
       const demographicChips = demographicPull?.topGroups?.length
-        ? demographicPull.topGroups.slice(0, 3).map((item) => `<span>${item.label || item.group} <b>${item.effect > 0 ? "+" : ""}${item.effect.toFixed(1)}</b></span>`).join("")
+        ? demographicPull.topGroups.slice(0, 3).map((item) => `<span>${demographicChipLabel(item)}</span>`).join("")
         : "<span>Not separately scored</span>";
       const demProfile = demographicPull?.demProfile?.profile || "Democratic profile";
       const repProfile = demographicPull?.repProfile?.profile || "Republican profile";
@@ -399,7 +409,7 @@
         </div>
         <dl class="map-card-factors">
           <div><dt>Rating basis</dt><dd>${ratingModeLabel}</dd></div>
-          <div><dt>Demographic pull</dt><dd>${demographicPull?.adjustment > 0 ? "+" : ""}${(demographicPull?.adjustment ?? 0).toFixed(1)} pts</dd></div>
+          <div><dt>Demographic pull</dt><dd>${demographicPullLabel}</dd></div>
           <div><dt>${demName}</dt><dd>${demProfile}</dd></div>
           <div><dt>${repName}</dt><dd>${repProfile}</dd></div>
         </dl>
