@@ -4,6 +4,7 @@ const demCandidateId = process.argv[2] || "newsom";
 const repCandidateId = process.argv[3] || "vance";
 const FORECAST_URL = new URL(`../data/president-forecast-${demCandidateId}-${repCandidateId}.json`, import.meta.url);
 const SENATE_FORECAST_URL = new URL("../data/forecast.json", import.meta.url);
+const previousForecast = readPreviousForecast();
 
 function decodeHtml(value) {
   return String(value || "")
@@ -22,6 +23,14 @@ function stripHtml(value) {
 function readSenateForecast() {
   try {
     return JSON.parse(readFileSync(SENATE_FORECAST_URL, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+function readPreviousForecast() {
+  try {
+    return JSON.parse(readFileSync(FORECAST_URL, "utf8"));
   } catch {
     return null;
   }
@@ -1347,6 +1356,34 @@ function buildForecast(demCandidate, repCandidate, fundamentals, pollingData = n
   };
 }
 
+function appendPresidentHistory(forecast) {
+  const current = {
+    date: forecast.date,
+    demWinProbability: forecast.national.demWinProbability,
+    repWinProbability: forecast.national.repWinProbability,
+    demExpectedEV: forecast.electoralCollege.demExpectedEV,
+    repExpectedEV: forecast.electoralCollege.repExpectedEV
+  };
+  const stored = Array.isArray(previousForecast?.history) ? previousForecast.history : [];
+  return [...stored.filter((point) => point.date !== current.date), current].slice(-90);
+}
+
+function appendPresidentStateHistory(forecast) {
+  const prior = previousForecast?.stateHistory || {};
+  const stateHistory = {};
+  for (const [state, stateData] of Object.entries(forecast.states || {})) {
+    const current = {
+      date: forecast.date,
+      demProbability: stateData.demProbability,
+      repProbability: 1 - stateData.demProbability,
+      demMargin: stateData.demMargin
+    };
+    const stored = Array.isArray(prior[state]) ? prior[state] : [];
+    stateHistory[state] = [...stored.filter((point) => point.date !== current.date), current].slice(-90);
+  }
+  return stateHistory;
+}
+
 function calculateHistoricalBacktest() {
   const cycles = ARCHIVED_PRESIDENTIAL_BACKTESTS.map(b => b.cycle);
   let totalBrier = 0;
@@ -1494,6 +1531,8 @@ async function main() {
     }
   };
   
+  forecast.history = appendPresidentHistory(forecast);
+  forecast.stateHistory = appendPresidentStateHistory(forecast);
   writeFileSync(FORECAST_URL, JSON.stringify(forecast, null, 2));
   console.log(`Wrote presidential forecast for ${demCandidate.name} vs ${repCandidate.name}`);
 }

@@ -525,12 +525,14 @@
       const winChart = document.getElementById("win-history-chart");
       const evChart = document.getElementById("ev-history-chart");
       if (winChart && forecastData) {
-        const point = {
-          date: forecastData.date,
-          dem: forecastData.national.demWinProbability,
-          rep: forecastData.national.repWinProbability
-        };
-        renderLineChart(winChart, [point], {
+        const points = forecastData.history?.length
+          ? forecastData.history.map((point) => ({ date: point.date, dem: point.demWinProbability, rep: point.repWinProbability }))
+          : [{
+            date: forecastData.date,
+            dem: forecastData.national.demWinProbability,
+            rep: forecastData.national.repWinProbability
+          }];
+        renderLineChart(winChart, points, {
           label: "2028 presidential win probability",
           pointHtml: (item) => `${item.date}<br>${candidateSideLabel(true)} ${(item.dem * 100).toFixed(1)}% / ${candidateSideLabel(false)} ${(item.rep * 100).toFixed(1)}%`,
           endLabel: (party, value) => `${party === "dem" ? candidateSideLabel(true) : candidateSideLabel(false)} ${(value * 100).toFixed(1)}%`,
@@ -539,12 +541,14 @@
         });
       }
       if (evChart && forecastData) {
-        const point = {
-          date: forecastData.date,
-          dem: forecastData.electoralCollege.demExpectedEV,
-          rep: forecastData.electoralCollege.repExpectedEV
-        };
-        renderLineChart(evChart, [point], {
+        const points = forecastData.history?.length
+          ? forecastData.history.map((point) => ({ date: point.date, dem: point.demExpectedEV, rep: point.repExpectedEV }))
+          : [{
+            date: forecastData.date,
+            dem: forecastData.electoralCollege.demExpectedEV,
+            rep: forecastData.electoralCollege.repExpectedEV
+          }];
+        renderLineChart(evChart, points, {
           label: "Expected electoral votes",
           pointHtml: (item) => `${item.date}<br>${candidateSideLabel(true)} ${Math.round(item.dem)} / ${candidateSideLabel(false)} ${Math.round(item.rep)}`,
           domain: [160, 380],
