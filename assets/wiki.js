@@ -939,6 +939,7 @@ function renderLineChart(chart, points, options) {
   }).filter(Boolean).join("");
   const electionX = hasUsableDates && electionDate && electionDate > latestChartDate && useFullRunway ? width - plot.right : null;
   const currentX = hasUsableDates ? latest.x : null;
+  const showLastDate = !currentX || Math.abs(currentX - coords[0].x) > 78;
   const backgroundBands = hasUsableDates && electionX ? `
     <rect class="history-runway" x="${currentX}" y="${plot.top}" width="${electionX - currentX}" height="${plotHeight}"></rect>
   ` : "";
@@ -958,7 +959,7 @@ function renderLineChart(chart, points, options) {
         const x = plot.left + (plotWidth / 6) * step;
         return `<path class="history-vgrid" d="M${x} ${plot.top}V${height - plot.bottom}"></path>`;
       }).join("")}
-      ${currentX ? `<g class="history-current-marker"><path d="M${currentX} ${plot.top}V${height - plot.bottom}"></path><text x="${currentX - 4}" y="${plot.top - 8}">${lastDate}</text></g>` : ""}
+      ${currentX ? `<g class="history-current-marker"><path d="M${currentX} ${plot.top}V${height - plot.bottom}"></path></g>` : ""}
       ${electionX ? `<g class="history-election-marker"><path d="M${electionX} ${plot.top}V${height - plot.bottom}"></path><text x="${electionX + 9}" y="${plot.top + 16}" transform="rotate(90 ${electionX + 9} ${plot.top + 16})">${electionDateLabel}</text></g>` : ""}
       <path class="history-band ${demBandClass}" d="${areaPath("dem")}"></path>
       <path class="history-band history-band-rep" d="${areaPath("rep")}"></path>
@@ -972,8 +973,8 @@ function renderLineChart(chart, points, options) {
         const value = extraValue(point);
         return value === null ? "" : `<g class="history-extra-point" tabindex="0" data-index="${index}"><circle class="history-dot ${extraSeries.dotClassName}" cx="${x}" cy="${yFor(value)}" r="${dotRadius}"></circle></g>`;
       }).join("") : ""}
-      <text class="history-date history-date-start" x="${plot.left}" y="${height - 18}">${firstDate}</text>
-      <text class="history-date history-date-end" x="${width - plot.right}" y="${height - 18}">${lastDate}</text>
+      <text class="history-date history-date-start" x="${coords[0].x}" y="${height - 18}">${firstDate}</text>
+      ${showLastDate ? `<text class="history-date history-date-end" x="${latest.x}" y="${height - 18}">${lastDate}</text>` : ""}
       <text class="history-end-label ${demEndLabelClass}" x="${latest.x + 11}" y="${demLabelY}">${endLabel("dem", demValue(latest.point))}</text>
       <text class="history-end-label history-end-label-rep" x="${latest.x + 11}" y="${repLabelY}">${endLabel("rep", repValue(latest.point))}</text>
       ${extraSeries && latestExtraY !== null ? `<text class="history-end-label ${extraSeries.labelClassName}" x="${latest.x + 11}" y="${extraLabelY}">${extraSeries.name} ${oneDecimal(latestExtraValue)}</text>` : ""}
