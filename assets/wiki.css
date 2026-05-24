@@ -2038,7 +2038,8 @@ button.race-board-row {
 
 .history-dot {
   fill: var(--paper);
-  stroke-width: 2.2;
+  stroke-width: 1.8;
+  opacity: .72;
   pointer-events: none;
   transition: r .16s ease, fill .16s ease;
 }
@@ -2067,8 +2068,36 @@ button.race-board-row {
 
 .history-point:hover .history-dot,
 .history-point:focus .history-dot {
-  r: 5.5;
+  r: 3.8;
+  opacity: 1;
   fill: var(--paper);
+}
+
+.history-zoom-controls {
+  display: inline-flex;
+  gap: 0;
+  margin: 0 0 8px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+}
+
+.history-zoom-controls button {
+  border: 0;
+  border-right: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  padding: 6px 10px;
+  font: 800 11px/1 "Segoe UI", Arial, sans-serif;
+  cursor: pointer;
+}
+
+.history-zoom-controls button:last-child {
+  border-right: 0;
+}
+
+.history-zoom-controls button.active {
+  background: var(--ink);
+  color: var(--paper);
 }
 
 .history-date {

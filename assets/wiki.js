@@ -868,7 +868,11 @@ function renderLineChart(chart, points, options) {
   const firstChartDate = hasUsableDates ? chartDates[0] : null;
   const latestChartDate = hasUsableDates ? chartDates.at(-1) : null;
   const electionDate = parseChartDate(options.electionDate);
-  const axisEndDate = hasUsableDates && electionDate && electionDate > latestChartDate ? electionDate : latestChartDate;
+  const zoomMode = options.zoomControls && chart.dataset.historyZoom ? chart.dataset.historyZoom : "recent";
+  const useFullRunway = !options.zoomControls || zoomMode === "full";
+  const axisEndDate = hasUsableDates && electionDate && electionDate > latestChartDate
+    ? (useFullRunway ? electionDate : latestChartDate)
+    : latestChartDate;
   const dateSpan = hasUsableDates ? Math.max(1, axisEndDate - firstChartDate) : 1;
   const xFor = (index) => {
     if (hasUsableDates) return plot.left + ((chartDates[index] - firstChartDate) / dateSpan) * plotWidth;
@@ -934,12 +938,20 @@ function renderLineChart(chart, points, options) {
     const labelY = plot.top + 96;
     return `<g class="history-annotation"><path d="M${x} ${plot.top}V${height - plot.bottom}"></path><text x="${labelX}" y="${labelY}" transform="rotate(-90 ${labelX} ${labelY})">${annotation.label}</text></g>`;
   }).filter(Boolean).join("");
-  const electionX = hasUsableDates && electionDate && electionDate > latestChartDate ? width - plot.right : null;
+  const electionX = hasUsableDates && electionDate && electionDate > latestChartDate && useFullRunway ? width - plot.right : null;
   const currentX = hasUsableDates ? latest.x : null;
   const backgroundBands = hasUsableDates && electionX ? `
     <rect class="history-runway" x="${currentX}" y="${plot.top}" width="${electionX - currentX}" height="${plotHeight}"></rect>
   ` : "";
+  const dotRadius = options.dotRadius ?? (coords.length === 1 ? 3.2 : 1.8);
+  const zoomControls = options.zoomControls && hasUsableDates && electionDate && electionDate > latestChartDate ? `
+    <div class="history-zoom-controls" aria-label="Chart time range">
+      <button type="button" class="${zoomMode !== "full" ? "active" : ""}" data-history-zoom="recent">Recent</button>
+      <button type="button" class="${zoomMode === "full" ? "active" : ""}" data-history-zoom="full">Full timeline</button>
+    </div>
+  ` : "";
   chart.innerHTML = `
+    ${zoomControls}
     <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${options.label}">
       ${backgroundBands}
       ${ticks.map((tick) => `<path class="history-grid ${tick === (options.midline ?? .5) ? "history-midline" : ""}" d="M${plot.left} ${yFor(tick)}H${width - plot.right}"></path><text class="history-axis" x="${plot.left - 12}" y="${yFor(tick) + 4}">${valueFormat(tick)}</text>`).join("")}
@@ -956,10 +968,10 @@ function renderLineChart(chart, points, options) {
       <path class="history-line history-line-rep" d="${linePath("rep")}"></path>
       ${extraSeries ? `<path class="history-line ${extraSeries.className}" d="${coords.filter((coord) => extraValue(coord.point) !== null).map((coord, index) => `${index ? "L" : "M"} ${coord.x} ${yFor(extraValue(coord.point))}`).join(" ")}"></path>` : ""}
       ${annotations}
-      ${coords.map(({ x, demY, repY }, index) => `<g class="history-point" tabindex="0" data-index="${index}"><circle class="history-dot ${demDotClass}" cx="${x}" cy="${demY}" r="${coords.length === 1 ? 4.8 : 3.3}"></circle><circle class="history-dot history-dot-rep" cx="${x}" cy="${repY}" r="${coords.length === 1 ? 4.8 : 3.3}"></circle></g>`).join("")}
+      ${coords.map(({ x, demY, repY }, index) => `<g class="history-point" tabindex="0" data-index="${index}"><circle class="history-dot ${demDotClass}" cx="${x}" cy="${demY}" r="${dotRadius}"></circle><circle class="history-dot history-dot-rep" cx="${x}" cy="${repY}" r="${dotRadius}"></circle></g>`).join("")}
       ${extraSeries ? coords.map(({ x, point }, index) => {
         const value = extraValue(point);
-        return value === null ? "" : `<g class="history-extra-point" tabindex="0" data-index="${index}"><circle class="history-dot ${extraSeries.dotClassName}" cx="${x}" cy="${yFor(value)}" r="${coords.length === 1 ? 4.8 : 3.3}"></circle></g>`;
+        return value === null ? "" : `<g class="history-extra-point" tabindex="0" data-index="${index}"><circle class="history-dot ${extraSeries.dotClassName}" cx="${x}" cy="${yFor(value)}" r="${dotRadius}"></circle></g>`;
       }).join("") : ""}
       <text class="history-date history-date-start" x="${plot.left}" y="${height - 18}">${firstDate}</text>
       <text class="history-date history-date-end" x="${width - plot.right}" y="${height - 18}">${lastDate}</text>
@@ -981,6 +993,12 @@ function renderLineChart(chart, points, options) {
     </svg>
   `;
   const svg = chart.querySelector("svg");
+  chart.querySelectorAll("[data-history-zoom]").forEach((button) => {
+    button.addEventListener("click", () => {
+      chart.dataset.historyZoom = button.dataset.historyZoom || "recent";
+      renderLineChart(chart, points, options);
+    });
+  });
   const overlay = chart.querySelector(".history-overlay");
   const hover = chart.querySelector(".history-hover");
   const hoverRule = chart.querySelector(".history-hover-rule");
@@ -2244,7 +2262,8 @@ function renderEmbed(target, embed) {
       hoverLabel: (party, value) => `${party === "dem" ? presidentCandidateShortName(model.demCandidateName) : presidentCandidateShortName(model.repCandidateName)} ${oneDecimal(value)}`,
       singleNote: "History begins once daily presidential forecast files are saved.",
       value: (point) => point.dem,
-      electionDate: "2028-11-07"
+      electionDate: "2028-11-07",
+      zoomControls: true
     });
     return;
   }
@@ -2266,7 +2285,8 @@ function renderEmbed(target, embed) {
       valueFormat: (value) => String(Math.round(value)),
       endLabel: (party, value) => `${party === "dem" ? presidentCandidateShortName(model.demCandidateName) : presidentCandidateShortName(model.repCandidateName)} ${Math.round(value)}`,
       hoverLabel: (party, value) => `${party === "dem" ? presidentCandidateShortName(model.demCandidateName) : presidentCandidateShortName(model.repCandidateName)} ${Math.round(value)}`,
-      electionDate: "2028-11-07"
+      electionDate: "2028-11-07",
+      zoomControls: true
     });
     return;
   }
@@ -2293,7 +2313,8 @@ function renderEmbed(target, embed) {
       hoverLabel: (party, value) => `${party === "dem" ? presidentCandidateShortName(model.demCandidateName) : presidentCandidateShortName(model.repCandidateName)} ${oneDecimal(value)}`,
       singleNote: "History begins once daily presidential forecast files are saved.",
       value: (point) => point.dem,
-      electionDate: "2028-11-07"
+      electionDate: "2028-11-07",
+      zoomControls: true
     });
     return;
   }
