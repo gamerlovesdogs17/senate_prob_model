@@ -1952,6 +1952,10 @@ button.race-board-row {
   display: block;
 }
 
+.history-runway {
+  fill: color-mix(in srgb, var(--dem) 5%, white);
+}
+
 .history-grid {
   fill: none;
   stroke: #d8d0c1;
@@ -1960,8 +1964,27 @@ button.race-board-row {
 
 .history-vgrid {
   fill: none;
-  stroke: #d8d0c1;
+  stroke: color-mix(in srgb, #d8d0c1 72%, transparent);
   stroke-width: 1;
+}
+
+.history-current-marker path,
+.history-election-marker path {
+  stroke: color-mix(in srgb, var(--ink) 58%, transparent);
+  stroke-width: 1.2;
+}
+
+.history-current-marker text {
+  fill: var(--muted);
+  font: 850 11px/1 "Segoe UI", Arial, sans-serif;
+  text-anchor: end;
+}
+
+.history-election-marker text {
+  fill: var(--muted);
+  font: 900 9px/1 "Segoe UI", Arial, sans-serif;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
 }
 
 .history-midline {

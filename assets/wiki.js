@@ -781,6 +781,7 @@ function renderControlHistory() {
     label: "Chamber control probability history",
     pointHtml: (point) => `${point.date}<br>D ${pct(point.dem)} / R ${pct(point.rep ?? 1 - point.dem)}`,
     value: (point) => point.dem,
+    electionDate: forecast.settings?.electionDate || "2026-11-03",
     singleNote: "Control history starts with the first generated forecast and grows each daily run."
   });
 }
@@ -797,6 +798,7 @@ function renderSeatHistory() {
     valueFormat: (value) => value.toFixed(0),
     endLabel: (party, value) => `${party === "dem" ? "Democrat" : "Republican"} ${value.toFixed(0)}`,
     hoverLabel: (party, value) => `${party === "dem" ? "Democratic seats" : "Republican seats"} ${value.toFixed(0)}`,
+    electionDate: forecast.settings?.electionDate || "2026-11-03",
     singleNote: "Seat-count history starts with the first generated forecast and grows each daily run."
   });
 }
@@ -812,7 +814,7 @@ function renderRaceSelector() {
 function renderLineChart(chart, points, options) {
   const width = 760;
   const height = 310;
-  const plot = { left: 54, right: 150, top: 20, bottom: 48 };
+  const plot = { left: 54, right: 110, top: 20, bottom: 48 };
   const plotWidth = width - plot.left - plot.right;
   const plotHeight = height - plot.top - plot.bottom;
   const demValue = (point) => point.dem;
@@ -822,10 +824,30 @@ function renderLineChart(chart, points, options) {
   const values = points.flatMap((point) => [demValue(point), repValue(point), extraValue(point)]).filter((value) => value !== null);
   const minValue = Math.min(...values);
   const maxValue = Math.max(...values);
-  const domain = options.domain || (minValue >= .28 && maxValue <= .72 ? [.3, .7] : [0, 1]);
+  const compactDomain = () => {
+    if (minValue >= 0 && maxValue <= 1) {
+      const paddedMin = Math.max(0, minValue - .055);
+      const paddedMax = Math.min(1, maxValue + .055);
+      const min = Math.floor(paddedMin * 20) / 20;
+      const max = Math.ceil(paddedMax * 20) / 20;
+      if (max - min < .18) {
+        const mid = (max + min) / 2;
+        return [Math.max(0, mid - .1), Math.min(1, mid + .1)];
+      }
+      return [min, max];
+    }
+    const span = Math.max(1, maxValue - minValue);
+    const min = Math.floor((minValue - span * .18) / 5) * 5;
+    const max = Math.ceil((maxValue + span * .18) / 5) * 5;
+    return min === max ? [min - 5, max + 5] : [min, max];
+  };
+  const domain = options.domain || compactDomain();
   const band = options.band ?? .055;
-  const ticks = options.ticks || (domain[0] === .3 ? [.7, .6, .5, .4, .3] : [1, .75, .5, .25, 0]);
-  const valueFormat = options.valueFormat || ((value) => (value * 100).toFixed(domain[0] === .3 ? 1 : 0));
+  const ticks = options.ticks || (() => {
+    const step = (domain[1] - domain[0]) / 4;
+    return [4, 3, 2, 1, 0].map((index) => domain[0] + step * index);
+  })();
+  const valueFormat = options.valueFormat || ((value) => (value * 100).toFixed(domain[1] - domain[0] <= .3 ? 1 : 0));
   const endLabel = options.endLabel || ((party, value) => `${party === "dem" ? "Democrat" : "Republican"} ${oneDecimal(value)}`);
   const hoverLabel = options.hoverLabel || ((party, value) => `${party === "dem" ? "Democrat" : "Republican"} ${oneDecimal(value)}`);
   const demSeriesClass = options.demSeriesClass || "history-line-dem";
@@ -834,7 +856,24 @@ function renderLineChart(chart, points, options) {
   const demHoverDotClass = options.demHoverDotClass || "history-hover-dot-dem";
   const demEndLabelClass = options.demEndLabelClass || "history-end-label-dem";
   const demHoverTextClass = options.demHoverTextClass || "";
-  const xFor = (index) => points.length === 1 ? plot.left + plotWidth / 2 : plot.left + index * (plotWidth / (points.length - 1));
+  const parseChartDate = (value) => {
+    if (!value) return null;
+    const text = String(value);
+    const normalized = /^\d{4}-\d{2}-\d{2}$/.test(text) ? `${text}T12:00:00` : /T\d{2}:\d{2}/.test(text) ? text : `${text} 12:00:00`;
+    const date = new Date(normalized);
+    return Number.isNaN(date.getTime()) ? null : date;
+  };
+  const chartDates = points.map((point) => parseChartDate(point.date));
+  const hasUsableDates = chartDates.every(Boolean);
+  const firstChartDate = hasUsableDates ? chartDates[0] : null;
+  const latestChartDate = hasUsableDates ? chartDates.at(-1) : null;
+  const electionDate = parseChartDate(options.electionDate);
+  const axisEndDate = hasUsableDates && electionDate && electionDate > latestChartDate ? electionDate : latestChartDate;
+  const dateSpan = hasUsableDates ? Math.max(1, axisEndDate - firstChartDate) : 1;
+  const xFor = (index) => {
+    if (hasUsableDates) return plot.left + ((chartDates[index] - firstChartDate) / dateSpan) * plotWidth;
+    return points.length === 1 ? plot.left + plotWidth / 2 : plot.left + index * (plotWidth / (points.length - 1));
+  };
   const yFor = (value) => plot.top + ((domain[1] - value) / (domain[1] - domain[0])) * plotHeight;
   const coords = points.map((point, index) => ({
     point,
@@ -845,7 +884,7 @@ function renderLineChart(chart, points, options) {
   const linePath = (series) => {
     if (coords.length === 1) {
       const y = series === "dem" ? coords[0].demY : coords[0].repY;
-      return `M ${coords[0].x - 26} ${y} L ${coords[0].x + 26} ${y}`;
+      return `M ${clamp(coords[0].x - 26, plot.left, width - plot.right)} ${y} L ${clamp(coords[0].x + 26, plot.left, width - plot.right)} ${y}`;
     }
     return coords.map((coord, index) => `${index ? "L" : "M"} ${coord.x} ${series === "dem" ? coord.demY : coord.repY}`).join(" ");
   };
@@ -872,8 +911,14 @@ function renderLineChart(chart, points, options) {
     }).join(" ");
     return `${upper} ${lower} Z`;
   };
-  const firstDate = String(points[0].date).slice(5);
-  const lastDate = String(points[points.length - 1].date).slice(5);
+  const formatChartDate = (value) => {
+    const date = parseChartDate(value);
+    if (!date) return String(value || "").slice(5);
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  };
+  const firstDate = formatChartDate(points[0].date);
+  const lastDate = formatChartDate(points[points.length - 1].date);
+  const electionDateLabel = electionDate ? "Election Day" : "";
   const latest = coords[coords.length - 1];
   const latestExtraValue = extraSeries ? extraValue(latest.point) : null;
   const latestExtraY = latestExtraValue === null ? null : yFor(latestExtraValue);
@@ -889,13 +934,21 @@ function renderLineChart(chart, points, options) {
     const labelY = plot.top + 96;
     return `<g class="history-annotation"><path d="M${x} ${plot.top}V${height - plot.bottom}"></path><text x="${labelX}" y="${labelY}" transform="rotate(-90 ${labelX} ${labelY})">${annotation.label}</text></g>`;
   }).filter(Boolean).join("");
+  const electionX = hasUsableDates && electionDate && electionDate > latestChartDate ? width - plot.right : null;
+  const currentX = hasUsableDates ? latest.x : null;
+  const backgroundBands = hasUsableDates && electionX ? `
+    <rect class="history-runway" x="${currentX}" y="${plot.top}" width="${electionX - currentX}" height="${plotHeight}"></rect>
+  ` : "";
   chart.innerHTML = `
     <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${options.label}">
+      ${backgroundBands}
       ${ticks.map((tick) => `<path class="history-grid ${tick === (options.midline ?? .5) ? "history-midline" : ""}" d="M${plot.left} ${yFor(tick)}H${width - plot.right}"></path><text class="history-axis" x="${plot.left - 12}" y="${yFor(tick) + 4}">${valueFormat(tick)}</text>`).join("")}
-      ${coords.length > 1 ? [1, 2, 3, 4].map((step) => {
-        const x = plot.left + (plotWidth / 5) * step;
+      ${[1, 2, 3, 4, 5].map((step) => {
+        const x = plot.left + (plotWidth / 6) * step;
         return `<path class="history-vgrid" d="M${x} ${plot.top}V${height - plot.bottom}"></path>`;
-      }).join("") : ""}
+      }).join("")}
+      ${currentX ? `<g class="history-current-marker"><path d="M${currentX} ${plot.top}V${height - plot.bottom}"></path><text x="${currentX - 4}" y="${plot.top - 8}">${lastDate}</text></g>` : ""}
+      ${electionX ? `<g class="history-election-marker"><path d="M${electionX} ${plot.top}V${height - plot.bottom}"></path><text x="${electionX + 9}" y="${plot.top + 16}" transform="rotate(90 ${electionX + 9} ${plot.top + 16})">${electionDateLabel}</text></g>` : ""}
       <path class="history-band ${demBandClass}" d="${areaPath("dem")}"></path>
       <path class="history-band history-band-rep" d="${areaPath("rep")}"></path>
       ${extraSeries ? `<path class="history-band history-band-extra" d="${extraAreaPath()}"></path>` : ""}
@@ -978,8 +1031,10 @@ function renderLineChart(chart, points, options) {
     const rect = svg.getBoundingClientRect();
     const ratio = width / rect.width;
     const x = (event.clientX - rect.left) * ratio;
-    if (points.length === 1) return 0;
-    return Math.round(clamp((x - plot.left) / plotWidth, 0, 1) * (points.length - 1));
+    return coords.reduce((best, coord, index) => {
+      const distance = Math.abs(coord.x - x);
+      return distance < best.distance ? { index, distance } : best;
+    }, { index: 0, distance: Infinity }).index;
   };
   overlay.addEventListener("pointerenter", (event) => showIndex(indexFromEvent(event)));
   overlay.addEventListener("pointermove", (event) => showIndex(indexFromEvent(event)));
@@ -1020,6 +1075,7 @@ function renderHistory(race) {
     endLabel: demIsIndependent ? (party, value) => `${party === "dem" ? demHistoryLabel : "Republican"} ${oneDecimal(value)}` : null,
     hoverLabel: demIsIndependent ? (party, value) => `${party === "dem" ? demHistoryLabel : "Republican"} ${oneDecimal(value)}` : null,
     annotations: race.state === "MT" ? [...CHART_ANNOTATIONS, ...MONTANA_CHART_ANNOTATIONS] : CHART_ANNOTATIONS,
+    electionDate: forecast.settings?.electionDate || "2026-11-03",
     value: (point) => point.dem,
     singleNote: "State history starts with the first generated forecast and grows each daily run."
   });
@@ -1437,7 +1493,8 @@ function renderHouseControlHistory() {
   renderLineChart(chart, points, {
     label: "House control probability history",
     pointHtml: (point) => `${point.date}<br>D ${pct(point.dem)} / R ${pct(point.rep ?? 1 - point.dem)}`,
-    value: (point) => point.dem
+    value: (point) => point.dem,
+    electionDate: "2026-11-03"
   });
 }
 
@@ -1460,7 +1517,8 @@ function renderHouseSeatHistory() {
     band: 3,
     valueFormat: (value) => Number.isInteger(value) ? String(value) : value.toFixed(1),
     endLabel: (party, value) => `${party === "dem" ? "Democrat" : "Republican"} ${Math.round(value)}`,
-    hoverLabel: (party, value) => `${party === "dem" ? "Democrat" : "Republican"} ${Math.round(value)}`
+    hoverLabel: (party, value) => `${party === "dem" ? "Democrat" : "Republican"} ${Math.round(value)}`,
+    electionDate: "2026-11-03"
   });
 }
 
@@ -1515,7 +1573,8 @@ function renderHouseDistrictHistoryInto(target, district) {
   renderLineChart(target, points, {
     label: `${district.id} probability history`,
     pointHtml: (point) => `${point.date}<br>D ${pct(point.dem)} / R ${pct(point.rep ?? 1 - point.dem)}`,
-    value: (point) => point.dem
+    value: (point) => point.dem,
+    electionDate: "2026-11-03"
   });
 }
 
@@ -2060,7 +2119,8 @@ function renderEmbed(target, embed) {
     renderLineChart(target, points, {
       label: embed.title || "National chamber control probability",
       pointHtml: (point) => `${point.date}<br>D ${pct(point.dem)} / R ${pct(point.rep ?? 1 - point.dem)}`,
-      value: (point) => point.dem
+      value: (point) => point.dem,
+      electionDate: forecast?.settings?.electionDate || "2026-11-03"
     });
     return;
   }
@@ -2092,7 +2152,8 @@ function renderEmbed(target, embed) {
       endLabel: demIsIndependent ? (party, value) => `${party === "dem" ? demHistoryLabel : "Republican"} ${oneDecimal(value)}` : null,
       hoverLabel: demIsIndependent ? (party, value) => `${party === "dem" ? demHistoryLabel : "Republican"} ${oneDecimal(value)}` : null,
       annotations: race.state === "MT" ? [...CHART_ANNOTATIONS, ...MONTANA_CHART_ANNOTATIONS] : CHART_ANNOTATIONS,
-      value: (point) => point.dem
+      value: (point) => point.dem,
+      electionDate: forecast?.settings?.electionDate || "2026-11-03"
     });
     return;
   }
@@ -2118,7 +2179,8 @@ function renderEmbed(target, embed) {
     renderLineChart(target, points, {
       label: embed.title || "House control probability",
       pointHtml: (point) => `${point.date}<br>D ${pct(point.dem)} / R ${pct(point.rep ?? 1 - point.dem)}`,
-      value: (point) => point.dem
+      value: (point) => point.dem,
+      electionDate: "2026-11-03"
     });
     return;
   }
@@ -2181,7 +2243,8 @@ function renderEmbed(target, embed) {
       endLabel: (party, value) => `${party === "dem" ? presidentCandidateShortName(model.demCandidateName) : presidentCandidateShortName(model.repCandidateName)} ${oneDecimal(value)}`,
       hoverLabel: (party, value) => `${party === "dem" ? presidentCandidateShortName(model.demCandidateName) : presidentCandidateShortName(model.repCandidateName)} ${oneDecimal(value)}`,
       singleNote: "History begins once daily presidential forecast files are saved.",
-      value: (point) => point.dem
+      value: (point) => point.dem,
+      electionDate: "2028-11-07"
     });
     return;
   }
@@ -2202,7 +2265,8 @@ function renderEmbed(target, embed) {
       band: 12,
       valueFormat: (value) => String(Math.round(value)),
       endLabel: (party, value) => `${party === "dem" ? presidentCandidateShortName(model.demCandidateName) : presidentCandidateShortName(model.repCandidateName)} ${Math.round(value)}`,
-      hoverLabel: (party, value) => `${party === "dem" ? presidentCandidateShortName(model.demCandidateName) : presidentCandidateShortName(model.repCandidateName)} ${Math.round(value)}`
+      hoverLabel: (party, value) => `${party === "dem" ? presidentCandidateShortName(model.demCandidateName) : presidentCandidateShortName(model.repCandidateName)} ${Math.round(value)}`,
+      electionDate: "2028-11-07"
     });
     return;
   }
@@ -2228,7 +2292,8 @@ function renderEmbed(target, embed) {
       endLabel: (party, value) => `${party === "dem" ? presidentCandidateShortName(model.demCandidateName) : presidentCandidateShortName(model.repCandidateName)} ${oneDecimal(value)}`,
       hoverLabel: (party, value) => `${party === "dem" ? presidentCandidateShortName(model.demCandidateName) : presidentCandidateShortName(model.repCandidateName)} ${oneDecimal(value)}`,
       singleNote: "History begins once daily presidential forecast files are saved.",
-      value: (point) => point.dem
+      value: (point) => point.dem,
+      electionDate: "2028-11-07"
     });
     return;
   }
