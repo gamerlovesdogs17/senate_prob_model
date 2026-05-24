@@ -866,6 +866,20 @@ const CANDIDATE_STATE_FIT = {
   cruz: { evangelical: 0.75, plains: 0.45, rural: 0.45, hispanic: 0.2, suburban: -0.45, college: -0.3 }
 };
 
+const CANDIDATE_DEMOGRAPHIC_APPEAL = {
+  newsom: { urban: .45, college: .32, suburban: .08, youth: .18, rural: -.42, evangelical: -.28, working_class: -.16 },
+  beshear: { rural: .42, working_class: .36, evangelical: .16, suburban: .14, senior: .08, college: -.06, youth: -.05 },
+  shapiro: { suburban: .42, college: .28, senior: .14, working_class: .12, rural: -.08, evangelical: -.05 },
+  buttigieg: { college: .38, suburban: .32, youth: .12, urban: .1, rural: -.18, evangelical: -.18 },
+  whitmer: { working_class: .42, suburban: .28, college: .16, senior: .08, rural: .08 },
+  aoc: { youth: .5, urban: .46, latino: .3, college: .22, rural: -.52, evangelical: -.42, senior: -.24, suburban: -.18 },
+  vance: { working_class: .42, rural: .34, evangelical: .16, youth: .06, suburban: -.28, college: -.2 },
+  rubio: { latino: .46, suburban: .18, senior: .14, evangelical: .08, college: -.04, rural: -.05 },
+  desantis: { evangelical: .3, rural: .18, senior: .12, suburban: -.12, college: -.18, youth: -.16 },
+  haley: { suburban: .44, college: .34, independent: .22, senior: .1, evangelical: -.05, rural: -.12 },
+  cruz: { evangelical: .42, rural: .3, latino: .12, working_class: .08, suburban: -.34, college: -.24, independent: -.16 }
+};
+
 const CANDIDATE_SWING_STATE_EFFECTS = {
   beshear: { AZ: 0.3, GA: 0.5, NC: 0.55, OH: 0.8, PA: 0.35, MI: 0.35, WI: 0.3, KY: 3.0 },
   shapiro: { PA: 2.2, MI: 0.25, WI: 0.25, AZ: 0.2, GA: 0.2, NC: 0.15 },
@@ -1068,6 +1082,46 @@ function candidateTraitEffect(state, candidate, side) {
   return side === "D" ? effect : -effect;
 }
 
+function stateDemographicWeights(state) {
+  const traits = STATE_TRAITS[state] || [];
+  const baseline = PRESIDENTIAL_BASELINES[state];
+  const weights = {
+    urban: traits.includes("urban") ? .22 : traits.includes("rural") ? .05 : .12,
+    suburban: traits.includes("suburban") ? .26 : .13,
+    rural: traits.includes("rural") || traits.includes("frontier") || traits.includes("plains") ? .24 : .09,
+    college: traits.includes("college") ? .22 : .11,
+    working_class: traits.includes("working_class") || traits.includes("appalachian") ? .22 : .12,
+    latino: traits.includes("hispanic") ? .2 : .07,
+    black: traits.includes("black_belt") ? .2 : .09,
+    evangelical: traits.includes("evangelical") || traits.includes("deep_south") ? .2 : .08,
+    independent: traits.includes("independent") ? .18 : .08,
+    youth: Math.abs(baseline.demMargin) < 12 || traits.includes("urban") ? .12 : .08,
+    senior: traits.includes("rural") || traits.includes("sunbelt") ? .15 : .1
+  };
+  return weights;
+}
+
+function candidateDemographicPull(state, demCandidate, repCandidate) {
+  const weights = stateDemographicWeights(state);
+  const demProfile = CANDIDATE_DEMOGRAPHIC_APPEAL[demCandidate.id] || {};
+  const repProfile = CANDIDATE_DEMOGRAPHIC_APPEAL[repCandidate.id] || {};
+  const groups = Object.keys(weights).map((group) => {
+    const demAppeal = demProfile[group] || 0;
+    const repAppeal = repProfile[group] || 0;
+    const effect = weights[group] * (demAppeal - repAppeal) * 1.85;
+    return { group, weight: Number(weights[group].toFixed(2)), effect: Number(effect.toFixed(2)) };
+  });
+  const raw = groups.reduce((sum, item) => sum + item.effect, 0);
+  const saturation = Math.abs(PRESIDENTIAL_BASELINES[state].demMargin) > 24 ? .55 : Math.abs(PRESIDENTIAL_BASELINES[state].demMargin) > 14 ? .75 : 1;
+  return {
+    adjustment: Number(clamp(raw * saturation, -1.35, 1.35).toFixed(2)),
+    topGroups: groups
+      .filter((item) => Math.abs(item.effect) >= .03)
+      .sort((a, b) => Math.abs(b.effect) - Math.abs(a.effect))
+      .slice(0, 5)
+  };
+}
+
 function candidateElectabilityEffect(demCandidate, repCandidate) {
   return clamp(((demCandidate.electability || 0.55) - (repCandidate.electability || 0.55)) * 3.2, -0.9, 0.9);
 }
@@ -1134,6 +1188,7 @@ function calculateCandidateModifiers(state, demCandidate, repCandidate) {
   modifier += candidateElectabilityEffect(demCandidate, repCandidate);
   modifier += candidateTraitEffect(state, demCandidate, "D");
   modifier += candidateTraitEffect(state, repCandidate, "R");
+  modifier += candidateDemographicPull(state, demCandidate, repCandidate).adjustment;
   modifier += candidateFinanceEffect(state, demCandidate, repCandidate);
   
   return modifier;
@@ -1296,10 +1351,12 @@ function buildForecast(demCandidate, repCandidate, fundamentals, pollingData = n
   
   for (const state of states) {
     const wins = simulation.stateWins[state] || 0;
+    const demographicPull = candidateDemographicPull(state, demCandidate, repCandidate);
     stateProbabilities[state] = {
       demProbability: wins / SETTINGS.simulations,
       ev: PRESIDENTIAL_BASELINES[state].ev,
-      demMargin: calculateStateMargin(state, demCandidate, repCandidate, fundamentals)
+      demMargin: calculateStateMargin(state, demCandidate, repCandidate, fundamentals),
+      demographicPull
     };
   }
   
@@ -1342,6 +1399,7 @@ function buildForecast(demCandidate, repCandidate, fundamentals, pollingData = n
       longTermTrendStates: Object.keys(STATE_LONG_TERM_TRENDS).length,
       stateVolatilityStates: Object.keys(STATE_VOLATILITY).length,
       candidateTraitModel: true,
+      candidateDemographicPullModel: true,
       candidateFinanceModel: true,
       expandedBattlegroundStates: [...EXPANDED_BATTLEGROUND_STATES],
       senateStateSignalStates: Object.keys(fundamentals.senateStateSignals || {}).length,

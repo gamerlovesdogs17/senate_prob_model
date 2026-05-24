@@ -72,6 +72,29 @@ const MANUAL_HOUSE_CHALLENGER_STRENGTH = {
   // Use entries such as "PA-07": { D: "notable" } when a challenger has prior office strength.
 };
 
+const STATE_COALITION_TRAITS = {
+  AL: ["deep_south", "rural", "evangelical"], AK: ["frontier", "independent"], AZ: ["sunbelt", "suburban", "latino"], AR: ["south", "rural"],
+  CA: ["urban", "college", "latino"], CO: ["suburban", "college"], CT: ["suburban", "college"], DE: ["suburban"],
+  FL: ["sunbelt", "suburban", "latino", "senior"], GA: ["suburban", "black_belt"], HI: ["minority"], ID: ["rural"],
+  IL: ["urban", "suburban"], IN: ["working_class"], IA: ["rural", "working_class"], KS: ["suburban", "rural"],
+  KY: ["appalachian", "rural", "working_class"], LA: ["deep_south", "black_belt"], ME: ["independent", "rural"], MD: ["suburban", "college"],
+  MA: ["college", "urban"], MI: ["working_class", "suburban"], MN: ["college", "suburban"], MS: ["black_belt", "rural"],
+  MO: ["rural", "working_class"], MT: ["frontier", "rural", "independent"], NE: ["rural", "suburban", "independent"], NV: ["sunbelt", "working_class", "latino"],
+  NH: ["independent", "suburban"], NJ: ["suburban", "college"], NM: ["latino"], NY: ["urban", "college"], NC: ["suburban", "black_belt"],
+  ND: ["rural"], OH: ["appalachian", "working_class"], OK: ["evangelical", "rural"], OR: ["college"], PA: ["working_class", "suburban"],
+  RI: ["urban"], SC: ["black_belt", "suburban", "evangelical"], SD: ["rural"], TN: ["appalachian", "evangelical"], TX: ["sunbelt", "suburban", "latino"],
+  UT: ["suburban", "religious"], VT: ["rural", "college"], VA: ["suburban", "college"], WA: ["college", "urban"], WV: ["appalachian", "rural", "working_class"],
+  WI: ["working_class", "rural"], WY: ["rural"]
+};
+
+const HOUSE_COALITION_PROFILES = {
+  democrat: { urban: .16, college: .13, black_belt: .14, latino: .1, suburban: .06, rural: -.14, evangelical: -.12, working_class: -.04 },
+  republican: { rural: .15, evangelical: .14, senior: .08, working_class: .06, suburban: .03, urban: -.13, college: -.08, black_belt: -.1, latino: -.06 },
+  demIncumbent: { urban: .14, college: .11, black_belt: .12, latino: .09, suburban: .1, senior: .06, rural: -.08 },
+  repIncumbent: { rural: .13, evangelical: .12, senior: .1, suburban: .07, working_class: .05, college: -.04, urban: -.09 },
+  openSeat: { independent: .02, suburban: -.01 }
+};
+
 const CATEGORY_ALIASES = {
   "Solid Democrat": "Safe D",
   "Likely Democrat": "Likely D",
@@ -476,7 +499,8 @@ function adjustedDistricts(sourceData) {
     const incumbencyAdjustment = district.open ? 0 : incumbentParty * MODEL_WEIGHTS.seatPartyIncumbency * (1 - (CHALLENGER_STRENGTH_DISCOUNTS[challengerStrength] || 0));
     const openPenalty = district.open ? (baselineMargin > 0 ? -MODEL_WEIGHTS.incumbencyOpenPenalty : MODEL_WEIGHTS.incumbencyOpenPenalty) : 0;
     const financeSignal = sourceData.fec[district.id]?.financeSignal ?? 0;
-    const margin = baselineMargin * MODEL_WEIGHTS.ratingBaseline + genericShift + nationalFinanceShift + MODEL_WEIGHTS.historicalMidterm + incumbencyAdjustment + openPenalty + financeSignal * MODEL_WEIGHTS.finance;
+    const demographicPull = houseDemographicPull(district, challengerStrength);
+    const margin = baselineMargin * MODEL_WEIGHTS.ratingBaseline + genericShift + nationalFinanceShift + MODEL_WEIGHTS.historicalMidterm + incumbencyAdjustment + openPenalty + demographicPull.adjustment + financeSignal * MODEL_WEIGHTS.finance;
     const error = Math.max(RATING_TO_ERROR[sourceRating] ?? 8, inside ? RATING_TO_ERROR[inside.rating] ?? 8 : 0);
     const demProbability = logistic(margin, error);
     return {
@@ -501,6 +525,7 @@ function adjustedDistricts(sourceData) {
         ratingBaseline: Number(ratingMargin.toFixed(2)),
         openPenalty: Number(openPenalty.toFixed(2)),
         incumbencyAdjustment: Number(incumbencyAdjustment.toFixed(2)),
+        demographicPull,
         challengerStrength,
         finance: sourceData.fec[district.id] || null
       },
@@ -606,6 +631,50 @@ function contextualDistrictMargin(district, ratingMargin) {
   const side = Math.sign(ratingMargin) || (district.seatParty === "D" ? 1 : district.seatParty === "R" ? -1 : 0);
   if (!side) return 0;
   return side * Math.min(Math.abs(district.fundamentalMargin), 16);
+}
+
+function districtCoalitionWeights(district) {
+  const traits = STATE_COALITION_TRAITS[district.state] || [];
+  const pres = Number.isFinite(district.presidentialMargin) ? district.presidentialMargin : 0;
+  const urbanized = pres > 10;
+  const exurban = pres < -10;
+  return {
+    urban: urbanized ? .18 : traits.includes("urban") ? .15 : .07,
+    suburban: Math.abs(pres) < 12 || traits.includes("suburban") ? .23 : .12,
+    rural: exurban || traits.includes("rural") || traits.includes("frontier") ? .23 : .08,
+    college: urbanized || traits.includes("college") ? .18 : .09,
+    working_class: traits.includes("working_class") || traits.includes("appalachian") || Math.abs(pres) < 7 ? .18 : .09,
+    black_belt: traits.includes("black_belt") ? .17 : .07,
+    latino: traits.includes("latino") ? .17 : .06,
+    evangelical: traits.includes("evangelical") || traits.includes("deep_south") ? .17 : .07,
+    independent: traits.includes("independent") || Math.abs(pres) < 7 ? .14 : .06,
+    senior: traits.includes("senior") || exurban ? .13 : .08
+  };
+}
+
+function houseDemographicPull(district, challengerStrength) {
+  const weights = districtCoalitionWeights(district);
+  const demProfile = district.seatParty === "D" && !district.open ? HOUSE_COALITION_PROFILES.demIncumbent : HOUSE_COALITION_PROFILES.democrat;
+  const repProfile = district.seatParty === "R" && !district.open ? HOUSE_COALITION_PROFILES.repIncumbent : HOUSE_COALITION_PROFILES.republican;
+  const openProfile = district.open ? HOUSE_COALITION_PROFILES.openSeat : {};
+  const challengerBonus = CHALLENGER_STRENGTH_DISCOUNTS[challengerStrength] || 0;
+  const challengerDirection = district.seatParty === "R" ? 1 : district.seatParty === "D" ? -1 : 0;
+  const groups = Object.keys(weights).map((group) => {
+    const profileGap = (demProfile[group] || 0) - (repProfile[group] || 0) + (openProfile[group] || 0);
+    const effect = weights[group] * profileGap * 1.35;
+    return { group, weight: Number(weights[group].toFixed(2)), effect: Number(effect.toFixed(2)) };
+  });
+  const raw = groups.reduce((sum, item) => sum + item.effect, 0) + challengerDirection * challengerBonus * .32;
+  const saturation = Math.abs(district.presidentialMargin || district.fundamentalMargin || 0) > 18 ? .6 : Math.abs(district.presidentialMargin || district.fundamentalMargin || 0) > 10 ? .78 : 1;
+  return {
+    adjustment: Number(clamp(raw * saturation, -0.95, 0.95).toFixed(2)),
+    demProfile: district.seatParty === "D" && !district.open ? "demIncumbent" : "democrat",
+    repProfile: district.seatParty === "R" && !district.open ? "repIncumbent" : "republican",
+    topGroups: groups
+      .filter((item) => Math.abs(item.effect) >= .02)
+      .sort((a, b) => Math.abs(b.effect) - Math.abs(a.effect))
+      .slice(0, 5)
+  };
 }
 
 function runModel(districts) {

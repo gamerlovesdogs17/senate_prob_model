@@ -1150,10 +1150,18 @@ function renderRaceInputCards(race) {
     ? race.movementDrivers.map((driver) => `<li><strong>${escapeHtml(driver.label)} ${signedDriverChange(driver.change)}</strong> ${escapeHtml(driver.detail || "")}</li>`).join("")
     : `<li>No previous generated run to compare.</li>`;
   const badgeRows = (race.uncertaintyBadges || []).map((badge) => `<li>${escapeHtml(badge)}</li>`).join("");
+  const demographic = race.demographicPull;
+  const demographicRows = demographic ? [
+    `<li>Adjustment: ${signedPointMargin(demographic.adjustment || 0)}</li>`,
+    `<li>Democratic profile: ${escapeHtml(demographic.demProfile || "standard")}</li>`,
+    `<li>Republican profile: ${escapeHtml(demographic.repProfile || "standard")}</li>`,
+    ...((demographic.topGroups || []).map((item) => `<li>${escapeHtml(item.group)}: ${signedPointMargin(item.effect || 0)}</li>`))
+  ].join("") : `<li>No separate demographic-pull adjustment in this saved run.</li>`;
   container.innerHTML = `
     <details open><summary>Why it moved</summary><ul>${driverRows}</ul></details>
     <details open><summary>Polling</summary><ul>${pollRows}</ul></details>
     <details><summary>Fundamentals</summary><ul>${fundamentalRows}</ul></details>
+    <details><summary>Demographic pull</summary><ul>${demographicRows}</ul></details>
     <details><summary>Finance</summary><ul>${financeRows}</ul></details>
     <details><summary>Candidates</summary><ul>${candidateRows}</ul></details>
     <details><summary>Input quality</summary><ul><li>${inputQualityText(race)}</li>${badgeRows}${(race.inputQuality?.reasons || []).map((reason) => `<li>${escapeHtml(reason)}</li>`).join("")}</ul></details>
@@ -1276,6 +1284,7 @@ function houseDistrictMarkup(district) {
     `2024 pres ${signedPointMargin(inputs.presidentialBaseline)}`,
     `2022 House ${signedPointMargin(inputs.congressionalBaseline)}`,
     `generic ${signedPointMargin(inputs.genericBallotShift)}`,
+    `demographic ${signedPointMargin(inputs.demographicPull?.adjustment)}`,
     district.open ? "open seat" : "incumbent seat"
   ].join(" / ");
   const quality = houseInputConfidence(district);
@@ -1298,6 +1307,7 @@ function houseDistrictMarkup(district) {
     </div>
     <p class="meta">${escapeHtml(baselineLine)}</p>
     <p class="meta">${escapeHtml(district.sourceBlend || "Cook")} / rating baseline ${signedPointMargin(inputs.ratingBaseline)} / contextual baseline ${signedPointMargin(inputs.contextualBaseline)}</p>
+    ${inputs.demographicPull?.topGroups?.length ? `<p class="meta">Coalition pull: ${inputs.demographicPull.topGroups.map((item) => `${escapeHtml(item.group)} ${signedPointMargin(item.effect)}`).join(" / ")}</p>` : ""}
   `;
 }
 

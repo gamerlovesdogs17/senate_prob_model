@@ -78,6 +78,32 @@ const CHALLENGER_STRENGTH_DISCOUNTS = {
   none: 0
 };
 
+const STATE_COALITION_TRAITS = {
+  AL: ["deep_south", "rural", "evangelical"], AK: ["frontier", "independent"], AZ: ["sunbelt", "suburban", "latino"], AR: ["south", "rural"],
+  CA: ["urban", "college", "latino"], CO: ["suburban", "college"], CT: ["suburban", "college"], DE: ["suburban"],
+  FL: ["sunbelt", "suburban", "latino", "senior"], GA: ["suburban", "black_belt"], HI: ["minority"], ID: ["rural"],
+  IL: ["urban", "suburban"], IN: ["working_class"], IA: ["rural", "working_class"], KS: ["suburban", "rural"],
+  KY: ["appalachian", "rural", "working_class"], LA: ["deep_south", "black_belt"], ME: ["independent", "rural"], MD: ["suburban", "college"],
+  MA: ["college", "urban"], MI: ["working_class", "suburban"], MN: ["college", "suburban"], MS: ["black_belt", "rural"],
+  MO: ["rural", "working_class"], MT: ["frontier", "rural", "independent"], NE: ["rural", "suburban", "independent"], NV: ["sunbelt", "working_class", "latino"],
+  NH: ["independent", "suburban"], NJ: ["suburban", "college"], NM: ["latino"], NY: ["urban", "college"], NC: ["suburban", "black_belt"],
+  ND: ["rural"], OH: ["appalachian", "working_class"], OK: ["evangelical", "rural"], OR: ["college"], PA: ["working_class", "suburban"],
+  RI: ["urban"], SC: ["black_belt", "suburban", "evangelical"], SD: ["rural"], TN: ["appalachian", "evangelical"], TX: ["sunbelt", "suburban", "latino"],
+  UT: ["suburban", "religious"], VT: ["rural", "college"], VA: ["suburban", "college"], WA: ["college", "urban"], WV: ["appalachian", "rural", "working_class"],
+  WI: ["working_class", "rural"], WY: ["rural"]
+};
+
+const SENATE_DEMOGRAPHIC_PROFILES = {
+  standardDemocrat: { urban: .2, college: .14, black_belt: .18, latino: .12, suburban: .08, rural: -.18, evangelical: -.16, working_class: -.05 },
+  incumbentDemocrat: { urban: .18, college: .12, black_belt: .16, latino: .1, suburban: .12, senior: .08, rural: -.1, evangelical: -.1 },
+  statewideDemocrat: { suburban: .18, college: .14, working_class: .1, independent: .1, rural: -.06, evangelical: -.08 },
+  independentLabor: { working_class: .32, rural: .24, independent: .26, frontier: .18, suburban: .06, college: -.04, evangelical: .02 },
+  standardRepublican: { rural: .18, evangelical: .18, senior: .1, suburban: .04, working_class: .08, urban: -.16, college: -.1, black_belt: -.12, latino: -.08 },
+  incumbentRepublican: { rural: .16, evangelical: .14, senior: .14, suburban: .08, independent: .05, urban: -.12, college: -.06 },
+  statewideRepublican: { suburban: .14, senior: .1, rural: .1, evangelical: .08, college: .02, urban: -.1 },
+  weakRepublican: { rural: .08, evangelical: .08, senior: .04, suburban: -.06, college: -.08, independent: -.08 }
+};
+
 const PATH_CENTRALITY = {
   OH: 1.85, TX: 1.65, AK: 1.6, MI: 1.35, GA: 1.25, NC: 1.12, ME: 1.1, NH: 1,
   IA: .75, NE: .72, MT: .68, SC: .55, KS: .45, FL: .25
@@ -639,6 +665,7 @@ function movementDrivers(race) {
   addDriver("Finance", (race.sourceInputs?.openFec?.financeSignal ?? 0) - (previousRace.sourceInputs?.openFec?.financeSignal ?? 0), "OpenFEC finance signal changed.");
   addDriver("Generic ballot", (race.sourceInputs?.genericPolling?.genericBallotMargin ?? 0) - (previousRace.sourceInputs?.genericPolling?.genericBallotMargin ?? 0), "National generic-ballot blend changed.");
   addDriver("National finance", (race.sourceInputs?.nationalFinance?.nationalFinance ?? 0) - (previousRace.sourceInputs?.nationalFinance?.nationalFinance ?? 0), "National finance environment changed.");
+  addDriver("Demographic pull", (race.demographicPull?.adjustment ?? 0) - (previousRace.demographicPull?.adjustment ?? 0), "Candidate coalition profile changed.");
   if (race.rating !== previousRace.rating) drivers.push({ label: "Rating", change: null, detail: `${previousRace.rating} to ${race.rating}` });
   return drivers
     .sort((a, b) => Math.abs(b.change || 0) - Math.abs(a.change || 0))
@@ -652,6 +679,57 @@ function incumbencyAdjustment(race) {
   return base * (1 - discount);
 }
 
+function senateDemographicProfileKey(race, party) {
+  const isIndependentDem = race.demDisplayParty === "I" || /independent|Osborn|Bodnar/i.test(`${race.dem || ""} ${race.independent || ""}`);
+  if (party === "D" && isIndependentDem) return "independentLabor";
+  if (party === "D" && race.hold === "D" && race.seat !== "Open seat") return "incumbentDemocrat";
+  if (party === "D" && ["statewide", "majorOffice", "sameSeat"].includes(race.challengerStrength)) return "statewideDemocrat";
+  if (party === "R" && race.hold === "R" && race.seat !== "Open seat") return "incumbentRepublican";
+  if (party === "R" && ["statewide", "majorOffice", "sameSeat"].includes(race.challengerStrength)) return "statewideRepublican";
+  if (party === "R" && race.seat === "Open seat" && race.rating && /Toss|Tilt|Lean/.test(race.rating)) return "weakRepublican";
+  return party === "D" ? "standardDemocrat" : "standardRepublican";
+}
+
+function stateCoalitionWeights(state) {
+  const traits = STATE_COALITION_TRAITS[state] || [];
+  return {
+    urban: traits.includes("urban") ? .2 : .08,
+    suburban: traits.includes("suburban") ? .24 : .12,
+    rural: traits.includes("rural") || traits.includes("frontier") ? .24 : .09,
+    college: traits.includes("college") ? .2 : .1,
+    working_class: traits.includes("working_class") || traits.includes("appalachian") ? .22 : .11,
+    black_belt: traits.includes("black_belt") ? .2 : .08,
+    latino: traits.includes("latino") ? .18 : .06,
+    evangelical: traits.includes("evangelical") || traits.includes("deep_south") ? .2 : .08,
+    independent: traits.includes("independent") ? .18 : .08,
+    senior: traits.includes("senior") || traits.includes("rural") ? .14 : .09,
+    frontier: traits.includes("frontier") ? .18 : .04
+  };
+}
+
+function demographicPullAdjustment(race) {
+  const weights = stateCoalitionWeights(race.state);
+  const demKey = senateDemographicProfileKey(race, "D");
+  const repKey = senateDemographicProfileKey(race, "R");
+  const demProfile = SENATE_DEMOGRAPHIC_PROFILES[demKey] || {};
+  const repProfile = SENATE_DEMOGRAPHIC_PROFILES[repKey] || {};
+  const groups = Object.keys(weights).map((group) => {
+    const effect = weights[group] * ((demProfile[group] || 0) - (repProfile[group] || 0)) * 1.75;
+    return { group, weight: Number(weights[group].toFixed(2)), effect: Number(effect.toFixed(2)) };
+  });
+  const raw = groups.reduce((sum, item) => sum + item.effect, 0);
+  const saturation = Math.abs(race.pvi) > 18 ? .55 : Math.abs(race.pvi) > 10 ? .75 : 1;
+  return {
+    adjustment: Number(clamp(raw * saturation, -1.1, 1.1).toFixed(2)),
+    demProfile: demKey,
+    repProfile: repKey,
+    topGroups: groups
+      .filter((item) => Math.abs(item.effect) >= .03)
+      .sort((a, b) => Math.abs(b.effect) - Math.abs(a.effect))
+      .slice(0, 5)
+  };
+}
+
 function baselineMargin(race) {
   const rating = RATING_TO_MARGIN[race.rating] || 0;
   const fundamentals = race.pvi * .24 + race.pastSenate * .20;
@@ -661,8 +739,9 @@ function baselineMargin(race) {
   const fundamentalsBlend = pollSignal === null ? 1 : MODEL_WEIGHTS.fundamentalsWithPolls;
   const incumbentPenalty = incumbencyAdjustment(race);
   const nationalPolling = race.nationalPolling || 0;
+  const demographicPull = demographicPullAdjustment(race).adjustment;
   return (rating * .48 + fundamentals * fundamentalsBlend + signals + incumbentPenalty + caucusDiscount(race)) +
-    pollBlend + nationalPolling + candidateHistoryAdjustment(race) + primaryScenarioAdjustment(race) + rcvBaselineAdjustment(race);
+    pollBlend + nationalPolling + demographicPull + candidateHistoryAdjustment(race) + primaryScenarioAdjustment(race) + rcvBaselineAdjustment(race);
 }
 
 function runModel(sourceData) {
@@ -675,6 +754,7 @@ function runModel(sourceData) {
     const quality = inputQuality(withCandidates, pollSignal);
     const uncertainty = raceTypeUncertainty(withCandidates, pollSignal, quality);
     const error = (RATING_TO_ERROR[race.rating] || 8) + primaryRisk(race) + uncertainty.extraError;
+    const demographicPull = demographicPullAdjustment(withCandidates);
     return {
       ...withCandidates,
       margin,
@@ -690,7 +770,8 @@ function runModel(sourceData) {
       challengerStrength: withCandidates.challengerStrength || "none",
       candidateHistoryAdjustment: candidateHistoryAdjustment(race),
       primaryScenarioAdjustment: primaryScenarioAdjustment(withCandidates),
-      rcvAdjustment: rcvBaselineAdjustment(race)
+      rcvAdjustment: rcvBaselineAdjustment(race),
+      demographicPull
     };
   });
 
