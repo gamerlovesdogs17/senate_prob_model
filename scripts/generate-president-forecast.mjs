@@ -880,6 +880,20 @@ const CANDIDATE_DEMOGRAPHIC_APPEAL = {
   cruz: { white_college: -.24, white_noncollege: .28, black: -.1, latino: .08, asian_other: -.08, youth: -.1, senior: .08 }
 };
 
+const CANDIDATE_DEMOGRAPHIC_NOTES = {
+  newsom: { profile: "coastal Democratic executive", strengths: ["White college", "Asian/other", "18-29"], weaknesses: ["White non-college", "65+"] },
+  beshear: { profile: "red-state Democratic executive", strengths: ["White non-college", "65+", "White college"], weaknesses: ["18-29"] },
+  shapiro: { profile: "suburban statewide Democrat", strengths: ["White college", "65+", "Black"], weaknesses: [] },
+  buttigieg: { profile: "college-heavy Midwestern Democrat", strengths: ["White college", "18-29", "Asian/other"], weaknesses: ["White non-college", "65+"] },
+  whitmer: { profile: "industrial-Midwest Democratic executive", strengths: ["White non-college", "White college", "65+"], weaknesses: [] },
+  aoc: { profile: "progressive urban Democrat", strengths: ["18-29", "Latino", "Black"], weaknesses: ["White non-college", "65+"] },
+  vance: { profile: "populist Midwestern Republican", strengths: ["White non-college", "65+"], weaknesses: ["White college", "Black", "Asian/other"] },
+  rubio: { profile: "Sun Belt Republican", strengths: ["Latino", "65+"], weaknesses: ["Black"] },
+  desantis: { profile: "conservative Sun Belt executive", strengths: ["White non-college", "65+"], weaknesses: ["White college", "18-29", "Black"] },
+  haley: { profile: "suburban Republican", strengths: ["White college", "65+", "Asian/other"], weaknesses: ["White non-college", "18-29"] },
+  cruz: { profile: "movement conservative Republican", strengths: ["White non-college", "Latino", "65+"], weaknesses: ["White college", "Black", "18-29"] }
+};
+
 const DEMOGRAPHIC_GROUP_LABELS = {
   white_college: "White college",
   white_noncollege: "White non-college",
@@ -1128,6 +1142,16 @@ function candidateDemographicPull(state, demCandidate, repCandidate) {
   const saturation = Math.abs(PRESIDENTIAL_BASELINES[state].demMargin) > 24 ? .55 : Math.abs(PRESIDENTIAL_BASELINES[state].demMargin) > 14 ? .75 : 1;
   return {
     adjustment: Number(clamp(raw * saturation, -1.35, 1.35).toFixed(2)),
+    demProfile: {
+      id: demCandidate.id,
+      name: demCandidate.name,
+      ...(CANDIDATE_DEMOGRAPHIC_NOTES[demCandidate.id] || {})
+    },
+    repProfile: {
+      id: repCandidate.id,
+      name: repCandidate.name,
+      ...(CANDIDATE_DEMOGRAPHIC_NOTES[repCandidate.id] || {})
+    },
     topGroups: groups
       .filter((item) => Math.abs(item.effect) >= .03)
       .sort((a, b) => Math.abs(b.effect) - Math.abs(a.effect))
@@ -1413,6 +1437,14 @@ function buildForecast(demCandidate, repCandidate, fundamentals, pollingData = n
       stateVolatilityStates: Object.keys(STATE_VOLATILITY).length,
       candidateTraitModel: true,
       candidateDemographicPullModel: true,
+      candidateDemographicProfiles: Object.fromEntries([...PRESIDENTIAL_CANDIDATES.democratic, ...PRESIDENTIAL_CANDIDATES.republican].map((candidate) => [
+        candidate.id,
+        {
+          name: candidate.name,
+          scores: CANDIDATE_DEMOGRAPHIC_APPEAL[candidate.id],
+          ...(CANDIDATE_DEMOGRAPHIC_NOTES[candidate.id] || {})
+        }
+      ])),
       candidateFinanceModel: true,
       expandedBattlegroundStates: [...EXPANDED_BATTLEGROUND_STATES],
       senateStateSignalStates: Object.keys(fundamentals.senateStateSignals || {}).length,

@@ -104,6 +104,30 @@ const SENATE_DEMOGRAPHIC_PROFILES = {
   weakRepublican: { white_college: -.1, white_noncollege: .08, black: -.08, latino: -.04, asian_other: -.04, youth: -.06, senior: .04 }
 };
 
+const SENATE_CANDIDATE_DEMOGRAPHIC_PROFILES = {
+  "mary peltola": { profile: "Alaska crossover Democrat", scores: { white_college: .1, white_noncollege: .22, black: .02, latino: .03, asian_other: .08, youth: .06, senior: .04 }, strengths: ["White non-college", "Asian/other", "18-29"], weaknesses: [] },
+  "dan sullivan": { profile: "Alaska Republican incumbent", scores: { white_college: -.04, white_noncollege: .16, black: -.06, latino: -.03, asian_other: -.02, youth: -.04, senior: .12 }, strengths: ["White non-college", "65+"], weaknesses: ["Black"] },
+  "jon ossoff": { profile: "metro-South Democratic incumbent", scores: { white_college: .24, white_noncollege: -.05, black: .18, latino: .08, asian_other: .08, youth: .12, senior: -.02 }, strengths: ["White college", "Black", "18-29"], weaknesses: ["White non-college"] },
+  "susan collins": { profile: "New England Republican crossover incumbent", scores: { white_college: .18, white_noncollege: .12, black: -.04, latino: -.02, asian_other: .02, youth: -.1, senior: .18 }, strengths: ["65+", "White college", "White non-college"], weaknesses: ["18-29"] },
+  "sherrod brown": { profile: "labor-populist Democrat", scores: { white_college: .08, white_noncollege: .36, black: .08, latino: .04, asian_other: .02, youth: .04, senior: .08 }, strengths: ["White non-college", "65+", "Black"], weaknesses: [] },
+  "jon husted": { profile: "Ohio establishment Republican", scores: { white_college: .02, white_noncollege: .13, black: -.08, latino: -.04, asian_other: -.02, youth: -.06, senior: .12 }, strengths: ["White non-college", "65+"], weaknesses: ["Black", "18-29"] },
+  "roy cooper": { profile: "North Carolina statewide Democrat", scores: { white_college: .24, white_noncollege: .08, black: .14, latino: .06, asian_other: .06, youth: .02, senior: .1 }, strengths: ["White college", "Black", "65+"], weaknesses: [] },
+  "michael whatley": { profile: "party-aligned North Carolina Republican", scores: { white_college: -.08, white_noncollege: .16, black: -.12, latino: -.04, asian_other: -.04, youth: -.06, senior: .08 }, strengths: ["White non-college", "65+"], weaknesses: ["Black", "White college"] },
+  "james talarico": { profile: "young Texas Democrat", scores: { white_college: .2, white_noncollege: -.06, black: .12, latino: .18, asian_other: .08, youth: .22, senior: -.08 }, strengths: ["18-29", "White college", "Latino"], weaknesses: ["65+"] },
+  "john cornyn / ken paxton runoff": { profile: "Texas Republican runoff field", scores: { white_college: -.12, white_noncollege: .2, black: -.1, latino: -.02, asian_other: -.06, youth: -.08, senior: .12 }, strengths: ["White non-college", "65+"], weaknesses: ["White college", "Black"] },
+  "dan osborn": { profile: "Nebraska independent labor candidate", scores: { white_college: .02, white_noncollege: .34, black: .03, latino: .04, asian_other: .02, youth: .08, senior: .02 }, strengths: ["White non-college", "18-29"], weaknesses: [] },
+  "pete ricketts": { profile: "Nebraska Republican incumbent", scores: { white_college: -.04, white_noncollege: .2, black: -.08, latino: -.04, asian_other: -.04, youth: -.08, senior: .12 }, strengths: ["White non-college", "65+"], weaknesses: ["Black", "18-29"] },
+  "seth bodnar": { profile: "Montana independent veteran/business profile", scores: { white_college: .08, white_noncollege: .28, black: .02, latino: .03, asian_other: .02, youth: .06, senior: .04 }, strengths: ["White non-college", "White college", "18-29"], weaknesses: [] },
+  "mark warner": { profile: "Virginia suburban Democratic incumbent", scores: { white_college: .24, white_noncollege: -.02, black: .12, latino: .07, asian_other: .1, youth: .02, senior: .12 }, strengths: ["White college", "65+", "Black"], weaknesses: [] },
+  "lindsey graham": { profile: "South Carolina Republican incumbent", scores: { white_college: -.04, white_noncollege: .16, black: -.12, latino: -.04, asian_other: -.04, youth: -.08, senior: .14 }, strengths: ["White non-college", "65+"], weaknesses: ["Black", "18-29"] },
+  "john hickenlooper": { profile: "Colorado suburban Democratic incumbent", scores: { white_college: .24, white_noncollege: -.02, black: .08, latino: .1, asian_other: .08, youth: .02, senior: .08 }, strengths: ["White college", "Latino", "65+"], weaknesses: [] },
+  "cory booker": { profile: "urban/suburban Democratic incumbent", scores: { white_college: .18, white_noncollege: -.08, black: .2, latino: .1, asian_other: .08, youth: .1, senior: -.02 }, strengths: ["Black", "White college", "18-29"], weaknesses: ["White non-college"] },
+  "ed markey": { profile: "progressive Democratic incumbent", scores: { white_college: .18, white_noncollege: -.1, black: .12, latino: .1, asian_other: .08, youth: .22, senior: -.08 }, strengths: ["18-29", "White college", "Black"], weaknesses: ["White non-college", "65+"] },
+  "jeff merkley": { profile: "Oregon progressive Democratic incumbent", scores: { white_college: .18, white_noncollege: -.04, black: .08, latino: .08, asian_other: .08, youth: .16, senior: -.02 }, strengths: ["White college", "18-29"], weaknesses: [] },
+  "jack reed": { profile: "Rhode Island Democratic incumbent", scores: { white_college: .16, white_noncollege: -.04, black: .1, latino: .08, asian_other: .06, youth: .02, senior: .12 }, strengths: ["White college", "65+", "Black"], weaknesses: [] },
+  "shelley moore capito": { profile: "West Virginia Republican incumbent", scores: { white_college: .02, white_noncollege: .24, black: -.08, latino: -.04, asian_other: -.04, youth: -.06, senior: .18 }, strengths: ["White non-college", "65+"], weaknesses: ["Black"] }
+};
+
 const DEMOGRAPHIC_GROUP_LABELS = {
   white_college: "White college",
   white_noncollege: "White non-college",
@@ -700,6 +724,32 @@ function senateDemographicProfileKey(race, party) {
   return party === "D" ? "standardDemocrat" : "standardRepublican";
 }
 
+function candidateProfileKey(name) {
+  return String(name || "").toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+function senateCandidateDemographicProfile(race, party) {
+  const name = party === "D" ? race.dem : race.rep;
+  const candidateProfile = SENATE_CANDIDATE_DEMOGRAPHIC_PROFILES[candidateProfileKey(name)];
+  if (candidateProfile) {
+    return {
+      key: candidateProfileKey(name),
+      label: name,
+      source: "candidate",
+      ...candidateProfile
+    };
+  }
+  const genericKey = senateDemographicProfileKey(race, party);
+  return {
+    key: genericKey,
+    label: genericKey.replace(/([A-Z])/g, " $1").replace(/^./, (letter) => letter.toUpperCase()),
+    source: "generic",
+    scores: SENATE_DEMOGRAPHIC_PROFILES[genericKey] || {},
+    strengths: [],
+    weaknesses: []
+  };
+}
+
 function stateCoalitionWeights(state) {
   const traits = STATE_COALITION_TRAITS[state] || [];
   const highCollege = traits.includes("college") || traits.includes("suburban");
@@ -720,25 +770,48 @@ function stateCoalitionWeights(state) {
 
 function demographicPullAdjustment(race) {
   const weights = stateCoalitionWeights(race.state);
-  const demKey = senateDemographicProfileKey(race, "D");
-  const repKey = senateDemographicProfileKey(race, "R");
-  const demProfile = SENATE_DEMOGRAPHIC_PROFILES[demKey] || {};
-  const repProfile = SENATE_DEMOGRAPHIC_PROFILES[repKey] || {};
+  const demProfile = senateCandidateDemographicProfile(race, "D");
+  const repProfile = senateCandidateDemographicProfile(race, "R");
   const groups = Object.keys(weights).map((group) => {
-    const effect = weights[group] * ((demProfile[group] || 0) - (repProfile[group] || 0)) * 1.75;
+    const effect = weights[group] * ((demProfile.scores[group] || 0) - (repProfile.scores[group] || 0)) * 1.75;
     return { group, label: DEMOGRAPHIC_GROUP_LABELS[group] || group, weight: Number(weights[group].toFixed(2)), effect: Number(effect.toFixed(2)) };
   });
   const raw = groups.reduce((sum, item) => sum + item.effect, 0);
   const saturation = Math.abs(race.pvi) > 18 ? .55 : Math.abs(race.pvi) > 10 ? .75 : 1;
   return {
     adjustment: Number(clamp(raw * saturation, -1.1, 1.1).toFixed(2)),
-    demProfile: demKey,
-    repProfile: repKey,
+    demProfile,
+    repProfile,
     topGroups: groups
       .filter((item) => Math.abs(item.effect) >= .03)
       .sort((a, b) => Math.abs(b.effect) - Math.abs(a.effect))
       .slice(0, 5)
   };
+}
+
+function extraCandidateDemographicPulls(race) {
+  if (!race.extraCandidates?.length) return [];
+  const weights = stateCoalitionWeights(race.state);
+  const repProfile = senateCandidateDemographicProfile(race, "R");
+  return race.extraCandidates.map((candidate) => {
+    const profile = SENATE_CANDIDATE_DEMOGRAPHIC_PROFILES[candidateProfileKey(candidate.name)];
+    if (!profile) return null;
+    const groups = Object.keys(weights).map((group) => {
+      const effect = weights[group] * ((profile.scores[group] || 0) - (repProfile.scores[group] || 0)) * 1.75;
+      return { group, label: DEMOGRAPHIC_GROUP_LABELS[group] || group, weight: Number(weights[group].toFixed(2)), effect: Number(effect.toFixed(2)) };
+    });
+    const raw = groups.reduce((sum, item) => sum + item.effect, 0);
+    const saturation = Math.abs(race.pvi) > 18 ? .55 : Math.abs(race.pvi) > 10 ? .75 : 1;
+    return {
+      name: candidate.name,
+      adjustment: Number(clamp(raw * saturation, -1.1, 1.1).toFixed(2)),
+      profile: { key: candidateProfileKey(candidate.name), label: candidate.name, source: "candidate", ...profile },
+      topGroups: groups
+        .filter((item) => Math.abs(item.effect) >= .03)
+        .sort((a, b) => Math.abs(b.effect) - Math.abs(a.effect))
+        .slice(0, 5)
+    };
+  }).filter(Boolean);
 }
 
 function baselineMargin(race) {
@@ -782,7 +855,8 @@ function runModel(sourceData) {
       candidateHistoryAdjustment: candidateHistoryAdjustment(race),
       primaryScenarioAdjustment: primaryScenarioAdjustment(withCandidates),
       rcvAdjustment: rcvBaselineAdjustment(race),
-      demographicPull
+      demographicPull,
+      extraCandidateDemographicPulls: extraCandidateDemographicPulls(withCandidates)
     };
   });
 
@@ -2018,6 +2092,18 @@ async function writeForecast() {
       censusStates: Object.keys(sourceData.census).length,
       civicApi: sourceData.civic,
       pollingReferences: sourceData.pollingReferences
+    },
+    modelInputs: {
+      candidateDemographicPullModel: true,
+      candidateDemographicProfiles: Object.fromEntries(Object.entries(SENATE_CANDIDATE_DEMOGRAPHIC_PROFILES).map(([key, profile]) => [
+        key,
+        {
+          profile: profile.profile,
+          scores: profile.scores,
+          strengths: profile.strengths,
+          weaknesses: profile.weaknesses
+        }
+      ]))
     },
     calibration: buildCalibrationReport(sourceData, model),
     controlHistory: appendControlHistory(model),

@@ -1151,10 +1151,16 @@ function renderRaceInputCards(race) {
     : `<li>No previous generated run to compare.</li>`;
   const badgeRows = (race.uncertaintyBadges || []).map((badge) => `<li>${escapeHtml(badge)}</li>`).join("");
   const demographic = race.demographicPull;
+  const demographicProfileLabel = (profile) => {
+    if (!profile) return "standard";
+    if (typeof profile === "string") return profile;
+    const source = profile.source === "candidate" ? "candidate profile" : "generic profile";
+    return `${profile.label || profile.key || "standard"} (${source})`;
+  };
   const demographicRows = demographic ? [
     `<li>Adjustment: ${signedPointMargin(demographic.adjustment || 0)}</li>`,
-    `<li>Democratic profile: ${escapeHtml(demographic.demProfile || "standard")}</li>`,
-    `<li>Republican profile: ${escapeHtml(demographic.repProfile || "standard")}</li>`,
+    `<li>Democratic profile: ${escapeHtml(demographicProfileLabel(demographic.demProfile))}</li>`,
+    `<li>Republican profile: ${escapeHtml(demographicProfileLabel(demographic.repProfile))}</li>`,
     ...((demographic.topGroups || []).map((item) => `<li>${escapeHtml(item.label || item.group)}: ${signedPointMargin(item.effect || 0)}</li>`))
   ].join("") : `<li>No separate demographic-pull adjustment in this saved run.</li>`;
   container.innerHTML = `
