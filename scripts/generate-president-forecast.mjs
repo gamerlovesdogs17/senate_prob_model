@@ -867,17 +867,27 @@ const CANDIDATE_STATE_FIT = {
 };
 
 const CANDIDATE_DEMOGRAPHIC_APPEAL = {
-  newsom: { urban: .45, college: .32, suburban: .08, youth: .18, rural: -.42, evangelical: -.28, working_class: -.16 },
-  beshear: { rural: .42, working_class: .36, evangelical: .16, suburban: .14, senior: .08, college: -.06, youth: -.05 },
-  shapiro: { suburban: .42, college: .28, senior: .14, working_class: .12, rural: -.08, evangelical: -.05 },
-  buttigieg: { college: .38, suburban: .32, youth: .12, urban: .1, rural: -.18, evangelical: -.18 },
-  whitmer: { working_class: .42, suburban: .28, college: .16, senior: .08, rural: .08 },
-  aoc: { youth: .5, urban: .46, latino: .3, college: .22, rural: -.52, evangelical: -.42, senior: -.24, suburban: -.18 },
-  vance: { working_class: .42, rural: .34, evangelical: .16, youth: .06, suburban: -.28, college: -.2 },
-  rubio: { latino: .46, suburban: .18, senior: .14, evangelical: .08, college: -.04, rural: -.05 },
-  desantis: { evangelical: .3, rural: .18, senior: .12, suburban: -.12, college: -.18, youth: -.16 },
-  haley: { suburban: .44, college: .34, independent: .22, senior: .1, evangelical: -.05, rural: -.12 },
-  cruz: { evangelical: .42, rural: .3, latino: .12, working_class: .08, suburban: -.34, college: -.24, independent: -.16 }
+  newsom: { white_college: .28, white_noncollege: -.28, black: .04, latino: .08, asian_other: .14, youth: .16, senior: -.1 },
+  beshear: { white_college: .08, white_noncollege: .34, black: .04, latino: .02, asian_other: .02, youth: -.04, senior: .1 },
+  shapiro: { white_college: .34, white_noncollege: .08, black: .08, latino: .04, asian_other: .08, youth: .02, senior: .12 },
+  buttigieg: { white_college: .32, white_noncollege: -.08, black: -.02, latino: -.02, asian_other: .06, youth: .1, senior: -.06 },
+  whitmer: { white_college: .18, white_noncollege: .28, black: .04, latino: .02, asian_other: .04, youth: .02, senior: .08 },
+  aoc: { white_college: .12, white_noncollege: -.42, black: .14, latino: .32, asian_other: .14, youth: .42, senior: -.28 },
+  vance: { white_college: -.22, white_noncollege: .34, black: -.06, latino: -.02, asian_other: -.08, youth: .04, senior: .06 },
+  rubio: { white_college: .02, white_noncollege: .04, black: -.08, latino: .38, asian_other: .02, youth: -.02, senior: .12 },
+  desantis: { white_college: -.18, white_noncollege: .18, black: -.08, latino: .04, asian_other: -.08, youth: -.16, senior: .14 },
+  haley: { white_college: .34, white_noncollege: -.08, black: -.06, latino: .02, asian_other: .08, youth: -.08, senior: .12 },
+  cruz: { white_college: -.24, white_noncollege: .28, black: -.1, latino: .08, asian_other: -.08, youth: -.1, senior: .08 }
+};
+
+const DEMOGRAPHIC_GROUP_LABELS = {
+  white_college: "White college",
+  white_noncollege: "White non-college",
+  black: "Black",
+  latino: "Latino",
+  asian_other: "Asian/other",
+  youth: "18-29",
+  senior: "65+"
 };
 
 const CANDIDATE_SWING_STATE_EFFECTS = {
@@ -1085,18 +1095,21 @@ function candidateTraitEffect(state, candidate, side) {
 function stateDemographicWeights(state) {
   const traits = STATE_TRAITS[state] || [];
   const baseline = PRESIDENTIAL_BASELINES[state];
+  const safeD = baseline.demMargin > 18;
+  const safeR = baseline.demMargin < -18;
+  const highCollege = traits.includes("college") || traits.includes("suburban") || traits.includes("northeast");
+  const highNoncollege = traits.includes("rural") || traits.includes("working_class") || traits.includes("appalachian") || traits.includes("plains");
+  const highBlack = traits.includes("black_belt") || ["GA", "NC", "SC", "MS", "LA", "AL", "MD", "VA", "DC"].includes(state);
+  const highLatino = traits.includes("hispanic") || ["AZ", "CA", "FL", "NV", "NM", "TX"].includes(state);
+  const highAsianOther = ["CA", "HI", "NJ", "NY", "WA", "VA", "MD", "NV"].includes(state);
   const weights = {
-    urban: traits.includes("urban") ? .22 : traits.includes("rural") ? .05 : .12,
-    suburban: traits.includes("suburban") ? .26 : .13,
-    rural: traits.includes("rural") || traits.includes("frontier") || traits.includes("plains") ? .24 : .09,
-    college: traits.includes("college") ? .22 : .11,
-    working_class: traits.includes("working_class") || traits.includes("appalachian") ? .22 : .12,
-    latino: traits.includes("hispanic") ? .2 : .07,
-    black: traits.includes("black_belt") ? .2 : .09,
-    evangelical: traits.includes("evangelical") || traits.includes("deep_south") ? .2 : .08,
-    independent: traits.includes("independent") ? .18 : .08,
-    youth: Math.abs(baseline.demMargin) < 12 || traits.includes("urban") ? .12 : .08,
-    senior: traits.includes("rural") || traits.includes("sunbelt") ? .15 : .1
+    white_college: highCollege ? .28 : highNoncollege ? .14 : .2,
+    white_noncollege: highNoncollege ? .34 : highCollege ? .2 : .27,
+    black: highBlack ? .22 : safeD ? .12 : .08,
+    latino: highLatino ? .2 : .07,
+    asian_other: highAsianOther ? .12 : .06,
+    youth: traits.includes("urban") || safeD ? .12 : .08,
+    senior: traits.includes("sunbelt") || highNoncollege || safeR ? .15 : .1
   };
   return weights;
 }
@@ -1109,7 +1122,7 @@ function candidateDemographicPull(state, demCandidate, repCandidate) {
     const demAppeal = demProfile[group] || 0;
     const repAppeal = repProfile[group] || 0;
     const effect = weights[group] * (demAppeal - repAppeal) * 1.85;
-    return { group, weight: Number(weights[group].toFixed(2)), effect: Number(effect.toFixed(2)) };
+    return { group, label: DEMOGRAPHIC_GROUP_LABELS[group] || group, weight: Number(weights[group].toFixed(2)), effect: Number(effect.toFixed(2)) };
   });
   const raw = groups.reduce((sum, item) => sum + item.effect, 0);
   const saturation = Math.abs(PRESIDENTIAL_BASELINES[state].demMargin) > 24 ? .55 : Math.abs(PRESIDENTIAL_BASELINES[state].demMargin) > 14 ? .75 : 1;

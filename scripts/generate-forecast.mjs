@@ -94,14 +94,24 @@ const STATE_COALITION_TRAITS = {
 };
 
 const SENATE_DEMOGRAPHIC_PROFILES = {
-  standardDemocrat: { urban: .2, college: .14, black_belt: .18, latino: .12, suburban: .08, rural: -.18, evangelical: -.16, working_class: -.05 },
-  incumbentDemocrat: { urban: .18, college: .12, black_belt: .16, latino: .1, suburban: .12, senior: .08, rural: -.1, evangelical: -.1 },
-  statewideDemocrat: { suburban: .18, college: .14, working_class: .1, independent: .1, rural: -.06, evangelical: -.08 },
-  independentLabor: { working_class: .32, rural: .24, independent: .26, frontier: .18, suburban: .06, college: -.04, evangelical: .02 },
-  standardRepublican: { rural: .18, evangelical: .18, senior: .1, suburban: .04, working_class: .08, urban: -.16, college: -.1, black_belt: -.12, latino: -.08 },
-  incumbentRepublican: { rural: .16, evangelical: .14, senior: .14, suburban: .08, independent: .05, urban: -.12, college: -.06 },
-  statewideRepublican: { suburban: .14, senior: .1, rural: .1, evangelical: .08, college: .02, urban: -.1 },
-  weakRepublican: { rural: .08, evangelical: .08, senior: .04, suburban: -.06, college: -.08, independent: -.08 }
+  standardDemocrat: { white_college: .16, white_noncollege: -.14, black: .16, latino: .1, asian_other: .08, youth: .08, senior: -.04 },
+  incumbentDemocrat: { white_college: .15, white_noncollege: -.06, black: .14, latino: .08, asian_other: .06, youth: .04, senior: .06 },
+  statewideDemocrat: { white_college: .2, white_noncollege: .06, black: .1, latino: .06, asian_other: .06, youth: .02, senior: .04 },
+  independentLabor: { white_college: .02, white_noncollege: .28, black: .04, latino: .04, asian_other: .02, youth: .06, senior: .02 },
+  standardRepublican: { white_college: -.08, white_noncollege: .18, black: -.12, latino: -.06, asian_other: -.06, youth: -.06, senior: .08 },
+  incumbentRepublican: { white_college: -.03, white_noncollege: .14, black: -.1, latino: -.04, asian_other: -.04, youth: -.04, senior: .12 },
+  statewideRepublican: { white_college: .04, white_noncollege: .1, black: -.08, latino: -.02, asian_other: -.02, youth: -.04, senior: .08 },
+  weakRepublican: { white_college: -.1, white_noncollege: .08, black: -.08, latino: -.04, asian_other: -.04, youth: -.06, senior: .04 }
+};
+
+const DEMOGRAPHIC_GROUP_LABELS = {
+  white_college: "White college",
+  white_noncollege: "White non-college",
+  black: "Black",
+  latino: "Latino",
+  asian_other: "Asian/other",
+  youth: "18-29",
+  senior: "65+"
 };
 
 const PATH_CENTRALITY = {
@@ -692,18 +702,19 @@ function senateDemographicProfileKey(race, party) {
 
 function stateCoalitionWeights(state) {
   const traits = STATE_COALITION_TRAITS[state] || [];
+  const highCollege = traits.includes("college") || traits.includes("suburban");
+  const highNoncollege = traits.includes("rural") || traits.includes("working_class") || traits.includes("appalachian") || traits.includes("frontier");
+  const highBlack = traits.includes("black_belt") || ["GA", "NC", "SC", "MS", "LA", "AL", "MD", "VA"].includes(state);
+  const highLatino = traits.includes("latino") || ["AZ", "CA", "FL", "NV", "NM", "TX"].includes(state);
+  const highAsianOther = ["CA", "HI", "NJ", "NY", "WA", "VA", "MD", "NV"].includes(state);
   return {
-    urban: traits.includes("urban") ? .2 : .08,
-    suburban: traits.includes("suburban") ? .24 : .12,
-    rural: traits.includes("rural") || traits.includes("frontier") ? .24 : .09,
-    college: traits.includes("college") ? .2 : .1,
-    working_class: traits.includes("working_class") || traits.includes("appalachian") ? .22 : .11,
-    black_belt: traits.includes("black_belt") ? .2 : .08,
-    latino: traits.includes("latino") ? .18 : .06,
-    evangelical: traits.includes("evangelical") || traits.includes("deep_south") ? .2 : .08,
-    independent: traits.includes("independent") ? .18 : .08,
-    senior: traits.includes("senior") || traits.includes("rural") ? .14 : .09,
-    frontier: traits.includes("frontier") ? .18 : .04
+    white_college: highCollege ? .27 : highNoncollege ? .14 : .2,
+    white_noncollege: highNoncollege ? .35 : highCollege ? .2 : .28,
+    black: highBlack ? .2 : .08,
+    latino: highLatino ? .18 : .06,
+    asian_other: highAsianOther ? .11 : .05,
+    youth: traits.includes("urban") || traits.includes("college") ? .11 : .08,
+    senior: traits.includes("senior") || highNoncollege ? .15 : .1
   };
 }
 
@@ -715,7 +726,7 @@ function demographicPullAdjustment(race) {
   const repProfile = SENATE_DEMOGRAPHIC_PROFILES[repKey] || {};
   const groups = Object.keys(weights).map((group) => {
     const effect = weights[group] * ((demProfile[group] || 0) - (repProfile[group] || 0)) * 1.75;
-    return { group, weight: Number(weights[group].toFixed(2)), effect: Number(effect.toFixed(2)) };
+    return { group, label: DEMOGRAPHIC_GROUP_LABELS[group] || group, weight: Number(weights[group].toFixed(2)), effect: Number(effect.toFixed(2)) };
   });
   const raw = groups.reduce((sum, item) => sum + item.effect, 0);
   const saturation = Math.abs(race.pvi) > 18 ? .55 : Math.abs(race.pvi) > 10 ? .75 : 1;

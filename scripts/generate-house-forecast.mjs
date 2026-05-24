@@ -88,11 +88,21 @@ const STATE_COALITION_TRAITS = {
 };
 
 const HOUSE_COALITION_PROFILES = {
-  democrat: { urban: .16, college: .13, black_belt: .14, latino: .1, suburban: .06, rural: -.14, evangelical: -.12, working_class: -.04 },
-  republican: { rural: .15, evangelical: .14, senior: .08, working_class: .06, suburban: .03, urban: -.13, college: -.08, black_belt: -.1, latino: -.06 },
-  demIncumbent: { urban: .14, college: .11, black_belt: .12, latino: .09, suburban: .1, senior: .06, rural: -.08 },
-  repIncumbent: { rural: .13, evangelical: .12, senior: .1, suburban: .07, working_class: .05, college: -.04, urban: -.09 },
-  openSeat: { independent: .02, suburban: -.01 }
+  democrat: { white_college: .14, white_noncollege: -.12, black: .13, latino: .09, asian_other: .06, youth: .07, senior: -.03 },
+  republican: { white_college: -.07, white_noncollege: .15, black: -.09, latino: -.05, asian_other: -.05, youth: -.05, senior: .07 },
+  demIncumbent: { white_college: .13, white_noncollege: -.05, black: .11, latino: .07, asian_other: .05, youth: .03, senior: .05 },
+  repIncumbent: { white_college: -.03, white_noncollege: .12, black: -.08, latino: -.03, asian_other: -.03, youth: -.03, senior: .09 },
+  openSeat: { white_college: -.01, white_noncollege: -.01, youth: .01 }
+};
+
+const DEMOGRAPHIC_GROUP_LABELS = {
+  white_college: "White college",
+  white_noncollege: "White non-college",
+  black: "Black",
+  latino: "Latino",
+  asian_other: "Asian/other",
+  youth: "18-29",
+  senior: "65+"
 };
 
 const CATEGORY_ALIASES = {
@@ -638,17 +648,19 @@ function districtCoalitionWeights(district) {
   const pres = Number.isFinite(district.presidentialMargin) ? district.presidentialMargin : 0;
   const urbanized = pres > 10;
   const exurban = pres < -10;
+  const highCollege = urbanized || traits.includes("college") || traits.includes("suburban");
+  const highNoncollege = exurban || traits.includes("rural") || traits.includes("working_class") || traits.includes("appalachian") || traits.includes("frontier");
+  const highBlack = traits.includes("black_belt") || ["GA", "NC", "SC", "MS", "LA", "AL", "MD", "VA"].includes(district.state);
+  const highLatino = traits.includes("latino") || ["AZ", "CA", "FL", "NV", "NM", "TX"].includes(district.state);
+  const highAsianOther = ["CA", "HI", "NJ", "NY", "WA", "VA", "MD", "NV"].includes(district.state);
   return {
-    urban: urbanized ? .18 : traits.includes("urban") ? .15 : .07,
-    suburban: Math.abs(pres) < 12 || traits.includes("suburban") ? .23 : .12,
-    rural: exurban || traits.includes("rural") || traits.includes("frontier") ? .23 : .08,
-    college: urbanized || traits.includes("college") ? .18 : .09,
-    working_class: traits.includes("working_class") || traits.includes("appalachian") || Math.abs(pres) < 7 ? .18 : .09,
-    black_belt: traits.includes("black_belt") ? .17 : .07,
-    latino: traits.includes("latino") ? .17 : .06,
-    evangelical: traits.includes("evangelical") || traits.includes("deep_south") ? .17 : .07,
-    independent: traits.includes("independent") || Math.abs(pres) < 7 ? .14 : .06,
-    senior: traits.includes("senior") || exurban ? .13 : .08
+    white_college: highCollege ? .28 : highNoncollege ? .13 : .2,
+    white_noncollege: highNoncollege ? .35 : highCollege ? .19 : .27,
+    black: highBlack ? .18 : urbanized ? .11 : .07,
+    latino: highLatino ? .17 : .06,
+    asian_other: highAsianOther ? .1 : .05,
+    youth: urbanized || traits.includes("college") ? .11 : .08,
+    senior: traits.includes("senior") || exurban ? .14 : .09
   };
 }
 
@@ -662,7 +674,7 @@ function houseDemographicPull(district, challengerStrength) {
   const groups = Object.keys(weights).map((group) => {
     const profileGap = (demProfile[group] || 0) - (repProfile[group] || 0) + (openProfile[group] || 0);
     const effect = weights[group] * profileGap * 1.35;
-    return { group, weight: Number(weights[group].toFixed(2)), effect: Number(effect.toFixed(2)) };
+    return { group, label: DEMOGRAPHIC_GROUP_LABELS[group] || group, weight: Number(weights[group].toFixed(2)), effect: Number(effect.toFixed(2)) };
   });
   const raw = groups.reduce((sum, item) => sum + item.effect, 0) + challengerDirection * challengerBonus * .32;
   const saturation = Math.abs(district.presidentialMargin || district.fundamentalMargin || 0) > 18 ? .6 : Math.abs(district.presidentialMargin || district.fundamentalMargin || 0) > 10 ? .78 : 1;
