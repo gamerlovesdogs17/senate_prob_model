@@ -1632,6 +1632,53 @@ button.race-board-row {
   text-transform: uppercase;
 }
 
+.map-card-factors {
+  margin: 10px 0 0;
+  border-top: 1px solid var(--line);
+}
+
+.map-card-factors div {
+  display: grid;
+  grid-template-columns: minmax(0, 88px) minmax(0, 1fr);
+  gap: 9px;
+  padding: 7px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+}
+
+.map-card-factors dt {
+  color: var(--muted);
+  font: 850 .62rem/1.05 "Segoe UI", Arial, sans-serif;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.map-card-factors dd {
+  margin: 0;
+  color: var(--ink);
+  font: 800 .76rem/1.15 "Segoe UI", Arial, sans-serif;
+  overflow-wrap: anywhere;
+}
+
+.coalition-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.coalition-chips span {
+  padding: 4px 6px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--paper) 86%, white);
+  color: var(--muted);
+  font: 800 .66rem/1 "Segoe UI", Arial, sans-serif;
+}
+
+.coalition-chips b {
+  color: var(--ink);
+}
+
 .calibration-miss-row {
   padding-bottom: 8px;
   border-bottom: 1px solid var(--line);

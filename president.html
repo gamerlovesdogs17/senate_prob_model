@@ -365,9 +365,9 @@
       const repProb = 1 - stateData.demProbability;
       const winnerVerb = leader.demLeads ? demName : repName;
       const demographicPull = stateData.demographicPull;
-      const demographicText = demographicPull?.topGroups?.length
-        ? demographicPull.topGroups.map((item) => `${item.label || item.group} ${item.effect > 0 ? "+" : ""}${item.effect.toFixed(1)}`).join(" / ")
-        : "not separately scored";
+      const demographicChips = demographicPull?.topGroups?.length
+        ? demographicPull.topGroups.slice(0, 3).map((item) => `<span>${item.label || item.group} <b>${item.effect > 0 ? "+" : ""}${item.effect.toFixed(1)}</b></span>`).join("")
+        : "<span>Not separately scored</span>";
       const demProfile = demographicPull?.demProfile?.profile || "Democratic profile";
       const repProfile = demographicPull?.repProfile?.profile || "Republican profile";
       hoverCard.innerHTML = `
@@ -397,10 +397,13 @@
           <span>${stateData.ev} electoral votes</span>
           <span>${ratingModeLabel}</span>
         </div>
-        <p>${STATE_NAMES[stateCode]} currently rates ${rating.toLowerCase()} in this matchup.</p>
-        <p class="meta">Color mode: ${ratingModeLabel} / EV: ${stateData.ev} / Margin: ${leader.side}+${leader.projectedMargin.toFixed(1)} / Demographic pull: ${demographicPull?.adjustment > 0 ? "+" : ""}${(demographicPull?.adjustment ?? 0).toFixed(1)} pts</p>
-        <p class="meta">Profiles: ${demName}: ${demProfile} / ${repName}: ${repProfile}</p>
-        <p class="meta">Coalition: ${demographicText}</p>
+        <dl class="map-card-factors">
+          <div><dt>Rating basis</dt><dd>${ratingModeLabel}</dd></div>
+          <div><dt>Demographic pull</dt><dd>${demographicPull?.adjustment > 0 ? "+" : ""}${(demographicPull?.adjustment ?? 0).toFixed(1)} pts</dd></div>
+          <div><dt>${demName}</dt><dd>${demProfile}</dd></div>
+          <div><dt>${repName}</dt><dd>${repProfile}</dd></div>
+        </dl>
+        <div class="coalition-chips">${demographicChips}</div>
       `;
       hoverCard.style.display = 'block';
     }
