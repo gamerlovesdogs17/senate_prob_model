@@ -826,15 +826,7 @@ function renderLineChart(chart, points, options) {
   const maxValue = Math.max(...values);
   const compactDomain = () => {
     if (minValue >= 0 && maxValue <= 1) {
-      const paddedMin = Math.max(0, minValue - .055);
-      const paddedMax = Math.min(1, maxValue + .055);
-      const min = Math.floor(paddedMin * 20) / 20;
-      const max = Math.ceil(paddedMax * 20) / 20;
-      if (max - min < .18) {
-        const mid = (max + min) / 2;
-        return [Math.max(0, mid - .1), Math.min(1, mid + .1)];
-      }
-      return [min, max];
+      return [0, 1];
     }
     const span = Math.max(1, maxValue - minValue);
     const min = Math.floor((minValue - span * .18) / 5) * 5;
