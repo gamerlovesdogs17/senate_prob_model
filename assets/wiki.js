@@ -870,8 +870,15 @@ function renderLineChart(chart, points, options) {
   const electionDate = parseChartDate(options.electionDate);
   const zoomMode = options.zoomControls && chart.dataset.historyZoom ? chart.dataset.historyZoom : "recent";
   const useFullRunway = !options.zoomControls || zoomMode === "full";
+  const recentPadDate = (() => {
+    if (!hasUsableDates || !latestChartDate) return latestChartDate;
+    const observedSpan = Math.max(86400000, latestChartDate - firstChartDate);
+    const padMs = Math.min(30 * 86400000, Math.max(86400000, observedSpan * .22));
+    const padded = new Date(latestChartDate.getTime() + padMs);
+    return electionDate && padded > electionDate ? electionDate : padded;
+  })();
   const axisEndDate = hasUsableDates && electionDate && electionDate > latestChartDate
-    ? (useFullRunway ? electionDate : latestChartDate)
+    ? (useFullRunway ? electionDate : recentPadDate)
     : latestChartDate;
   const dateSpan = hasUsableDates ? Math.max(1, axisEndDate - firstChartDate) : 1;
   const xFor = (index) => {
@@ -980,9 +987,9 @@ function renderLineChart(chart, points, options) {
       ${extraSeries && latestExtraY !== null ? `<text class="history-end-label ${extraSeries.labelClassName}" x="${latest.x + 11}" y="${extraLabelY}">${extraSeries.name} ${oneDecimal(latestExtraValue)}</text>` : ""}
       <g class="history-hover" style="display:none">
         <path class="history-hover-rule"></path>
-        <circle class="history-hover-dot history-hover-dot-dem ${demHoverDotClass === "history-hover-dot-dem" ? "" : demHoverDotClass}" r="4.5"></circle>
-        <circle class="history-hover-dot history-hover-dot-rep" r="4.5"></circle>
-        ${extraSeries ? `<circle class="history-hover-dot history-hover-dot-extra" r="4.5"></circle>` : ""}
+        <circle class="history-hover-dot history-hover-dot-dem ${demHoverDotClass === "history-hover-dot-dem" ? "" : demHoverDotClass}" r="3.2"></circle>
+        <circle class="history-hover-dot history-hover-dot-rep" r="3.2"></circle>
+        ${extraSeries ? `<circle class="history-hover-dot history-hover-dot-extra" r="3.2"></circle>` : ""}
         <rect class="history-hover-box" width="150" height="${extraSeries ? 72 : 56}" rx="2"></rect>
         <text class="history-hover-title"></text>
         <text class="history-hover-dem ${demHoverTextClass}"></text>
