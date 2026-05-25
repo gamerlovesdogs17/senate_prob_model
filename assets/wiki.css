@@ -1576,18 +1576,10 @@ button.race-board-row {
   overflow: hidden;
 }
 
-.movement-panel.is-up {
-  border-top-color: #238636;
-}
-
-.movement-panel.is-down {
-  border-top-color: #c93b32;
-}
-
 .movement-summary {
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr);
-  gap: 12px;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 14px;
   align-items: center;
   padding: 14px;
   border-bottom: 1px solid var(--line);
@@ -1596,20 +1588,53 @@ button.race-board-row {
 .movement-arrow {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: 42px;
+  height: 42px;
   border-radius: 999px;
   background: var(--toss);
-  color: #fff;
-  font: 950 1rem/1 "Segoe UI", Arial, sans-serif;
 }
 
-.movement-panel.is-up .movement-arrow {
-  background: #238636;
+.movement-panel.moved-dem {
+  border-top-color: var(--dem);
 }
 
-.movement-panel.is-down .movement-arrow {
-  background: #c93b32;
+.movement-panel.moved-rep {
+  border-top-color: var(--rep);
+}
+
+.movement-panel.moved-ind {
+  border-top-color: var(--ind);
+}
+
+.movement-panel.moved-dem .movement-arrow {
+  background: var(--dem);
+}
+
+.movement-panel.moved-rep .movement-arrow {
+  background: var(--rep);
+}
+
+.movement-panel.moved-ind .movement-arrow {
+  background: var(--ind);
+}
+
+.movement-arrow::before {
+  content: "";
+  width: 0;
+  height: 0;
+  border-left: 11px solid transparent;
+  border-right: 11px solid transparent;
+  border-bottom: 18px solid #fff;
+  transform: translateY(-1px);
+}
+
+.movement-panel.moved-flat .movement-arrow::before {
+  width: 18px;
+  height: 4px;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  transform: none;
 }
 
 .movement-summary strong {
@@ -1648,6 +1673,10 @@ button.race-board-row {
 
 .movement-driver-list li.toward-rep {
   border-left-color: var(--rep);
+}
+
+.movement-driver-list li.toward-ind {
+  border-left-color: var(--ind);
 }
 
 .movement-driver-label {
@@ -2316,7 +2345,7 @@ button.race-board-row {
   }
 
   .movement-summary {
-    grid-template-columns: 34px minmax(0, 1fr);
+    grid-template-columns: 42px minmax(0, 1fr);
     padding: 12px;
   }
 

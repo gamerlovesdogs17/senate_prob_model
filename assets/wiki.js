@@ -160,10 +160,10 @@ function pollingInputText(race) {
 }
 
 function movementText(race) {
-  const party = raceLeaderParty(race);
-  const value = probabilityChangeForParty(race, party);
-  if (!Number.isFinite(value) || Math.abs(value) < .05) return "No change since last run";
-  return `${raceLeaderName(race)} ${formatProbabilityShift(value)} since last run`;
+  const party = movementGainingParty(race);
+  const value = Math.abs(race?.movement?.sinceLastRun || 0);
+  if (!party || !Number.isFinite(value) || value < .05) return "No change since last run";
+  return `${racePartyCandidateLabel(race, party)} up ${value.toFixed(1)} pts since last run`;
 }
 
 function movementPartyLabel(party) {
@@ -191,6 +191,19 @@ function probabilityChangeForParty(race, party, period = "sinceLastRun") {
   const value = race?.movement?.[period];
   if (!Number.isFinite(value)) return null;
   return party === "D" ? value : -value;
+}
+
+function movementGainingParty(race, period = "sinceLastRun") {
+  const value = race?.movement?.[period];
+  if (!Number.isFinite(value) || Math.abs(value) < .05) return null;
+  return value > 0 ? "D" : "R";
+}
+
+function movementSideClass(race, party) {
+  if (party === "D" && (race?.demDisplayParty === "I" || String(race?.dem || "").toLowerCase().includes("independent"))) return "moved-ind";
+  if (party === "D") return "moved-dem";
+  if (party === "R") return "moved-rep";
+  return "moved-flat";
 }
 
 function formatProbabilityShift(value) {
@@ -238,17 +251,16 @@ function movementDriverScope(race) {
 
 function renderMovementPanel(race) {
   const movement = race?.movement || {};
-  const leader = raceLeaderParty(race);
-  const leaderChange = probabilityChangeForParty(race, leader);
-  const weekChange = probabilityChangeForParty(race, leader, "sinceWeek");
-  const isUp = Number.isFinite(leaderChange) && leaderChange > .05;
-  const isDown = Number.isFinite(leaderChange) && leaderChange < -.05;
-  const summaryClass = isUp ? "is-up" : isDown ? "is-down" : "is-flat";
+  const gainingParty = movementGainingParty(race);
+  const gainingChange = gainingParty ? Math.abs(movement.sinceLastRun || 0) : 0;
+  const weekParty = movementGainingParty(race, "sinceWeek") || gainingParty || raceLeaderParty(race);
+  const weekChange = weekParty ? probabilityChangeForParty(race, weekParty, "sinceWeek") : null;
+  const summaryClass = movementSideClass(race, gainingParty);
   const drivers = (race.movementDrivers || []).filter(Boolean);
   const driverCards = drivers.length
     ? drivers.map((driver) => {
         const party = Number.isFinite(driver.change) ? (driver.change > 0 ? "D" : "R") : "";
-        const className = party === "D" ? "toward-dem" : party === "R" ? "toward-rep" : "toward-neutral";
+        const className = party ? movementSideClass(race, party).replace("moved-", "toward-") : "toward-neutral";
         const impact = Number.isFinite(driver.change) ? movementImpactLabel(driver.change) : "changed";
         return `
           <li class="${className}">
@@ -259,8 +271,9 @@ function renderMovementPanel(race) {
         `;
       }).join("")
     : `<li class="toward-neutral"><span class="movement-driver-label">No prior run</span><strong>No previous generated race file to compare.</strong><em>first saved point</em></li>`;
-  const leaderCopy = Number.isFinite(leaderChange) && Math.abs(leaderChange) >= .05
-    ? `${raceLeaderName(race)} ${formatProbabilityShift(leaderChange)} since the last run.`
+  const movedName = gainingParty ? racePartyCandidateLabel(race, gainingParty) : raceLeaderName(race);
+  const leaderCopy = gainingParty
+    ? `${movedName} up ${gainingChange.toFixed(1)} pts since the last run.`
     : "No meaningful probability change since the last run.";
   const weekCopy = Number.isFinite(weekChange) && Math.abs(weekChange) >= .05
     ? `${formatProbabilityShift(weekChange)} this week`
@@ -268,11 +281,11 @@ function renderMovementPanel(race) {
   return `
     <section class="movement-panel ${summaryClass}" aria-label="Race movement">
       <div class="movement-summary">
-        <span class="movement-arrow" aria-hidden="true">${isUp ? "&uarr;" : isDown ? "&darr;" : "&ndash;"}</span>
+        <span class="movement-arrow" aria-hidden="true"></span>
         <div>
           <span class="panel-label">Since last run</span>
           <strong>${escapeHtml(leaderCopy)}</strong>
-          <small>${escapeHtml(raceLeaderName(race))} is ${escapeHtml(weekCopy)}. ${escapeHtml(movementDriverScope(race))}</small>
+          <small>${escapeHtml(racePartyCandidateLabel(race, weekParty))} is ${escapeHtml(weekCopy)}. ${escapeHtml(movementDriverScope(race))}</small>
         </div>
       </div>
       <ol class="movement-driver-list">${driverCards}</ol>
