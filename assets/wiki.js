@@ -105,6 +105,10 @@ function candidateChanceLabel(race, party) {
   return party === "D" ? "Democrat" : "Republican";
 }
 
+function candidateForecastName(race, party) {
+  return candidateDisplayName(race, party);
+}
+
 function leaderClassForRace(race) {
   if (race.winnerParty === "D" && (race.demDisplayParty === "I" || String(race.dem || "").toLowerCase().includes("independent"))) return "leads-ind";
   if (race.rating === "Toss-up") return "leads-tossup";
@@ -173,8 +177,7 @@ function movementPartyLabel(party) {
 }
 
 function racePartyCandidateLabel(race, party) {
-  if (party === "D") return candidateChanceLabel(race, "D");
-  if (party === "R") return candidateDisplayName(race, "R");
+  if (party === "D" || party === "R") return candidateForecastName(race, party);
   return "the race";
 }
 
@@ -619,7 +622,7 @@ function renderHomeRadar() {
       .sort((a, b) => b.tippingPower - a.tippingPower)
       .slice(0, 6);
     senate.innerHTML = races.map((race) => {
-      const leader = race.winnerParty === "D" ? candidateChanceLabel(race, "D") : "Republican";
+      const leader = candidateForecastName(race, race.winnerParty);
       return `
         <a class="home-radar-row ${leaderClassForRace(race)}" href="race.html?state=${race.state}">
           <strong>${escapeHtml(race.state)}</strong>
@@ -739,7 +742,7 @@ function hoverMarkup(race, mode = mapColorMode) {
   const ratingLabel = ratingLabelForRace(race, activeMode);
   const ratingBucket = bucketForRace(race, activeMode);
   const ratingModeLabel = MAP_COLOR_MODES[activeMode];
-  const winner = race.winnerParty === "D" ? candidateChanceLabel(race, "D") : "Republican";
+  const winner = candidateForecastName(race, race.winnerParty);
   const demCandidate = candidateDisplayName(race, "D");
   const repCandidate = candidateDisplayName(race, "R");
   const demBadge = candidateStatusBadge(race, "D");
@@ -1404,7 +1407,7 @@ function renderRacePage() {
   setText("race-incumbent", race.incumbent);
   setText("race-seat", race.seat);
   setText("race-rating", race.rating);
-  setText("race-winner", `${race.winnerParty === "D" ? candidateChanceLabel(race, "D") : "Republican"} ${pct(race.winnerProbability)}`);
+  setText("race-winner", `${candidateForecastName(race, race.winnerParty)} ${pct(race.winnerProbability)}`);
   setText("race-note", race.summary || race.note);
   setText("race-dem", pct(race.demProbability));
   setText("race-rep", pct(1 - race.demProbability));
@@ -1996,7 +1999,7 @@ function renderBattlegroundList() {
   const races = [...forecast.races]
     .sort((a, b) => b.tippingPower - a.tippingPower);
   container.innerHTML = races.map((race) => {
-    const leader = race.winnerParty === "D" ? "Democrat" : "Republican";
+    const leader = candidateForecastName(race, race.winnerParty);
     const leaderClass = leaderClassForRace(race);
     return `
       <a class="race-board-row ${leaderClass}" href="race.html?state=${race.state}">
