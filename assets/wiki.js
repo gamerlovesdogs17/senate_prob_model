@@ -160,11 +160,111 @@ function pollingInputText(race) {
 }
 
 function movementText(race) {
-  const value = race?.movement?.sinceLastRun;
+  const party = raceLeaderParty(race);
+  const value = probabilityChangeForParty(race, party);
   if (!Number.isFinite(value) || Math.abs(value) < .05) return "No change since last run";
-  const party = value > 0 ? "D" : "R";
-  const arrow = value > 0 ? "up" : "down";
-  return `${party} ${Math.abs(value).toFixed(1)} pts ${arrow} since last run`;
+  return `${raceLeaderName(race)} ${formatProbabilityShift(value)} since last run`;
+}
+
+function movementPartyLabel(party) {
+  if (party === "D") return "Democrats";
+  if (party === "R") return "Republicans";
+  return "the race";
+}
+
+function raceLeaderParty(race) {
+  return (race?.demProbability ?? 0) >= .5 ? "D" : "R";
+}
+
+function raceLeaderName(race) {
+  const party = raceLeaderParty(race);
+  return party === "D" ? candidateChanceLabel(race, "D") : "Republican";
+}
+
+function probabilityChangeForParty(race, party, period = "sinceLastRun") {
+  const value = race?.movement?.[period];
+  if (!Number.isFinite(value)) return null;
+  return party === "D" ? value : -value;
+}
+
+function formatProbabilityShift(value) {
+  if (!Number.isFinite(value) || Math.abs(value) < .05) return "flat";
+  return `${value > 0 ? "up" : "down"} ${Math.abs(value).toFixed(1)} pts`;
+}
+
+function movementImpactLabel(value) {
+  const abs = Math.abs(value || 0);
+  if (abs >= 2) return "large";
+  if (abs >= .75) return "noticeable";
+  if (abs >= .2) return "small";
+  return "tiny";
+}
+
+function movementDriverCopy(driver) {
+  const label = driver?.label || "Model input";
+  const change = driver?.change;
+  const hasChange = Number.isFinite(change);
+  const party = !hasChange ? null : change > 0 ? "D" : "R";
+  const toward = party ? movementPartyLabel(party) : "";
+  const magnitude = hasChange ? `${Math.abs(change).toFixed(1)} pts` : "";
+  const ratingDetail = driver?.detail && / to /.test(driver.detail) ? driver.detail : "";
+  const templates = {
+    Polling: `Race polling shifted ${magnitude} toward ${toward}.`,
+    "Projected margin": `The combined forecast margin moved ${magnitude} toward ${toward}.`,
+    "Primary risk": `Nomination uncertainty moved ${magnitude} toward ${toward}.`,
+    Finance: `Candidate finance moved ${magnitude} toward ${toward}.`,
+    "Generic ballot": `The national polling environment moved ${magnitude} toward ${toward}.`,
+    "National finance": `The national finance environment moved ${magnitude} toward ${toward}.`,
+    "Demographic pull": `Coalition and demographic adjustments moved ${magnitude} toward ${toward}.`,
+    Rating: ratingDetail ? `Public rating input changed from ${ratingDetail}.` : "Public rating input changed."
+  };
+  if (!hasChange) return templates[label] || (driver?.detail || "Input changed.");
+  return templates[label] || `${label} moved ${magnitude} toward ${toward}.`;
+}
+
+function renderMovementPanel(race) {
+  const movement = race?.movement || {};
+  const leader = raceLeaderParty(race);
+  const leaderChange = probabilityChangeForParty(race, leader);
+  const weekChange = probabilityChangeForParty(race, leader, "sinceWeek");
+  const isUp = Number.isFinite(leaderChange) && leaderChange > .05;
+  const isDown = Number.isFinite(leaderChange) && leaderChange < -.05;
+  const summaryClass = isUp ? "is-up" : isDown ? "is-down" : "is-flat";
+  const drivers = (race.movementDrivers || []).filter(Boolean);
+  const driverCards = drivers.length
+    ? drivers.map((driver) => {
+        const party = Number.isFinite(driver.change) ? (driver.change > 0 ? "D" : "R") : "";
+        const className = party === "D" ? "toward-dem" : party === "R" ? "toward-rep" : "toward-neutral";
+        const impact = Number.isFinite(driver.change) ? movementImpactLabel(driver.change) : "changed";
+        return `
+          <li class="${className}">
+            <span class="movement-driver-label">${escapeHtml(driver.label || "Input")}</span>
+            <strong>${escapeHtml(movementDriverCopy(driver))}</strong>
+            <em>${escapeHtml(impact)} input move</em>
+          </li>
+        `;
+      }).join("")
+    : `<li class="toward-neutral"><span class="movement-driver-label">No prior run</span><strong>No previous generated race file to compare.</strong><em>first saved point</em></li>`;
+  const leaderCopy = Number.isFinite(leaderChange) && Math.abs(leaderChange) >= .05
+    ? `${raceLeaderName(race)} ${formatProbabilityShift(leaderChange)} since the last run.`
+    : "No meaningful probability change since the last run.";
+  const weekCopy = Number.isFinite(weekChange) && Math.abs(weekChange) >= .05
+    ? `${formatProbabilityShift(weekChange)} this week`
+    : "flat this week";
+  return `
+    <section class="movement-panel ${summaryClass}" aria-label="Race movement">
+      <div class="movement-summary">
+        <span class="movement-arrow" aria-hidden="true">${isUp ? "▲" : isDown ? "▼" : "■"}</span>
+        <div>
+          <span class="panel-label">Since last run</span>
+          <strong>${escapeHtml(leaderCopy)}</strong>
+          <small>${escapeHtml(raceLeaderName(race))} is ${escapeHtml(weekCopy)}.</small>
+        </div>
+      </div>
+      <ol class="movement-driver-list">${driverCards}</ol>
+      <p class="movement-note">These are input changes, not a claim that one single factor caused the whole probability move.</p>
+    </section>
+  `;
 }
 
 function compactMovementText(race) {
@@ -1165,9 +1265,6 @@ function renderRaceInputCards(race) {
     `<li>${escapeHtml(race.primarySummary || "")}</li>`,
     ...(race.extraCandidates || []).map((candidate) => `<li>${escapeHtml(candidate.name)}: ${escapeHtml(candidate.note || candidate.party || "tracked option")}</li>`)
   ].join("");
-  const driverRows = (race.movementDrivers || []).length
-    ? race.movementDrivers.map((driver) => `<li><strong>${escapeHtml(driver.label)} ${signedDriverChange(driver.change)}</strong> ${escapeHtml(driver.detail || "")}</li>`).join("")
-    : `<li>No previous generated run to compare.</li>`;
   const badgeRows = (race.uncertaintyBadges || []).map((badge) => `<li>${escapeHtml(badge)}</li>`).join("");
   const demographic = race.demographicPull;
   const demographicProfileLabel = (profile) => {
@@ -1183,7 +1280,7 @@ function renderRaceInputCards(race) {
     ...((demographic.topGroups || []).map((item) => `<li>${escapeHtml(item.label || item.group)}: ${signedPointMargin(item.effect || 0)}</li>`))
   ].join("") : `<li>No separate demographic-pull adjustment in this saved run.</li>`;
   container.innerHTML = `
-    <details open><summary>Why it moved</summary><ul>${driverRows}</ul></details>
+    ${renderMovementPanel(race)}
     <details open><summary>Polling</summary><ul>${pollRows}</ul></details>
     <details><summary>Fundamentals</summary><ul>${fundamentalRows}</ul></details>
     <details><summary>Demographic pull</summary><ul>${demographicRows}</ul></details>

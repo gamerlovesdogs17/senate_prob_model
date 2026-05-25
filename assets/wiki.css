@@ -1567,6 +1567,117 @@ button.race-board-row {
   color: var(--muted);
 }
 
+.movement-panel {
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--toss);
+  border-radius: 3px;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--paper) 82%, white), color-mix(in srgb, var(--paper-2) 76%, transparent));
+  overflow: hidden;
+}
+
+.movement-panel.is-up {
+  border-top-color: #238636;
+}
+
+.movement-panel.is-down {
+  border-top-color: #c93b32;
+}
+
+.movement-summary {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.movement-arrow {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: var(--toss);
+  color: #fff;
+  font: 950 1rem/1 "Segoe UI", Arial, sans-serif;
+}
+
+.movement-panel.is-up .movement-arrow {
+  background: #238636;
+}
+
+.movement-panel.is-down .movement-arrow {
+  background: #c93b32;
+}
+
+.movement-summary strong {
+  display: block;
+  margin-top: 3px;
+  color: var(--ink);
+  font: 950 1.15rem/1.08 "Segoe UI", Arial, sans-serif;
+}
+
+.movement-summary small,
+.movement-note {
+  color: var(--muted);
+  font: 800 .78rem/1.25 "Segoe UI", Arial, sans-serif;
+}
+
+.movement-driver-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 12px;
+  list-style: none;
+}
+
+.movement-driver-list li {
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--toss);
+  border-radius: 3px;
+  padding: 10px;
+  background: color-mix(in srgb, var(--paper-2) 78%, transparent);
+}
+
+.movement-driver-list li.toward-dem {
+  border-left-color: var(--dem);
+}
+
+.movement-driver-list li.toward-rep {
+  border-left-color: var(--rep);
+}
+
+.movement-driver-label {
+  display: block;
+  color: var(--muted);
+  font: 950 .66rem/1 "Segoe UI", Arial, sans-serif;
+  text-transform: uppercase;
+}
+
+.movement-driver-list strong {
+  display: block;
+  margin-top: 5px;
+  color: var(--ink);
+  font: 900 .92rem/1.18 "Segoe UI", Arial, sans-serif;
+}
+
+.movement-driver-list em {
+  display: inline-block;
+  margin-top: 7px;
+  color: var(--muted);
+  font: 850 .68rem/1 "Segoe UI", Arial, sans-serif;
+  text-transform: uppercase;
+  font-style: normal;
+}
+
+.movement-note {
+  margin: 0;
+  padding: 0 14px 14px;
+}
+
 .calibration-table table {
   width: 100%;
   border-collapse: collapse;
@@ -2161,6 +2272,19 @@ button.race-board-row {
 }
 
 @media (max-width: 760px) {
+  .movement-driver-list {
+    grid-template-columns: 1fr;
+  }
+
+  .movement-summary {
+    grid-template-columns: 34px minmax(0, 1fr);
+    padding: 12px;
+  }
+
+  .movement-summary strong {
+    font-size: 1rem;
+  }
+
   .history-zoom-controls.mobile-only {
     display: inline-flex;
   }
