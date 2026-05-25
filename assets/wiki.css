@@ -2137,6 +2137,10 @@ button.race-board-row {
   background: var(--paper);
 }
 
+.history-zoom-controls.mobile-only {
+  display: none;
+}
+
 .history-zoom-controls button {
   border: 0;
   border-right: 1px solid var(--line);
@@ -2154,6 +2158,12 @@ button.race-board-row {
 .history-zoom-controls button.active {
   background: var(--ink);
   color: var(--paper);
+}
+
+@media (max-width: 760px) {
+  .history-zoom-controls.mobile-only {
+    display: inline-flex;
+  }
 }
 
 .history-date {

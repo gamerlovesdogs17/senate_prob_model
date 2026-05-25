@@ -786,6 +786,7 @@ function renderControlHistory() {
     pointHtml: (point) => `${point.date}<br>D ${pct(point.dem)} / R ${pct(point.rep ?? 1 - point.dem)}`,
     value: (point) => point.dem,
     electionDate: forecast.settings?.electionDate || "2026-11-03",
+    mobileZoomControls: true,
     singleNote: "Control history starts with the first generated forecast and grows each daily run."
   });
 }
@@ -864,8 +865,10 @@ function renderLineChart(chart, points, options) {
   const firstChartDate = hasUsableDates ? chartDates[0] : null;
   const latestChartDate = hasUsableDates ? chartDates.at(-1) : null;
   const electionDate = parseChartDate(options.electionDate);
-  const zoomMode = options.zoomControls && chart.dataset.historyZoom ? chart.dataset.historyZoom : "recent";
-  const useFullRunway = !options.zoomControls || zoomMode === "full";
+  const mobileZoomActive = Boolean(options.mobileZoomControls && typeof window !== "undefined" && window.matchMedia?.("(max-width: 760px)").matches);
+  const hasZoomControls = Boolean(options.zoomControls || mobileZoomActive);
+  const zoomMode = hasZoomControls && chart.dataset.historyZoom ? chart.dataset.historyZoom : "recent";
+  const useFullRunway = !hasZoomControls || zoomMode === "full";
   const recentPadDate = (() => {
     if (!hasUsableDates || !latestChartDate) return latestChartDate;
     const observedSpan = Math.max(86400000, latestChartDate - firstChartDate);
@@ -958,8 +961,8 @@ function renderLineChart(chart, points, options) {
     <rect class="history-runway" x="${currentX}" y="${plot.top}" width="${electionX - currentX}" height="${plotHeight}"></rect>
   ` : "";
   const dotRadius = options.dotRadius ?? (coords.length === 1 ? 3.2 : 1.8);
-  const zoomControls = options.zoomControls && hasUsableDates && electionDate && electionDate > latestChartDate ? `
-    <div class="history-zoom-controls" aria-label="Chart time range">
+  const zoomControls = hasZoomControls && hasUsableDates && electionDate && electionDate > latestChartDate ? `
+    <div class="history-zoom-controls ${mobileZoomActive && !options.zoomControls ? "mobile-only" : ""}" aria-label="Chart time range">
       <button type="button" class="${zoomMode !== "full" ? "active" : ""}" data-history-zoom="recent">Recent</button>
       <button type="button" class="${zoomMode === "full" ? "active" : ""}" data-history-zoom="full">Full timeline</button>
     </div>
@@ -1109,6 +1112,7 @@ function renderHistory(race) {
     hoverLabel: demIsIndependent ? (party, value) => `${party === "dem" ? demHistoryLabel : "Republican"} ${oneDecimal(value)}` : null,
     annotations: race.state === "MT" ? [...CHART_ANNOTATIONS, ...MONTANA_CHART_ANNOTATIONS] : CHART_ANNOTATIONS,
     electionDate: forecast.settings?.electionDate || "2026-11-03",
+    mobileZoomControls: true,
     value: (point) => point.dem,
     singleNote: "State history starts with the first generated forecast and grows each daily run."
   });
@@ -1543,7 +1547,8 @@ function renderHouseControlHistory() {
     label: "House control probability history",
     pointHtml: (point) => `${point.date}<br>D ${pct(point.dem)} / R ${pct(point.rep ?? 1 - point.dem)}`,
     value: (point) => point.dem,
-    electionDate: "2026-11-03"
+    electionDate: "2026-11-03",
+    mobileZoomControls: true
   });
 }
 
@@ -1623,7 +1628,8 @@ function renderHouseDistrictHistoryInto(target, district) {
     label: `${district.id} probability history`,
     pointHtml: (point) => `${point.date}<br>D ${pct(point.dem)} / R ${pct(point.rep ?? 1 - point.dem)}`,
     value: (point) => point.dem,
-    electionDate: "2026-11-03"
+    electionDate: "2026-11-03",
+    mobileZoomControls: true
   });
 }
 
@@ -2211,7 +2217,8 @@ function renderEmbed(target, embed) {
       label: embed.title || "National chamber control probability",
       pointHtml: (point) => `${point.date}<br>D ${pct(point.dem)} / R ${pct(point.rep ?? 1 - point.dem)}`,
       value: (point) => point.dem,
-      electionDate: forecast?.settings?.electionDate || "2026-11-03"
+      electionDate: forecast?.settings?.electionDate || "2026-11-03",
+      mobileZoomControls: true
     });
     return;
   }
@@ -2244,7 +2251,8 @@ function renderEmbed(target, embed) {
       hoverLabel: demIsIndependent ? (party, value) => `${party === "dem" ? demHistoryLabel : "Republican"} ${oneDecimal(value)}` : null,
       annotations: race.state === "MT" ? [...CHART_ANNOTATIONS, ...MONTANA_CHART_ANNOTATIONS] : CHART_ANNOTATIONS,
       value: (point) => point.dem,
-      electionDate: forecast?.settings?.electionDate || "2026-11-03"
+      electionDate: forecast?.settings?.electionDate || "2026-11-03",
+      mobileZoomControls: true
     });
     return;
   }
@@ -2271,7 +2279,8 @@ function renderEmbed(target, embed) {
       label: embed.title || "House control probability",
       pointHtml: (point) => `${point.date}<br>D ${pct(point.dem)} / R ${pct(point.rep ?? 1 - point.dem)}`,
       value: (point) => point.dem,
-      electionDate: "2026-11-03"
+      electionDate: "2026-11-03",
+      mobileZoomControls: true
     });
     return;
   }

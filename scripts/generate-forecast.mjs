@@ -1770,12 +1770,18 @@ async function fetchAllSources() {
     fetchCivicApi(status),
     fetchPollingReferencePages(status)
   ]);
+  const usableGenericSource = (source) => {
+    if (!Number.isFinite(source.margin)) return false;
+    if (source.polls > 0) return true;
+    const hasVoteShares = Number.isFinite(source.dem) && Number.isFinite(source.rep) && source.dem > 20 && source.rep > 20;
+    return hasVoteShares;
+  };
   const genericPollingSources = [
     { source: "VoteHub", margin: votehub.genericBallotMargin, dem: votehub.genericBallotDem, rep: votehub.genericBallotRep, polls: votehub.usableGenericBallotPolls, weight: 1 },
     { source: "DDHQ", margin: ddhqGeneric.genericBallotMargin, dem: ddhqGeneric.genericBallotDem, rep: ddhqGeneric.genericBallotRep, polls: ddhqGeneric.polls, weight: .75 },
     { source: "Pollfinity", margin: pollfinity.genericBallotMargin, dem: pollfinity.genericBallotDem, rep: pollfinity.genericBallotRep, polls: pollfinity.genericBallotPolls, weight: .55 },
     { source: "USPollingData", margin: usPollingDataGeneric.genericBallotMargin, dem: usPollingDataGeneric.genericBallotDem, rep: usPollingDataGeneric.genericBallotRep, polls: 0, weight: .45 }
-  ].filter((source) => Number.isFinite(source.margin));
+  ].filter(usableGenericSource);
   const genericWeight = genericPollingSources.reduce((sum, source) => sum + source.weight, 0);
   const genericPolling = {
     sources: genericPollingSources,
