@@ -172,13 +172,19 @@ function movementPartyLabel(party) {
   return "the race";
 }
 
+function racePartyCandidateLabel(race, party) {
+  if (party === "D") return candidateChanceLabel(race, "D");
+  if (party === "R") return candidateDisplayName(race, "R");
+  return "the race";
+}
+
 function raceLeaderParty(race) {
   return (race?.demProbability ?? 0) >= .5 ? "D" : "R";
 }
 
 function raceLeaderName(race) {
   const party = raceLeaderParty(race);
-  return party === "D" ? candidateChanceLabel(race, "D") : "Republican";
+  return racePartyCandidateLabel(race, party);
 }
 
 function probabilityChangeForParty(race, party, period = "sinceLastRun") {
@@ -200,12 +206,12 @@ function movementImpactLabel(value) {
   return "tiny";
 }
 
-function movementDriverCopy(driver) {
+function movementDriverCopy(race, driver) {
   const label = driver?.label || "Model input";
   const change = driver?.change;
   const hasChange = Number.isFinite(change);
   const party = !hasChange ? null : change > 0 ? "D" : "R";
-  const toward = party ? movementPartyLabel(party) : "";
+  const toward = party ? racePartyCandidateLabel(race, party) : "";
   const magnitude = hasChange ? `${Math.abs(change).toFixed(1)} pts` : "";
   const ratingDetail = driver?.detail && / to /.test(driver.detail) ? driver.detail : "";
   const templates = {
@@ -213,13 +219,21 @@ function movementDriverCopy(driver) {
     "Projected margin": `The combined forecast margin moved ${magnitude} toward ${toward}.`,
     "Primary risk": `Nomination uncertainty moved ${magnitude} toward ${toward}.`,
     Finance: `Candidate finance moved ${magnitude} toward ${toward}.`,
-    "Generic ballot": `The national polling environment moved ${magnitude} toward ${toward}.`,
-    "National finance": `The national finance environment moved ${magnitude} toward ${toward}.`,
+    "Generic ballot": `The national polling environment moved ${magnitude} toward ${toward}'s side.`,
+    "National finance": `The national finance environment moved ${magnitude} toward ${toward}'s side.`,
     "Demographic pull": `Coalition and demographic adjustments moved ${magnitude} toward ${toward}.`,
     Rating: ratingDetail ? `Public rating input changed from ${ratingDetail}.` : "Public rating input changed."
   };
   if (!hasChange) return templates[label] || (driver?.detail || "Input changed.");
   return templates[label] || `${label} moved ${magnitude} toward ${toward}.`;
+}
+
+function movementDriverScope(race) {
+  const labels = new Set((race?.movementDrivers || []).map((driver) => driver.label));
+  const hasStateDriver = ["Polling", "Primary risk", "Finance", "Demographic pull", "Rating"].some((label) => labels.has(label));
+  if (hasStateDriver) return "This run includes race-specific movement.";
+  if (labels.has("Generic ballot") || labels.has("Projected margin")) return "Mostly a national-environment move in this run.";
+  return "No meaningful saved movement source in this run.";
 }
 
 function renderMovementPanel(race) {
@@ -239,7 +253,7 @@ function renderMovementPanel(race) {
         return `
           <li class="${className}">
             <span class="movement-driver-label">${escapeHtml(driver.label || "Input")}</span>
-            <strong>${escapeHtml(movementDriverCopy(driver))}</strong>
+            <strong>${escapeHtml(movementDriverCopy(race, driver))}</strong>
             <em>${escapeHtml(impact)} input move</em>
           </li>
         `;
@@ -254,11 +268,11 @@ function renderMovementPanel(race) {
   return `
     <section class="movement-panel ${summaryClass}" aria-label="Race movement">
       <div class="movement-summary">
-        <span class="movement-arrow" aria-hidden="true">${isUp ? "▲" : isDown ? "▼" : "■"}</span>
+        <span class="movement-arrow" aria-hidden="true">${isUp ? "&uarr;" : isDown ? "&darr;" : "&ndash;"}</span>
         <div>
           <span class="panel-label">Since last run</span>
           <strong>${escapeHtml(leaderCopy)}</strong>
-          <small>${escapeHtml(raceLeaderName(race))} is ${escapeHtml(weekCopy)}.</small>
+          <small>${escapeHtml(raceLeaderName(race))} is ${escapeHtml(weekCopy)}. ${escapeHtml(movementDriverScope(race))}</small>
         </div>
       </div>
       <ol class="movement-driver-list">${driverCards}</ol>
@@ -277,6 +291,37 @@ function inputQualityText(race) {
   const quality = race?.inputQuality;
   if (!quality) return "Not scored";
   return `${quality.label} (${quality.score}/100)`;
+}
+
+function pollWeightLabel(race) {
+  const weight = race?.pollSignal?.blendWeight;
+  if (!Number.isFinite(weight) || weight <= 0) return "No current race-poll signal";
+  if (weight >= .45) return "Heavy race-poll signal";
+  if (weight >= .2) return "Moderate race-poll signal";
+  return "Light race-poll signal";
+}
+
+function candidateTiltText(race, value) {
+  if (!Number.isFinite(value) || Math.abs(value) < .05) return "No clear tilt";
+  const party = value > 0 ? "D" : "R";
+  return `${racePartyCandidateLabel(race, party)} by ${Math.abs(value).toFixed(1)} pts`;
+}
+
+function signedInputText(race, value) {
+  if (!Number.isFinite(value) || Math.abs(value) < .05) return "Even";
+  return candidateTiltText(race, value);
+}
+
+function financeInputText(race) {
+  const signal = race?.sourceInputs?.openFec?.financeSignal;
+  if (!Number.isFinite(signal) || Math.abs(signal) < .05) return "No clear finance edge";
+  return candidateTiltText(race, signal);
+}
+
+function primaryInputText(race) {
+  if (race?.primary === "resolved") return "Nominees set";
+  if (race?.primary === "runoff") return "Runoff pending";
+  return "Primary unresolved";
 }
 
 function houseInputConfidence(district) {
@@ -1239,11 +1284,55 @@ function renderRaceInputCards(race) {
   const container = document.getElementById("race-input-cards");
   if (!container) return;
   const finance = race.sourceInputs?.openFec;
+  const pollCount = race.pollSignal?.pollCount || 0;
+  const pollsterCount = race.pollSignal?.pollsters || 0;
+  const sourceCount = [
+    race.sourceInputs?.twoSeventyToWin,
+    race.sourceInputs?.realClearPolling
+  ].filter(Boolean).length;
+  const inputSnapshot = [
+    {
+      label: "Polling",
+      value: pollWeightLabel(race),
+      detail: pollCount ? `${pollCount} usable polls from ${pollsterCount} pollster${pollsterCount === 1 ? "" : "s"}` : "No recent usable public race polls"
+    },
+    {
+      label: "Forecast margin",
+      value: signedInputText(race, race.margin),
+      detail: "Projected vote margin, not probability margin"
+    },
+    {
+      label: "Rating",
+      value: race.rating,
+      detail: `${primaryInputText(race)}`
+    },
+    {
+      label: "Money",
+      value: financeInputText(race),
+      detail: finance ? "Matched campaign-finance signal" : "No matched campaign-finance row"
+    },
+    {
+      label: "Candidate field",
+      value: `${candidateDisplayName(race, "D")} / ${candidateDisplayName(race, "R")}`,
+      detail: race.primarySummary || "Candidate status tracked"
+    },
+    {
+      label: "Input confidence",
+      value: inputQualityText(race),
+      detail: (race.uncertaintyBadges || []).slice(0, 2).join(" / ") || "No major data warning"
+    }
+  ];
+  const snapshotCards = inputSnapshot.map((item) => `
+    <article class="input-snapshot-card">
+      <span>${escapeHtml(item.label)}</span>
+      <strong>${escapeHtml(item.value)}</strong>
+      <small>${escapeHtml(item.detail)}</small>
+    </article>
+  `).join("");
   const pollRows = [
     `<li>${pollingInputText(race)}</li>`,
-    race.pollSignal ? `<li>${race.pollSignal.pollCount} polls, ${race.pollSignal.pollsters} pollsters, ${(race.pollSignal.blendWeight * 100).toFixed(0)}% blend weight</li>` : `<li>Poll weight is zero until usable public race polls are found.</li>`,
-    race.sourceInputs?.twoSeventyToWin ? `<li>270toWin rows blended: ${race.sourceInputs.twoSeventyToWin.polls}</li>` : "",
-    race.sourceInputs?.realClearPolling ? `<li>RealClearPolling rows blended: ${race.sourceInputs.realClearPolling.polls}</li>` : ""
+    race.pollSignal ? `<li>${pollWeightLabel(race)} from ${race.pollSignal.pollCount} usable poll rows.</li>` : `<li>No usable race-poll signal in this run.</li>`,
+    sourceCount ? `<li>${sourceCount} public polling source${sourceCount === 1 ? "" : "s"} contributed race-level rows.</li>` : ""
   ].filter(Boolean).join("");
   const fundamentalRows = [
     `<li>Rating input: ${escapeHtml(race.rating)}</li>`,
@@ -1281,12 +1370,13 @@ function renderRaceInputCards(race) {
   ].join("") : `<li>No separate demographic-pull adjustment in this saved run.</li>`;
   container.innerHTML = `
     ${renderMovementPanel(race)}
-    <details open><summary>Polling</summary><ul>${pollRows}</ul></details>
+    <div class="input-snapshot-grid">${snapshotCards}</div>
+    <details><summary>Polling notes</summary><ul>${pollRows}</ul></details>
     <details><summary>Fundamentals</summary><ul>${fundamentalRows}</ul></details>
     <details><summary>Demographic pull</summary><ul>${demographicRows}</ul></details>
     <details><summary>Finance</summary><ul>${financeRows}</ul></details>
     <details><summary>Candidates</summary><ul>${candidateRows}</ul></details>
-    <details><summary>Input quality</summary><ul><li>${inputQualityText(race)}</li>${badgeRows}${(race.inputQuality?.reasons || []).map((reason) => `<li>${escapeHtml(reason)}</li>`).join("")}</ul></details>
+    <details><summary>Input warnings</summary><ul><li>${inputQualityText(race)}</li>${badgeRows}${(race.inputQuality?.reasons || []).map((reason) => `<li>${escapeHtml(reason)}</li>`).join("")}</ul></details>
   `;
 }
 

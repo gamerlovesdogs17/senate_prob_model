@@ -1678,6 +1678,41 @@ button.race-board-row {
   padding: 0 14px 14px;
 }
 
+.input-snapshot-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.input-snapshot-card {
+  min-height: 104px;
+  padding: 11px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--paper-2) 72%, transparent);
+}
+
+.input-snapshot-card span {
+  display: block;
+  color: var(--muted);
+  font: 950 .66rem/1 "Segoe UI", Arial, sans-serif;
+  text-transform: uppercase;
+}
+
+.input-snapshot-card strong {
+  display: block;
+  margin-top: 8px;
+  color: var(--ink);
+  font: 950 1rem/1.08 "Segoe UI", Arial, sans-serif;
+}
+
+.input-snapshot-card small {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  font: 800 .76rem/1.22 "Segoe UI", Arial, sans-serif;
+}
+
 .calibration-table table {
   width: 100%;
   border-collapse: collapse;
@@ -2272,6 +2307,10 @@ button.race-board-row {
 }
 
 @media (max-width: 760px) {
+  .input-snapshot-grid {
+    grid-template-columns: 1fr;
+  }
+
   .movement-driver-list {
     grid-template-columns: 1fr;
   }
