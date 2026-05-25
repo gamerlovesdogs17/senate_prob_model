@@ -106,6 +106,13 @@ function candidateChanceLabel(race, party) {
 }
 
 function candidateForecastName(race, party) {
+  const name = party === "D" ? race.dem : race.rep;
+  const status = party === "D" ? race.demStatus : race.repStatus;
+  const fallback = party === "D" ? "Democratic field" : "Republican field";
+  if (status === "unresolved") {
+    if (name && !["Democrat", "Republican"].includes(name)) return name;
+    return fallback;
+  }
   return candidateDisplayName(race, party);
 }
 
@@ -249,7 +256,8 @@ function movementDriverScope(race) {
   const hasStateDriver = ["Polling", "Primary risk", "Finance", "Demographic pull", "Rating"].some((label) => labels.has(label));
   if (hasStateDriver) return "This run includes race-specific movement.";
   if (labels.has("Generic ballot") || labels.has("Projected margin")) return "Mostly a national-environment move in this run.";
-  return "No meaningful saved movement source in this run.";
+  if ((race?.history || []).length > 1) return "Small probability move; no major input driver was saved.";
+  return "No previous saved run to compare.";
 }
 
 function renderMovementPanel(race) {
@@ -260,6 +268,10 @@ function renderMovementPanel(race) {
   const weekChange = weekParty ? probabilityChangeForParty(race, weekParty, "sinceWeek") : null;
   const summaryClass = movementSideClass(race, gainingParty);
   const drivers = (race.movementDrivers || []).filter(Boolean);
+  const hasPriorRun = (race.history || []).length > 1;
+  const fallbackDriver = hasPriorRun
+    ? `<li class="toward-neutral"><span class="movement-driver-label">Small move</span><strong>No major input driver crossed the saved threshold for this run.</strong><em>minor model drift</em></li>`
+    : `<li class="toward-neutral"><span class="movement-driver-label">No prior run</span><strong>No previous generated race file to compare.</strong><em>first saved point</em></li>`;
   const driverCards = drivers.length
     ? drivers.map((driver) => {
         const party = Number.isFinite(driver.change) ? (driver.change > 0 ? "D" : "R") : "";
@@ -273,7 +285,7 @@ function renderMovementPanel(race) {
           </li>
         `;
       }).join("")
-    : `<li class="toward-neutral"><span class="movement-driver-label">No prior run</span><strong>No previous generated race file to compare.</strong><em>first saved point</em></li>`;
+    : fallbackDriver;
   const movedName = gainingParty ? racePartyCandidateLabel(race, gainingParty) : raceLeaderName(race);
   const leaderCopy = gainingParty
     ? `${movedName} up ${gainingChange.toFixed(1)} pts since the last run.`
