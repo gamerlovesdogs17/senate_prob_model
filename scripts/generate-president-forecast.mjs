@@ -904,6 +904,112 @@ const DEMOGRAPHIC_GROUP_LABELS = {
   senior: "65+"
 };
 
+const PRESIDENTIAL_RACE_EDUCATION_BASELINES = {
+  AL: { white_college: .25, white_noncollege: .41, black: .27, latino: .04, asian_other: .03 },
+  AK: { white_college: .31, white_noncollege: .39, black: .03, latino: .05, asian_other: .22 },
+  AZ: { white_college: .34, white_noncollege: .37, black: .04, latino: .18, asian_other: .07 },
+  AR: { white_college: .25, white_noncollege: .53, black: .14, latino: .05, asian_other: .03 },
+  CA: { white_college: .34, white_noncollege: .22, black: .07, latino: .24, asian_other: .13 },
+  CO: { white_college: .49, white_noncollege: .28, black: .03, latino: .14, asian_other: .06 },
+  CT: { white_college: .48, white_noncollege: .33, black: .09, latino: .06, asian_other: .04 },
+  DE: { white_college: .40, white_noncollege: .34, black: .18, latino: .05, asian_other: .03 },
+  FL: { white_college: .32, white_noncollege: .34, black: .12, latino: .17, asian_other: .05 },
+  GA: { white_college: .33, white_noncollege: .29, black: .30, latino: .04, asian_other: .04 },
+  HI: { white_college: .22, white_noncollege: .18, black: .02, latino: .06, asian_other: .52 },
+  ID: { white_college: .33, white_noncollege: .53, black: .01, latino: .09, asian_other: .04 },
+  IL: { white_college: .42, white_noncollege: .34, black: .13, latino: .07, asian_other: .04 },
+  IN: { white_college: .31, white_noncollege: .54, black: .09, latino: .04, asian_other: .02 },
+  IA: { white_college: .33, white_noncollege: .57, black: .03, latino: .04, asian_other: .03 },
+  KS: { white_college: .35, white_noncollege: .48, black: .06, latino: .07, asian_other: .04 },
+  KY: { white_college: .28, white_noncollege: .58, black: .08, latino: .04, asian_other: .02 },
+  LA: { white_college: .24, white_noncollege: .39, black: .30, latino: .04, asian_other: .03 },
+  ME: { white_college: .43, white_noncollege: .50, black: .01, latino: .02, asian_other: .04 },
+  MD: { white_college: .43, white_noncollege: .25, black: .24, latino: .05, asian_other: .03 },
+  MA: { white_college: .56, white_noncollege: .27, black: .07, latino: .06, asian_other: .04 },
+  MI: { white_college: .37, white_noncollege: .47, black: .10, latino: .03, asian_other: .03 },
+  MN: { white_college: .44, white_noncollege: .41, black: .06, latino: .04, asian_other: .05 },
+  MS: { white_college: .21, white_noncollege: .39, black: .36, latino: .02, asian_other: .02 },
+  MO: { white_college: .33, white_noncollege: .52, black: .10, latino: .03, asian_other: .02 },
+  MT: { white_college: .37, white_noncollege: .52, black: .01, latino: .03, asian_other: .07 },
+  NE: { white_college: .34, white_noncollege: .53, black: .04, latino: .06, asian_other: .03 },
+  NV: { white_college: .35, white_noncollege: .31, black: .08, latino: .18, asian_other: .08 },
+  NH: { white_college: .48, white_noncollege: .46, black: .01, latino: .02, asian_other: .03 },
+  NJ: { white_college: .42, white_noncollege: .29, black: .12, latino: .11, asian_other: .06 },
+  NM: { white_college: .30, white_noncollege: .28, black: .02, latino: .35, asian_other: .05 },
+  NY: { white_college: .43, white_noncollege: .29, black: .13, latino: .10, asian_other: .05 },
+  NC: { white_college: .36, white_noncollege: .40, black: .19, latino: .03, asian_other: .02 },
+  ND: { white_college: .33, white_noncollege: .56, black: .02, latino: .03, asian_other: .06 },
+  OH: { white_college: .34, white_noncollege: .52, black: .09, latino: .03, asian_other: .02 },
+  OK: { white_college: .26, white_noncollege: .49, black: .07, latino: .06, asian_other: .12 },
+  OR: { white_college: .45, white_noncollege: .38, black: .02, latino: .08, asian_other: .07 },
+  PA: { white_college: .39, white_noncollege: .46, black: .10, latino: .03, asian_other: .02 },
+  RI: { white_college: .44, white_noncollege: .34, black: .06, latino: .12, asian_other: .04 },
+  SC: { white_college: .30, white_noncollege: .41, black: .25, latino: .02, asian_other: .02 },
+  SD: { white_college: .32, white_noncollege: .54, black: .02, latino: .03, asian_other: .09 },
+  TN: { white_college: .30, white_noncollege: .52, black: .13, latino: .03, asian_other: .02 },
+  TX: { white_college: .30, white_noncollege: .35, black: .12, latino: .19, asian_other: .04 },
+  UT: { white_college: .39, white_noncollege: .46, black: .01, latino: .10, asian_other: .04 },
+  VT: { white_college: .51, white_noncollege: .44, black: .01, latino: .01, asian_other: .03 },
+  VA: { white_college: .45, white_noncollege: .31, black: .16, latino: .05, asian_other: .03 },
+  WA: { white_college: .45, white_noncollege: .34, black: .04, latino: .08, asian_other: .09 },
+  WV: { white_college: .24, white_noncollege: .71, black: .03, latino: .01, asian_other: .01 },
+  WI: { white_college: .37, white_noncollege: .50, black: .06, latino: .04, asian_other: .03 },
+  WY: { white_college: .31, white_noncollege: .60, black: .01, latino: .05, asian_other: .03 }
+};
+
+const PRESIDENTIAL_AGE_BASELINES = {
+  AL: { youth: .15, midage: .57, senior: .28 },
+  AK: { youth: .18, midage: .63, senior: .19 },
+  AZ: { youth: .17, midage: .58, senior: .25 },
+  AR: { youth: .15, midage: .56, senior: .29 },
+  CA: { youth: .18, midage: .60, senior: .22 },
+  CO: { youth: .18, midage: .60, senior: .22 },
+  CT: { youth: .15, midage: .56, senior: .29 },
+  DE: { youth: .15, midage: .55, senior: .30 },
+  FL: { youth: .14, midage: .55, senior: .31 },
+  GA: { youth: .17, midage: .59, senior: .24 },
+  HI: { youth: .16, midage: .57, senior: .27 },
+  ID: { youth: .17, midage: .57, senior: .26 },
+  IL: { youth: .17, midage: .58, senior: .25 },
+  IN: { youth: .16, midage: .57, senior: .27 },
+  IA: { youth: .16, midage: .56, senior: .28 },
+  KS: { youth: .17, midage: .57, senior: .26 },
+  KY: { youth: .15, midage: .56, senior: .29 },
+  LA: { youth: .16, midage: .58, senior: .26 },
+  ME: { youth: .13, midage: .52, senior: .35 },
+  MD: { youth: .16, midage: .58, senior: .26 },
+  MA: { youth: .17, midage: .57, senior: .26 },
+  MI: { youth: .16, midage: .56, senior: .28 },
+  MN: { youth: .17, midage: .57, senior: .26 },
+  MS: { youth: .16, midage: .57, senior: .27 },
+  MO: { youth: .16, midage: .57, senior: .27 },
+  MT: { youth: .15, midage: .55, senior: .30 },
+  NE: { youth: .17, midage: .56, senior: .27 },
+  NV: { youth: .17, midage: .59, senior: .24 },
+  NH: { youth: .14, midage: .55, senior: .31 },
+  NJ: { youth: .16, midage: .57, senior: .27 },
+  NM: { youth: .16, midage: .56, senior: .28 },
+  NY: { youth: .17, midage: .58, senior: .25 },
+  NC: { youth: .17, midage: .58, senior: .25 },
+  ND: { youth: .16, midage: .57, senior: .27 },
+  OH: { youth: .16, midage: .56, senior: .28 },
+  OK: { youth: .16, midage: .57, senior: .27 },
+  OR: { youth: .16, midage: .57, senior: .27 },
+  PA: { youth: .15, midage: .56, senior: .29 },
+  RI: { youth: .15, midage: .56, senior: .29 },
+  SC: { youth: .15, midage: .56, senior: .29 },
+  SD: { youth: .16, midage: .55, senior: .29 },
+  TN: { youth: .15, midage: .57, senior: .28 },
+  TX: { youth: .18, midage: .60, senior: .22 },
+  UT: { youth: .19, midage: .59, senior: .22 },
+  VT: { youth: .14, midage: .54, senior: .32 },
+  VA: { youth: .17, midage: .58, senior: .25 },
+  WA: { youth: .17, midage: .59, senior: .24 },
+  WV: { youth: .13, midage: .54, senior: .33 },
+  WI: { youth: .16, midage: .56, senior: .28 },
+  WY: { youth: .15, midage: .56, senior: .29 }
+};
+
 const CANDIDATE_SWING_STATE_EFFECTS = {
   beshear: { AZ: 0.3, GA: 0.5, NC: 0.55, OH: 0.8, PA: 0.35, MI: 0.35, WI: 0.3, KY: 3.0 },
   shapiro: { PA: 2.2, MI: 0.25, WI: 0.25, AZ: 0.2, GA: 0.2, NC: 0.15 },
@@ -1081,6 +1187,12 @@ function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
 
+function normalizeShares(shares) {
+  const entries = Object.entries(shares).map(([key, value]) => [key, Math.max(0, Number(value) || 0)]);
+  const total = entries.reduce((sum, [, value]) => sum + value, 0) || 1;
+  return Object.fromEntries(entries.map(([key, value]) => [key, Number((value / total).toFixed(4))]));
+}
+
 function logistic(margin, error) {
   return 1 / (1 + Math.exp(-margin / Math.max(error, 0.1)));
 }
@@ -1128,16 +1240,53 @@ function stateDemographicWeights(state) {
   return weights;
 }
 
+function presidentialElectorateComposition(state) {
+  const raceEducation = PRESIDENTIAL_RACE_EDUCATION_BASELINES[state];
+  const age = PRESIDENTIAL_AGE_BASELINES[state];
+  const modeledWeights = stateDemographicWeights(state);
+  const modeledRaceEducation = {
+    white_college: modeledWeights.white_college,
+    white_noncollege: modeledWeights.white_noncollege,
+    black: modeledWeights.black,
+    latino: modeledWeights.latino,
+    asian_other: modeledWeights.asian_other
+  };
+  const modeledAge = {
+    youth: modeledWeights.youth,
+    midage: Math.max(0, 1 - modeledWeights.youth - modeledWeights.senior),
+    senior: modeledWeights.senior
+  };
+  return {
+    source: raceEducation ? "Manual 2028 likely-voter race/education baseline; not fixed truth" : "Modeled from state turnout traits",
+    raceEducation: raceEducation ? normalizeShares(raceEducation) : normalizeShares(modeledRaceEducation),
+    age: age ? normalizeShares(age) : normalizeShares(modeledAge),
+    notes: [
+      "Race/education blocs are mutually exclusive expected-voter shares and sum to 100%.",
+      "Age is a separate overlay, not part of the race/education total.",
+      "Candidate demographic pull uses race/education shares plus a smaller age-overlay adjustment."
+    ]
+  };
+}
+
 function candidateDemographicPull(state, demCandidate, repCandidate) {
-  const weights = stateDemographicWeights(state);
+  const composition = presidentialElectorateComposition(state);
+  const raceEducationWeights = composition.raceEducation;
+  const ageWeights = composition.age;
   const demProfile = CANDIDATE_DEMOGRAPHIC_APPEAL[demCandidate.id] || {};
   const repProfile = CANDIDATE_DEMOGRAPHIC_APPEAL[repCandidate.id] || {};
-  const groups = Object.keys(weights).map((group) => {
+  const raceEducationGroups = Object.keys(raceEducationWeights).map((group) => {
     const demAppeal = demProfile[group] || 0;
     const repAppeal = repProfile[group] || 0;
-    const effect = weights[group] * (demAppeal - repAppeal) * 1.85;
-    return { group, label: DEMOGRAPHIC_GROUP_LABELS[group] || group, weight: Number(weights[group].toFixed(2)), effect: Number(effect.toFixed(2)) };
+    const effect = raceEducationWeights[group] * (demAppeal - repAppeal) * 1.85;
+    return { group, label: DEMOGRAPHIC_GROUP_LABELS[group] || group, weight: Number(raceEducationWeights[group].toFixed(2)), effect: Number(effect.toFixed(2)) };
   });
+  const ageGroups = Object.keys(ageWeights).map((group) => {
+    const demAppeal = demProfile[group] || 0;
+    const repAppeal = repProfile[group] || 0;
+    const effect = ageWeights[group] * (demAppeal - repAppeal) * 0.85;
+    return { group, label: DEMOGRAPHIC_GROUP_LABELS[group] || group, weight: Number(ageWeights[group].toFixed(2)), effect: Number(effect.toFixed(2)), overlay: "age" };
+  });
+  const groups = [...raceEducationGroups, ...ageGroups];
   const raw = groups.reduce((sum, item) => sum + item.effect, 0);
   const saturation = Math.abs(PRESIDENTIAL_BASELINES[state].demMargin) > 24 ? .55 : Math.abs(PRESIDENTIAL_BASELINES[state].demMargin) > 14 ? .75 : 1;
   return {
@@ -1152,6 +1301,7 @@ function candidateDemographicPull(state, demCandidate, repCandidate) {
       name: repCandidate.name,
       ...(CANDIDATE_DEMOGRAPHIC_NOTES[repCandidate.id] || {})
     },
+    electorateComposition: composition,
     topGroups: groups
       .filter((item) => Math.abs(item.effect) >= .03)
       .sort((a, b) => Math.abs(b.effect) - Math.abs(a.effect))
@@ -1393,6 +1543,7 @@ function buildForecast(demCandidate, repCandidate, fundamentals, pollingData = n
       demProbability: wins / SETTINGS.simulations,
       ev: PRESIDENTIAL_BASELINES[state].ev,
       demMargin: calculateStateMargin(state, demCandidate, repCandidate, fundamentals),
+      electorateComposition: demographicPull.electorateComposition,
       demographicPull
     };
   }
@@ -1437,6 +1588,8 @@ function buildForecast(demCandidate, repCandidate, fundamentals, pollingData = n
       stateVolatilityStates: Object.keys(STATE_VOLATILITY).length,
       candidateTraitModel: true,
       candidateDemographicPullModel: true,
+      stateElectorateCompositionStates: Object.keys(PRESIDENTIAL_RACE_EDUCATION_BASELINES).length,
+      stateAgeOverlayStates: Object.keys(PRESIDENTIAL_AGE_BASELINES).length,
       candidateDemographicProfiles: Object.fromEntries([...PRESIDENTIAL_CANDIDATES.democratic, ...PRESIDENTIAL_CANDIDATES.republican].map((candidate) => [
         candidate.id,
         {
