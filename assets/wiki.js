@@ -353,9 +353,16 @@ function primaryInputText(race) {
 }
 
 function senatePrimaryMarkers(race) {
-  if (!race?.primaryDate) return [];
-  const label = race.primary === "runoff" ? "Runoff" : "Primary";
-  return [{ date: race.primaryDate, label, className: "history-primary-marker" }];
+  const events = Array.isArray(race?.primaryEvents) && race.primaryEvents.length
+    ? race.primaryEvents
+    : race?.primaryDate
+      ? [{ date: race.primaryDate, label: race.primary === "runoff" ? "Runoff" : "Primary" }]
+      : [];
+  return events.map((event) => ({
+    date: event.date,
+    label: event.conditional ? `${event.label} if needed` : event.label,
+    className: "history-primary-marker"
+  }));
 }
 
 function houseInputConfidence(district) {
@@ -1299,7 +1306,10 @@ function renderHistory(race) {
 }
 
 function renderPrimaryPanel(race) {
-  setText("race-primary", `${race.primary} / ${race.primaryDate}`);
+  const primarySchedule = (race.primaryEvents || []).length
+    ? race.primaryEvents.map((event) => `${event.label}${event.conditional ? " if needed" : ""}: ${event.date}`).join(" / ")
+    : `${race.primary} / ${race.primaryDate}`;
+  setText("race-primary", primarySchedule);
   setText("race-independent", race.independent);
   setText("race-caucus", race.caucusTarget === "D" ? "Counts as Democrat for control if elected" : "Counts as Republican for control");
   setText("race-dem-candidate", race.dem);

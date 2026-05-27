@@ -169,6 +169,44 @@ const RCV_STATES = {
   ME: { transferMean: .55, transferSd: .9, exhaustedSd: .45 }
 };
 
+const PRIMARY_EVENTS_BY_STATE = {
+  AL: [{ date: "2026-05-19", label: "Primary" }, { date: "2026-06-16", label: "Runoff" }],
+  AK: [{ date: "2026-08-18", label: "Primary" }],
+  AR: [{ date: "2026-03-03", label: "Primary" }],
+  CO: [{ date: "2026-06-30", label: "Primary" }],
+  DE: [{ date: "2026-09-15", label: "Primary" }],
+  FL: [{ date: "2026-08-18", label: "Primary" }],
+  GA: [{ date: "2026-05-19", label: "Primary" }, { date: "2026-06-16", label: "Runoff" }],
+  ID: [{ date: "2026-05-19", label: "Primary" }],
+  IL: [{ date: "2026-03-17", label: "Primary" }],
+  IA: [{ date: "2026-06-02", label: "Primary" }],
+  KS: [{ date: "2026-08-04", label: "Primary" }],
+  KY: [{ date: "2026-05-19", label: "Primary" }],
+  LA: [{ date: "2026-05-16", label: "Primary" }, { date: "2026-06-27", label: "Runoff" }],
+  ME: [{ date: "2026-06-09", label: "Primary" }],
+  MA: [{ date: "2026-09-01", label: "Primary" }],
+  MI: [{ date: "2026-08-04", label: "Primary" }],
+  MN: [{ date: "2026-08-11", label: "Primary" }],
+  MS: [{ date: "2026-03-10", label: "Primary" }],
+  MT: [{ date: "2026-06-02", label: "Primary" }],
+  NC: [{ date: "2026-03-03", label: "Primary" }],
+  NE: [{ date: "2026-05-12", label: "Primary" }],
+  NH: [{ date: "2026-09-08", label: "Primary" }],
+  NJ: [{ date: "2026-06-02", label: "Primary" }],
+  NM: [{ date: "2026-06-02", label: "Primary" }],
+  OH: [{ date: "2026-05-05", label: "Primary" }],
+  OK: [{ date: "2026-06-16", label: "Primary" }],
+  OR: [{ date: "2026-05-19", label: "Primary" }],
+  RI: [{ date: "2026-09-09", label: "Primary" }],
+  SC: [{ date: "2026-06-09", label: "Primary" }, { date: "2026-06-23", label: "Runoff", conditional: true }],
+  SD: [{ date: "2026-06-02", label: "Primary" }, { date: "2026-07-28", label: "Runoff", conditional: true }],
+  TN: [{ date: "2026-08-06", label: "Primary" }],
+  TX: [{ date: "2026-03-03", label: "Primary" }, { date: "2026-05-26", label: "Runoff" }],
+  VA: [{ date: "2026-08-04", label: "Primary" }],
+  WV: [{ date: "2026-05-12", label: "Primary" }],
+  WY: [{ date: "2026-08-18", label: "Primary" }]
+};
+
 const ARCHIVED_SENATE_BACKTESTS = [
   {
     cycle: 2024,
@@ -354,19 +392,37 @@ const CANDIDATE_STATUS = {
   AL: { dem: "Dakarai Larriett / Everett Wess runoff", rep: "Barry Moore / Jared Hudson runoff", demStatus: "unresolved", repStatus: "unresolved", primarySummary: "Both parties advanced to June 16 runoffs: Larriett versus Wess on the Democratic side and Moore versus Hudson on the Republican side." },
   AK: { dem: "Mary Peltola", rep: "Dan Sullivan", demStatus: "presumptive", repStatus: "presumptive", primarySummary: "Peltola has launched her challenge and is treated as the presumptive Democratic nominee. Sullivan is the Republican incumbent and presumptive GOP nominee." },
   AR: { dem: "Hallie Shoffner", rep: "Tom Cotton", demStatus: "nominee", repStatus: "nominee", primarySummary: "Primaries held March 3. Shoffner won the Democratic nomination; Cotton secured the Republican nomination." },
+  CO: { dem: "John Hickenlooper", rep: "Republican", demStatus: "presumptive", repStatus: "unresolved", primarySummary: "Colorado's Senate primary is scheduled for June 30. Hickenlooper is treated as the presumptive Democratic nominee." },
+  DE: { dem: "Chris Coons", rep: "Republican", demStatus: "presumptive", repStatus: "unresolved", primarySummary: "Delaware's Senate primary is scheduled for September 15. Coons is treated as the presumptive Democratic nominee." },
+  FL: { dem: "Democrat", rep: "Ashley Moody", demStatus: "unresolved", repStatus: "presumptive", primarySummary: "Florida's special Senate primary is scheduled for August 18. Moody is treated as the presumptive Republican nominee." },
   GA: { dem: "Jon Ossoff", rep: "Mike Collins / Derek Dooley runoff", demStatus: "nominee", repStatus: "unresolved", primarySummary: "Ossoff is renominated. Collins and Dooley advanced to the June 16 Republican runoff." },
   ID: { dem: "David Jordan Roth", rep: "Jim Risch", demStatus: "nominee", repStatus: "nominee", primarySummary: "Primaries held May 19. Roth won the Democratic nomination and Risch secured the Republican nomination." },
   IL: { dem: "Juliana Stratton", rep: "Don Tracy", demStatus: "nominee", repStatus: "nominee", primarySummary: "Primaries held March 17. Stratton and Tracy are the general-election nominees." },
+  IA: { dem: "Democrat", rep: "Republican", demStatus: "unresolved", repStatus: "unresolved", primarySummary: "Iowa's Senate primary is scheduled for June 2." },
+  KS: { dem: "Democrat", rep: "Roger Marshall", demStatus: "unresolved", repStatus: "presumptive", primarySummary: "Kansas' Senate primary is scheduled for August 4. Marshall is treated as the presumptive Republican nominee." },
   KY: { dem: "Charles Booker", rep: "Andy Barr", demStatus: "nominee", repStatus: "nominee", primarySummary: "Primaries held May 19. Booker won the Democratic nomination and Barr won the Republican nomination." },
   MS: { dem: "Scott Colom", rep: "Cindy Hyde-Smith", demStatus: "nominee", repStatus: "nominee", primarySummary: "Primaries held March 10. Hyde-Smith defeated a GOP challenger; Colom is the Democratic nominee." },
+  MA: { dem: "Ed Markey", rep: "Republican", demStatus: "presumptive", repStatus: "unresolved", primarySummary: "Massachusetts' Senate primary is scheduled for September 1. Markey is treated as the presumptive Democratic nominee." },
+  MI: { dem: "Democrat", rep: "Mike Rogers", demStatus: "unresolved", repStatus: "presumptive", primarySummary: "Michigan's Senate primary is scheduled for August 4. Rogers is treated as the presumptive Republican nominee while the Democratic primary remains open." },
+  MN: { dem: "Democrat", rep: "Republican", demStatus: "unresolved", repStatus: "unresolved", primarySummary: "Minnesota's Senate primary is scheduled for August 11." },
   MT: { dem: "Democrat", rep: "Republican", demStatus: "unresolved", repStatus: "unresolved", extraCandidates: [{ name: "Seth Bodnar", party: "I", caucusTarget: "D", note: "Independent, counts with Democrats for control" }], primarySummary: "The Democratic primary is unresolved. Seth Bodnar is tracked as an independent option who would count with Democrats for control, but Montana Democrats are not assumed to clear the field for him." },
   ME: { dem: "Graham Platner", rep: "Susan Collins", demStatus: "presumptive", repStatus: "presumptive", primarySummary: "Platner is treated as the presumptive Democratic nominee after Mills' exit and party consolidation. Collins is the Republican incumbent and presumptive GOP nominee." },
   NC: { dem: "Roy Cooper", rep: "Michael Whatley", demStatus: "nominee", repStatus: "nominee", primarySummary: "Primaries held March 3. Cooper and Whatley won their nominations." },
+  NH: { dem: "Democrat", rep: "Republican", demStatus: "unresolved", repStatus: "unresolved", primarySummary: "New Hampshire's Senate primary is scheduled for September 8." },
+  NJ: { dem: "Cory Booker", rep: "Republican", demStatus: "presumptive", repStatus: "unresolved", primarySummary: "New Jersey's congressional primary is scheduled for June 2. Booker is treated as the presumptive Democratic nominee." },
+  NM: { dem: "Ben Ray Lujan", rep: "Republican", demStatus: "presumptive", repStatus: "unresolved", primarySummary: "New Mexico's Senate primary is scheduled for June 2. Lujan is treated as the presumptive Democratic nominee." },
   OH: { dem: "Sherrod Brown", rep: "Jon Husted", demStatus: "nominee", repStatus: "nominee", primarySummary: "Primaries held May 5. Brown won the Democratic primary; Husted was unopposed for the GOP nomination." },
+  OK: { dem: "Democrat", rep: "Republican", demStatus: "unresolved", repStatus: "unresolved", primarySummary: "Oklahoma's special Senate primary is scheduled for June 16." },
   OR: { dem: "Jeff Merkley", rep: "David Brock Smith", demStatus: "nominee", repStatus: "nominee", primarySummary: "Primaries held May 19. Merkley secured renomination and Smith won the Republican nomination." },
+  RI: { dem: "Jack Reed", rep: "Republican", demStatus: "presumptive", repStatus: "unresolved", primarySummary: "Rhode Island's Senate primary is scheduled for September 9. Reed is treated as the presumptive Democratic nominee." },
+  SC: { dem: "Democrat", rep: "Lindsey Graham", demStatus: "unresolved", repStatus: "presumptive", primarySummary: "South Carolina's Senate primary is scheduled for June 9, with a June 23 runoff if needed. Graham is treated as the presumptive Republican nominee." },
+  SD: { dem: "Democrat", rep: "Mike Rounds", demStatus: "unresolved", repStatus: "presumptive", primarySummary: "South Dakota's Senate primary is scheduled for June 2, with a July 28 runoff if needed. Rounds is treated as the presumptive Republican nominee." },
+  TN: { dem: "Democrat", rep: "Bill Hagerty", demStatus: "unresolved", repStatus: "presumptive", primarySummary: "Tennessee's Senate primary is scheduled for August 6. Hagerty is treated as the presumptive Republican nominee." },
   TX: { dem: "James Talarico", rep: "Ken Paxton", demStatus: "nominee", repStatus: "nominee", primarySummary: "Primaries complete. Talarico is the Democratic nominee; Paxton is treated as the Republican nominee after the May 26 runoff call." },
+  VA: { dem: "Mark Warner", rep: "Republican", demStatus: "presumptive", repStatus: "unresolved", primarySummary: "Virginia's congressional primary is scheduled for August 4. Warner is treated as the presumptive Democratic nominee." },
   NE: { dem: "Dan Osborn", rep: "Pete Ricketts", demStatus: "nominee", repStatus: "nominee", demDisplayParty: "I", primarySummary: "Ricketts won the Republican primary. The Democratic primary is over and the Democratic nominee said they will withdraw so Osborn can consolidate the anti-Ricketts vote." },
   WV: { dem: "Rachel Fetty Anderson", rep: "Shelley Moore Capito", demStatus: "nominee", repStatus: "nominee", primarySummary: "Primaries held May 12. Capito and Anderson are the projected nominees." },
+  WY: { dem: "Democrat", rep: "Republican", demStatus: "unresolved", repStatus: "unresolved", primarySummary: "Wyoming's Senate primary is scheduled for August 18." },
   LA: { dem: "Jamie Davis / Gary Crockett runoff", rep: "Julia Letlow / John Fleming runoff", demStatus: "unresolved", repStatus: "unresolved", primarySummary: "Louisiana voted May 16. Cassidy missed the Republican runoff; Letlow and Fleming advanced. Davis advanced on the Democratic side, with Crockett treated as the second runoff candidate after Albares fell short." },
   DEFAULT: { dem: "Democrat", rep: "Republican", demStatus: "unresolved", repStatus: "unresolved", primarySummary: "Primary not yet resolved or not entered in the manual candidate ledger." }
 };
@@ -607,6 +663,12 @@ function primaryScenarioAdjustment(race) {
   if (demStatus === "presumptive") adjustment += .12;
   if (repStatus === "presumptive") adjustment -= .12;
   return adjustment;
+}
+
+function primaryEventsForRace(race) {
+  const events = PRIMARY_EVENTS_BY_STATE[race.state] || [];
+  if (events.length) return events.map((event) => ({ ...event }));
+  return race.primaryDate ? [{ date: race.primaryDate, label: race.primary === "runoff" ? "Runoff" : "Primary" }] : [];
 }
 
 function rcvBaselineAdjustment(race) {
@@ -859,6 +921,7 @@ function runModel(sourceData) {
       pollSignal,
       inputQuality: quality,
       uncertaintyAdjustment: uncertainty,
+      primaryEvents: primaryEventsForRace(withCandidates),
       primaryRisk: primaryRisk(race),
       stateElasticity: stateElasticity(race),
       incumbencyAdjustment: incumbencyAdjustment(withCandidates),
