@@ -178,6 +178,44 @@ const MIDTERM_LIKELY_VOTER_BASELINES = {
   WY: { white_college: .30, white_noncollege: .61, black: .01, latino: .05, asian_other: .03 }
 };
 
+const MIDTERM_AGE_BASELINES = {
+  AL: { youth: .13, core_age: .57, senior: .30 },
+  AK: { youth: .16, core_age: .63, senior: .21 },
+  AR: { youth: .13, core_age: .56, senior: .31 },
+  CO: { youth: .17, core_age: .60, senior: .23 },
+  DE: { youth: .13, core_age: .55, senior: .32 },
+  FL: { youth: .12, core_age: .55, senior: .33 },
+  GA: { youth: .15, core_age: .59, senior: .26 },
+  ID: { youth: .15, core_age: .57, senior: .28 },
+  IL: { youth: .15, core_age: .58, senior: .27 },
+  IA: { youth: .14, core_age: .55, senior: .31 },
+  KS: { youth: .15, core_age: .57, senior: .28 },
+  KY: { youth: .13, core_age: .56, senior: .31 },
+  LA: { youth: .14, core_age: .58, senior: .28 },
+  ME: { youth: .11, core_age: .52, senior: .37 },
+  MA: { youth: .15, core_age: .57, senior: .28 },
+  MI: { youth: .14, core_age: .56, senior: .30 },
+  MN: { youth: .15, core_age: .57, senior: .28 },
+  MS: { youth: .14, core_age: .57, senior: .29 },
+  MT: { youth: .13, core_age: .55, senior: .32 },
+  NE: { youth: .15, core_age: .56, senior: .29 },
+  NH: { youth: .12, core_age: .55, senior: .33 },
+  NJ: { youth: .14, core_age: .57, senior: .29 },
+  NM: { youth: .14, core_age: .56, senior: .30 },
+  NC: { youth: .15, core_age: .58, senior: .27 },
+  OH: { youth: .14, core_age: .56, senior: .30 },
+  OK: { youth: .14, core_age: .57, senior: .29 },
+  OR: { youth: .14, core_age: .57, senior: .29 },
+  RI: { youth: .13, core_age: .56, senior: .31 },
+  SC: { youth: .13, core_age: .56, senior: .31 },
+  SD: { youth: .14, core_age: .55, senior: .31 },
+  TN: { youth: .13, core_age: .57, senior: .30 },
+  TX: { youth: .16, core_age: .60, senior: .24 },
+  VA: { youth: .15, core_age: .58, senior: .27 },
+  WV: { youth: .11, core_age: .54, senior: .35 },
+  WY: { youth: .13, core_age: .56, senior: .31 }
+};
+
 const PATH_CENTRALITY = {
   OH: 1.85, TX: 1.65, AK: 1.6, MI: 1.35, GA: 1.25, NC: 1.12, ME: 1.1, NH: 1,
   IA: .75, NE: .72, MT: .68, SC: .55, KS: .45, FL: .25
@@ -971,17 +1009,20 @@ function stateElectorateComposition(race) {
     asian_other: highAsianOther ? .12 : .05
   });
   const baseline = MIDTERM_LIKELY_VOTER_BASELINES[state];
-  const age = normalizeShares({
+  const modeledAge = normalizeShares({
     youth: traits.includes("urban") || traits.includes("college") || fastGrowth ? .13 : .09,
     core_age: traits.includes("senior") || highNoncollege ? .7 : .75,
     senior: traits.includes("senior") || highNoncollege ? .21 : .16
   });
+  const ageBaseline = MIDTERM_AGE_BASELINES[state];
   return {
-    source: baseline
+    source: baseline && ageBaseline
+      ? "Manual midterm likely-voter baseline; not fixed truth"
+      : baseline
       ? "Manual midterm likely-voter baseline; not fixed truth"
       : race.sourceInputs?.census ? "Modeled from Census population trend plus state turnout traits" : "Modeled from state turnout traits",
     raceEducation: baseline ? normalizeShares(baseline) : raceEducation,
-    age,
+    age: ageBaseline ? normalizeShares(ageBaseline) : modeledAge,
     notes: [
       "Race/education blocs are mutually exclusive expected-voter shares and sum to 100%.",
       "Age shares are a separate turnout overlay and are not added to race/education shares."
