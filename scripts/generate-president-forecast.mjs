@@ -804,7 +804,7 @@ const PRESIDENTIAL_BASELINES = {
   NY: { demMargin: 25.5, ev: 28, region: "Northeast", population: 20201249 },
   NC: { demMargin: -5.8, ev: 16, region: "South", population: 10439388 },
   ND: { demMargin: -35.5, ev: 3, region: "Plains", population: 779094 },
-  OH: { demMargin: -11.5, ev: 17, region: "Midwest", population: 11799448 },
+  OH: { demMargin: -11.2, ev: 17, region: "Midwest", population: 11799448 },
   OK: { demMargin: -36.5, ev: 7, region: "South", population: 3959353 },
   OR: { demMargin: 14.5, ev: 8, region: "West", population: 4237256 },
   PA: { demMargin: -2.8, ev: 19, region: "Northeast", population: 13002700 },
@@ -1214,7 +1214,7 @@ function candidateTraitEffect(state, candidate, side) {
   const rawTraitEffect = traits.reduce((sum, trait) => sum + (fit[trait] || 0), 0);
   const baseline = PRESIDENTIAL_BASELINES[state];
   const saturation = Math.abs(baseline.demMargin) > 25 ? 0.55 : Math.abs(baseline.demMargin) > 14 ? 0.75 : 1;
-  const effect = clamp((rawTraitEffect + swing) * saturation, -2.2, 2.6);
+  const effect = clamp(((rawTraitEffect * 0.35) + (swing * 0.45)) * saturation, -1.1, 1.1);
   return side === "D" ? effect : -effect;
 }
 
@@ -1351,22 +1351,24 @@ function currentCycleStateSignal(state, fundamentals) {
 function calculateCandidateModifiers(state, demCandidate, repCandidate) {
   let modifier = 0;
   const baseline = PRESIDENTIAL_BASELINES[state];
+  const demHomeState = demCandidate.homeState === state;
+  const repHomeState = repCandidate.homeState === state;
   
-  // Home-state modifier
-  if (demCandidate.homeState === state) modifier += 4.5;
-  if (repCandidate.homeState === state) modifier -= 4.5;
+  // Presidential home-state effects are real but should not swamp the national environment.
+  if (demHomeState) modifier += Math.abs(baseline.demMargin) > 18 ? 0.9 : 1.35;
+  if (repHomeState) modifier -= Math.abs(baseline.demMargin) > 18 ? 0.9 : 1.35;
   
-  // Regional modifier
-  if (demCandidate.homeState && REGION_BY_STATE[demCandidate.homeState] === baseline.region) modifier += 0.9;
-  if (repCandidate.homeState && REGION_BY_STATE[repCandidate.homeState] === baseline.region) modifier -= 0.9;
+  // Regional fit is separate from home-state advantage, so do not stack both.
+  if (!demHomeState && demCandidate.homeState && REGION_BY_STATE[demCandidate.homeState] === baseline.region) modifier += 0.3;
+  if (!repHomeState && repCandidate.homeState && REGION_BY_STATE[repCandidate.homeState] === baseline.region) modifier -= 0.3;
   
   // Ideological modifier
   const stateLean = baseline.demMargin;
   const isSwingOrReach = EXPANDED_BATTLEGROUND_STATES.has(state) || Math.abs(stateLean) < 14;
-  if (demCandidate.ideology === "progressive" && stateLean < 0) modifier -= isSwingOrReach ? 0.75 : 0.4;
-  if (demCandidate.ideology === "moderate" && stateLean < 8) modifier += isSwingOrReach ? 0.45 : 0.2;
-  if (repCandidate.ideology === "moderate" && stateLean > -8) modifier -= isSwingOrReach ? 0.45 : 0.2;
-  if (repCandidate.ideology === "conservative" && stateLean > 0) modifier += isSwingOrReach ? 0.55 : 0.25;
+  if (demCandidate.ideology === "progressive" && stateLean < 0) modifier -= isSwingOrReach ? 0.35 : 0.2;
+  if (demCandidate.ideology === "moderate" && stateLean < 8) modifier += isSwingOrReach ? 0.3 : 0.15;
+  if (repCandidate.ideology === "moderate" && stateLean > -8) modifier -= isSwingOrReach ? 0.3 : 0.15;
+  if (repCandidate.ideology === "conservative" && stateLean > 0) modifier += isSwingOrReach ? 0.35 : 0.18;
   
   // Favorability modifier
   const demFavFactor = (demCandidate.favorability - 45) / 100;
@@ -1384,6 +1386,7 @@ function calculateCandidateModifiers(state, demCandidate, repCandidate) {
 function calculateStateMargin(state, demCandidate, repCandidate, fundamentals, pollingData = null) {
   const baseline = PRESIDENTIAL_BASELINES[state];
   const modifiers = calculateCandidateModifiers(state, demCandidate, repCandidate);
+  const elasticity = stateElasticity(state);
   
   const approvalAdjustment = Number.isFinite(fundamentals.approval) ? (45 - fundamentals.approval) * 0.16 : 0;
   const sentiment = Number(fundamentals.consumerSentiment?.value);
@@ -1420,13 +1423,11 @@ function calculateStateMargin(state, demCandidate, repCandidate, fundamentals, p
         return sum + (poll.margin * weight);
       }, 0) / Math.max(weightTotal, 0.1);
       
-      const baselineMargin = baseline.demMargin;
-      pollingAdjustment = (weightedMargin - baselineMargin) * 0.18;
+      const expectedNationalMargin = (fundamentals.nationalShift || 0) * 0.65;
+      pollingAdjustment = (weightedMargin - expectedNationalMargin) * 0.2 * elasticity;
     }
   }
-  
-  const elasticity = stateElasticity(state);
-  
+
   return baseline.demMargin + trendAdjustment + currentCycleAdjustment + migrationAdjustment + modifiers + (fundamentalsAdjustment * elasticity) + pollingAdjustment;
 }
 
