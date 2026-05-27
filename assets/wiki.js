@@ -352,6 +352,12 @@ function primaryInputText(race) {
   return "Primary unresolved";
 }
 
+function senatePrimaryMarkers(race) {
+  if (!race?.primaryDate) return [];
+  const label = race.primary === "runoff" ? "Runoff" : "Primary";
+  return [{ date: race.primaryDate, label, className: "history-primary-marker" }];
+}
+
 function houseInputConfidence(district) {
   if (!district) return { score: 0, label: "Unscored", reasons: [] };
   let score = 56;
@@ -1284,6 +1290,7 @@ function renderHistory(race) {
     endLabel: demIsIndependent ? (party, value) => `${party === "dem" ? demHistoryLabel : "Republican"} ${oneDecimal(value)}` : null,
     hoverLabel: demIsIndependent ? (party, value) => `${party === "dem" ? demHistoryLabel : "Republican"} ${oneDecimal(value)}` : null,
     annotations: race.state === "MT" ? [...CHART_ANNOTATIONS, ...MONTANA_CHART_ANNOTATIONS] : CHART_ANNOTATIONS,
+    eventMarkers: senatePrimaryMarkers(race),
     electionDate: forecast.settings?.electionDate || "2026-11-03",
     mobileZoomControls: true,
     value: (point) => point.dem,
@@ -2465,6 +2472,7 @@ function renderEmbed(target, embed) {
       endLabel: demIsIndependent ? (party, value) => `${party === "dem" ? demHistoryLabel : "Republican"} ${oneDecimal(value)}` : null,
       hoverLabel: demIsIndependent ? (party, value) => `${party === "dem" ? demHistoryLabel : "Republican"} ${oneDecimal(value)}` : null,
       annotations: race.state === "MT" ? [...CHART_ANNOTATIONS, ...MONTANA_CHART_ANNOTATIONS] : CHART_ANNOTATIONS,
+      eventMarkers: senatePrimaryMarkers(race),
       value: (point) => point.dem,
       electionDate: forecast?.settings?.electionDate || "2026-11-03",
       mobileZoomControls: true
