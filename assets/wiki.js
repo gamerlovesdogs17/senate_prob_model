@@ -260,8 +260,63 @@ function movementDriverScope(race) {
   const hasStateDriver = ["Polling", "Primary risk", "Finance", "Demographic pull", "Rating"].some((label) => labels.has(label));
   if (hasStateDriver) return "This run includes race-specific movement.";
   if (labels.has("Generic ballot") || labels.has("Projected margin")) return "Mostly a national-environment move in this run.";
-  if ((race?.history || []).length > 1) return "Small probability move; no major input driver was saved.";
+  if ((race?.history || []).length > 1) return "Small probability move; the largest saved effect is grouped below.";
   return "No previous saved run to compare.";
+}
+
+function dateOnlyTime(value) {
+  if (!value) return null;
+  const date = new Date(/^\d{4}-\d{2}-\d{2}$/.test(String(value)) ? `${value}T12:00:00` : value);
+  return Number.isNaN(date.getTime()) ? null : date.getTime();
+}
+
+function recentRaceEvent(race) {
+  const history = race?.history || [];
+  if (history.length < 2) return null;
+  const previous = dateOnlyTime(history.at(-2)?.date);
+  const current = dateOnlyTime(history.at(-1)?.date);
+  if (!previous || !current) return null;
+  return (race.primaryEvents || []).find((event) => {
+    const eventTime = dateOnlyTime(event.date);
+    return eventTime && eventTime > previous && eventTime <= current;
+  }) || null;
+}
+
+function inferredMovementDriver(race, gainingParty) {
+  const event = recentRaceEvent(race);
+  const toward = gainingParty ? racePartyCandidateLabel(race, gainingParty) : raceLeaderName(race);
+  if (event) {
+    const isRunoff = /runoff/i.test(event.label || "");
+    return {
+      label: isRunoff ? "Candidate field" : "Primary result",
+      detail: isRunoff
+        ? `${event.label} on ${event.date} changed the nomination field; the move is grouped toward ${toward}.`
+        : `${event.label} on ${event.date} locked in candidate assumptions; the move is grouped toward ${toward}.`,
+      kind: isRunoff ? "nomination update" : "primary update"
+    };
+  }
+  if (race.demographicPull) {
+    const topGroup = (race.demographicPull.topGroups || [])[0];
+    return {
+      label: "Base support",
+      detail: topGroup
+        ? `${topGroup.label || topGroup.group} and candidate coalition assumptions are the largest saved context for this move.`
+        : "Candidate coalition and demographic support assumptions are the largest saved context for this move.",
+      kind: "demographic support"
+    };
+  }
+  if (race.pollSignal?.pollCount) {
+    return {
+      label: "Polling base",
+      detail: `${race.pollSignal.pollCount} usable race-poll row${race.pollSignal.pollCount === 1 ? "" : "s"} anchor the move, but no single poll delta crossed the saved threshold.`,
+      kind: "polling support"
+    };
+  }
+  return {
+    label: "National environment",
+    detail: `The move is mostly from shared national conditions and baseline support rather than a single state-only update.`,
+    kind: "baseline update"
+  };
 }
 
 function renderMovementPanel(race) {
@@ -273,8 +328,10 @@ function renderMovementPanel(race) {
   const summaryClass = movementSideClass(race, gainingParty);
   const drivers = (race.movementDrivers || []).filter(Boolean);
   const hasPriorRun = (race.history || []).length > 1;
+  const inferredDriver = inferredMovementDriver(race, gainingParty);
+  const inferredClass = gainingParty ? movementSideClass(race, gainingParty).replace("moved-", "toward-") : "toward-neutral";
   const fallbackDriver = hasPriorRun
-    ? `<li class="toward-neutral"><span class="movement-driver-label">Small move</span><strong>No major input driver crossed the saved threshold for this run.</strong><em>minor model drift</em></li>`
+    ? `<li class="${inferredClass}"><span class="movement-driver-label">${escapeHtml(inferredDriver.label)}</span><strong>${escapeHtml(inferredDriver.detail)}</strong><em>${escapeHtml(inferredDriver.kind)}</em></li>`
     : `<li class="toward-neutral"><span class="movement-driver-label">No prior run</span><strong>No previous generated race file to compare.</strong><em>first saved point</em></li>`;
   const driverCards = drivers.length
     ? drivers.map((driver) => {
@@ -1054,6 +1111,7 @@ function renderLineChart(chart, points, options) {
   };
   const chartDates = points.map((point) => parseChartDate(point.date));
   const hasUsableDates = chartDates.every(Boolean);
+  const rawEventMarkers = options.eventMarkers || [];
   const firstChartDate = hasUsableDates ? chartDates[0] : null;
   const latestChartDate = hasUsableDates ? chartDates.at(-1) : null;
   const electionDate = parseChartDate(options.electionDate);
@@ -1071,9 +1129,15 @@ function renderLineChart(chart, points, options) {
   const axisEndDate = hasUsableDates && electionDate && electionDate > latestChartDate
     ? (useFullRunway ? electionDate : recentPadDate)
     : latestChartDate;
-  const dateSpan = hasUsableDates ? Math.max(1, axisEndDate - firstChartDate) : 1;
+  const markerRangeDates = hasUsableDates && options.includeEventMarkerRange
+    ? rawEventMarkers.map((marker) => parseChartDate(marker.date)).filter(Boolean)
+    : [];
+  const axisStartDate = hasUsableDates && markerRangeDates.length
+    ? new Date(Math.min(firstChartDate.getTime(), ...markerRangeDates.map((date) => date.getTime())))
+    : firstChartDate;
+  const dateSpan = hasUsableDates ? Math.max(1, axisEndDate - axisStartDate) : 1;
   const xFor = (index) => {
-    if (hasUsableDates) return plot.left + ((chartDates[index] - firstChartDate) / dateSpan) * plotWidth;
+    if (hasUsableDates) return plot.left + ((chartDates[index] - axisStartDate) / dateSpan) * plotWidth;
     return points.length === 1 ? plot.left + plotWidth / 2 : plot.left + index * (plotWidth / (points.length - 1));
   };
   const yFor = (value) => plot.top + ((domain[1] - value) / (domain[1] - domain[0])) * plotHeight;
@@ -1138,11 +1202,11 @@ function renderLineChart(chart, points, options) {
   }).filter(Boolean).join("");
   const electionX = hasUsableDates && electionDate && electionDate > latestChartDate && useFullRunway ? width - plot.right : null;
   const currentX = hasUsableDates ? latest.x : null;
-  const eventMarkers = hasUsableDates ? (options.eventMarkers || []).map((marker) => {
+  const eventMarkers = hasUsableDates ? rawEventMarkers.map((marker) => {
     const markerDate = parseChartDate(marker.date);
-    if (!markerDate || markerDate < firstChartDate || markerDate > axisEndDate) return null;
+    if (!markerDate || markerDate < axisStartDate || markerDate > axisEndDate) return null;
     if (marker.fullOnly && !useFullRunway) return null;
-    const x = plot.left + ((markerDate - firstChartDate) / dateSpan) * plotWidth;
+    const x = plot.left + ((markerDate - axisStartDate) / dateSpan) * plotWidth;
     const textX = clamp(x + (marker.align === "left" ? -9 : 9), plot.left + 10, width - plot.right - 10);
     const textY = plot.top + 18;
     const rotation = marker.align === "left" ? -90 : 90;
@@ -1304,6 +1368,7 @@ function renderHistory(race) {
     hoverLabel: demIsIndependent ? (party, value) => `${party === "dem" ? demHistoryLabel : "Republican"} ${oneDecimal(value)}` : null,
     annotations: race.state === "MT" ? [...CHART_ANNOTATIONS, ...MONTANA_CHART_ANNOTATIONS] : CHART_ANNOTATIONS,
     eventMarkers: senatePrimaryMarkers(race),
+    includeEventMarkerRange: true,
     electionDate: forecast.settings?.electionDate || "2026-11-03",
     mobileZoomControls: true,
     value: (point) => point.dem,
@@ -2490,6 +2555,7 @@ function renderEmbed(target, embed) {
       hoverLabel: demIsIndependent ? (party, value) => `${party === "dem" ? demHistoryLabel : "Republican"} ${oneDecimal(value)}` : null,
       annotations: race.state === "MT" ? [...CHART_ANNOTATIONS, ...MONTANA_CHART_ANNOTATIONS] : CHART_ANNOTATIONS,
       eventMarkers: senatePrimaryMarkers(race),
+      includeEventMarkerRange: true,
       value: (point) => point.dem,
       electionDate: forecast?.settings?.electionDate || "2026-11-03",
       mobileZoomControls: true
