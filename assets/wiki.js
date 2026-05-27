@@ -1129,15 +1129,9 @@ function renderLineChart(chart, points, options) {
   const axisEndDate = hasUsableDates && electionDate && electionDate > latestChartDate
     ? (useFullRunway ? electionDate : recentPadDate)
     : latestChartDate;
-  const markerRangeDates = hasUsableDates && options.includeEventMarkerRange
-    ? rawEventMarkers.map((marker) => parseChartDate(marker.date)).filter(Boolean)
-    : [];
-  const axisStartDate = hasUsableDates && markerRangeDates.length
-    ? new Date(Math.min(firstChartDate.getTime(), ...markerRangeDates.map((date) => date.getTime())))
-    : firstChartDate;
-  const dateSpan = hasUsableDates ? Math.max(1, axisEndDate - axisStartDate) : 1;
+  const dateSpan = hasUsableDates ? Math.max(1, axisEndDate - firstChartDate) : 1;
   const xFor = (index) => {
-    if (hasUsableDates) return plot.left + ((chartDates[index] - axisStartDate) / dateSpan) * plotWidth;
+    if (hasUsableDates) return plot.left + ((chartDates[index] - firstChartDate) / dateSpan) * plotWidth;
     return points.length === 1 ? plot.left + plotWidth / 2 : plot.left + index * (plotWidth / (points.length - 1));
   };
   const yFor = (value) => plot.top + ((domain[1] - value) / (domain[1] - domain[0])) * plotHeight;
@@ -1204,9 +1198,9 @@ function renderLineChart(chart, points, options) {
   const currentX = hasUsableDates ? latest.x : null;
   const eventMarkers = hasUsableDates ? rawEventMarkers.map((marker) => {
     const markerDate = parseChartDate(marker.date);
-    if (!markerDate || markerDate < axisStartDate || markerDate > axisEndDate) return null;
+    if (!markerDate || markerDate < firstChartDate || markerDate > axisEndDate) return null;
     if (marker.fullOnly && !useFullRunway) return null;
-    const x = plot.left + ((markerDate - axisStartDate) / dateSpan) * plotWidth;
+    const x = plot.left + ((markerDate - firstChartDate) / dateSpan) * plotWidth;
     const textX = clamp(x + (marker.align === "left" ? -9 : 9), plot.left + 10, width - plot.right - 10);
     const textY = plot.top + 18;
     const rotation = marker.align === "left" ? -90 : 90;
@@ -1368,7 +1362,6 @@ function renderHistory(race) {
     hoverLabel: demIsIndependent ? (party, value) => `${party === "dem" ? demHistoryLabel : "Republican"} ${oneDecimal(value)}` : null,
     annotations: race.state === "MT" ? [...CHART_ANNOTATIONS, ...MONTANA_CHART_ANNOTATIONS] : CHART_ANNOTATIONS,
     eventMarkers: senatePrimaryMarkers(race),
-    includeEventMarkerRange: true,
     electionDate: forecast.settings?.electionDate || "2026-11-03",
     mobileZoomControls: true,
     value: (point) => point.dem,
@@ -2555,7 +2548,6 @@ function renderEmbed(target, embed) {
       hoverLabel: demIsIndependent ? (party, value) => `${party === "dem" ? demHistoryLabel : "Republican"} ${oneDecimal(value)}` : null,
       annotations: race.state === "MT" ? [...CHART_ANNOTATIONS, ...MONTANA_CHART_ANNOTATIONS] : CHART_ANNOTATIONS,
       eventMarkers: senatePrimaryMarkers(race),
-      includeEventMarkerRange: true,
       value: (point) => point.dem,
       electionDate: forecast?.settings?.electionDate || "2026-11-03",
       mobileZoomControls: true
