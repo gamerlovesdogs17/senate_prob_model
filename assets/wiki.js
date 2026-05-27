@@ -41,6 +41,10 @@ const PRESIDENT_PRIMARY_MARKERS = [
   { date: "2028-02-01", label: "Presidential primaries", className: "history-primary-marker", fullOnly: true }
 ];
 
+const SENATE_NATIONAL_MARKERS = [
+  { date: "2026-09-15", label: "All primaries resolved", className: "history-primary-marker" }
+];
+
 let forecast = null;
 let houseForecast = null;
 let presidentForecasts = null;
@@ -972,6 +976,7 @@ function renderControlHistory() {
     pointHtml: (point) => `${point.date}<br>D ${pct(point.dem)} / R ${pct(point.rep ?? 1 - point.dem)}`,
     value: (point) => point.dem,
     electionDate: forecast.settings?.electionDate || "2026-11-03",
+    eventMarkers: SENATE_NATIONAL_MARKERS,
     mobileZoomControls: true,
     singleNote: "Control history starts with the first generated forecast and grows each daily run."
   });
@@ -990,6 +995,7 @@ function renderSeatHistory() {
     endLabel: (party, value) => `${party === "dem" ? "Democrat" : "Republican"} ${value.toFixed(0)}`,
     hoverLabel: (party, value) => `${party === "dem" ? "Democratic seats" : "Republican seats"} ${value.toFixed(0)}`,
     electionDate: forecast.settings?.electionDate || "2026-11-03",
+    eventMarkers: SENATE_NATIONAL_MARKERS,
     singleNote: "Seat-count history starts with the first generated forecast and grows each daily run."
   });
 }
@@ -2450,6 +2456,7 @@ function renderEmbed(target, embed) {
       pointHtml: (point) => `${point.date}<br>D ${pct(point.dem)} / R ${pct(point.rep ?? 1 - point.dem)}`,
       value: (point) => point.dem,
       electionDate: forecast?.settings?.electionDate || "2026-11-03",
+      eventMarkers: SENATE_NATIONAL_MARKERS,
       mobileZoomControls: true
     });
     return;
