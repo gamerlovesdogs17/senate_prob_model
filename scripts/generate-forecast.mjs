@@ -198,10 +198,10 @@ const PRIMARY_EVENTS_BY_STATE = {
   OK: [{ date: "2026-06-16", label: "Primary" }],
   OR: [{ date: "2026-05-19", label: "Primary" }],
   RI: [{ date: "2026-09-09", label: "Primary" }],
-  SC: [{ date: "2026-06-09", label: "Primary" }, { date: "2026-06-23", label: "Runoff", conditional: true }],
-  SD: [{ date: "2026-06-02", label: "Primary" }, { date: "2026-07-28", label: "Runoff", conditional: true }],
+  SC: [{ date: "2026-06-09", label: "Primary" }],
+  SD: [{ date: "2026-06-02", label: "Primary" }],
   TN: [{ date: "2026-08-06", label: "Primary" }],
-  TX: [{ date: "2026-03-03", label: "Primary" }, { date: "2026-05-26", label: "Runoff" }],
+  TX: [{ date: "2026-03-03", label: "Primary" }, { date: "2026-05-26", label: "Runoff", actual: true }],
   VA: [{ date: "2026-08-04", label: "Primary" }],
   WV: [{ date: "2026-05-12", label: "Primary" }],
   WY: [{ date: "2026-08-18", label: "Primary" }]
@@ -382,7 +382,7 @@ const races = [
   { state: "SC", seat: "Lindsey Graham", incumbent: "Lindsey Graham", hold: "R", caucusTarget: "D", rating: "Lean R", pvi: -8, pastSenate: -10, money: -.4, candidate: -.2, approval: -.4, primary: "unresolved", primaryDate: "2026-06-09", nomination: .5, independent: "none", polls: [], note: "Long-shot Democratic upside, but not a core path." },
   { state: "SD", seat: "Mike Rounds", incumbent: "Mike Rounds", hold: "R", caucusTarget: "D", rating: "Safe R", pvi: -16, pastSenate: -20, money: -1, candidate: -1, approval: -.8, primary: "unresolved", primaryDate: "2026-06-02", nomination: .1, independent: "independent longshot, caucus not credited", polls: [], note: "Republican lock in the baseline." },
   { state: "TN", seat: "Bill Hagerty", incumbent: "Bill Hagerty", hold: "R", caucusTarget: "D", rating: "Safe R", pvi: -14, pastSenate: -16, money: -1, candidate: -1, approval: -.8, primary: "unresolved", primaryDate: "2026-08-06", nomination: .2, independent: "none", polls: [], note: "Tail risk only." },
-  { state: "TX", seat: "Open seat", incumbent: "John Cornyn", hold: "R", caucusTarget: "D", rating: "Tilt R", pvi: -5, pastSenate: -5, money: .85, candidate: 1.05, approval: -.65, primary: "resolved", primaryDate: "2026-05-26", nomination: .1, independent: "none", polls: [[-150, 38], [-92, 41], [-48, 44], [-13, 46]], note: "Paxton is treated as the Republican nominee; scandals, fundraising drag, and general-election polling make him weaker than a generic Texas Republican." },
+  { state: "TX", seat: "Open seat", incumbent: "John Cornyn", hold: "R", caucusTarget: "D", rating: "Tilt R", pvi: -5, pastSenate: -5, money: .85, candidate: 1.05, approval: -.65, primary: "resolved", primaryDate: "2026-03-03", nomination: .1, independent: "none", polls: [[-150, 38], [-92, 41], [-48, 44], [-13, 46]], note: "Paxton is treated as the Republican nominee; scandals, fundraising drag, and general-election polling make him weaker than a generic Texas Republican." },
   { state: "VA", seat: "Mark Warner", incumbent: "Mark Warner", hold: "D", caucusTarget: "D", rating: "Likely D", pvi: 6, pastSenate: 9, money: 1, candidate: 1, approval: .5, primary: "unresolved", primaryDate: "2026-08-04", nomination: .2, independent: "none", polls: [], note: "Usually not central unless the environment turns hard red." },
   { state: "WV", seat: "Shelley Moore Capito", incumbent: "Shelley Moore Capito", hold: "R", caucusTarget: "D", rating: "Safe R", pvi: -23, pastSenate: -28, money: -1, candidate: -1, approval: -.9, primary: "resolved", primaryDate: "2026-05-12", nomination: .05, independent: "none", polls: [], note: "The least Democratic state on the board." },
   { state: "WY", seat: "Open seat", incumbent: "Cynthia Lummis", hold: "R", caucusTarget: "D", rating: "Safe R", pvi: -26, pastSenate: -32, money: -1, candidate: -1, approval: -1, primary: "unresolved", primaryDate: "2026-08-18", nomination: .15, independent: "none", polls: [], note: "Republican floor seat." }
@@ -396,7 +396,7 @@ const CANDIDATE_STATUS = {
   DE: { dem: "Chris Coons", rep: "Republican", demStatus: "presumptive", repStatus: "unresolved", primarySummary: "Delaware's Senate primary is scheduled for September 15. Coons is treated as the presumptive Democratic nominee." },
   FL: { dem: "Democrat", rep: "Ashley Moody", demStatus: "unresolved", repStatus: "presumptive", primarySummary: "Florida's special Senate primary is scheduled for August 18. Moody is treated as the presumptive Republican nominee." },
   GA: { dem: "Jon Ossoff", rep: "Mike Collins / Derek Dooley runoff", demStatus: "nominee", repStatus: "unresolved", primarySummary: "Ossoff is renominated. Collins and Dooley advanced to the June 16 Republican runoff." },
-  ID: { dem: "David Jordan Roth", rep: "Jim Risch", demStatus: "nominee", repStatus: "nominee", primarySummary: "Primaries held May 19. Roth won the Democratic nomination and Risch secured the Republican nomination." },
+  ID: { dem: "David Roth", rep: "Jim Risch", demStatus: "nominee", repStatus: "nominee", primarySummary: "Primaries held May 19. Roth won the Democratic nomination and Risch secured the Republican nomination." },
   IL: { dem: "Juliana Stratton", rep: "Don Tracy", demStatus: "nominee", repStatus: "nominee", primarySummary: "Primaries held March 17. Stratton and Tracy are the general-election nominees." },
   IA: { dem: "Democrat", rep: "Republican", demStatus: "unresolved", repStatus: "unresolved", primarySummary: "Iowa's Senate primary is scheduled for June 2." },
   KS: { dem: "Democrat", rep: "Roger Marshall", demStatus: "unresolved", repStatus: "presumptive", primarySummary: "Kansas' Senate primary is scheduled for August 4. Marshall is treated as the presumptive Republican nominee." },
@@ -415,16 +415,74 @@ const CANDIDATE_STATUS = {
   OK: { dem: "Democrat", rep: "Republican", demStatus: "unresolved", repStatus: "unresolved", primarySummary: "Oklahoma's special Senate primary is scheduled for June 16." },
   OR: { dem: "Jeff Merkley", rep: "David Brock Smith", demStatus: "nominee", repStatus: "nominee", primarySummary: "Primaries held May 19. Merkley secured renomination and Smith won the Republican nomination." },
   RI: { dem: "Jack Reed", rep: "Republican", demStatus: "presumptive", repStatus: "unresolved", primarySummary: "Rhode Island's Senate primary is scheduled for September 9. Reed is treated as the presumptive Democratic nominee." },
-  SC: { dem: "Democrat", rep: "Lindsey Graham", demStatus: "unresolved", repStatus: "presumptive", primarySummary: "South Carolina's Senate primary is scheduled for June 9, with a June 23 runoff if needed. Graham is treated as the presumptive Republican nominee." },
-  SD: { dem: "Democrat", rep: "Mike Rounds", demStatus: "unresolved", repStatus: "presumptive", primarySummary: "South Dakota's Senate primary is scheduled for June 2, with a July 28 runoff if needed. Rounds is treated as the presumptive Republican nominee." },
+  SC: { dem: "Democrat", rep: "Lindsey Graham", demStatus: "unresolved", repStatus: "presumptive", primarySummary: "South Carolina's Senate primary is scheduled for June 9. Graham is treated as the presumptive Republican nominee." },
+  SD: { dem: "Democrat", rep: "Mike Rounds", demStatus: "unresolved", repStatus: "presumptive", primarySummary: "South Dakota's Senate primary is scheduled for June 2. Rounds is treated as the presumptive Republican nominee." },
   TN: { dem: "Democrat", rep: "Bill Hagerty", demStatus: "unresolved", repStatus: "presumptive", primarySummary: "Tennessee's Senate primary is scheduled for August 6. Hagerty is treated as the presumptive Republican nominee." },
-  TX: { dem: "James Talarico", rep: "Ken Paxton", demStatus: "nominee", repStatus: "nominee", primarySummary: "Primaries complete. Talarico is the Democratic nominee; Paxton is treated as the Republican nominee after the May 26 runoff call." },
+  TX: { dem: "James Talarico", rep: "Ken Paxton", demStatus: "nominee", repStatus: "nominee", primarySummary: "Talarico won the March 3 Democratic primary. Paxton won the May 26 Republican runoff after no Republican secured the nomination on March 3." },
   VA: { dem: "Mark Warner", rep: "Republican", demStatus: "presumptive", repStatus: "unresolved", primarySummary: "Virginia's congressional primary is scheduled for August 4. Warner is treated as the presumptive Democratic nominee." },
-  NE: { dem: "Dan Osborn", rep: "Pete Ricketts", demStatus: "nominee", repStatus: "nominee", demDisplayParty: "I", primarySummary: "Ricketts won the Republican primary. The Democratic primary is over and the Democratic nominee said they will withdraw so Osborn can consolidate the anti-Ricketts vote." },
+  NE: { dem: "Dan Osborn", rep: "Pete Ricketts", demStatus: "nominee", repStatus: "nominee", demDisplayParty: "I", primarySummary: "Ricketts won the Republican primary on May 12. Cindy Burbank won the Democratic primary and said she will withdraw so Osborn can consolidate the anti-Ricketts vote." },
   WV: { dem: "Rachel Fetty Anderson", rep: "Shelley Moore Capito", demStatus: "nominee", repStatus: "nominee", primarySummary: "Primaries held May 12. Capito and Anderson are the projected nominees." },
   WY: { dem: "Democrat", rep: "Republican", demStatus: "unresolved", repStatus: "unresolved", primarySummary: "Wyoming's Senate primary is scheduled for August 18." },
   LA: { dem: "Jamie Davis / Gary Crockett runoff", rep: "Julia Letlow / John Fleming runoff", demStatus: "unresolved", repStatus: "unresolved", primarySummary: "Louisiana voted May 16. Cassidy missed the Republican runoff; Letlow and Fleming advanced. Davis advanced on the Democratic side, with Crockett treated as the second runoff candidate after Albares fell short." },
   DEFAULT: { dem: "Democrat", rep: "Republican", demStatus: "unresolved", repStatus: "unresolved", primarySummary: "Primary not yet resolved or not entered in the manual candidate ledger." }
+};
+
+const COMPLETED_PRIMARY_RESULTS_BY_STATE = {
+  AR: [
+    { party: "R", winner: "Tom Cotton", date: "2026-03-03" },
+    { party: "D", winner: "Hallie Shoffner", date: "2026-03-03" }
+  ],
+  NC: [
+    { party: "D", winner: "Roy Cooper", date: "2026-03-03" },
+    { party: "R", winner: "Michael Whatley", date: "2026-03-03" }
+  ],
+  TX: [
+    { party: "D", winner: "James Talarico", date: "2026-03-03" },
+    { party: "R", winner: "Ken Paxton", date: "2026-05-26", contest: "Runoff" }
+  ],
+  MS: [
+    { party: "R", winner: "Cindy Hyde-Smith", date: "2026-03-10" },
+    { party: "D", winner: "Scott Colom", date: "2026-03-10" }
+  ],
+  IL: [
+    { party: "D", winner: "Juliana Stratton", date: "2026-03-17" },
+    { party: "R", winner: "Don Tracy", date: "2026-03-17" }
+  ],
+  OH: [
+    { party: "D", winner: "Sherrod Brown", date: "2026-05-05" },
+    { party: "R", winner: "Jon Husted", date: "2026-05-05" }
+  ],
+  NE: [
+    { party: "R", winner: "Pete Ricketts", date: "2026-05-12" },
+    { party: "D", winner: "Cindy Burbank", date: "2026-05-12", note: "Withdrawing to back Dan Osborn" }
+  ],
+  WV: [
+    { party: "R", winner: "Shelley Moore Capito", date: "2026-05-12" },
+    { party: "D", winner: "Rachel Fetty Anderson", date: "2026-05-12" }
+  ],
+  LA: [
+    { party: "R", winner: "NO WINNER-RUNOFF", date: "2026-05-16" }
+  ],
+  AL: [
+    { party: "R", winner: "NO WINNER-RUNOFF", date: "2026-05-19" },
+    { party: "D", winner: "NO WINNER-RUNOFF", date: "2026-05-19" }
+  ],
+  GA: [
+    { party: "D", winner: "Jon Ossoff", date: "2026-05-19" },
+    { party: "R", winner: "NO WINNER-RUNOFF", date: "2026-05-19" }
+  ],
+  ID: [
+    { party: "R", winner: "Jim Risch", date: "2026-05-19" },
+    { party: "D", winner: "David Roth", date: "2026-05-19" }
+  ],
+  KY: [
+    { party: "R", winner: "Andy Barr", date: "2026-05-19" },
+    { party: "D", winner: "Charles Booker", date: "2026-05-19" }
+  ],
+  OR: [
+    { party: "D", winner: "Jeff Merkley", date: "2026-05-19" },
+    { party: "R", winner: "David Brock Smith", date: "2026-05-19" }
+  ]
 };
 
 const RCP_CANDIDATE_SIDE = {
@@ -445,7 +503,8 @@ const RCP_CANDIDATE_SIDE = {
 
 function candidateInfo(race) {
   const entered = CANDIDATE_STATUS[race.state];
-  if (entered) return entered;
+  const primaryResults = COMPLETED_PRIMARY_RESULTS_BY_STATE[race.state] || [];
+  if (entered) return { ...entered, primaryResults };
   const info = { ...CANDIDATE_STATUS.DEFAULT };
   const openSeat = race.seat === "Open seat";
   const incumbentName = !openSeat && race.incumbent && !["Open", "Open seat"].includes(race.incumbent) ? race.incumbent : null;
@@ -460,7 +519,7 @@ function candidateInfo(race) {
     info.repStatus = "presumptive";
     info.primarySummary = `${settledPrimary} The incumbent is treated as the presumptive Republican nominee until the candidate ledger is updated.`;
   }
-  return info;
+  return { ...info, primaryResults };
 }
 
 function forecastSummary(race) {
@@ -667,7 +726,11 @@ function primaryScenarioAdjustment(race) {
 
 function primaryEventsForRace(race) {
   const events = PRIMARY_EVENTS_BY_STATE[race.state] || [];
-  if (events.length) return events.map((event) => ({ ...event }));
+  if (events.length) {
+    return events
+      .filter((event) => event.label !== "Runoff" || race.primary === "runoff" || event.actual)
+      .map((event) => ({ ...event }));
+  }
   return race.primaryDate ? [{ date: race.primaryDate, label: race.primary === "runoff" ? "Runoff" : "Primary" }] : [];
 }
 
@@ -1863,7 +1926,15 @@ async function fetchAllSources() {
     genericBallotDem: genericWeight ? genericPollingSources.reduce((sum, source) => sum + (Number.isFinite(source.dem) ? source.dem : 0) * source.weight, 0) / genericWeight : null,
     genericBallotRep: genericWeight ? genericPollingSources.reduce((sum, source) => sum + (Number.isFinite(source.rep) ? source.rep : 0) * source.weight, 0) / genericWeight : null
   };
-  return { status, votehub, ddhqGeneric, pollfinity, usPollingDataGeneric, genericPolling, realClearPolling, twoSeventyToWin, fec, mit, census, civic, pollingReferences };
+  return { status: stableSourceStatus(status), votehub, ddhqGeneric, pollfinity, usPollingDataGeneric, genericPolling, realClearPolling, twoSeventyToWin, fec, mit, census, civic, pollingReferences };
+}
+
+function stableSourceStatus(status) {
+  const { checkedAt, ...sources } = status;
+  return {
+    checkedAt,
+    ...Object.fromEntries(Object.entries(sources).sort(([a], [b]) => a.localeCompare(b)))
+  };
 }
 
 function applySourceInputs(baseRaces, sourceData) {
