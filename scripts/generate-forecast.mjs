@@ -140,6 +140,44 @@ const DEMOGRAPHIC_GROUP_LABELS = {
   senior: "65+"
 };
 
+const MIDTERM_LIKELY_VOTER_BASELINES = {
+  AL: { white_college: .24, white_noncollege: .43, black: .27, latino: .03, asian_other: .03 },
+  AK: { white_college: .31, white_noncollege: .42, black: .03, latino: .04, asian_other: .20 },
+  AR: { white_college: .25, white_noncollege: .55, black: .14, latino: .03, asian_other: .03 },
+  CO: { white_college: .47, white_noncollege: .31, black: .03, latino: .14, asian_other: .05 },
+  DE: { white_college: .39, white_noncollege: .35, black: .18, latino: .05, asian_other: .03 },
+  FL: { white_college: .31, white_noncollege: .36, black: .12, latino: .16, asian_other: .05 },
+  GA: { white_college: .31, white_noncollege: .31, black: .30, latino: .04, asian_other: .04 },
+  ID: { white_college: .32, white_noncollege: .54, black: .01, latino: .09, asian_other: .04 },
+  IL: { white_college: .40, white_noncollege: .36, black: .13, latino: .07, asian_other: .04 },
+  IA: { white_college: .32, white_noncollege: .58, black: .03, latino: .04, asian_other: .03 },
+  KS: { white_college: .34, white_noncollege: .49, black: .06, latino: .07, asian_other: .04 },
+  KY: { white_college: .28, white_noncollege: .59, black: .08, latino: .03, asian_other: .02 },
+  LA: { white_college: .24, white_noncollege: .41, black: .29, latino: .03, asian_other: .03 },
+  ME: { white_college: .42, white_noncollege: .51, black: .01, latino: .02, asian_other: .04 },
+  MA: { white_college: .55, white_noncollege: .28, black: .07, latino: .06, asian_other: .04 },
+  MI: { white_college: .35, white_noncollege: .49, black: .10, latino: .03, asian_other: .03 },
+  MN: { white_college: .42, white_noncollege: .44, black: .06, latino: .04, asian_other: .04 },
+  MS: { white_college: .21, white_noncollege: .41, black: .34, latino: .02, asian_other: .02 },
+  MT: { white_college: .36, white_noncollege: .54, black: .01, latino: .03, asian_other: .06 },
+  NE: { white_college: .33, white_noncollege: .54, black: .04, latino: .06, asian_other: .03 },
+  NH: { white_college: .47, white_noncollege: .47, black: .01, latino: .02, asian_other: .03 },
+  NJ: { white_college: .43, white_noncollege: .31, black: .12, latino: .10, asian_other: .04 },
+  NM: { white_college: .30, white_noncollege: .30, black: .02, latino: .33, asian_other: .05 },
+  NC: { white_college: .34, white_noncollege: .42, black: .19, latino: .03, asian_other: .02 },
+  OH: { white_college: .33, white_noncollege: .53, black: .09, latino: .03, asian_other: .02 },
+  OK: { white_college: .25, white_noncollege: .51, black: .07, latino: .06, asian_other: .11 },
+  OR: { white_college: .43, white_noncollege: .40, black: .02, latino: .08, asian_other: .07 },
+  RI: { white_college: .43, white_noncollege: .36, black: .06, latino: .11, asian_other: .04 },
+  SC: { white_college: .29, white_noncollege: .43, black: .24, latino: .02, asian_other: .02 },
+  SD: { white_college: .31, white_noncollege: .56, black: .02, latino: .03, asian_other: .08 },
+  TN: { white_college: .29, white_noncollege: .53, black: .13, latino: .03, asian_other: .02 },
+  TX: { white_college: .29, white_noncollege: .37, black: .12, latino: .18, asian_other: .04 },
+  VA: { white_college: .43, white_noncollege: .33, black: .16, latino: .05, asian_other: .03 },
+  WV: { white_college: .23, white_noncollege: .72, black: .03, latino: .01, asian_other: .01 },
+  WY: { white_college: .30, white_noncollege: .61, black: .01, latino: .05, asian_other: .03 }
+};
+
 const PATH_CENTRALITY = {
   OH: 1.85, TX: 1.65, AK: 1.6, MI: 1.35, GA: 1.25, NC: 1.12, ME: 1.1, NH: 1,
   IA: .75, NE: .72, MT: .68, SC: .55, KS: .45, FL: .25
@@ -932,14 +970,17 @@ function stateElectorateComposition(race) {
     latino: highLatino ? (fastGrowth ? .21 : .18) : .06,
     asian_other: highAsianOther ? .12 : .05
   });
+  const baseline = MIDTERM_LIKELY_VOTER_BASELINES[state];
   const age = normalizeShares({
     youth: traits.includes("urban") || traits.includes("college") || fastGrowth ? .13 : .09,
     core_age: traits.includes("senior") || highNoncollege ? .7 : .75,
     senior: traits.includes("senior") || highNoncollege ? .21 : .16
   });
   return {
-    source: race.sourceInputs?.census ? "Modeled from Census population trend plus state turnout traits" : "Modeled from state turnout traits",
-    raceEducation,
+    source: baseline
+      ? "Manual midterm likely-voter baseline; not fixed truth"
+      : race.sourceInputs?.census ? "Modeled from Census population trend plus state turnout traits" : "Modeled from state turnout traits",
+    raceEducation: baseline ? normalizeShares(baseline) : raceEducation,
     age,
     notes: [
       "Race/education blocs are mutually exclusive expected-voter shares and sum to 100%.",
