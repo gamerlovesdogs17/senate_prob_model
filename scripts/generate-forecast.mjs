@@ -164,6 +164,10 @@ const CANDIDATE_HISTORY = {
   VA: .55
 };
 
+const INDEPENDENT_CONTROL_FINANCE = {
+  NE: { side: "dem", label: "Dan Osborn" }
+};
+
 const RCV_STATES = {
   AK: { transferMean: 1.0, transferSd: 1.55, exhaustedSd: .75 },
   ME: { transferMean: .55, transferSd: .9, exhaustedSd: .45 }
@@ -904,8 +908,57 @@ function stateCoalitionWeights(state) {
   };
 }
 
+function normalizeShares(shares) {
+  const entries = Object.entries(shares).map(([key, value]) => [key, Math.max(0, Number(value) || 0)]);
+  const total = entries.reduce((sum, [, value]) => sum + value, 0) || 1;
+  return Object.fromEntries(entries.map(([key, value]) => [key, Number((value / total).toFixed(4))]));
+}
+
+function stateElectorateComposition(race) {
+  const state = race.state;
+  const traits = STATE_COALITION_TRAITS[state] || [];
+  const censusGrowth = race.sourceInputs?.census?.growth || 0;
+  const highCollege = traits.includes("college") || traits.includes("suburban");
+  const highNoncollege = traits.includes("rural") || traits.includes("working_class") || traits.includes("appalachian") || traits.includes("frontier");
+  const highBlack = traits.includes("black_belt") || ["GA", "NC", "SC", "MS", "LA", "AL", "MD", "VA"].includes(state);
+  const highLatino = traits.includes("latino") || ["AZ", "CA", "FL", "NV", "NM", "TX"].includes(state);
+  const highAsianOther = ["CA", "HI", "NJ", "NY", "WA", "VA", "MD", "NV"].includes(state);
+  const fastGrowth = censusGrowth > 4 || ["AZ", "FL", "GA", "NC", "NV", "TX"].includes(state);
+
+  const raceEducation = normalizeShares({
+    white_college: highCollege ? .27 : highNoncollege ? .14 : .2,
+    white_noncollege: highNoncollege ? .38 : highCollege ? .22 : .31,
+    black: highBlack ? .2 : .08,
+    latino: highLatino ? (fastGrowth ? .21 : .18) : .06,
+    asian_other: highAsianOther ? .12 : .05
+  });
+  const age = normalizeShares({
+    youth: traits.includes("urban") || traits.includes("college") || fastGrowth ? .13 : .09,
+    core_age: traits.includes("senior") || highNoncollege ? .7 : .75,
+    senior: traits.includes("senior") || highNoncollege ? .21 : .16
+  });
+  return {
+    source: race.sourceInputs?.census ? "Modeled from Census population trend plus state turnout traits" : "Modeled from state turnout traits",
+    raceEducation,
+    age,
+    notes: [
+      "Race/education blocs are mutually exclusive expected-voter shares and sum to 100%.",
+      "Age shares are a separate turnout overlay and are not added to race/education shares."
+    ]
+  };
+}
+
+function demographicWeightsForRace(race) {
+  const composition = race.electorateComposition || stateElectorateComposition(race);
+  return {
+    ...composition.raceEducation,
+    youth: composition.age.youth,
+    senior: composition.age.senior
+  };
+}
+
 function demographicPullAdjustment(race) {
-  const weights = stateCoalitionWeights(race.state);
+  const weights = demographicWeightsForRace(race);
   const demProfile = senateCandidateDemographicProfile(race, "D");
   const repProfile = senateCandidateDemographicProfile(race, "R");
   const groups = Object.keys(weights).map((group) => {
@@ -927,7 +980,7 @@ function demographicPullAdjustment(race) {
 
 function extraCandidateDemographicPulls(race) {
   if (!race.extraCandidates?.length) return [];
-  const weights = stateCoalitionWeights(race.state);
+  const weights = demographicWeightsForRace(race);
   const repProfile = senateCandidateDemographicProfile(race, "R");
   return race.extraCandidates.map((candidate) => {
     const profile = SENATE_CANDIDATE_DEMOGRAPHIC_PROFILES[candidateProfileKey(candidate.name)];
@@ -969,14 +1022,16 @@ function runModel(sourceData) {
   const enriched = adjustedRaces.map((race) => {
     const candidates = candidateInfo(race);
     const withCandidates = { ...race, ...candidates };
-    const pollSignal = pollWeightMetrics(withCandidates);
-    const margin = baselineMargin(withCandidates);
-    const quality = inputQuality(withCandidates, pollSignal);
-    const uncertainty = raceTypeUncertainty(withCandidates, pollSignal, quality);
+    const electorateComposition = stateElectorateComposition(withCandidates);
+    const withComposition = { ...withCandidates, electorateComposition };
+    const pollSignal = pollWeightMetrics(withComposition);
+    const margin = baselineMargin(withComposition);
+    const quality = inputQuality(withComposition, pollSignal);
+    const uncertainty = raceTypeUncertainty(withComposition, pollSignal, quality);
     const error = (RATING_TO_ERROR[race.rating] || 8) + primaryRisk(race) + uncertainty.extraError;
-    const demographicPull = demographicPullAdjustment(withCandidates);
+    const demographicPull = demographicPullAdjustment(withComposition);
     return {
-      ...withCandidates,
+      ...withComposition,
       margin,
       error,
       demProbability: logistic(margin, error),
@@ -993,7 +1048,7 @@ function runModel(sourceData) {
       primaryScenarioAdjustment: primaryScenarioAdjustment(withCandidates),
       rcvAdjustment: rcvBaselineAdjustment(race),
       demographicPull,
-      extraCandidateDemographicPulls: extraCandidateDemographicPulls(withCandidates)
+      extraCandidateDemographicPulls: extraCandidateDemographicPulls(withComposition)
     };
   });
 
@@ -1729,10 +1784,10 @@ async function fetchFec(status) {
     const side = party.startsWith("DEM") ? "dem" : party.startsWith("REP") ? "rep" : "other";
     byState[state] ||= {
       demReceipts: 0, repReceipts: 0, otherReceipts: 0,
-      demDisbursements: 0, repDisbursements: 0,
-      demCash: 0, repCash: 0,
-      demDebts: 0, repDebts: 0,
-      demIndividual: 0, repIndividual: 0,
+      demDisbursements: 0, repDisbursements: 0, otherDisbursements: 0,
+      demCash: 0, repCash: 0, otherCash: 0,
+      demDebts: 0, repDebts: 0, otherDebts: 0,
+      demIndividual: 0, repIndividual: 0, otherIndividual: 0,
       candidates: 0, coverageEndDate: ""
     };
     byState[state].candidates += 1;
@@ -1762,8 +1817,13 @@ async function fetchFec(status) {
       national.repCash += cash;
       national.repDebts += debts;
       national.repCandidates += 1;
+    } else {
+      byState[state].otherReceipts += receipts;
+      byState[state].otherDisbursements += disbursements;
+      byState[state].otherCash += cash;
+      byState[state].otherDebts += debts;
+      byState[state].otherIndividual += individual;
     }
-    else byState[state].otherReceipts += receipts;
   }
   national.financeSignal = nationalFinanceSignal(national);
   byState.__national = national;
@@ -1771,6 +1831,24 @@ async function fetchFec(status) {
   status.openFecCandidateSummary.senateStates = Object.keys(byState).filter((state) => STATE_NAMES[state]).length;
   status.openFecCandidateSummary.nationalFinanceSignal = national.financeSignal;
   return byState;
+}
+
+function financeSideForRace(fec, race) {
+  const independent = INDEPENDENT_CONTROL_FINANCE[race.state];
+  if (independent?.side === "dem" && fec.otherReceipts > fec.demReceipts) {
+    return {
+      ...fec,
+      demReceipts: fec.otherReceipts,
+      demDisbursements: fec.otherDisbursements,
+      demCash: fec.otherCash,
+      demDebts: fec.otherDebts,
+      demIndividual: fec.otherIndividual,
+      demFinanceLabel: independent.label,
+      demFinanceParty: "I",
+      financeTreatment: `${independent.label} is an independent who counts with Democrats for control, so independent-side FEC money is compared against Republican money.`
+    };
+  }
+  return { ...fec, demFinanceLabel: "Democratic side", repFinanceLabel: "Republican side" };
 }
 
 function nationalFinanceSignal(finance) {
@@ -1950,13 +2028,14 @@ function applySourceInputs(baseRaces, sourceData) {
     let nationalPolling = 0;
 
     if (fec) {
-      const demEfficiency = (fec.demCash + fec.demIndividual * .45 - fec.demDebts * .7) / Math.sqrt(1 + Math.max(fec.demDisbursements, 1));
-      const repEfficiency = (fec.repCash + fec.repIndividual * .45 - fec.repDebts * .7) / Math.sqrt(1 + Math.max(fec.repDisbursements, 1));
+      const raceFec = financeSideForRace(fec, race);
+      const demEfficiency = (raceFec.demCash + raceFec.demIndividual * .45 - raceFec.demDebts * .7) / Math.sqrt(1 + Math.max(raceFec.demDisbursements, 1));
+      const repEfficiency = (raceFec.repCash + raceFec.repIndividual * .45 - raceFec.repDebts * .7) / Math.sqrt(1 + Math.max(raceFec.repDisbursements, 1));
       const efficiencySignal = clamp((demEfficiency - repEfficiency) / 1800, -1.35, 1.35);
-      const rawReceiptSignal = clamp((fec.demReceipts - fec.repReceipts) / 8000000, -1, 1);
+      const rawReceiptSignal = clamp((raceFec.demReceipts - raceFec.repReceipts) / 8000000, -1, 1);
       const financeSignal = efficiencySignal * .72 + rawReceiptSignal * .28;
       money = clamp(race.money * .55 + financeSignal * .45, -1.5, 1.5);
-      sourceInputs.openFec = { ...fec, demEfficiency, repEfficiency, efficiencySignal, rawReceiptSignal, financeSignal };
+      sourceInputs.openFec = { ...raceFec, repFinanceLabel: raceFec.repFinanceLabel || "Republican side", demEfficiency, repEfficiency, efficiencySignal, rawReceiptSignal, financeSignal };
     }
     if (mit) {
       pastSenate = race.pastSenate * .8 + mit.margin * .2;

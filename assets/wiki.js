@@ -1450,12 +1450,15 @@ function renderRaceInputCards(race) {
     `<li>Incumbency adjustment: ${signedPointMargin(race.incumbencyAdjustment || 0)}</li>`,
     `<li>Candidate-history adjustment: ${signedPointMargin(race.candidateHistoryAdjustment || 0)}</li>`
   ].join("");
+  const demFinanceLabel = finance?.demFinanceLabel || "Democratic side";
+  const repFinanceLabel = finance?.repFinanceLabel || "Republican side";
   const financeRows = finance ? [
     `<li>Finance signal: ${Number(finance.financeSignal || 0).toFixed(2)} pts</li>`,
-    `<li>Dem receipts: $${Math.round(finance.demReceipts || 0).toLocaleString()}</li>`,
-    `<li>Rep receipts: $${Math.round(finance.repReceipts || 0).toLocaleString()}</li>`,
-    `<li>Dem cash: $${Math.round(finance.demCash || 0).toLocaleString()}</li>`,
-    `<li>Rep cash: $${Math.round(finance.repCash || 0).toLocaleString()}</li>`
+    `<li>${escapeHtml(demFinanceLabel)} receipts: $${Math.round(finance.demReceipts || 0).toLocaleString()}</li>`,
+    `<li>${escapeHtml(repFinanceLabel)} receipts: $${Math.round(finance.repReceipts || 0).toLocaleString()}</li>`,
+    `<li>${escapeHtml(demFinanceLabel)} cash: $${Math.round(finance.demCash || 0).toLocaleString()}</li>`,
+    `<li>${escapeHtml(repFinanceLabel)} cash: $${Math.round(finance.repCash || 0).toLocaleString()}</li>`,
+    finance.financeTreatment ? `<li>${escapeHtml(finance.financeTreatment)}</li>` : ""
   ].join("") : `<li>No matched OpenFEC state-race finance row in this run.</li>`;
   const candidateRows = [
     `<li>${escapeHtml(candidateDisplayName(race, "D"))}: ${escapeHtml(race.demStatus || "unresolved")}</li>`,
@@ -1465,13 +1468,31 @@ function renderRaceInputCards(race) {
   ].join("");
   const badgeRows = (race.uncertaintyBadges || []).map((badge) => `<li>${escapeHtml(badge)}</li>`).join("");
   const demographic = race.demographicPull;
+  const electorate = race.electorateComposition;
   const demographicProfileLabel = (profile) => {
     if (!profile) return "standard";
     if (typeof profile === "string") return profile;
     const source = profile.source === "candidate" ? "candidate profile" : "generic profile";
     return `${profile.label || profile.key || "standard"} (${source})`;
   };
+  const blocLabels = {
+    white_college: "White college",
+    white_noncollege: "White non-college",
+    black: "Black",
+    latino: "Latino",
+    asian_other: "Asian/other",
+    youth: "18-29",
+    core_age: "30-64",
+    senior: "65+"
+  };
+  const blocLabel = (key) => blocLabels[key] || key.replace(/_/g, " ");
+  const electorateRows = electorate ? [
+    `<li><strong>Expected electorate:</strong> ${(Object.entries(electorate.raceEducation || {})).map(([key, value]) => `${escapeHtml(blocLabel(key))} ${pct(value)}`).join(" / ")}</li>`,
+    `<li><strong>Age overlay:</strong> ${(Object.entries(electorate.age || {})).map(([key, value]) => `${escapeHtml(blocLabel(key))} ${pct(value)}`).join(" / ")}</li>`,
+    `<li>${escapeHtml(electorate.source || "Modeled expected-voter composition")}</li>`
+  ].join("") : `<li>No expected-electorate composition saved for this race.</li>`;
   const demographicRows = demographic ? [
+    electorateRows,
     `<li>Adjustment: ${signedPointMargin(demographic.adjustment || 0)}</li>`,
     `<li>Democratic profile: ${escapeHtml(demographicProfileLabel(demographic.demProfile))}</li>`,
     `<li>Republican profile: ${escapeHtml(demographicProfileLabel(demographic.repProfile))}</li>`,
