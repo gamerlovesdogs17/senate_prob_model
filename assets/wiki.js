@@ -1496,7 +1496,7 @@ function renderRaceInputCards(race) {
     `<li>Adjustment: ${signedPointMargin(demographic.adjustment || 0)}</li>`,
     `<li>Democratic profile: ${escapeHtml(demographicProfileLabel(demographic.demProfile))}</li>`,
     `<li>Republican profile: ${escapeHtml(demographicProfileLabel(demographic.repProfile))}</li>`,
-    ...((demographic.topGroups || []).map((item) => `<li>${escapeHtml(item.label || item.group)}: ${signedPointMargin(item.effect || 0)}</li>`))
+    ...((demographic.topGroups || []).map((item) => `<li>${escapeHtml(item.label || item.group)}: ${signedPointMargin(item.displayEffect ?? item.effect ?? 0)}</li>`))
   ].join("") : `<li>No separate demographic-pull adjustment in this saved run.</li>`;
   container.innerHTML = `
     ${renderMovementPanel(race)}
@@ -1649,7 +1649,7 @@ function houseDistrictMarkup(district) {
     </div>
     <p class="meta">${escapeHtml(baselineLine)}</p>
     <p class="meta">${escapeHtml(district.sourceBlend || "Cook")} / rating baseline ${signedPointMargin(inputs.ratingBaseline)} / contextual baseline ${signedPointMargin(inputs.contextualBaseline)}</p>
-    ${inputs.demographicPull?.topGroups?.length ? `<p class="meta">Demographic pull: ${inputs.demographicPull.topGroups.map((item) => `${escapeHtml(item.label || item.group)} ${signedPointMargin(item.effect)}`).join(" / ")}</p>` : ""}
+    ${inputs.demographicPull?.topGroups?.length ? `<p class="meta">Demographic pull: ${inputs.demographicPull.topGroups.map((item) => `${escapeHtml(item.label || item.group)} ${signedPointMargin(item.displayEffect ?? item.effect)}`).join(" / ")}</p>` : ""}
   `;
 }
 

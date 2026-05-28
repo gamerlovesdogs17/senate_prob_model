@@ -1278,13 +1278,28 @@ function candidateDemographicPull(state, demCandidate, repCandidate) {
     const demAppeal = demProfile[group] || 0;
     const repAppeal = repProfile[group] || 0;
     const effect = raceEducationWeights[group] * (demAppeal - repAppeal) * 1.85;
-    return { group, label: DEMOGRAPHIC_GROUP_LABELS[group] || group, weight: Number(raceEducationWeights[group].toFixed(2)), effect: Number(effect.toFixed(2)) };
+    const displayEffect = Math.abs(demAppeal) >= Math.abs(repAppeal) ? demAppeal : -repAppeal;
+    return {
+      group,
+      label: DEMOGRAPHIC_GROUP_LABELS[group] || group,
+      weight: Number(raceEducationWeights[group].toFixed(2)),
+      effect: Number(effect.toFixed(2)),
+      displayEffect: Number(displayEffect.toFixed(2))
+    };
   });
   const ageGroups = Object.keys(ageWeights).map((group) => {
     const demAppeal = demProfile[group] || 0;
     const repAppeal = repProfile[group] || 0;
     const effect = ageWeights[group] * (demAppeal - repAppeal) * 0.85;
-    return { group, label: DEMOGRAPHIC_GROUP_LABELS[group] || group, weight: Number(ageWeights[group].toFixed(2)), effect: Number(effect.toFixed(2)), overlay: "age" };
+    const displayEffect = Math.abs(demAppeal) >= Math.abs(repAppeal) ? demAppeal : -repAppeal;
+    return {
+      group,
+      label: DEMOGRAPHIC_GROUP_LABELS[group] || group,
+      weight: Number(ageWeights[group].toFixed(2)),
+      effect: Number(effect.toFixed(2)),
+      displayEffect: Number(displayEffect.toFixed(2)),
+      overlay: "age"
+    };
   });
   const groups = [...raceEducationGroups, ...ageGroups];
   const raw = groups.reduce((sum, item) => sum + item.effect, 0);
