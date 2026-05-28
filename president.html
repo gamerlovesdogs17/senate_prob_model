@@ -371,7 +371,7 @@
         return `${value > 0 ? demName : repName} by ${Math.abs(value).toFixed(1)} pts`;
       })();
       const demographicChipLabel = (item) => {
-        const value = item.displayEffect ?? item.effect ?? 0;
+        const value = item.effect || 0;
         if (Math.abs(value) < .05) return `${item.label || item.group}: even`;
         return `${item.label || item.group}: ${value > 0 ? demName : repName} +${Math.abs(value).toFixed(1)}`;
       };

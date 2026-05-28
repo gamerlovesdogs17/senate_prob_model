@@ -857,7 +857,7 @@ const CANDIDATE_STATE_FIT = {
   beshear: { appalachian: 1.25, south: 0.8, deep_south: 0.25, rural: 0.65, working_class: 0.55, evangelical: 0.25, suburban: 0.2 },
   shapiro: { northeast: 0.9, suburban: 0.75, college: 0.45, working_class: 0.25, rural: -0.15 },
   buttigieg: { midwest: 0.8, suburban: 0.55, college: 0.45, urban: 0.25, rural: -0.25, evangelical: -0.2 },
-  harris: { west: 0.45, coastal: 0.3, urban: 0.25, college: 0.2, minority: 0.2, working_class: -0.25, rural: -0.25 },
+  harris: { west: 0.45, coastal: 0.4, urban: 0.35, college: 0.2, minority: 0.3, black_belt: 0.16, working_class: -0.28, rural: -0.5, evangelical: -0.32 },
   aoc: { urban: 0.95, minority: 0.45, college: 0.35, coastal: 0.25, rural: -0.9, evangelical: -0.65, plains: -0.35 },
   vance: { appalachian: 1.05, midwest: 0.65, working_class: 0.75, rural: 0.35, suburban: -0.4, college: -0.3 },
   rubio: { sunbelt: 0.75, hispanic: 0.75, suburban: 0.25, south: 0.25, coastal: 0.15 },
@@ -871,9 +871,9 @@ const CANDIDATE_DEMOGRAPHIC_APPEAL = {
   beshear: { white_college: .08, white_noncollege: .34, black: .04, latino: .02, asian_other: .02, youth: -.04, senior: .1 },
   shapiro: { white_college: .34, white_noncollege: .08, black: .08, latino: .04, asian_other: .08, youth: .02, senior: .12 },
   buttigieg: { white_college: .32, white_noncollege: -.08, black: -.02, latino: -.02, asian_other: .06, youth: .1, senior: -.06 },
-  harris: { white_college: .18, white_noncollege: -.26, black: .22, latino: .02, asian_other: .2, youth: -.08, senior: -.08 },
+  harris: { white_college: .18, white_noncollege: -.32, black: .2, latino: -.02, asian_other: .18, youth: -.08, senior: -.06 },
   aoc: { white_college: .12, white_noncollege: -.42, black: .14, latino: .32, asian_other: .14, youth: .42, senior: -.28 },
-  vance: { white_college: -.22, white_noncollege: .6, black: -.06, latino: -.02, asian_other: -.08, youth: .04, senior: .06 },
+  vance: { white_college: -.22, white_noncollege: .34, black: -.06, latino: -.02, asian_other: -.08, youth: .04, senior: .06 },
   rubio: { white_college: .02, white_noncollege: .04, black: -.08, latino: .38, asian_other: .02, youth: -.02, senior: .12 },
   desantis: { white_college: -.18, white_noncollege: .18, black: -.08, latino: .04, asian_other: -.08, youth: -.16, senior: .14 },
   haley: { white_college: .34, white_noncollege: -.08, black: -.06, latino: .02, asian_other: .08, youth: -.08, senior: .12 },
@@ -1278,28 +1278,13 @@ function candidateDemographicPull(state, demCandidate, repCandidate) {
     const demAppeal = demProfile[group] || 0;
     const repAppeal = repProfile[group] || 0;
     const effect = raceEducationWeights[group] * (demAppeal - repAppeal) * 1.85;
-    const displayEffect = Math.abs(demAppeal) >= Math.abs(repAppeal) ? demAppeal : -repAppeal;
-    return {
-      group,
-      label: DEMOGRAPHIC_GROUP_LABELS[group] || group,
-      weight: Number(raceEducationWeights[group].toFixed(2)),
-      effect: Number(effect.toFixed(2)),
-      displayEffect: Number(displayEffect.toFixed(2))
-    };
+    return { group, label: DEMOGRAPHIC_GROUP_LABELS[group] || group, weight: Number(raceEducationWeights[group].toFixed(2)), effect: Number(effect.toFixed(2)) };
   });
   const ageGroups = Object.keys(ageWeights).map((group) => {
     const demAppeal = demProfile[group] || 0;
     const repAppeal = repProfile[group] || 0;
     const effect = ageWeights[group] * (demAppeal - repAppeal) * 0.85;
-    const displayEffect = Math.abs(demAppeal) >= Math.abs(repAppeal) ? demAppeal : -repAppeal;
-    return {
-      group,
-      label: DEMOGRAPHIC_GROUP_LABELS[group] || group,
-      weight: Number(ageWeights[group].toFixed(2)),
-      effect: Number(effect.toFixed(2)),
-      displayEffect: Number(displayEffect.toFixed(2)),
-      overlay: "age"
-    };
+    return { group, label: DEMOGRAPHIC_GROUP_LABELS[group] || group, weight: Number(ageWeights[group].toFixed(2)), effect: Number(effect.toFixed(2)), overlay: "age" };
   });
   const groups = [...raceEducationGroups, ...ageGroups];
   const raw = groups.reduce((sum, item) => sum + item.effect, 0);
