@@ -22,6 +22,9 @@
   --likely-r: #c84646;
   --safe-r: #8e1f2d;
   --shadow: 0 10px 28px rgba(49, 45, 38, .10);
+  --shadow-soft: 0 5px 14px rgba(49, 45, 38, .08);
+  --shadow-lift: 0 14px 34px rgba(49, 45, 38, .14);
+  --ease-out: cubic-bezier(.2, .8, .2, 1);
 }
 
 * {
@@ -39,7 +42,7 @@ body {
   background: var(--bg);
   color: var(--ink);
   font: 16px/1.5 "Segoe UI", Arial, sans-serif;
-  animation: page-in .35s ease both;
+  animation: page-in .34s var(--ease-out) both;
   overflow-x: hidden;
 }
 
@@ -55,6 +58,26 @@ body {
 @keyframes page-in {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes panel-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes line-draw {
+  from { stroke-dashoffset: var(--line-length, 700); }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes bar-rise {
+  from { transform: scaleY(.12); opacity: .54; }
+  to { transform: scaleY(1); opacity: 1; }
+}
+
+@keyframes bar-width {
+  from { transform: scaleX(.08); opacity: .62; }
+  to { transform: scaleX(1); opacity: 1; }
 }
 
 a,
@@ -143,6 +166,7 @@ button {
   text-decoration: none;
   font-family: "Segoe UI", Arial, sans-serif;
   font-size: .9rem;
+  transition: background .16s var(--ease-out), border-color .16s var(--ease-out), color .16s var(--ease-out), transform .16s var(--ease-out);
 }
 
 .site-nav a:hover,
@@ -153,10 +177,15 @@ button {
   background: var(--paper-2);
 }
 
+.site-nav a:hover,
+.button-link:hover {
+  transform: translateY(-1px);
+}
+
 main {
   width: min(1180px, calc(100% - 28px));
   margin: 0 auto;
-  padding: 18px 0 58px;
+  padding: 16px 0 54px;
 }
 
 .hero-grid {
@@ -176,8 +205,17 @@ main {
   border: 1px solid var(--line);
   border-radius: 4px;
   background: color-mix(in srgb, var(--paper) 92%, transparent);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-soft);
+  animation: panel-in .42s var(--ease-out) both;
 }
+
+.hero-main { animation-delay: .02s; }
+.odds-panel { animation-delay: .06s; }
+.map-panel { animation-delay: .08s; }
+.chart-panel,
+.source-panel,
+.text-panel,
+.detail-panel { animation-delay: .1s; }
 
 .hero-main {
   display: flex;
@@ -241,7 +279,7 @@ h1 {
   margin: 0;
   font-size: clamp(2.35rem, 5vw, 4.85rem);
   line-height: .95;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   font-family: "Segoe UI", Arial, sans-serif;
   font-weight: 950;
 }
@@ -295,7 +333,17 @@ h3 {
   background: color-mix(in srgb, var(--paper) 92%, transparent);
   color: var(--ink);
   text-decoration: none;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-soft);
+  transition: border-color .16s var(--ease-out), box-shadow .16s var(--ease-out), transform .16s var(--ease-out), background .16s var(--ease-out);
+}
+
+.forecast-family-card:hover,
+.forecast-family-card:focus {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--ink) 55%, var(--line));
+  background: color-mix(in srgb, var(--paper) 98%, white);
+  box-shadow: var(--shadow-lift);
+  outline: none;
 }
 
 .forecast-family-card.active {
@@ -338,7 +386,17 @@ h3 {
   background: color-mix(in srgb, var(--paper) 92%, transparent);
   color: var(--ink);
   text-decoration: none;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-soft);
+  transition: border-color .16s var(--ease-out), box-shadow .16s var(--ease-out), transform .16s var(--ease-out), background .16s var(--ease-out);
+}
+
+.forecast-overview-card:hover,
+.forecast-overview-card:focus {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--ink) 55%, var(--line));
+  background: color-mix(in srgb, var(--paper) 98%, white);
+  box-shadow: var(--shadow-lift);
+  outline: none;
 }
 
 .forecast-overview-card.active {
@@ -460,6 +518,7 @@ h3 {
   padding: 10px 2px;
   border-bottom: 1px solid var(--line);
   border-left: 5px solid var(--toss);
+  transition: background .14s var(--ease-out), transform .14s var(--ease-out), padding-left .14s var(--ease-out);
 }
 
 .home-radar-row.leads-dem {
@@ -501,11 +560,24 @@ h3 {
   outline: none;
 }
 
+.home-radar-row:hover,
+.home-radar-row:focus {
+  padding-left: 6px;
+  transform: translateX(2px);
+}
+
 .home-article-list a {
   display: grid;
   gap: 5px;
   padding: 11px 2px;
   border-bottom: 1px solid var(--line);
+  transition: background .14s var(--ease-out), transform .14s var(--ease-out), padding-left .14s var(--ease-out);
+}
+
+.home-article-list a:hover,
+.home-article-list a:focus {
+  padding-left: 6px;
+  transform: translateX(2px);
 }
 
 .home-article-list strong {
@@ -526,11 +598,13 @@ h3 {
   font: 900 .92rem/1 "Segoe UI", Arial, sans-serif;
   text-decoration-thickness: 2px;
   text-underline-offset: 3px;
+  transition: background .14s var(--ease-out), padding-left .14s var(--ease-out);
 }
 
 .home-data-links a:hover,
 .home-data-links a:focus {
   background: color-mix(in srgb, var(--gold) 12%, transparent);
+  padding-left: 6px;
   outline: none;
 }
 
@@ -642,6 +716,15 @@ h3 {
   border: 1px solid var(--line);
   border-radius: 3px;
   background: color-mix(in srgb, var(--paper-2) 72%, transparent);
+  transition: background .14s var(--ease-out), border-color .14s var(--ease-out), transform .14s var(--ease-out);
+}
+
+.odds-panel dl div:hover,
+.race-stats div:hover,
+.method-list li:hover,
+.source-card:hover {
+  background: color-mix(in srgb, var(--paper) 88%, white);
+  border-color: color-mix(in srgb, var(--ink) 20%, var(--line));
 }
 
 dt {
@@ -679,8 +762,14 @@ dd {
   background: var(--ind);
 }
 
+.control-bar span,
+.prob-track span {
+  transform-origin: left center;
+  transition: width .42s var(--ease-out);
+}
+
 .map-panel {
-  margin-top: 12px;
+  margin-top: 10px;
   padding: clamp(14px, 2.5vw, 24px);
   border-top: 4px solid var(--dem);
 }
@@ -700,6 +789,7 @@ dd {
   background: var(--paper);
   color: var(--muted);
   font: 850 .78rem/1 "Segoe UI", Arial, sans-serif;
+  transition: background .14s var(--ease-out), color .14s var(--ease-out), border-color .14s var(--ease-out), transform .14s var(--ease-out);
 }
 
 .map-color-controls button:hover,
@@ -710,12 +800,19 @@ dd {
   color: var(--ink);
 }
 
+.map-color-controls button:hover,
+.map-color-controls button:focus {
+  transform: translateY(-1px);
+}
+
 .section-head {
   display: flex;
   justify-content: space-between;
   gap: 18px;
   align-items: end;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
 }
 
 .section-head p:last-child,
@@ -792,6 +889,7 @@ dd {
   display: grid;
   place-items: center;
   appearance: none;
+  transition: transform .14s var(--ease-out), outline-color .14s var(--ease-out), color .14s var(--ease-out);
 }
 
 .district-cell span {
@@ -833,6 +931,7 @@ dd {
   color: var(--ink);
   text-align: left;
   appearance: none;
+  transition: background .14s var(--ease-out), transform .14s var(--ease-out), padding-left .14s var(--ease-out);
 }
 
 .district-list-row.leads-dem {
@@ -846,6 +945,8 @@ dd {
 .district-list-row:hover,
 .district-list-row:focus {
   background: color-mix(in srgb, var(--gold) 12%, transparent);
+  padding-left: 14px;
+  transform: translateX(2px);
   outline: none;
 }
 
@@ -888,7 +989,7 @@ dd {
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
   cursor: pointer;
-  transition: opacity .16s ease, stroke-width .16s ease, filter .16s ease, transform .16s ease;
+  transition: opacity .16s var(--ease-out), stroke-width .16s var(--ease-out), filter .16s var(--ease-out), transform .16s var(--ease-out);
 }
 
 .state-shape:hover,
@@ -949,6 +1050,14 @@ dd {
   border: 1px solid var(--line);
   border-radius: 4px;
   background: color-mix(in srgb, var(--paper-2) 82%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35);
+  transition: background .16s var(--ease-out), box-shadow .16s var(--ease-out), transform .16s var(--ease-out);
+}
+
+.hover-card:hover,
+.hover-card:focus-within {
+  background: color-mix(in srgb, var(--paper-2) 66%, var(--paper));
+  box-shadow: var(--shadow-soft);
 }
 
 .hover-card h3 {
@@ -977,6 +1086,11 @@ dd {
   border-radius: 3px;
   color: var(--ink);
   font: 900 .72rem/1 "Segoe UI", Arial, sans-serif;
+  transition: transform .14s var(--ease-out);
+}
+
+.hover-card:hover .rating-pill {
+  transform: translateY(-1px);
 }
 
 .candidate-table {
@@ -1151,6 +1265,15 @@ dd {
   border-top: 4px solid var(--ink);
 }
 
+.chart-panel + .chart-panel,
+.chart-panel + .text-panel,
+.text-panel + .chart-panel,
+.text-panel + .text-panel,
+.detail-panel + .detail-panel,
+.source-panel + .source-panel {
+  margin-top: 12px;
+}
+
 .chart-panel,
 .detail-panel,
 .map-panel {
@@ -1194,6 +1317,9 @@ dd {
   min-height: 4px;
   border-radius: 2px 2px 0 0;
   background: var(--dem);
+  transform-origin: bottom;
+  animation: bar-rise .34s var(--ease-out) both;
+  transition: background .14s var(--ease-out), filter .14s var(--ease-out), transform .14s var(--ease-out);
 }
 
 #house-seat-histogram .seat-bin i {
@@ -1203,6 +1329,7 @@ dd {
 .seat-bin:hover i,
 .seat-bin:focus i {
   background: linear-gradient(180deg, var(--gold), var(--dem));
+  filter: drop-shadow(0 4px 6px rgba(49, 45, 38, .18));
 }
 
 .seat-bin span,
@@ -1261,12 +1388,28 @@ dd {
   background: transparent;
   padding: 7px 0;
   text-align: left;
+  transition: background .14s var(--ease-out), padding-left .14s var(--ease-out);
+}
+
+.matchup-strength-row:hover,
+.matchup-strength-row:focus {
+  padding-left: 5px;
+  background: color-mix(in srgb, var(--gold) 10%, transparent);
+  outline: none;
 }
 
 .matchup-strength-row i {
   height: 9px;
   border-radius: 999px;
   background: var(--dem);
+  transform-origin: left center;
+  animation: bar-width .42s var(--ease-out) both;
+  transition: filter .14s var(--ease-out), transform .14s var(--ease-out);
+}
+
+.matchup-strength-row:hover i,
+.matchup-strength-row:focus i {
+  filter: drop-shadow(0 3px 5px rgba(49, 45, 38, .18));
 }
 
 .matchup-strength-row.rep i {
@@ -1353,6 +1496,12 @@ dd {
   padding: 10px 0;
   border-bottom: 1px solid var(--line);
   font: 700 .9rem/1.2 "Segoe UI", Arial, sans-serif;
+  transition: background .14s var(--ease-out), padding-left .14s var(--ease-out);
+}
+
+.president-state-row:not(.president-state-head):hover {
+  padding-left: 6px;
+  background: color-mix(in srgb, var(--gold) 9%, transparent);
 }
 
 .president-state-row span {
@@ -1372,6 +1521,7 @@ dd {
   grid-template-columns: 48px 1fr 52px;
   gap: 10px;
   align-items: center;
+  transition: background .14s var(--ease-out), transform .14s var(--ease-out);
 }
 
 .leverage-row {
@@ -1393,6 +1543,9 @@ button.leverage-row {
   height: 10px;
   border-radius: 999px;
   background: var(--rep);
+  transform-origin: left center;
+  animation: bar-width .42s var(--ease-out) both;
+  transition: box-shadow .14s var(--ease-out), filter .14s var(--ease-out);
 }
 
 .leverage-row.leads-dem i {
@@ -1415,6 +1568,7 @@ button.leverage-row {
 .leverage-row:focus i,
 .poll-row:hover i {
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--gold) 20%, transparent);
+  filter: drop-shadow(0 3px 5px rgba(49, 45, 38, .16));
 }
 
 .compact-page-head h1 {
@@ -1442,6 +1596,7 @@ button.leverage-row {
   border-left: 6px solid var(--toss);
   color: var(--ink);
   text-decoration: none;
+  transition: background .14s var(--ease-out), transform .14s var(--ease-out), padding-left .14s var(--ease-out);
 }
 
 button.race-board-row {
@@ -1872,6 +2027,9 @@ button.race-board-row {
 .race-board-row:hover,
 .race-board-row:focus {
   background: color-mix(in srgb, var(--paper-2) 72%, transparent);
+  padding-left: 10px;
+  transform: translateX(2px);
+  outline: none;
 }
 
 .page-grid {
@@ -1904,11 +2062,17 @@ button.race-board-row {
   text-align: center;
   text-decoration: none;
   font: 800 .9rem/1 "Segoe UI", Arial, sans-serif;
+  transition: border-color .14s var(--ease-out), background .14s var(--ease-out), transform .14s var(--ease-out);
 }
 
 .race-selector a.active,
 .race-selector a:hover {
   border-color: var(--gold);
+  background: color-mix(in srgb, var(--gold) 10%, transparent);
+}
+
+.race-selector a:hover {
+  transform: translateY(-1px);
 }
 
 .source-grid {
@@ -1934,6 +2098,13 @@ button.race-board-row {
   border: 1px solid var(--line);
   border-radius: 3px;
   background: color-mix(in srgb, var(--paper-2) 70%, transparent);
+  transition: background .14s var(--ease-out), transform .14s var(--ease-out), border-color .14s var(--ease-out);
+}
+
+.source-status-card:hover {
+  background: color-mix(in srgb, var(--paper) 88%, white);
+  border-color: color-mix(in srgb, var(--ink) 18%, var(--line));
+  transform: translateY(-1px);
 }
 
 .source-status-card h3 {
@@ -1978,7 +2149,16 @@ button.race-board-row {
   border-top: 4px solid var(--ink);
   border-radius: 4px;
   background: color-mix(in srgb, var(--paper) 92%, transparent);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-soft);
+  transition: background .16s var(--ease-out), box-shadow .16s var(--ease-out), transform .16s var(--ease-out), border-color .16s var(--ease-out);
+}
+
+.article-card:hover,
+.article-card:focus-within {
+  transform: translateY(-3px);
+  background: color-mix(in srgb, var(--paper) 98%, white);
+  border-color: color-mix(in srgb, var(--ink) 24%, var(--line));
+  box-shadow: var(--shadow-lift);
 }
 
 .article-body {
@@ -2166,6 +2346,7 @@ button.race-board-row {
   max-width: 100%;
   min-width: 0;
   touch-action: pan-y;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45);
 }
 
 .history-chart svg {
@@ -2249,6 +2430,9 @@ button.race-board-row {
   stroke-width: 2.6;
   stroke-linecap: round;
   stroke-linejoin: round;
+  stroke-dasharray: var(--line-length, 700);
+  stroke-dashoffset: var(--line-length, 700);
+  animation: line-draw .72s var(--ease-out) .08s both;
 }
 
 .history-line-dem {
@@ -2272,7 +2456,7 @@ button.race-board-row {
   stroke-width: 1.8;
   opacity: .72;
   pointer-events: none;
-  transition: r .16s ease, fill .16s ease;
+  transition: r .16s var(--ease-out), fill .16s var(--ease-out), opacity .16s var(--ease-out);
 }
 
 .history-dot-dem {
@@ -2324,6 +2508,7 @@ button.race-board-row {
   padding: 6px 10px;
   font: 800 11px/1 "Segoe UI", Arial, sans-serif;
   cursor: pointer;
+  transition: background .14s var(--ease-out), color .14s var(--ease-out);
 }
 
 .history-zoom-controls button:last-child {
@@ -2560,6 +2745,36 @@ button.race-board-row {
   display: block;
   color: var(--ink);
   font-family: "Segoe UI", Arial, sans-serif;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+
+  .forecast-family-card:hover,
+  .forecast-family-card:focus,
+  .forecast-overview-card:hover,
+  .forecast-overview-card:focus,
+  .article-card:hover,
+  .article-card:focus-within,
+  .race-board-row:hover,
+  .race-board-row:focus,
+  .district-list-row:hover,
+  .district-list-row:focus,
+  .home-radar-row:hover,
+  .home-radar-row:focus,
+  .home-article-list a:hover,
+  .home-article-list a:focus,
+  .site-nav a:hover,
+  .button-link:hover {
+    transform: none;
+  }
 }
 
 @media (max-width: 1080px) {
