@@ -873,7 +873,7 @@ const CANDIDATE_DEMOGRAPHIC_APPEAL = {
   buttigieg: { white_college: .32, white_noncollege: -.08, black: -.02, latino: -.02, asian_other: .06, youth: .1, senior: -.06 },
   harris: { white_college: .18, white_noncollege: -.26, black: .22, latino: .02, asian_other: .2, youth: -.08, senior: -.08 },
   aoc: { white_college: .12, white_noncollege: -.42, black: .14, latino: .32, asian_other: .14, youth: .42, senior: -.28 },
-  vance: { white_college: -.22, white_noncollege: .34, black: -.06, latino: -.02, asian_other: -.08, youth: .04, senior: .06 },
+  vance: { white_college: -.22, white_noncollege: .6, black: -.06, latino: -.02, asian_other: -.08, youth: .04, senior: .06 },
   rubio: { white_college: .02, white_noncollege: .04, black: -.08, latino: .38, asian_other: .02, youth: -.02, senior: .12 },
   desantis: { white_college: -.18, white_noncollege: .18, black: -.08, latino: .04, asian_other: -.08, youth: -.16, senior: .14 },
   haley: { white_college: .34, white_noncollege: -.08, black: -.06, latino: .02, asian_other: .08, youth: -.08, senior: .12 },
