@@ -7406,7 +7406,7 @@
       "primaryScenarioAdjustment": -0.4,
       "rcvAdjustment": 0,
       "demographicPull": {
-        "adjustment": 0.02,
+        "adjustment": -0.14,
         "demProfile": {
           "key": "standardDemocrat",
           "label": "Standard Democrat",
@@ -7424,45 +7424,52 @@
           "weaknesses": []
         },
         "repProfile": {
-          "key": "weakRepublican",
-          "label": "Weak Republican",
-          "source": "generic",
+          "key": "mike rogers",
+          "label": "Mike Rogers",
+          "source": "candidate",
+          "profile": "Michigan establishment Republican",
           "scores": {
-            "white_college": -0.1,
-            "white_noncollege": 0.08,
-            "black": -0.08,
+            "white_college": -0.02,
+            "white_noncollege": 0.18,
+            "black": -0.1,
             "latino": -0.04,
-            "asian_other": -0.04,
+            "asian_other": -0.03,
             "youth": -0.06,
-            "senior": 0.04
+            "senior": 0.12
           },
-          "strengths": [],
-          "weaknesses": []
+          "strengths": [
+            "White non-college",
+            "65+"
+          ],
+          "weaknesses": [
+            "Black",
+            "18-29"
+          ]
         },
         "topGroups": [
           {
             "group": "white_noncollege",
             "label": "White non-college",
             "weight": 0.49,
-            "effect": -0.19
+            "effect": -0.27
           },
           {
             "group": "white_college",
             "label": "White college",
             "weight": 0.35,
-            "effect": 0.16
-          },
-          {
-            "group": "black",
-            "label": "Black",
-            "weight": 0.1,
-            "effect": 0.04
+            "effect": 0.11
           },
           {
             "group": "senior",
             "label": "65+",
             "weight": 0.3,
-            "effect": -0.04
+            "effect": -0.08
+          },
+          {
+            "group": "black",
+            "label": "Black",
+            "weight": 0.1,
+            "effect": 0.05
           },
           {
             "group": "youth",
